@@ -1,0 +1,320 @@
+# sources.yaml — The Wire source registry
+# Verified from a cloud sandbox on 2026-10-05 (legal sources on 2026-10-14).
+# V1 builds only entries with `enabled: true`. Everything else is the roadmap backlog
+# (see ROADMAP.md); `enabled` defaults to false when absent.
+#
+# status:
+#   OK        fetched cleanly with plain HTTP, no JavaScript
+#   KEY       free API key required (key_env names the secret); not used in V1
+#   DC-BLOCK  blocks cloud/datacenter IPs (Cloudflare/Akamai 403). Not usable from GitHub;
+#             recovered later by the V8 home fetcher. Headlines may still arrive via Google News.
+#   GEO       geo-blocked outside the host country
+#   UNTESTED  not yet checked; url may be null
+# type: rss | api | html | pdf_index | youtube_channel | youtube_playlist
+# poll: minutes between fetches (V1 runs every 15; skip a source until its poll interval has passed)
+# fast: true  = eligible for the "Last hour" list in the breaking strip
+# desk: BEACON | GOV | LAW | WORLD (V1 desk tag; defaults by section if absent)
+# robots: subscription = the publisher offers this URL as a feed or API to subscribe to,
+#   so it is fetched like any feed reader would. Every other source honors robots.txt.
+# Rule: never invent an endpoint. A null url means "find it before enabling."
+
+beacon:
+  - id: beacon_granicus_listing
+    name: City of Beacon meetings (Granicus listing)
+    type: html
+    url: https://cityofbeacon.granicus.com/ViewPublisher.php?view_id=1
+    status: OK
+    poll: 15
+    notes: Every City Council, Planning Board, and ZBA meeting, including upcoming ones with time, Agenda, and Agenda Packet links. No frame-blocking header, so its player is an embed candidate.
+  - id: beacon_granicus_agendas
+    enabled: true
+    desk: BEACON
+    robots: subscription
+    name: Beacon agendas RSS
+    type: rss
+    url: https://cityofbeacon.granicus.com/ViewPublisherRSS.php?view_id=1&mode=agendas
+    status: OK
+    poll: 15
+  - id: beacon_granicus_minutes
+    name: Beacon minutes RSS
+    type: rss
+    url: https://cityofbeacon.granicus.com/ViewPublisherRSS.php?view_id=1&mode=minutes
+    status: OK
+    poll: 60
+  - id: beacon_wp_media
+    enabled: true
+    desk: BEACON
+    name: City of Beacon new documents (WordPress media API)
+    type: api
+    url: https://beaconny.gov/wp-json/wp/v2/media?mime_type=application/pdf&orderby=date&order=desc&per_page=50&_fields=date,title,source_url
+    status: OK
+    poll: 15
+    notes: Live feed of every PDF the city uploads (resolutions, hearing notices, RFPs, daily police blotters). Classify by title and filename.
+  - id: beacon_wp_posts
+    enabled: true
+    desk: BEACON
+    name: City of Beacon news posts
+    type: api
+    url: https://beaconny.gov/wp-json/wp/v2/posts?per_page=20&_fields=date,title,link,excerpt
+    status: OK
+    poll: 30
+  - id: beacon_police_blotter
+    name: Beacon daily police blotter (PDFs)
+    type: pdf_index
+    url: https://beaconny.gov/wp-content/uploads/YYYY/MM/MM.DD.YYYY.pdf
+    status: OK
+    poll: 120
+    notes: Discover new blotters through beacon_wp_media (titles like 09.23.2026). Uploaded in batches several days late. Parse rows of time, call type, disposition, officer. Never use for alerts.
+  - id: beacon_youtube
+    name: City of Beacon YouTube
+    type: youtube_channel
+    channel_id: UCvPpigGwZDeR7WYmw-SuDxg
+    status: OK
+    poll: 5
+    notes: Live detection needs the YouTube Data API (channel RSS omits live and upcoming streams).
+  - id: beacon_youtube_playlist_a
+    name: Beacon meeting playlist A
+    type: youtube_playlist
+    playlist_id: PLhEUshaB9yYr8xfNxmalstjUY6bniLsCE
+    status: OK
+    poll: 60
+  - id: beacon_youtube_playlist_b
+    name: Beacon meeting playlist B
+    type: youtube_playlist
+    playlist_id: PLhEUshaB9yYrILGgtwpLmv_m8rY0KP9oW
+    status: OK
+    poll: 60
+  - id: highlands_current
+    enabled: true
+    desk: BEACON
+    name: The Highlands Current
+    type: rss
+    url: https://highlandscurrent.org/feed/
+    status: OK
+    poll: 30
+    notes: Open WordPress API too (https://highlandscurrent.org/wp-json/wp/v2/posts?search=...). Publishes the curated Beacon blotter.
+  - id: gnews_beacon
+    enabled: true
+    desk: BEACON
+    name: Google News — "Beacon, NY"
+    type: rss
+    url: https://news.google.com/rss/search?q=%22Beacon%2C+NY%22&hl=en-US&gl=US&ceid=US:en
+    status: OK
+    poll: 30
+    exclude_domains: [realtor.com, zillow.com, redfin.com, legacy.com, maxpreps.com, apartments.com, trulia.com]
+    notes: Noisy (real estate listings, obituaries, school sports). Drop exclude_domains; extend the list as junk appears.
+  - id: nws_beacon
+    enabled: true
+    desk: BEACON
+    fast: true
+    robots: subscription
+    name: NWS active alerts for Beacon
+    type: api
+    url: https://api.weather.gov/alerts/active?point=41.5048,-73.9696
+    status: OK
+    poll: 5
+    notes: Alert source for Beacon safety pushes (V6).
+  - id: beacon_schools
+    name: Beacon City School District board agendas
+    type: html
+    url: null
+    status: UNTESTED
+    poll: 120
+    notes: District site https://www.beaconk12.org/ is server-rendered. Find where current board agendas are posted (may be BoardDocs or similar).
+
+regional:
+  - {id: midhudson_news, enabled: true, desk: BEACON, name: Mid-Hudson News, type: rss, url: "https://midhudsonnews.com/feed/", status: OK, poll: 30}
+  - {id: hv_post, name: Hudson Valley Post, type: rss, url: "https://hudsonvalleypost.com/feed/", status: OK, poll: 30}
+  - {id: news10, name: News10 (Albany), type: rss, url: "https://www.news10.com/feed/", status: OK, poll: 30}
+  - {id: wamc, name: WAMC, type: rss, url: "https://www.wamc.org/news.rss", status: OK, poll: 30}
+  - {id: pojo, name: Poughkeepsie Journal, type: rss, url: "https://rssfeeds.poughkeepsiejournal.com/poughkeepsiejournal/home", status: DC-BLOCK, poll: 30}
+  - {id: reddit_beacon, name: r/BeaconNY, type: rss, url: "https://www.reddit.com/r/BeaconNY/.rss", status: DC-BLOCK, poll: 60}
+
+dutchess:
+  - id: dutchess_leg_home
+    name: Dutchess County Legislature
+    type: html
+    url: https://www.dutchessny.gov/Departments/County-Legislature/County-Legislature.htm
+    status: OK
+    poll: 120
+  - {id: dutchess_leg_agenda, name: Legislature meeting agenda, type: html, url: "https://www.dutchessny.gov/Departments/County-Legislature/County-Legislature-Meeting-Agenda.htm", status: OK, poll: 120}
+  - {id: dutchess_leg_dates, name: Legislature meeting dates, type: html, url: "https://www.dutchessny.gov/Departments/County-Legislature/County-Legislature-Meeting-Dates.htm", status: OK, poll: 1440}
+  - {id: dutchess_leg_board_minutes, name: Board meeting minutes, type: html, url: "https://www.dutchessny.gov/Departments/County-Legislature/Board-Meeting-Minutes.htm", status: OK, poll: 360}
+  - {id: dutchess_leg_committee_minutes, name: Committee meeting minutes, type: html, url: "https://www.dutchessny.gov/Departments/County-Legislature/Committee-Meeting-Minutes.htm", status: OK, poll: 360}
+  - {id: gnews_dutchess_leg, name: Google News — Dutchess County Legislature, type: rss, url: "https://news.google.com/rss/search?q=%22Dutchess+County+Legislature%22&hl=en-US&gl=US&ceid=US:en", status: OK, poll: 60}
+
+new_york:
+  - id: nysenate_openleg
+    name: NY Senate Open Legislation API (Senate and Assembly bills)
+    type: api
+    url: https://legislation.nysenate.gov/api/3/
+    status: KEY
+    key_env: NYSENATE_API_KEY
+    poll: 60
+  - {id: city_state, enabled: true, desk: GOV, name: City & State NY, type: rss, url: "https://www.cityandstateny.com/rss/all/", status: OK, poll: 30}
+  - {id: ny_focus, name: New York Focus, type: rss, url: "https://nysfocus.com/feed", status: OK, poll: 60}
+  - {id: gothamist, name: Gothamist, type: rss, url: "https://gothamist.com/feed", status: OK, poll: 30}
+  - {id: governor_ny, name: Governor's press releases, type: html, url: "https://www.governor.ny.gov/news", status: OK, poll: 30}
+  - {id: nysenate_press, name: NY Senate articles RSS, type: rss, url: "https://www.nysenate.gov/rss/articles", status: DC-BLOCK, poll: 60}
+
+courts:
+  - id: scotus_orders
+    name: Supreme Court orders of the Court
+    type: html
+    url: https://www.supremecourt.gov/orders/ordersofthecourt/25
+    status: OK
+    poll: 15
+    notes: The path segment is the term year. The October 2026 term likely uses /26; confirm before enabling and make the term configurable.
+  - {id: scotus_home, name: Supreme Court homepage (opinions, calendar), type: html, url: "https://www.supremecourt.gov/", status: OK, poll: 15}
+  - {id: courtlistener, name: CourtListener API v4, type: api, url: "https://www.courtlistener.com/api/rest/v4/", status: OK, poll: 30, notes: "Free account token raises rate limits; store as COURTLISTENER_TOKEN."}
+  - {id: scotusblog, enabled: true, desk: GOV, name: SCOTUSblog, type: rss, url: "https://www.scotusblog.com/feed/", status: OK, poll: 30}
+  - {id: lawfare, name: Lawfare, type: rss, url: "https://www.lawfaremedia.org/feeds/articles", status: OK, poll: 60, notes: "Feed returned only 2 items; check for a fuller feed."}
+
+federal:
+  - {id: congress_bills, name: Congress.gov bills, type: api, url: "https://api.congress.gov/v3/bill", status: KEY, key_env: DATA_GOV_API_KEY, poll: 30}
+  - {id: congress_committee_meetings, name: Congress.gov committee meetings, type: api, url: "https://api.congress.gov/v3/committee-meeting", status: KEY, key_env: DATA_GOV_API_KEY, poll: 15}
+  - {id: govinfo, name: GovInfo (Federal Register, Congressional Record), type: api, url: "https://api.govinfo.gov/", status: KEY, key_env: DATA_GOV_API_KEY, poll: 60}
+  - {id: federal_register, name: Federal Register API, type: api, url: "https://www.federalregister.gov/api/v1/documents.json", status: OK, poll: 60, notes: "No key. Filter by agency (EPA, FinCEN, Treasury, DOJ). Worked from the sandbox on 10-05, then returned 'Your IP address has been blocked' on 10-14; may rate-limit cloud IPs. GovInfo (FR collection) is the fallback."}
+  - {id: house_floor, name: House floor summary, type: html, url: "https://clerk.house.gov/floorsummary/floor-download.aspx", status: OK, poll: 10}
+  - {id: house_committee_calendar, name: House committee calendar, type: html, url: "https://docs.house.gov/Committee/Calendar/ByWeek.aspx", status: OK, poll: 60}
+  - {id: senate_floor, name: Senate floor activity, type: html, url: "https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm", status: OK, poll: 10}
+  - {id: senate_hearings, name: Senate hearings and meetings, type: html, url: "https://www.senate.gov/committees/hearings_meetings.htm", status: OK, poll: 60}
+  - {id: the_hill, enabled: true, desk: GOV, fast: true, name: The Hill, type: rss, url: "https://thehill.com/feed/", status: OK, poll: 15}
+  - {id: politico_congress, name: Politico Congress, type: rss, url: "https://rss.politico.com/congress.xml", status: DC-BLOCK, poll: 15}
+
+national_world:
+  - {id: abc, enabled: true, desk: WORLD, fast: true, name: ABC News, type: rss, url: "https://abcnews.go.com/abcnews/topstories", status: OK, poll: 10}
+  - {id: cbs, enabled: true, desk: WORLD, fast: true, name: CBS News, type: rss, url: "https://www.cbsnews.com/latest/rss/main", status: OK, poll: 10}
+  - {id: euronews, name: Euronews, type: rss, url: "https://www.euronews.com/rss", status: OK, poll: 15}
+  - {id: aljazeera, enabled: true, desk: WORLD, fast: true, name: Al Jazeera English, type: rss, url: "https://www.aljazeera.com/xml/rss/all.xml", status: OK, poll: 10}
+  - {id: france24_en, enabled: true, desk: WORLD, fast: true, name: France 24 English, type: rss, url: "https://www.france24.com/en/rss", status: OK, poll: 15}
+  - {id: bbc_world, name: BBC World, type: rss, url: "https://feeds.bbci.co.uk/news/world/rss.xml", status: DC-BLOCK, poll: 10}
+  - {id: npr, name: NPR News, type: rss, url: "https://feeds.npr.org/1001/rss.xml", status: DC-BLOCK, poll: 10}
+  - {id: guardian_world, name: The Guardian World, type: rss, url: "https://www.theguardian.com/world/rss", status: DC-BLOCK, poll: 15}
+  - {id: dw, name: DW, type: rss, url: "https://rss.dw.com/rdf/rss-en-all", status: DC-BLOCK, poll: 15}
+  - {id: ap, name: Associated Press, type: rss, url: null, status: UNTESTED, poll: 10, notes: "apnews.com blocked the sandbox; find a current official feed from home."}
+  - {id: wsj, name: Wall Street Journal headlines, type: rss, url: null, status: UNTESTED, poll: 15, notes: "Headlines and links only. Never fetch article text."}
+  - {id: gdelt, name: GDELT DOC API, type: api, url: "https://api.gdeltproject.org/api/v2/doc/doc", status: UNTESTED, poll: 30, notes: "Timed out from the sandbox. Best tool for multilingual city-level monitoring; retest from home."}
+
+paris:
+  - {id: gnews_paris_fr, name: Google News Paris (French), type: rss, url: "https://news.google.com/rss/search?q=Paris+mairie+OR+arrondissement&hl=fr&gl=FR&ceid=FR:fr", status: OK, poll: 30, language: fr}
+  - {id: paris_events, name: Que faire à Paris (open data), type: api, url: "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/que-faire-a-paris-/records", status: OK, poll: 360, language: fr}
+  - {id: paris_roadworks, name: Paris disruptive roadworks (open data), type: api, url: "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/chantiers-perturbants/records", status: OK, poll: 360, language: fr}
+  - {id: le_monde, name: Le Monde, type: rss, url: "https://www.lemonde.fr/rss/une.xml", status: DC-BLOCK, poll: 30, language: fr}
+  - {id: le_parisien_paris, name: Le Parisien Paris, type: rss, url: "https://feeds.leparisien.fr/leparisien/rss/paris-75", status: DC-BLOCK, poll: 30, language: fr}
+  - {id: actu_paris, name: Actu Paris, type: rss, url: "https://actu.fr/ile-de-france/paris_75056/rss.xml", status: DC-BLOCK, poll: 30, language: fr}
+  - {id: 20min_paris, name: 20 Minutes Paris, type: rss, url: "https://www.20minutes.fr/feeds/rss-paris.xml", status: DC-BLOCK, poll: 30, language: fr}
+  - {id: franceinfo, name: franceinfo, type: rss, url: "https://www.francetvinfo.fr/titres.rss", status: DC-BLOCK, poll: 15, language: fr}
+
+tel_aviv:
+  - {id: gnews_tlv_he, name: Google News Tel Aviv (Hebrew), type: rss, url: "https://news.google.com/rss/search?q=%D7%AA%D7%9C+%D7%90%D7%91%D7%99%D7%91&hl=he&gl=IL&ceid=IL:he", status: OK, poll: 30, language: he}
+  - {id: ynet_en, name: Ynetnews (English), type: rss, url: "https://www.ynetnews.com/Integration/StoryRss2.xml", status: OK, poll: 15, language: en}
+  - {id: ynet_he, name: Ynet (Hebrew), type: rss, url: "https://www.ynet.co.il/Integration/StoryRss2.xml", status: OK, poll: 15, language: he}
+  - {id: walla, name: Walla, type: rss, url: "https://rss.walla.co.il/feed/1?type=main", status: OK, poll: 15, language: he}
+  - {id: globes, name: Globes, type: rss, url: "https://www.globes.co.il/webservice/rss/rssfeeder.asmx/FeederNode?iID=2", status: OK, poll: 30, language: he}
+  - {id: haaretz_en, name: Haaretz (English), type: rss, url: "https://www.haaretz.com/srv/haaretz-latest-headlines", status: OK, poll: 15, language: en}
+  - {id: haaretz_he, name: Haaretz (Hebrew), type: rss, url: "https://www.haaretz.co.il/srv/htz---all-articles", status: OK, poll: 15, language: he}
+  - {id: jpost, name: Jerusalem Post, type: rss, url: "https://www.jpost.com/rss/rssfeedsfrontpage.aspx", status: OK, poll: 15, language: en}
+  - {id: times_of_israel, name: Times of Israel, type: rss, url: "https://www.timesofisrael.com/feed/", status: DC-BLOCK, poll: 15, language: en}
+  - {id: tzeva_adom, name: Tzeva Adom rocket alerts (third-party), type: api, url: "https://api.tzevaadom.co.il/notifications", status: OK, poll: 1, notes: "Alert source. Returned an empty list when quiet."}
+  - {id: oref, name: Home Front Command alerts, type: api, url: "https://www.oref.org.il/WarningMessages/alert/alerts.json", status: GEO, poll: 1}
+  - {id: tlv_municipality, name: Tel Aviv municipality, type: html, url: "https://www.tel-aviv.gov.il/en/", status: GEO, poll: 360}
+
+osint:
+  - {id: adsb_lol_mil, name: adsb.lol military aircraft, type: api, url: "https://api.adsb.lol/v2/mil", status: OK, poll: 10, notes: "No key. Use as a regional baseline signal, never a story by itself."}
+  - {id: opensky, name: OpenSky Network, type: api, url: "https://opensky-network.org/api/states/all", status: OK, poll: 10, notes: "Bounding-box queries."}
+  - {id: airplanes_live_mil, name: airplanes.live military, type: api, url: "https://api.airplanes.live/v2/mil", status: DC-BLOCK, poll: 10}
+  - {id: usgs_significant, name: USGS significant earthquakes (day), type: api, url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_day.geojson", status: OK, poll: 15}
+
+law:
+  - {id: nysba, name: NYSBA (CasePrepPlus, State Law Digest, ethics opinions), type: rss, url: "https://nysba.org/feed/", status: OK, poll: 60, enabled: true, desk: LAW, notes: "Weekly CasePrepPlus summarizes NY appellate decisions; also NYSBA ethics opinions and the monthly State Law Digest."}
+  - {id: cl_ny_court_of_appeals, name: NY Court of Appeals opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ny/", status: OK, poll: 60, enabled: true, desk: LAW}
+  - {id: cl_ca2, name: Second Circuit opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ca2/", status: OK, poll: 60, enabled: true, desk: LAW}
+  - {id: how_appealing, name: How Appealing (appellate news), type: rss, url: "https://howappealing.abovethelaw.com/feed/", status: OK, poll: 60, enabled: true, desk: LAW}
+  - {id: jdsupra_environmental, name: JD Supra Environmental Law, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=EnvironmentalLaw", status: OK, poll: 120, enabled: true, desk: LAW, notes: "Free law-firm client alerts. High volume; watchlist highlighting does the sorting."}
+  - {id: nylj, name: New York Law Journal headlines, type: rss, url: "https://www.law.com/newyorklawjournal/feed/", status: OK, poll: 60, enabled: true, desk: LAW, notes: "Paywalled. Headlines and links only."}
+  - id: dec_enb
+    name: NYSDEC Environmental Notice Bulletin
+    type: html
+    url: https://dec.ny.gov/news/environmental-notice-bulletin
+    status: OK
+    poll: 360
+    notes: DISABLED 2026-10-14 because dec.ny.gov/robots.txt explicitly disallows /news/environmental-notice-bulletin for all bots. Roadmap idea - DEC's email subscription for the ENB. Published weekly (Wednesdays). Item links follow /news/environmental-notice-bulletin/YYYY-MM-DD/<category>/<slug>; list new items with their category (seqr, permits, remediation, etc.). Link scraping only in V1.
+  - {id: cl_ny_appdiv, name: Appellate Division opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/nyappdiv/", status: OK, poll: 60, notes: "All four departments, dozens a day. Roadmap: filter to watchlist terms and the Second Department."}
+  - {id: cl_nysd, name: SDNY opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/nysd/", status: OK, poll: 120}
+  - {id: cl_nysb, name: SDNY Bankruptcy opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/nysb/", status: OK, poll: 120}
+  - {id: cl_scotus, name: Supreme Court opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/scotus/", status: OK, poll: 60}
+  - {id: jdsupra_bankruptcy, name: JD Supra Bankruptcy, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=BankruptcyLaw", status: OK, poll: 120}
+  - {id: jdsupra_real_estate, name: JD Supra Real Estate, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=RealEstate", status: OK, poll: 120}
+  - {id: jdsupra_finance, name: JD Supra Finance and Banking, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=FinanceBanking", status: OK, poll: 120}
+  - {id: volokh, name: Volokh Conspiracy, type: rss, url: "https://reason.com/volokh/feed/", status: OK, poll: 60}
+  - {id: above_the_law, name: Above the Law, type: rss, url: "https://abovethelaw.com/feed/", status: OK, poll: 60, notes: "Legal-industry news; noisy."}
+  - {id: dec_regs, name: NYSDEC proposed, emergency, and adopted regulations, type: html, url: "https://dec.ny.gov/regulatory/regulations/proposed-emergency-recently-adopted-regulations", status: OK, poll: 1440}
+  - {id: nys_register, name: NYS Register (weekly proposed state rules), type: html, url: "https://dos.ny.gov/state-register", status: OK, poll: 1440, notes: "Page loads; issue links not yet located."}
+  - {id: nycourts_press, name: NY Unified Court System news and notices, type: html, url: "https://ww2.nycourts.gov/press/index.shtml", status: DC-BLOCK, poll: 360, notes: "nycourts.gov blocked the sandbox on every page (Court of Appeals, CLE Board, attorney registration). Retest from GitHub; otherwise V8 home fetcher."}
+  - {id: fincen, name: FinCEN press releases, type: html, url: null, status: UNTESTED, poll: 360, notes: "Guessed URLs returned 404. FinCEN rules also arrive through the Federal Register."}
+
+# Terms that highlight an item in V1 when they appear in its headline or description
+# Case-insensitive whole-word or whole-phrase match; a trailing * matches a prefix
+# (indemnif* matches indemnify, indemnification). Nothing is filtered out. Tune freely.
+# A group can also be {terms: [...], skip_desks: [DESK], case_sensitive: true}.
+watchlist:
+  # Beacon news on the other desks stands out; on the BEACON desk it would match everything.
+  beacon_local: {terms: [Beacon, Dutchess, Fishkill, Hudson Highlands], skip_desks: [BEACON], case_sensitive: true}
+  environmental: [Navigation Law, Oil Spill Fund, PFAS, PFOS, PFOA, oil spill, petroleum bulk storage, Part 613, brownfield, remediation, CERCLA, RCRA, Superfund, NYSDEC, spill]
+  contractors: [indemnif*, Labor Law 240, prevailing wage]
+  bankruptcy: [Chapter 11, Chapter 7, bankruptcy]
+  aml: [FinCEN, beneficial ownership, Corporate Transparency Act, anti-money laundering, Bank Secrecy Act]
+  real_estate_land_use: [zoning, land use, SEQRA, eminent domain, commercial real estate]
+  courts: [emergency application, shadow docket, stay application]
+  bar: [Rules of Professional Conduct, attorney registration, CLE, ethics opinion]
+
+# ---------------------------------------------------------------
+# VIDEO. V1 uses only the presets marked enabled: true, through the no-key
+# channel live embed (see V1.md), in the order listed. Everything else is for V4.
+# Embed test 2026-10-14 4:20 PM ET: NBC, CBS, Reuters, Al Jazeera, France 24, DW and
+# Bloomberg played; LiveNOW, ABC, Sky, PBS and C-SPAN showed "video unavailable"
+# (offline at the time or embedding disabled). Reuters is event-driven, not 24/7. Live detection uses the YouTube Data API
+# (key_env: YOUTUBE_API_KEY): uploads playlist via playlistItems,
+# then videos.list with liveStreamingDetails,status in batches of 50.
+# Channel RSS does NOT include live or upcoming streams.
+# Check embeddability per video with status.embeddable or oEmbed.
+# ---------------------------------------------------------------
+video_youtube:
+  government:
+    - {id: yt_cspan, name: C-SPAN, channel_id: UCb--64Gl51jIEVE-GLDAVTg, notes: "Live events and debates embed. C-SPAN's own networks stay link-out to c-span.org/live."}
+    - {id: yt_house_clerk, name: House Clerk (House floor), channel_id: null, handle: USHouseClerk, notes: "live.house.gov blocks framing and links here. Resolve channel_id in V4."}
+    - {id: yt_white_house, name: White House, channel_id: UCYxRlFDqcWM4y7FfpiAN3KQ}
+    - {id: yt_state_dept, name: State Department, channel_id: UC6ZhpmNnLxlOYipqh8wbM3A}
+    - {id: yt_fed, name: Federal Reserve, channel_id: UCAzhpt9DmG6PnHXjmJTvRGQ}
+    - {id: yt_un, name: United Nations, channel_id: UC5O114-PQNYkurlTg6hekZw}
+    - {id: yt_nasa, name: NASA, channel_id: UCLA_DiR1FfKNvjuUpBHmylQ}
+    - {id: yt_house_oversight, name: House Oversight, channel_id: UCHdykx4GTSsJq0YRZphzrPA}
+    - {id: yt_ny_senate, name: NY Senate, channel_id: UCVJzgJ1u9YANbvHDHryZO2g}
+    - {id: yt_beacon, name: City of Beacon, channel_id: UCvPpigGwZDeR7WYmw-SuDxg}
+    - {id: yt_committees, name: House and Senate committee channels, channel_id: null, notes: "V4: build the list from official committee websites. Also resolve Senate floor stream, Pentagon, and Governor channels."}
+  breaking:
+    - {id: yt_nbc, enabled: true, name: NBC News, channel_id: UCeY0bbntWzzVIaj2z3QigXg}
+    - {id: yt_cbs, enabled: true, name: CBS News, channel_id: UC8p1vwvWtl6T73JiExfWs1g}
+    - {id: yt_reuters, enabled: true, name: Reuters, channel_id: UChqUTb7kYRX8-EiaN3XFrSQ}
+    - {id: yt_aljazeera, enabled: true, name: Al Jazeera English, channel_id: UCNye-wNBqNL5ZzHSJj3l8Bg, notes: "24/7 live, embeddable (verified)."}
+    - {id: yt_livenow_fox, name: LiveNOW from FOX, channel_id: UCJg9wBPyKMNA5sRDnvzmkdg, notes: "Raw, unedited live feeds of pressers, hearings, events."}
+    - {id: yt_france24, name: France 24 English, channel_id: UCQfwfsi5VrQ8yKZ-UWmAEFg}
+    - {id: yt_dw, name: DW News, channel_id: UCknLrEdhRCp1aegoMqRaCZg}
+    - {id: yt_sky, name: Sky News, channel_id: UCoMdktPbSTixAyNGwb-UYkQ}
+    - {id: yt_abc, name: ABC News, channel_id: UCBi2mrWuNuyYy4gbM6fU18Q}
+    - {id: yt_bloomberg, name: Bloomberg, channel_id: UCIALMKvObZNtJ6AmdCLP7Lg}
+    - {id: yt_pbs, name: PBS NewsHour, channel_id: UC6ZFN9Tx6xh-skXCuRHCDpQ}
+  city_desks:
+    - {id: yt_franceinfo, name: franceinfo, channel_id: UCO6K_kkdP-lnSCiO3tPx7WA, desk: paris}
+    - {id: yt_bfmtv, name: BFMTV, channel_id: UCXwDLMDV86ldKoFVc_g8P0g, desk: paris}
+    - {id: yt_kan11, name: Kan 11, channel_id: UCKqFqiCe1dCUxRe0_YNZ6gg, desk: tel_aviv}
+    - {id: yt_n12, name: N12, channel_id: UCZH1ZFHSLSZEh_Ek2L-vrgA, desk: tel_aviv}
+
+video_other:
+  - {id: senate_floor_video, name: Senate floor video, url: "https://www.senate.gov/floor/index.htm", mode: embed_candidate, notes: "No frame-blocking header; test the player."}
+  - {id: scotus_live_audio, name: Supreme Court live oral argument audio, url: "https://www.supremecourt.gov/oral_arguments/live.aspx", mode: embed_candidate, notes: "Show as an audio card."}
+  - {id: knesset_live, name: Knesset broadcast, url: "https://main.knesset.gov.il/en/News/Broadcast/Pages/default.aspx", mode: embed_candidate}
+  - {id: un_webtv, name: UN Web TV, url: "https://webtv.un.org/en/schedule", mode: link_out, notes: "Page blocks framing; uses Kaltura players. Prefer the UN YouTube channel."}
+  - {id: dvids_webcast, name: DVIDS (Pentagon) webcasts, url: "https://www.dvidshub.net/webcast", mode: link_out, notes: "Framing blocked. DVIDS API needs a free key."}
+  - {id: cspan_live, name: C-SPAN networks, url: "https://www.c-span.org/live/", mode: link_out, notes: "Automated requests blocked. Link only; never scrape."}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b0d0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Wire">
+<title>The Wire</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">THE WIRE<span class="cursor">_</span></div>
+  <div class="asof" id="asof">loading…</div>
+</header>
+
+<div id="alerts"></div>
+
+<section class="breaking" aria-label="Breaking">
+  <div class="live">
+    <div class="live-bar">
+      <span class="live-dot" aria-hidden="true"></span><span class="label">LIVE</span>
+      <div class="channels" id="channels" role="tablist"></div>
+    </div>
+    <div class="player" id="player" hidden></div>
+  </div>
+  <div class="lasthour">
+    <div class="section-label">LAST HOUR <span id="lasthour-count"></span></div>
+    <ol id="lasthour"></ol>
+  </div>
+</section>
+
+<nav class="desks" id="desks" aria-label="Desks"></nav>
+<div class="newcount" id="newcount"></div>
+
+<main>
+  <ol class="feed" id="feed"></ol>
+</main>
+
+<footer>
+  <details id="health">
+    <summary>SOURCE HEALTH <span id="health-summary"></span></summary>
+    <table><thead><tr><th>source</th><th>desk</th><th>items</th><th>last ok</th><th>status</th></tr></thead><tbody id="health-rows"></tbody></table>
+  </details>
+  <div class="fineprint">Headlines and links only. Built every 15 minutes.</div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
