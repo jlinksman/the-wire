@@ -166,10 +166,15 @@ def robots_allows(url: str, state: dict, session: requests.Session) -> bool:
     return Protego.parse(cached["body"]).can_fetch(url, "TheWire")
 
 
+FORCE = os.environ.get("WIRE_FORCE", "").lower() == "true"
+
+
 def is_due(src: dict, st: dict) -> bool:
     nxt = parse_iso(st.get("next_allowed"))
     if nxt and now_utc() < nxt:
         return False
+    if FORCE:  # a manual run fetches everything that isn't backing off
+        return True
     last = parse_iso(st.get("last_attempt"))
     if not last:
         return True
@@ -201,8 +206,13 @@ def struct_to_dt(st) -> datetime | None:
 
 def parse_rss(src: dict, content: bytes) -> list[dict]:
     feed = feedparser.parse(content)
-    if feed.bozo and not feed.entries:
-        raise ValueError(f"unparseable feed: {feed.bozo_exception}")
+    if not feed.entries:
+        head = content[:600].decode("utf-8", "replace").lower()
+        if "<rss" not in head and "<feed" not in head and "<rdf" not in head:
+            # A block or challenge page comes back as HTML with a 200; never count it as "ok".
+            raise ValueError("got a web page instead of a feed (likely blocked or moved)")
+        if feed.bozo:
+            raise ValueError(f"unparseable feed: {feed.bozo_exception}")
     exclude = {d.lower() for d in src.get("exclude_domains", [])}
     is_gnews = "news.google.com" in src["url"]
     items = []
