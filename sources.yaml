@@ -94,13 +94,13 @@ beacon:
     poll: 30
     notes: Open WordPress API too (https://highlandscurrent.org/wp-json/wp/v2/posts?search=...). Publishes the curated Beacon blotter.
   - id: gnews_beacon
-    enabled: true
     desk: BEACON
     name: Google News — "Beacon, NY"
     type: rss
     url: https://news.google.com/rss/search?q=%22Beacon%2C+NY%22&hl=en-US&gl=US&ceid=US:en
     status: OK
     poll: 30
+    # Off in V1: news.google.com/robots.txt disallows all bots (and names AI crawlers).
     exclude_domains: [realtor.com, zillow.com, redfin.com, legacy.com, maxpreps.com, apartments.com, trulia.com]
     notes: Noisy (real estate listings, obituaries, school sports). Drop exclude_domains; extend the list as junk appears.
   - id: nws_beacon
@@ -231,8 +231,8 @@ law:
   - {id: cl_ny_court_of_appeals, name: NY Court of Appeals opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ny/", status: OK, poll: 60, enabled: true, desk: LAW}
   - {id: cl_ca2, name: Second Circuit opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ca2/", status: OK, poll: 60, enabled: true, desk: LAW}
   - {id: how_appealing, name: How Appealing (appellate news), type: rss, url: "https://howappealing.abovethelaw.com/feed/", status: OK, poll: 60, enabled: true, desk: LAW}
-  - {id: jdsupra_environmental, name: JD Supra Environmental Law, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=EnvironmentalLaw", status: OK, poll: 120, enabled: true, desk: LAW, notes: "Free law-firm client alerts. High volume; watchlist highlighting does the sorting."}
-  - {id: nylj, name: New York Law Journal headlines, type: rss, url: "https://www.law.com/newyorklawjournal/feed/", status: OK, poll: 60, enabled: true, desk: LAW, notes: "Paywalled. Headlines and links only."}
+  - {id: jdsupra_environmental, name: JD Supra Environmental Law, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=EnvironmentalLaw", status: DC-BLOCK, poll: 120, desk: LAW, notes: "Worked from the sandbox; GitHub runners get a block page (2026-10-15). Candidate for the V8 home fetcher."}
+  - {id: nylj, name: New York Law Journal headlines, type: rss, url: "https://www.law.com/newyorklawjournal/feed/", status: DC-BLOCK, poll: 60, desk: LAW, notes: "Paywalled; headlines and links only. HTTP 403 from GitHub runners (2026-10-15). Candidate for the V8 home fetcher."}
   - id: dec_enb
     name: NYSDEC Environmental Notice Bulletin
     type: html
