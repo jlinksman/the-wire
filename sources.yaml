@@ -32,6 +32,7 @@ beacon:
     enabled: true
     desk: BEACON
     robots: subscription
+    agendas: true   # also fetch each linked agenda PDF (approved 2026-10-16), parse items, track addresses
     name: Beacon agendas RSS
     type: rss
     url: https://cityofbeacon.granicus.com/ViewPublisherRSS.php?view_id=1&mode=agendas
@@ -271,7 +272,8 @@ watchlist:
   contractors: [indemnif*, Labor Law 240, prevailing wage]
   bankruptcy: [Chapter 11, Chapter 7, bankruptcy]
   aml: [FinCEN, beneficial ownership, Corporate Transparency Act, anti-money laundering, Bank Secrecy Act]
-  real_estate_land_use: [zoning, land use, SEQRA, eminent domain, commercial real estate]
+  # Skips the BEACON desk, where zoning is the whole point and would tag everything.
+  real_estate_land_use: {terms: [zoning, land use, SEQRA, eminent domain, commercial real estate], skip_desks: [BEACON]}
   courts: [emergency application, shadow docket, stay application]
   bar: [Rules of Professional Conduct, attorney registration, CLE, ethics opinion]
 

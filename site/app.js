@@ -159,7 +159,7 @@ function renderToday() {
   const rows = { today: [], tomorrow: [] };
   const meetings = data.items
     .filter((it) => it.event_at && Date.parse(it.event_at) > Date.now() - 3 * 3600000)
-    .map((it) => ({ ms: Date.parse(it.event_at), label: it.title.split(" - ")[0], link: it.link, meeting: true }))
+    .map((it) => ({ ms: Date.parse(it.event_at), label: it.title.split(" - ")[0] + (it.agenda ? " (" + it.agenda.length + " items)" : ""), link: it.link, meeting: true }))
     .sort((a, b) => a.ms - b.ms);
   const seen = new Set();
   for (const m of meetings) {
@@ -313,12 +313,39 @@ function row(it) {
     },
   }, meta, headline);
   const more = el("div", { class: "more" },
-    it.summary ? el("p", { text: it.summary }) : null,
+    it.summary && !it.agenda ? el("p", { text: it.summary }) : null,
     it.blotter ? blotterTable(it.blotter) : null,
+    it.agenda ? agendaList(it) : null,
     el("p", {}, el("a", { href: it.link, target: "_blank", rel: "noopener", text: "Open ↗" }),
       el("span", { class: "exact", text: exact(it.ms) })));
   li.append(head, more);
   return li;
+}
+
+function agendaList(it) {
+  const box = el("div", { class: "agenda" }, el("div", { class: "agenda-head", text: it.agenda.length + " agenda items" }));
+  let section = null;
+  for (const a of it.agenda) {
+    if (a.section && a.section !== section) {
+      section = a.section;
+      box.append(el("div", { class: "asec", text: section.toUpperCase() }));
+    }
+    const hist = a.addr ? ((data.tracker || {})[a.addr] || []).filter((h) => h.link !== it.link) : [];
+    const histBox = el("div", { class: "ahist", hidden: true },
+      ...hist.map((h) => el("div", {},
+        el("a", { href: h.link, target: "_blank", rel: "noopener", text: fmtDate.format(new Date(h.date + "T12:00:00")) + " · " + h.body }),
+        h.flags.length ? " · " + h.flags.join(", ") : "")));
+    box.append(el("div", { class: "aitem" },
+      el("span", { class: "an", text: a.n != null ? a.n + "." : "·" }),
+      el("span", { class: "at" }, a.text,
+        ...a.flags.map((f) => el("span", { class: "aflag" + (f === "ADJOURNED" ? " adj" : ""), text: f })),
+        hist.length ? el("button", {
+          class: "aseen", text: "↺ " + hist.length + " earlier",
+          onclick: (ev) => { ev.stopPropagation(); histBox.hidden = !histBox.hidden; },
+        }) : null,
+        histBox)));
+  }
+  return box;
 }
 
 function blotterTable(days) {

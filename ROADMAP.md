@@ -7,7 +7,8 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - [x] City documents labeled by type (Resolution, Local law, Public hearing, Bid/RFP, Agenda, Minutes, Budget, Schedule, Notice).
 - [x] Meetings on the TODAY line link to their agenda, with a ▶ WATCH button from 30 minutes before until 4 hours after the start.
 - [x] Beacon row in the live player: City meetings channel and the school board's channel.
-- [ ] Agenda item lists and running items (follow an application across meetings). Waiting on Joe's call: Granicus's robots.txt disallows the linked agenda pages.
+- [x] Agenda item lists: each Granicus agenda PDF is parsed into numbered items with flags (HEARING, ADJOURNED, LOCAL LAW, RESOLUTION). Joe approved fetching the linked agenda documents as part of the feed subscription (2026-10-16); upcoming agendas refresh every 6 hours, older ones are fetched once, at most 10 new per run.
+- [x] Running items: agenda items that name an address (or a named site like Edgewater Place) show "↺ N earlier" with links to each earlier meeting, over the last 120 days.
 - [ ] School board agendas: BoardDocs blocks cloud servers. Moved to the V8 home fetcher.
 - Note: YouTube's robots.txt disallows its RSS feeds (/feeds/videos.xml), so meeting recordings come through the live player and links, not feeds.
 

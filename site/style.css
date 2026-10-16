@@ -71,6 +71,18 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .today .what a { color: var(--text); text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 2px; }
 .today .watch { margin-left: 6px; padding: 1px 6px; border: 1px solid var(--red); color: var(--red); font: 700 10.5px var(--mono); }
 
+/* Agenda items */
+.agenda { margin: 4px 0 8px; }
+.agenda-head { font: 11px var(--mono); color: var(--meta); letter-spacing: 0.06em; margin-bottom: 4px; }
+.asec { font: 10.5px var(--mono); color: var(--faint); letter-spacing: 0.08em; margin: 8px 0 2px; }
+.aitem { display: grid; grid-template-columns: 1.8em 1fr; gap: 6px; padding: 4px 0; font-size: 14px; line-height: 1.35; color: #c3c7cc; border-top: 1px solid var(--line); }
+.aitem .an { font: 12px var(--mono); color: var(--faint); padding-top: 1px; }
+.aflag { display: inline-block; margin-left: 6px; padding: 0 4px; font: 700 9.5px/1.6 var(--mono); border: 1px solid var(--faint); color: var(--meta); vertical-align: 1px; }
+.aflag.adj { border-color: var(--amber); color: var(--amber); }
+.aseen { margin-left: 6px; font: 700 10.5px var(--mono); color: var(--beacon); text-decoration: underline; }
+.ahist { margin: 4px 0 2px; font: 12px/1.5 var(--mono); color: var(--meta); }
+.ahist a { color: var(--meta); }
+
 /* Blotter rows */
 .blotter { font: 12px/1.45 var(--mono); margin: 4px 0 8px; }
 .bday { color: var(--text); margin: 8px 0 2px; }

@@ -31,6 +31,9 @@ from bs4 import BeautifulSoup
 from pypdf import PdfReader
 from protego import Protego
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import agendas  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "sources.yaml"
 SITE = ROOT / "site"
@@ -712,6 +715,34 @@ def write_dist(state: dict, sources: list[dict], video: list[dict], teams: list[
     return data
 
 
+def attach_agendas(state: dict, track: dict, watch) -> None:
+    """Give each agenda feed item its parsed item list, history counts and watch hits."""
+    cache = state.get("agendas") or {}
+    for it in state["items"].values():
+        rec = cache.get(it["link"])
+        if not rec or not rec.get("items"):
+            continue
+        rows = []
+        for a in rec["items"]:
+            hist = track.get(a.get("addr") or "", [])
+            rows.append({"n": a["n"], "text": a["text"], "section": a.get("section", ""),
+                         "addr": a.get("addr"), "flags": a.get("flags", []),
+                         "seen": len([h for h in hist if h["link"] != it["link"]])})
+        it["agenda"] = rows
+        text = " ".join(r["text"] for r in rows)
+        terms = list(it.get("watch_terms") or [])
+        groups = set(it.get("watch") or [])
+        for g, pat, skip in watch:
+            if it["desk"] in skip:
+                continue
+            m = pat.search(text)
+            if m:
+                groups.add(g)
+                if m.group(0).lower() not in (x.lower() for x in terms):
+                    terms.append(m.group(0))
+        it["watch"], it["watch_terms"] = sorted(groups), terms[:3]
+
+
 def src_robots(s: dict) -> str:
     return "subscription" if s.get("robots") == "subscription" else "honored"
 
@@ -730,6 +761,8 @@ def main() -> int:
     for src, outcome, items in results:
         if items is not None:
             merge(state, src, items, watch)
+            if src.get("agendas"):
+                state["granicus_entries"] = [{"title": i["title"], "link": i["link"]} for i in items]
         err = state["sources"][src["id"]].get("last_error")
         log(f"[{outcome:>12}] {src['id']:<26} {len(items) if items is not None else '-':>4}  {err or ''}")
 
@@ -743,8 +776,20 @@ def main() -> int:
     for tm in teams:
         log(f"[team] {tm['id']:<10} last={bool(tm['last'])} next={bool(tm['next'])} {tm['error'] or ''}")
 
+    # Agenda PDFs linked from the Granicus feed (approved as part of that subscription).
+    entries = state.get("granicus_entries") or []
+    if entries:
+        agendas.update(state, entries, session, TIMEOUT, log)
+        keep = {e["link"] for e in entries}
+        state["agendas"] = {k: v for k, v in state.get("agendas", {}).items() if k in keep}
+    track = agendas.tracker(state)
+    attach_agendas(state, track, watch)
+
     prune(state)
     data = write_dist(state, sources, video, teams)
+    data_tracker = {a: track[a] for a in {x["addr"] for it in data["items"] for x in it.get("agenda") or [] if x.get("addr")} if a in track}
+    data["tracker"] = data_tracker
+    (DIST / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     save_state(state)
     failing = sum(1 for h in data["sources"] if h["last_error"])
     log(f"built {len(data['items'])} items from {len(sources)} sources "
