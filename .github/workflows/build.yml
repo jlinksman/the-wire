@@ -30,7 +30,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
       # Only an explicit "force" run ignores poll intervals; timer runs stay polite.
-      WIRE_FORCE: ${{ inputs.force == true }}
+      WIRE_FORCE: ${{ inputs.force == true || inputs.force == 'true' }}
     steps:
       - uses: actions/checkout@v4
 
