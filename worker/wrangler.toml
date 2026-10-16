@@ -1,0 +1,11 @@
+name = "the-wire-timer"
+main = "index.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+preview_urls = false
+
+[vars]
+REPO = "jlinksman/the-wire"
+
+[triggers]
+crons = ["*/15 * * * *"]
