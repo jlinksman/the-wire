@@ -1,11 +1,17 @@
 name: Build feed
 
 # Every 15 minutes: fetch the enabled sources and write the result to Workers KV.
-# GitHub may start scheduled runs late under load; the page's "as of" time shows true freshness.
+# The Cloudflare build timer (worker/) starts this on time; GitHub's own schedule
+# below is only a backup, because it often runs hours late.
 on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Fetch every source now, ignoring poll intervals"
+        type: boolean
+        default: false
 
 concurrency:
   group: build-feed
@@ -23,8 +29,8 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
-      # Manual runs ignore poll intervals so a fix can be checked right away.
-      WIRE_FORCE: ${{ github.event_name == 'workflow_dispatch' }}
+      # Only an explicit "force" run ignores poll intervals; timer runs stay polite.
+      WIRE_FORCE: ${{ inputs.force == true }}
     steps:
       - uses: actions/checkout@v4
 

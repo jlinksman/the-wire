@@ -1,0 +1,38 @@
+name: Deploy build timer
+
+# Deploys the Cloudflare Worker that starts "Build feed" every 15 minutes.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker/**"
+      - ".github/workflows/deploy-timer.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stop if the GitHub dispatch token is missing
+        if: env.GH_DISPATCH_TOKEN == ''
+        run: |
+          echo "::error::Add a GH_DISPATCH_TOKEN repository secret (fine-grained token, Actions read and write on this repo), then re-run."
+          exit 1
+
+      - name: Deploy the Worker
+        working-directory: worker
+        run: npx --yes wrangler@4 deploy
+
+      - name: Give the Worker its GitHub token
+        working-directory: worker
+        run: printf '%s' "$GH_DISPATCH_TOKEN" | npx --yes wrangler@4 secret put GH_TOKEN
