@@ -12,7 +12,7 @@ const FRESH_MIN = 30;
 const PIN_HOURS = 48;
 const PIN_MAX = 5;
 const LAST_HOUR_MAX = 5;
-const KIND_MARK = { VIDEO: "▶ VIDEO", DOC: "DOC", QUOTE: "“ QUOTE" };
+const KIND_MARK = { VIDEO: "▶ VIDEO", DOC: "DOC", QUOTE: "“ QUOTE", BLOTTER: "BLOTTER" };
 
 // --------------------------------------------------------------- storage (never throws)
 const store = {
@@ -159,7 +159,7 @@ function renderToday() {
   const rows = { today: [], tomorrow: [] };
   const meetings = data.items
     .filter((it) => it.event_at && Date.parse(it.event_at) > Date.now() - 3 * 3600000)
-    .map((it) => ({ ms: Date.parse(it.event_at), label: it.title.split(" - ")[0], link: it.link }))
+    .map((it) => ({ ms: Date.parse(it.event_at), label: it.title.split(" - ")[0], link: it.link, meeting: true }))
     .sort((a, b) => a.ms - b.ms);
   const seen = new Set();
   for (const m of meetings) {
@@ -178,11 +178,18 @@ function renderToday() {
       else if (isTomorrow(ms)) rows.tomorrow.push(g);
     }
   }
+  const meetingFeed = (data.video || []).find((v) => v.meetings);
+  const watchable = (m) => m.meeting && meetingFeed && Date.now() > m.ms - 30 * 60000 && Date.now() < m.ms + 4 * 3600000;
   const line = (name, items) => el("div", { class: "row" },
     el("span", { class: "when", text: name }),
     el("span", { class: "what" }, ...items.sort((a, b) => a.ms - b.ms).flatMap((m, i) => [
       i ? el("span", { class: "sep", text: " · " }) : null,
-      (m.live ? "" : fmtTime.format(new Date(m.ms)) + " ") + m.label,
+      m.live ? "" : fmtTime.format(new Date(m.ms)) + " ",
+      m.link ? el("a", { href: m.link, target: "_blank", rel: "noopener", text: m.label }) : m.label,
+      watchable(m) ? el("button", {
+        class: "watch", text: "▶ WATCH",
+        onclick: () => { channel = meetingFeed.id; playing = true; livePanelOpen = true; store.set(KEY.channel, channel); renderLive(); $("live-toggle").scrollIntoView({ block: "start" }); },
+      }) : null,
     ])));
   const kids = [];
   if (rows.today.length) kids.push(line("TODAY", rows.today));
@@ -307,17 +314,36 @@ function row(it) {
   }, meta, headline);
   const more = el("div", { class: "more" },
     it.summary ? el("p", { text: it.summary }) : null,
+    it.blotter ? blotterTable(it.blotter) : null,
     el("p", {}, el("a", { href: it.link, target: "_blank", rel: "noopener", text: "Open ↗" }),
       el("span", { class: "exact", text: exact(it.ms) })));
   li.append(head, more);
   return li;
 }
 
+function blotterTable(days) {
+  const box = el("div", { class: "blotter" });
+  for (const d of days.slice().reverse()) {
+    const dt = new Date(d.day + "T12:00:00");
+    const label = isNaN(dt) ? d.day : fmtDate.format(dt);
+    box.append(el("div", { class: "bday" },
+      el("a", { href: d.url, target: "_blank", rel: "noopener", text: label }),
+      " · " + d.rows.length + " calls"));
+    for (const r of d.rows) {
+      box.append(el("div", { class: "brow" },
+        el("span", { class: "bt", text: r.time }),
+        el("span", { class: "bc", text: r.call }),
+        el("span", { class: "bd", text: r.disposition })));
+    }
+  }
+  return box;
+}
+
 // --------------------------------------------------------------- pinned Beacon block
 function pinnedItems() {
   if (desk !== "ALL") return [];
   const cutoff = Date.now() - PIN_HOURS * 3600000;
-  return data.items.filter((it) => it.desk === "BEACON" && !it.alert && it.ms >= cutoff && (!newOnly || !isSeen(it))).slice(0, PIN_MAX);
+  return data.items.filter((it) => it.desk === "BEACON" && !it.alert && it.kind !== "BLOTTER" && it.ms >= cutoff && (!newOnly || !isSeen(it))).slice(0, PIN_MAX);
 }
 
 function renderPinned() {

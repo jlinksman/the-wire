@@ -121,12 +121,12 @@ beacon:
     poll: 5
     notes: Alert source for Beacon safety pushes (V6).
   - id: beacon_schools
-    name: Beacon City School District board agendas
+    name: Beacon City School District board agendas (BoardDocs)
     type: html
-    url: null
-    status: UNTESTED
+    url: https://go.boarddocs.com/ny/beacon/Board.nsf/Public
+    status: DC-BLOCK
     poll: 120
-    notes: District site https://www.beaconk12.org/ is server-rendered. Find where current board agendas are posted (may be BoardDocs or similar).
+    notes: BoardDocs (CloudFront) returns 403 to cloud servers (2026-10-16). Candidate for the V8 home fetcher. Board meetings stream on YouTube @BCSDBOE (UCUxD5Qj1i__1hCVsPilNjGw), in live_lineup.
 
 regional:
   - {id: midhudson_news, short: "Mid-Hudson News", enabled: true, desk: BEACON, name: Mid-Hudson News, type: rss, url: "https://midhudsonnews.com/feed/", status: OK, poll: 30}
@@ -337,6 +337,9 @@ teams:
 # live embed; link = open elsewhere (embedding not allowed). Tested 2026-10-16 evening;
 # Israeli channels were off air for Shabbat, so a daytime retest decides which stay.
 live_lineup:
+  Beacon:
+    - {name: City meetings, channel_id: UCvPpigGwZDeR7WYmw-SuDxg, note: "council, boards", meetings: true}
+    - {name: School board, channel_id: UCUxD5Qj1i__1hCVsPilNjGw, note: "BCSD"}
   US:
     - {name: NBC News NOW, channel_id: UCeY0bbntWzzVIaj2z3QigXg}
     - {name: CBS News 24/7, channel_id: UC8p1vwvWtl6T73JiExfWs1g}

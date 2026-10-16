@@ -2,12 +2,14 @@
 
 Everything here was researched and scoped, then held back so V1 could start simple. I'll pick the next version after using V1 for a few weeks. The order below is a default, not a commitment. Source details for every item are already in `sources.yaml` with `enabled: false`.
 
-## V2 — Beacon depth
-- Upcoming meetings from Beacon's Granicus listing page, with a "Tonight" card at the top on meeting days.
-- Agenda packet PDFs parsed into numbered item lists. Resolutions as title and date.
-- Daily police blotter PDFs parsed into rows, labeled with their posting lag. Never used for alerts.
-- Beacon City School District board agendas (find the source).
-- Beacon meeting livestream detection (needs a free YouTube Data API key).
+## V2 — Beacon depth (in progress, started 2026-10-16)
+- [x] Daily police blotter PDFs parsed into rows. Each city upload batch is one feed item with call counts and the posting lag; officer names are left out. Never used for alerts.
+- [x] City documents labeled by type (Resolution, Local law, Public hearing, Bid/RFP, Agenda, Minutes, Budget, Schedule, Notice).
+- [x] Meetings on the TODAY line link to their agenda, with a ▶ WATCH button from 30 minutes before until 4 hours after the start.
+- [x] Beacon row in the live player: City meetings channel and the school board's channel.
+- [ ] Agenda item lists and running items (follow an application across meetings). Waiting on Joe's call: Granicus's robots.txt disallows the linked agenda pages.
+- [ ] School board agendas: BoardDocs blocks cloud servers. Moved to the V8 home fetcher.
+- Note: YouTube's robots.txt disallows its RSS feeds (/feeds/videos.xml), so meeting recordings come through the live player and links, not feeds.
 
 ## V3 — Government and law depth
 - **Federal:** Congress.gov bills and committee meetings, House and Senate floor schedules, a "Today in government" view, and Federal Register items filtered by agency (EPA, FinCEN, Treasury, DOJ). Free api.data.gov key.

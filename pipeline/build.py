@@ -26,7 +26,9 @@ from urllib.parse import urljoin, urlparse
 import feedparser
 import requests
 import yaml
+import io
 from bs4 import BeautifulSoup
+from pypdf import PdfReader
 from protego import Protego
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -111,6 +113,7 @@ def load_config():
                     "id": re.sub(r"[^a-z0-9]+", "-", v["name"].lower()).strip("-"),
                     "group": group, "name": v["name"],
                     "channel_id": v.get("channel_id"), "link": v.get("link"), "note": v.get("note"),
+                    "meetings": bool(v.get("meetings")),
                 })
 
     teams = [t for t in (cfg.get("teams") or []) if t.get("schedules")]
@@ -244,21 +247,129 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
     return items
 
 
-def parse_wp_media(src: dict, content: bytes) -> list[dict]:
+DOC_KINDS = [  # first match wins; labels city uploads by what they are
+    (r"\bresolution\b", "Resolution"), (r"\blocal law\b|\bLL\b", "Local law"),
+    (r"public hearing", "Public hearing"), (r"\bRFP\b|\bRFQ\b|\bbid\b|addendum", "Bid/RFP"),
+    (r"\bagenda\b", "Agenda"), (r"\bminutes\b", "Minutes"), (r"budget", "Budget"),
+    (r"schedule", "Schedule"), (r"notice", "Notice"),
+]
+BLOTTER_TITLE = re.compile(r"(\d{2})\.(\d{2})\.(\d{4})")
+BLOTTER_ROW = re.compile(r"^(\d{1,2}:?\d{2})\s+(.*)$")
+OFFICER = re.compile(r"\s((?:(?:PO|SGT|LT|DET|DET SGT|CAPT|CHIEF|DISPATCHER)\b[\w .'\-]*,?\s*)+)$")
+DISPOSITIONS = sorted([
+    "BLOTTER ONLY", "ADVISED", "CIVIL / ADVISED", "WARNING", "ISSUED", "ENTERED", "ACCIDENT REPORT", "UNFOUNDED",
+    "COMPLETE", "ARREST MADE", "REPORT ON FILE", "CHECKED", "SECURE", "APPEARS SECURE", "NEGATIVE RESULTS",
+    "NEGATIVE PROBLEM", "DOMESTIC INC REP", "INTERVIEWED", "ACCIDENTAL", "TRANSPORTED", "RESOLVED",
+    "GONE ON ARRIVAL", "LOCATED", "UNABLE TO LOCATE", "CANCELED", "CANCELLED", "REMOVED", "TOT EMS", "TOT BVAC",
+    "TOT OTHER PD", "IMPOUND", "FOLLOW UP", "DPW NOTIFIED", "COVERED", "ASSISTED", "AIDED TRANSPORTED",
+    "NEGATIVE", "REFUSED", "SERVED", "RECOVERED", "PARKING TICKET", "SUMMONS ISSUED",
+], key=len, reverse=True)
+
+
+def parse_blotter_pdf(pdf: bytes) -> list[dict]:
+    """Rows of time, call type, disposition, officer from a daily blotter PDF."""
+    text = "\n".join(p.extract_text() or "" for p in PdfReader(io.BytesIO(pdf)).pages)
+    rows, cur = [], None
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("Time Occurred") or "DAILY POLICE BLOTTER" in line or line == "CITY OF BEACON":
+            continue
+        m = BLOTTER_ROW.match(line)
+        if m:
+            if cur:
+                rows.append(cur)
+            cur = [m.group(1), m.group(2)]
+        elif cur and not BLOTTER_TITLE.fullmatch(line):
+            cur[1] += " " + line  # wrapped onto the next line in the PDF
+    if cur:
+        rows.append(cur)
+    out = []
+    for time_, rest in rows:
+        rest = re.sub(r"\s+", " ", rest).strip()
+        officer = ""
+        m = OFFICER.search(" " + rest)
+        if m:
+            officer = m.group(1).strip()
+            rest = rest[: len(rest) - len(m.group(1))].strip()
+        disposition = ""
+        for d in DISPOSITIONS:
+            if rest.endswith(" " + d) or rest == d:
+                disposition, rest = d, rest[: -len(d)].strip()
+                break
+        if ":" not in time_:
+            time_ = time_[:-2] + ":" + time_[-2:]
+        out.append({"time": time_, "call": rest.title(), "disposition": disposition.title(), "officer": officer})
+    return out
+
+
+def blotter_batch(src: dict, media: list[dict], state: dict, session: requests.Session) -> list[dict]:
+    """The city uploads blotters in batches; each upload day becomes one feed item."""
+    cache = state.setdefault("blotters", {})
+    by_upload: dict[str, list] = {}
+    for m in media:
+        title = html.unescape((m.get("title") or {}).get("rendered", "")).strip()
+        bm = BLOTTER_TITLE.fullmatch(title)
+        if not bm or not m.get("source_url"):
+            continue
+        url = m["source_url"]
+        if url not in cache:
+            try:
+                r = session.get(url, timeout=TIMEOUT)
+                r.raise_for_status()
+                cache[url] = parse_blotter_pdf(r.content)
+            except Exception as exc:
+                log(f"[blotter] {url}: {type(exc).__name__}: {exc}")
+                cache[url] = None
+        day = f"{bm.group(3)}-{bm.group(1)}-{bm.group(2)}"
+        uploaded = (m.get("date") or "")[:10]
+        by_upload.setdefault(uploaded, []).append({"day": day, "url": url, "rows": cache[url] or []})
+    listed = {m.get("source_url") for m in media}
+    for url in [u for u in cache if u not in listed]:
+        del cache[url]
     items = []
-    for m in json.loads(content):
+    for uploaded, days in by_upload.items():
+        days.sort(key=lambda d: d["day"])
+        calls = [r for d in days for r in d["rows"]]
+        counts: dict[str, int] = {}
+        for r in calls:
+            counts[r["call"]] = counts.get(r["call"], 0) + 1
+        top = ", ".join(f"{c} {n}" for c, n in sorted(counts.items(), key=lambda x: -x[1])[:5])
+        first, last = days[0]["day"], days[-1]["day"]
+        span = _short_date(first) if first == last else f"{_short_date(first)}–{_short_date(last)}"
+        lag = (datetime.fromisoformat(uploaded) - datetime.fromisoformat(last)).days if uploaded else 0
+        n_days = len(days)
+        items.append({
+            "title": f"Police blotter, {span}: {len(calls)} calls" + (f" over {n_days} days" if n_days > 1 else ""),
+            "link": days[-1]["url"],
+            "summary": (top + ". " if top else "") + (f"Posted {lag} day{'s' if lag != 1 else ''} after the last day covered." if lag > 0 else ""),
+            "published": iso(parse_iso(uploaded + "T16:00:00Z")) if uploaded else None,
+            # Officer names are left out: not useful here.
+            "blotter": [{"day": d["day"], "url": d["url"],
+                         "rows": [{k: r[k] for k in ("time", "call", "disposition")} for r in d["rows"]]} for d in days],
+            "kind": "BLOTTER",
+        })
+    return items
+
+
+def _short_date(day: str) -> str:
+    d = datetime.fromisoformat(day)
+    return f"{d.month}/{d.day}"
+
+
+def parse_wp_media(src: dict, content: bytes, state: dict | None = None, session: requests.Session | None = None) -> list[dict]:
+    media = json.loads(content)
+    items = blotter_batch(src, media, state, session) if state is not None else []
+    for m in media:
         title = html.unescape((m.get("title") or {}).get("rendered", "")).strip()
         url = m.get("source_url")
-        if not url:
+        if not url or BLOTTER_TITLE.fullmatch(title):
             continue
-        if re.fullmatch(r"\d{2}\.\d{2}\.\d{4}", title):
-            label = f"Police blotter: {title}"
-        else:
-            label = f"City document: {title or url.rsplit('/', 1)[-1]}"
+        label = title or url.rsplit("/", 1)[-1]
+        kind = next((name for pat, name in DOC_KINDS if re.search(pat, label + " " + url, re.IGNORECASE)), "City document")
         items.append({
-            "title": label,
+            "title": f"{kind}: {label}",
             "link": url,
-            "summary": "PDF posted to beaconny.gov",
+            "summary": "Posted to beaconny.gov" + (" (PDF)" if url.lower().endswith(".pdf") else ""),
             "published": iso(parse_iso(m.get("date_gmt", "") + "Z") if m.get("date_gmt") else parse_iso(m.get("date"))),
         })
     return items
@@ -368,7 +479,8 @@ def fetch_source(src: dict, state: dict, session: requests.Session) -> tuple[str
             st["next_allowed"] = iso(now_utc() + timedelta(minutes=max(src["poll"], BLOCKED_BACKOFF_MIN)))
             raise RuntimeError(f"HTTP {r.status_code} (backing off)")
         r.raise_for_status()
-        items = pick_parser(src)(src, r.content)
+        parser = pick_parser(src)
+        items = parser(src, r.content, state, session) if parser is parse_wp_media else parser(src, r.content)
         st["etag"] = r.headers.get("ETag")
         st["last_modified"] = r.headers.get("Last-Modified")
         st["last_success"] = iso(now_utc())
@@ -540,7 +652,8 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             "first_seen": existing["first_seen"] if existing else stamp,
             "watch": sorted(groups),
             "watch_terms": terms[:3],
-            "kind": item_kind(src, it),
+            "kind": it.get("kind") or item_kind(src, it),
+            **({"blotter": it["blotter"]} if it.get("blotter") else {}),
             "event_at": meeting_time(it),
             **({"alert": it["alert"]} if it.get("alert") else {}),
         }

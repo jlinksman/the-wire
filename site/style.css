@@ -67,6 +67,18 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .today .what { color: var(--text); }
 .today .what .sep { color: var(--faint); }
 
+/* Today links and watch button */
+.today .what a { color: var(--text); text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 2px; }
+.today .watch { margin-left: 6px; padding: 1px 6px; border: 1px solid var(--red); color: var(--red); font: 700 10.5px var(--mono); }
+
+/* Blotter rows */
+.blotter { font: 12px/1.45 var(--mono); margin: 4px 0 8px; }
+.bday { color: var(--text); margin: 8px 0 2px; }
+.bday a { color: var(--text); font-family: var(--mono); font-size: 12px; }
+.brow { display: grid; grid-template-columns: 3.4em 1fr auto; gap: 8px; color: var(--meta); }
+.brow .bc { color: #c3c7cc; }
+.brow .bd { color: var(--faint); text-align: right; }
+
 /* Live */
 .live { margin-top: 10px; border: 1px solid var(--line); background: var(--panel); }
 .live-toggle { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; min-height: 44px; font-family: var(--mono); font-size: 13px; }
