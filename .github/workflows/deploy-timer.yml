@@ -36,3 +36,16 @@ jobs:
       - name: Give the Worker its GitHub token
         working-directory: worker
         run: printf '%s' "$GH_DISPATCH_TOKEN" | npx --yes wrangler@4 secret put GH_TOKEN
+
+      - name: Check the token can start a build
+        run: |
+          code=$(curl -s -o /tmp/resp -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $GH_DISPATCH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/build.yml/dispatches" \
+            -d '{"ref":"main"}')
+          if [ "$code" != "204" ]; then
+            echo "::error::GH_DISPATCH_TOKEN can't start builds (HTTP $code): $(cat /tmp/resp)"
+            exit 1
+          fi
+          echo "Token works: build started."
