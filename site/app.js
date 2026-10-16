@@ -67,16 +67,40 @@ function when(ms) {
 }
 
 // --------------------------------------------------------------- data
+// The last good data.json is kept in the browser cache so the page paints instantly,
+// then a fresh copy replaces it.
+const DATA_CACHE = "wire-data";
+
+function accept(json) {
+  data = json;
+  for (const it of data.items) it.ms = Date.parse(it.t);
+  render();
+}
+
+async function loadCached() {
+  try {
+    const c = await caches.open(DATA_CACHE);
+    const r = await c.match("data.json");
+    if (r && !data) accept(await r.json());
+  } catch (e) { /* no Cache API: fine, the network load follows */ }
+}
+
 async function load() {
   try {
-    const r = await fetch("data.json?ts=" + Date.now(), { cache: "no-store", credentials: "same-origin" });
+    const r = await fetch("data.json?ts=" + Date.now(), { cache: "no-store", credentials: "same-origin", redirect: "manual" });
+    if (r.type === "opaqueredirect" || r.status === 401 || r.status === 403) throw new Error("signed out");
     if (!r.ok) throw new Error("HTTP " + r.status);
-    data = await r.json();
-    for (const it of data.items) it.ms = Date.parse(it.t);
-    render();
+    const json = await r.clone().json();
+    try { (await caches.open(DATA_CACHE)).put("data.json", r); } catch (e) { /* ignore */ }
+    accept(json);
   } catch (e) {
-    $("asof").textContent = "couldn't load data (" + e.message + ")";
-    $("asof").classList.add("stale");
+    const a = $("asof");
+    a.classList.add("stale");
+    if (e.message === "signed out" || e instanceof TypeError) {
+      a.replaceChildren(el("a", { href: "./?reauth=" + Date.now(), text: data ? "offline or signed out · sign in" : "sign in" }));
+    } else if (!data) {
+      a.textContent = "couldn't load data (" + e.message + ")";
+    }
   }
 }
 
@@ -389,7 +413,26 @@ document.addEventListener("visibilitychange", () => {
 });
 window.addEventListener("pagehide", markVisit);
 
+// --------------------------------------------------------------- world clocks
+const CLOCKS = [["BEACON", "America/New_York", true], ["PARIS", "Europe/Paris", false], ["TEL AVIV", "Asia/Jerusalem", false]];
+const clockFmt = CLOCKS.map(([, tz, h12]) => new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit", hour12: h12, weekday: "short" }));
+function renderClocks() {
+  const now = new Date();
+  const here = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(now);
+  $("clocks").replaceChildren(...CLOCKS.flatMap(([name], i) => {
+    const parts = clockFmt[i].formatToParts(now);
+    const day = parts.find((p) => p.type === "weekday").value;
+    const time = parts.filter((p) => p.type !== "weekday" && p.type !== "literal" || (p.type === "literal" && p.value !== ", ")).map((p) => p.value).join("").trim();
+    return [i ? el("span", { class: "sep", text: " · " }) : null,
+      el("span", {}, el("span", { class: "cn", text: name + " " }), time + (day !== here ? " " + day : ""))];
+  }).filter(Boolean));
+}
+
 // --------------------------------------------------------------- boot
-load();
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => { /* page works without it */ });
+}
+renderClocks();
+loadCached().then(load);
 setInterval(() => { if (document.visibilityState === "visible") load(); }, REFRESH_MS);
-setInterval(() => { if (data) { renderAsOf(); } }, 30000);
+setInterval(() => { renderClocks(); if (data) { renderAsOf(); } }, 30000);

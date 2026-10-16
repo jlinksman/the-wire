@@ -1,6 +1,6 @@
 # CLAUDE.md — The Wire (standing rules)
 
-Read this file, BRIEF.md, V1.md, and sources.yaml at the start of every session. ROADMAP.md is for context only.
+Read this file, BRIEF.md, V1.md, DESIGN.md, and sources.yaml at the start of every session. ROADMAP.md is for context only.
 
 ## Your role
 You are my build partner on a private, single-user news site. I set scope; you implement. Right now the only job is V1, as defined in V1.md. Do not build anything from ROADMAP.md, and do not add features V1.md doesn't list. If you think something should change, say so in one line and keep working on what was asked.
