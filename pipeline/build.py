@@ -20,6 +20,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from urllib.parse import urljoin, urlparse
 
 import feedparser
@@ -54,8 +55,10 @@ SECTION_DESK = {
     "dutchess": "GOV", "new_york": "GOV", "courts": "GOV", "federal": "GOV",
     "law": "LAW",
     "national_world": "WORLD", "paris": "WORLD", "tel_aviv": "WORLD", "osint": "WORLD",
+    "sports": "SPORTS",
 }
 
+NY = ZoneInfo("America/New_York")
 BEACON_WEATHER_PAGE = "https://forecast.weather.gov/MapClick.php?lat=41.5048&lon=-73.9696"
 
 
@@ -82,7 +85,7 @@ def log(msg: str) -> None:
 
 # ---------------------------------------------------------------- config
 
-def load_config() -> tuple[list[dict], list[dict], list[tuple[str, re.Pattern]]]:
+def load_config():
     cfg = yaml.safe_load(CONFIG.read_text())
     sources = []
     for section, entries in cfg.items():
@@ -99,13 +102,18 @@ def load_config() -> tuple[list[dict], list[dict], list[tuple[str, re.Pattern]]]
             s.setdefault("poll", 15)
             sources.append(s)
 
+    # Live player lineup, grouped into rows (US, World, France, Israel...).
     video = []
-    groups = cfg.get("video_youtube") or {}
-    # 24/7 breaking channels first, so the default preset is always live.
-    for name in ["breaking"] + [g for g in groups if g != "breaking"]:
-        for v in groups.get(name) or []:
-            if v.get("enabled") and v.get("channel_id"):
-                video.append({"id": v["id"], "name": v["name"], "channel_id": v["channel_id"]})
+    for group, chans in (cfg.get("live_lineup") or {}).items():
+        for v in chans or []:
+            if v.get("channel_id") or v.get("link"):
+                video.append({
+                    "id": re.sub(r"[^a-z0-9]+", "-", v["name"].lower()).strip("-"),
+                    "group": group, "name": v["name"],
+                    "channel_id": v.get("channel_id"), "link": v.get("link"), "note": v.get("note"),
+                })
+
+    teams = [t for t in (cfg.get("teams") or []) if t.get("schedules")]
 
     watch = []
     for group, spec in (cfg.get("watchlist") or {}).items():
@@ -125,7 +133,7 @@ def load_config() -> tuple[list[dict], list[dict], list[tuple[str, re.Pattern]]]
             else:
                 pat = r"\b" + re.escape(term) + r"\b"
             watch.append((group, re.compile(pat, flags), skip))
-    return sources, video, watch
+    return sources, video, watch, teams
 
 
 # ---------------------------------------------------------------- state
@@ -373,6 +381,117 @@ def fetch_source(src: dict, state: dict, session: requests.Session) -> tuple[str
         return "error", None
 
 
+
+# ---------------------------------------------------------------- item hints
+
+# A quoted phrase in the headline: "…" / “…”, or ‘…’ / '…' that opens after a space
+# and closes before a space or punctuation (so apostrophes in "Trump's" don't count).
+QUOTE = re.compile(r"[\"“][^\"“”]{8,}[\"”]|(?:^|[\s:(])[‘'][^‘’']{8,}[’'](?=[\s,.:;!?)]|$)")
+MEETING = re.compile(
+    r"(?:on\s+)?(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),?\s+"
+    r"([A-Z][a-z]+\s+\d{1,2},\s+\d{4}),?\s+at\s+(\d{1,2}:\d{2}\s*[AP]\.?M\.?)", re.IGNORECASE)
+
+
+def item_kind(src: dict, it: dict) -> str | None:
+    """A small type mark for the row: VIDEO, DOC, or QUOTE (Joe's preferred story forms)."""
+    link = it["link"].lower()
+    if "youtube.com" in link or "youtu.be" in link:
+        return "VIDEO"
+    if (link.endswith(".pdf") or "courtlistener.com/opinion" in link or "agendaviewer" in link
+            or "ethics opinion" in it["title"].lower()):
+        return "DOC"
+    title = it["title"].strip()
+    # A headline wrapped entirely in quotes is a quoted article title, not someone speaking.
+    if title[:1] not in "\"“‘'" and QUOTE.search(title):
+        return "QUOTE"
+    return None
+
+
+def meeting_time(it: dict) -> str | None:
+    """Beacon agendas say 'will meet on Tuesday, October 20, 2026, at 7:00 PM'."""
+    m = MEETING.search(it.get("summary") or "")
+    if not m:
+        return None
+    try:
+        clock = m.group(2).upper().replace(".", "").replace(" ", "")
+        local = datetime.strptime(f"{m.group(1)} {clock}", "%B %d, %Y %I:%M%p").replace(tzinfo=NY)
+        return iso(local)
+    except ValueError:
+        return None
+
+
+# ---------------------------------------------------------------- sports
+
+COMP_SHORT = {"STD": "", "Premier League": "PL", "Concacaf Nations League": "Nations League",
+              "Concacaf W Championship": "W Championship", "Women's International Friendly": "Friendly",
+              "International Friendly": "Friendly", "Men's International Friendly": "Friendly"}
+
+
+def comp_name(e: dict, comp: dict) -> str:
+    raw = (e.get("league") or {}).get("abbreviation") or (comp.get("type") or {}).get("abbreviation") or ""
+    return COMP_SHORT.get(raw, raw)
+
+
+def fetch_team(team: dict, state: dict, session: requests.Session) -> dict:
+    """Last result and next game from ESPN's public schedule JSON (unofficial, no key)."""
+    st = state.setdefault("teams", {}).setdefault(team["id"], {})
+    last_ok = parse_iso(st.get("fetched"))
+    poll = team.get("poll", 30)
+    if last_ok and not FORCE and now_utc() - last_ok < timedelta(minutes=poll) - timedelta(minutes=2) and st.get("summary"):
+        return st["summary"]
+    events = {}
+    errors = []
+    for url in team["schedules"]:
+        for attempt in (1, 2):  # ESPN is occasionally slow; one retry
+            try:
+                r = session.get(url, timeout=TIMEOUT)
+                r.raise_for_status()
+                for e in r.json().get("events", []):
+                    events[e["id"]] = e
+                break
+            except Exception as exc:
+                if attempt == 2:
+                    errors.append(f"{type(exc).__name__}: {exc}"[:160])
+    games = []
+    for e in events.values():
+        try:
+            comp = e["competitions"][0]
+            me = next(c for c in comp["competitors"] if str(c["team"]["id"]) == str(team["espn_id"]))
+            opp = next(c for c in comp["competitors"] if c is not me)
+            status = comp.get("status", e.get("status", {})).get("type", {})
+            def score(c):
+                s = c.get("score")
+                return (s.get("displayValue") if isinstance(s, dict) else s) or ""
+            games.append({
+                "at": e["date"].replace("Z", ":00Z") if len(e["date"]) == 17 else e["date"],
+                "opp": opp["team"].get("shortDisplayName") or opp["team"].get("abbreviation"),
+                "home": me.get("homeAway") == "home",
+                "comp": comp_name(e, comp),
+                "state": status.get("state"),  # pre / in / post
+                "detail": status.get("shortDetail") or "",
+                "us": score(me), "them": score(opp),
+                "winner": me.get("winner"),
+            })
+        except (StopIteration, KeyError, IndexError, TypeError):
+            continue
+    games.sort(key=lambda g: g["at"])
+    done = [g for g in games if g["state"] == "post"]
+    live = [g for g in games if g["state"] == "in"]
+    upcoming = [g for g in games if g["state"] == "pre"]
+    summary = {
+        "id": team["id"], "name": team["name"], "short": team.get("short", team["name"]),
+        "last": done[-1] if done else None, "live": live[0] if live else None,
+        "next": upcoming[0] if upcoming else None,
+        "error": "; ".join(errors) if errors and not games else None,
+    }
+    if games or not st.get("summary"):
+        st["summary"] = summary
+        st["fetched"] = iso(now_utc())
+    else:
+        st["summary"]["error"] = summary["error"]
+    return st["summary"]
+
+
 # ---------------------------------------------------------------- merge
 
 def item_id(link: str) -> str:
@@ -398,12 +517,20 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
     for it in items:
         key = item_id(it["link"] + ("|" + it["alert"]["key"] if it.get("alert") else ""))
         text = f"{it['title']} {it.get('summary', '')}"
-        groups = sorted({g for g, pat, skip in watch if src["desk"] not in skip and pat.search(text)})
+        groups, terms = set(), []
+        for g, pat, skip in watch:
+            if src["desk"] in skip:
+                continue
+            m = pat.search(text)
+            if m:
+                groups.add(g)
+                if m.group(0).lower() not in (x.lower() for x in terms):
+                    terms.append(m.group(0))
         existing = store.get(key)
         store[key] = {
             "id": key,
             "source_id": src["id"],
-            "source": src["name"],
+            "source": src.get("short") or src["name"],
             "desk": src["desk"],
             "fast": bool(src.get("fast")),
             "title": it["title"],
@@ -411,7 +538,10 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             "summary": it.get("summary", ""),
             "published": it.get("published"),
             "first_seen": existing["first_seen"] if existing else stamp,
-            "watch": groups,
+            "watch": sorted(groups),
+            "watch_terms": terms[:3],
+            "kind": item_kind(src, it),
+            "event_at": meeting_time(it),
             **({"alert": it["alert"]} if it.get("alert") else {}),
         }
 
@@ -437,7 +567,7 @@ def prune(state: dict) -> None:
 
 # ---------------------------------------------------------------- output
 
-def write_dist(state: dict, sources: list[dict], video: list[dict]) -> dict:
+def write_dist(state: dict, sources: list[dict], video: list[dict], teams: list[dict]) -> dict:
     items = sorted(state["items"].values(), key=sort_time, reverse=True)[:MAX_ITEMS]
     for it in items:
         it["t"] = iso(sort_time(it))
@@ -460,6 +590,7 @@ def write_dist(state: dict, sources: list[dict], video: list[dict]) -> dict:
         "alerts": [it for it in items if it.get("alert")],
         "sources": health,
         "video": video,
+        "teams": teams,
     }
     if DIST.exists():
         shutil.rmtree(DIST)
@@ -474,7 +605,7 @@ def src_robots(s: dict) -> str:
 
 def main() -> int:
     started = time.time()
-    sources, video, watch = load_config()
+    sources, video, watch, team_cfg = load_config()
     state = load_state()
     state.setdefault("robots", {})
     session = requests.Session()
@@ -494,8 +625,13 @@ def main() -> int:
     state["sources"] = {k: v for k, v in state["sources"].items() if k in live}
     state["items"] = {k: v for k, v in state["items"].items() if v["source_id"] in live}
 
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        teams = list(pool.map(lambda tm: fetch_team(tm, state, session), team_cfg))
+    for tm in teams:
+        log(f"[team] {tm['id']:<10} last={bool(tm['last'])} next={bool(tm['next'])} {tm['error'] or ''}")
+
     prune(state)
-    data = write_dist(state, sources, video)
+    data = write_dist(state, sources, video, teams)
     save_state(state)
     failing = sum(1 for h in data["sources"] if h["last_error"])
     log(f"built {len(data['items'])} items from {len(sources)} sources "

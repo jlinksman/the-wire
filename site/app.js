@@ -1,14 +1,18 @@
 "use strict";
 
-// The Wire — V1 page. Reads data.json, renders the feed, breaking strip and
-// source health. Last-visit time lives in this browser only (per device).
+// The Wire — page. Reads data.json and renders: notices, today line, live player,
+// last hour, desk filters, Beacon pin, scoreboard, feed, source health.
+// Last-visit time and preferences live in this browser only (per device).
 
-const DESKS = ["ALL", "BEACON", "GOV", "LAW", "WORLD"];
-const LAST_VISIT_KEY = "wire.lastVisit";
-const DESK_KEY = "wire.desk";
-const CHANNEL_KEY = "wire.channel";
+const DESKS = ["ALL", "BEACON", "GOV", "LAW", "WORLD", "SPORTS"];
+const KEY = { visit: "wire.lastVisit", desk: "wire.desk", channel: "wire.channel" };
 const REFRESH_MS = 5 * 60 * 1000;
 const STALE_MIN = 45;
+const FRESH_MIN = 30;
+const PIN_HOURS = 48;
+const PIN_MAX = 5;
+const LAST_HOUR_MAX = 5;
+const KIND_MARK = { VIDEO: "▶ VIDEO", DOC: "DOC", QUOTE: "“ QUOTE" };
 
 // --------------------------------------------------------------- storage (never throws)
 const store = {
@@ -17,11 +21,12 @@ const store = {
 };
 
 let data = null;
-let desk = store.get(DESK_KEY) || "ALL";
-if (!DESKS.includes(desk)) desk = "ALL";
-let prevVisit = Number(store.get(LAST_VISIT_KEY)) || null; // ms; the visit before this one
-let channel = store.get(CHANNEL_KEY);
-let playerOpen = false;
+let desk = DESKS.includes(store.get(KEY.desk)) ? store.get(KEY.desk) : "ALL";
+let prevVisit = Number(store.get(KEY.visit)) || null; // the visit before this one (ms)
+let channel = store.get(KEY.channel);
+let livePanelOpen = false;
+let playing = false;
+let newOnly = false;
 const openRows = new Set();
 
 // --------------------------------------------------------------- helpers
@@ -35,7 +40,7 @@ function el(tag, attrs = {}, ...kids) {
     else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
     else n.setAttribute(k, v === true ? "" : v);
   }
-  for (const kid of kids) if (kid != null) n.append(kid);
+  for (const kid of kids) if (kid != null && kid !== false) n.append(kid);
   return n;
 }
 function ago(ms) {
@@ -45,10 +50,21 @@ function ago(ms) {
   if (s < 86400) return Math.floor(s / 3600) + "h";
   return Math.floor(s / 86400) + "d";
 }
-const fmt = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const fmtFull = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const fmtTime = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
-function exact(ms) { return fmt.format(new Date(ms)); }
-function sameDay(a, b) { return new Date(a).toDateString() === new Date(b).toDateString(); }
+const fmtDay = new Intl.DateTimeFormat(undefined, { weekday: "short" });
+const fmtDate = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "numeric", day: "numeric" });
+const exact = (ms) => fmtFull.format(new Date(ms));
+const dayKey = (ms) => new Date(ms).toDateString();
+const isToday = (ms) => dayKey(ms) === dayKey(Date.now());
+const isTomorrow = (ms) => dayKey(ms) === dayKey(Date.now() + 86400000);
+const isSeen = (it) => prevVisit != null && it.ms <= prevVisit;
+const isFresh = (ms) => Date.now() - ms < FRESH_MIN * 60000;
+function when(ms) {
+  if (isToday(ms)) return fmtTime.format(new Date(ms));
+  if (isTomorrow(ms)) return "Tmrw " + fmtTime.format(new Date(ms));
+  return fmtDate.format(new Date(ms)) + " " + fmtTime.format(new Date(ms));
+}
 
 // --------------------------------------------------------------- data
 async function load() {
@@ -64,179 +80,310 @@ async function load() {
   }
 }
 
-// --------------------------------------------------------------- render
 function render() {
   if (!data) return;
   renderAsOf();
-  renderAlerts();
-  renderChannels();
-  renderPlayer();
+  renderNotices();
+  renderToday();
+  renderLive();
   renderLastHour();
   renderDesks();
+  renderNewLine();
+  renderScoreboard();
+  renderPinned();
   renderFeed();
   renderHealth();
 }
 
+// --------------------------------------------------------------- header + notices
 function renderAsOf() {
   const g = Date.parse(data.generated_at);
-  const minutes = (Date.now() - g) / 60000;
   const a = $("asof");
-  a.textContent = "as of " + (sameDay(g, Date.now()) ? fmtTime.format(new Date(g)) : exact(g)) + " · " + ago(g);
+  a.textContent = "as of " + (isToday(g) ? fmtTime.format(new Date(g)) : exact(g)) + " · " + ago(g);
   a.title = exact(g);
-  a.classList.toggle("stale", minutes > STALE_MIN);
+  a.classList.toggle("stale", (Date.now() - g) / 60000 > STALE_MIN);
 }
 
-function renderAlerts() {
-  const box = $("alerts");
-  box.replaceChildren();
+function failingSources() {
+  return data.sources.filter((s) => {
+    const ok = s.last_success ? Date.parse(s.last_success) : null;
+    return Boolean(s.last_error) || !ok || Date.now() - ok > Math.max(3 * s.poll, 60) * 60000;
+  });
+}
+
+function renderNotices() {
+  const box = $("notices");
+  const kids = [];
   for (const it of data.alerts || []) {
     const exp = it.alert && it.alert.expires ? " · until " + exact(Date.parse(it.alert.expires)) : "";
-    box.append(el("a", { class: "alert", href: it.link, target: "_blank", rel: "noopener" },
-      "⚠ " + (it.alert.event || "Weather alert") + " — Beacon" + exp,
-      el("small", { text: it.title })));
+    kids.push(el("a", { class: "alert", href: it.link, target: "_blank", rel: "noopener" },
+      "⚠ " + (it.alert.event || "Weather alert") + " — Beacon" + exp, el("small", { text: it.title })));
   }
+  const bad = failingSources();
+  if (bad.length) {
+    kids.push(el("a", {
+      class: "down", href: "#footer",
+      onclick: () => { $("health").hidden = false; $("health-line").setAttribute("aria-expanded", "true"); },
+      text: "⚠ " + bad.length + " source" + (bad.length > 1 ? "s" : "") + " down: " + bad.map((s) => s.name).join(", "),
+    }));
+  }
+  box.replaceChildren(...kids);
 }
 
-function renderChannels() {
+// --------------------------------------------------------------- today line
+function renderToday() {
+  const rows = { today: [], tomorrow: [] };
+  const meetings = data.items
+    .filter((it) => it.event_at && Date.parse(it.event_at) > Date.now() - 3 * 3600000)
+    .map((it) => ({ ms: Date.parse(it.event_at), label: it.title.split(" - ")[0], link: it.link }))
+    .sort((a, b) => a.ms - b.ms);
+  const seen = new Set();
+  for (const m of meetings) {
+    const k = m.label + m.ms;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    if (isToday(m.ms)) rows.today.push(m);
+    else if (isTomorrow(m.ms)) rows.tomorrow.push(m);
+  }
+  for (const t of data.teams || []) {
+    if (t.live) rows.today.unshift({ ms: Date.now(), label: "LIVE " + t.short + " " + score(t.live) + " " + vs(t.live), live: true });
+    else if (t.next) {
+      const ms = Date.parse(t.next.at);
+      const g = { ms, label: t.short + " " + vs(t.next) };
+      if (isToday(ms)) rows.today.push(g);
+      else if (isTomorrow(ms)) rows.tomorrow.push(g);
+    }
+  }
+  const line = (name, items) => el("div", { class: "row" },
+    el("span", { class: "when", text: name }),
+    el("span", { class: "what" }, ...items.sort((a, b) => a.ms - b.ms).flatMap((m, i) => [
+      i ? el("span", { class: "sep", text: " · " }) : null,
+      (m.live ? "" : fmtTime.format(new Date(m.ms)) + " ") + m.label,
+    ])));
+  const kids = [];
+  if (rows.today.length) kids.push(line("TODAY", rows.today));
+  if (rows.tomorrow.length) kids.push(line("TOMORROW", rows.tomorrow));
+  if (!kids.length) {
+    const next = meetings.find((m) => m.ms > Date.now());
+    if (next) kids.push(el("div", { class: "row" }, el("span", { class: "when", text: "NEXT" }),
+      el("span", { class: "what", text: when(next.ms) + " " + next.label })));
+  }
+  $("today").replaceChildren(...kids);
+}
+
+// --------------------------------------------------------------- live player
+function renderLive() {
   const vids = data.video || [];
-  if (!vids.some((v) => v.id === channel)) channel = vids.length ? vids[0].id : null;
-  const box = $("channels");
-  box.replaceChildren(...vids.map((v) => el("button", {
-    role: "tab", "aria-selected": String(playerOpen && v.id === channel), text: v.name,
-    onclick: () => {
-      if (playerOpen && v.id === channel) { playerOpen = false; } else { channel = v.id; playerOpen = true; store.set(CHANNEL_KEY, v.id); }
-      renderChannels(); renderPlayer();
-    },
-  })));
+  const playable = vids.filter((v) => v.channel_id);
+  if (!playable.some((v) => v.id === channel)) channel = playable.length ? playable[0].id : null;
+  const current = playable.find((v) => v.id === channel);
+  $("live-now").textContent = playing && current ? current.name : "Watch a live channel";
+  $("live-toggle").setAttribute("aria-expanded", String(livePanelOpen));
+  $("live-panel").hidden = !livePanelOpen;
+
+  const groups = [];
+  for (const v of vids) {
+    let g = groups.find((x) => x.name === v.group);
+    if (!g) groups.push((g = { name: v.group, items: [] }));
+    g.items.push(v);
+  }
+  $("channels").replaceChildren(...groups.map((g) => el("div", { class: "cg" },
+    el("span", { class: "cg-name", text: g.name.toUpperCase() }),
+    ...g.items.map((v) => v.link
+      ? el("a", { class: "chip out", href: v.link, target: "_blank", rel: "noopener", text: v.name })
+      : el("button", {
+          class: "chip", "aria-pressed": String(playing && v.id === channel),
+          onclick: () => { channel = v.id; playing = true; store.set(KEY.channel, v.id); renderLive(); },
+        }, v.name, v.note ? el("span", { class: "note", text: v.note }) : null)))));
+  renderPlayer(current);
 }
 
-function renderPlayer() {
+function renderPlayer(v) {
   const p = $("player");
-  const v = (data.video || []).find((x) => x.id === channel);
-  if (!playerOpen || !v) {
-    p.hidden = false;
-    p.replaceChildren(el("div", { class: "player-hint", text: "▶ Tap a channel to watch live" }));
-    return;
-  }
+  if (!playing || !v) { p.replaceChildren(); return; }
+  const existing = p.querySelector("iframe");
+  if (existing && existing.dataset.channel === v.channel_id) return;
   const src = "https://www.youtube.com/embed/live_stream?channel=" + encodeURIComponent(v.channel_id) + "&autoplay=1&mute=1&playsinline=1";
-  const current = p.querySelector("iframe");
-  if (current && current.dataset.channel === v.channel_id) { p.hidden = false; return; }
-  const frame = el("div", { class: "frame" }, el("iframe", {
-    src, title: v.name + " live", "data-channel": v.channel_id,
-    allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: true, referrerpolicy: "strict-origin-when-cross-origin",
-  }));
-  const links = el("div", { class: "player-links" },
-    el("a", { href: "https://www.youtube.com/channel/" + v.channel_id + "/live", target: "_blank", rel: "noopener", text: "Not playing? Watch on YouTube" }),
-    el("button", { text: "close", onclick: () => { playerOpen = false; renderChannels(); renderPlayer(); } }));
-  p.replaceChildren(frame, links);
-  p.hidden = false;
+  p.replaceChildren(
+    el("div", { class: "frame" }, el("iframe", {
+      src, title: v.name + " live", "data-channel": v.channel_id,
+      allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: true,
+      referrerpolicy: "strict-origin-when-cross-origin",
+    })),
+    el("div", { class: "player-links" },
+      el("a", { href: "https://www.youtube.com/channel/" + v.channel_id + "/live", target: "_blank", rel: "noopener", text: "Not playing? Open on YouTube" }),
+      el("button", { text: "stop", onclick: () => { playing = false; renderLive(); } })));
 }
 
-let lastHourExpanded = false;
+$("live-toggle").addEventListener("click", () => {
+  livePanelOpen = !livePanelOpen;
+  if (!livePanelOpen) playing = false;
+  renderLive();
+});
+
+// --------------------------------------------------------------- last hour
 function renderLastHour() {
-  const cutoff = Date.now() - 60 * 60 * 1000;
-  const items = data.items.filter((it) => it.fast && it.ms >= cutoff && !it.alert).slice(0, 12);
-  $("lasthour-count").textContent = items.length ? "· " + items.length : "";
-  const list = $("lasthour");
-  if (!items.length) { list.replaceChildren(el("li", { class: "empty", text: "Nothing from the fast sources in the last 60 minutes." })); return; }
-  const narrow = window.matchMedia("(max-width: 759px)").matches;
-  const shown = narrow && !lastHourExpanded ? items.slice(0, 5) : items;
-  const rows = shown.map((it) => el("li", {},
+  const cutoff = Date.now() - 3600000;
+  const items = data.items.filter((it) => it.fast && it.ms >= cutoff && !it.alert).slice(0, LAST_HOUR_MAX);
+  $("lasthour").hidden = !items.length;
+  $("lasthour-list").replaceChildren(...items.map((it) => el("li", {},
     el("span", { class: "t", text: ago(it.ms), title: exact(it.ms) }),
-    el("a", { href: it.link, target: "_blank", rel: "noopener", title: it.source + " — " + it.title, text: it.title })));
-  if (shown.length < items.length) {
-    rows.push(el("li", {}, el("button", { class: "linklike", text: "+" + (items.length - shown.length) + " more",
-      onclick: () => { lastHourExpanded = true; renderLastHour(); } })));
-  }
-  list.replaceChildren(...rows);
+    el("a", { href: it.link, target: "_blank", rel: "noopener", title: it.source + " — " + it.title, text: it.title }))));
+}
+
+// --------------------------------------------------------------- desks + new line
+function newCount(d) {
+  return data.items.filter((it) => (d === "ALL" || it.desk === d) && !isSeen(it)).length;
 }
 
 function renderDesks() {
-  const counts = { ALL: data.items.length };
-  for (const it of data.items) counts[it.desk] = (counts[it.desk] || 0) + 1;
-  $("desks").replaceChildren(...DESKS.map((d) => el("button", {
-    "aria-pressed": String(d === desk),
-    onclick: () => { desk = d; store.set(DESK_KEY, d); renderDesks(); renderFeed(); },
-  }, d, el("span", { class: "n", text: String(counts[d] || 0) }))));
+  $("desks").replaceChildren(...DESKS.map((d) => {
+    const n = prevVisit ? newCount(d) : 0;
+    return el("button", {
+      "aria-pressed": String(d === desk),
+      onclick: () => { desk = d; store.set(KEY.desk, d); render(); },
+    }, d, n ? el("span", { class: "n", text: String(n) }) : null);
+  }));
 }
 
-function renderFeed() {
-  const items = data.items.filter((it) => desk === "ALL" || it.desk === desk);
-  const nc = $("newcount");
-  if (prevVisit) {
-    const fresh = items.filter((it) => it.ms > prevVisit).length;
-    nc.textContent = fresh ? fresh + " new since " + (sameDay(prevVisit, Date.now()) ? fmtTime.format(new Date(prevVisit)) : exact(prevVisit)) : "Nothing new since your last visit.";
-  } else {
-    nc.textContent = "";
-  }
-  const feed = $("feed");
-  const rows = [];
-  let dividerPlaced = !prevVisit;
-  for (const it of items) {
-    if (!dividerPlaced && it.ms <= prevVisit) {
-      if (rows.length) rows.push(el("li", { class: "divider", text: "SINCE YOU LAST OPENED" }));
-      dividerPlaced = true;
-    }
-    rows.push(row(it));
-  }
-  if (!rows.length) rows.push(el("li", { class: "empty", text: "No items on this desk yet." }));
-  feed.replaceChildren(...rows);
+function renderNewLine() {
+  const b = $("newline");
+  if (!prevVisit) { b.hidden = true; return; }
+  const n = newCount(desk);
+  const since = isToday(prevVisit) ? fmtTime.format(new Date(prevVisit)) : exact(prevVisit);
+  b.hidden = false;
+  b.replaceChildren(...[
+    n ? n + " new since " + since : "Nothing new since " + since,
+    n ? el("span", { class: "act", text: newOnly ? "show all" : "new only" }) : null,
+  ].filter(Boolean));
+  b.onclick = () => { if (n) { newOnly = !newOnly; renderNewLine(); renderPinned(); renderFeed(); } };
 }
 
+// --------------------------------------------------------------- rows
 function row(it) {
-  const li = el("li", { class: "row" + (it.watch && it.watch.length ? " watch" : "") + (openRows.has(it.id) ? " open" : "") });
-  const title = el("span", { class: "title" }, it.title);
-  for (const g of it.watch || []) title.append(el("span", { class: "tag", text: g.replace(/_/g, " ") }));
-  title.append(el("span", { class: "src", text: it.source }));
+  const li = el("li", { class: "row" + (it.watch && it.watch.length ? " watch" : "") + (isSeen(it) ? " seen" : "") + (openRows.has(it.id) ? " open" : "") });
+  const meta = el("span", { class: "meta" },
+    el("span", { class: "t" + (isFresh(it.ms) ? " fresh" : ""), text: ago(it.ms), title: exact(it.ms) }),
+    el("span", { class: "sep", text: "·" }),
+    el("span", { class: "desk " + it.desk, text: it.desk }),
+    el("span", { class: "sep", text: "·" }),
+    el("span", { class: "src", text: it.source }),
+    it.kind ? el("span", { class: "sep", text: "·" }) : null,
+    it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null);
+  const headline = el("span", { class: "headline" }, it.title);
+  const tags = (it.watch_terms && it.watch_terms.length ? it.watch_terms : it.watch || []).slice(0, 2);
+  for (const tg of tags) headline.append(el("span", { class: "tag", text: String(tg).toUpperCase() }));
   const head = el("button", {
     class: "head", "aria-expanded": String(openRows.has(it.id)),
     onclick: () => {
       openRows.has(it.id) ? openRows.delete(it.id) : openRows.add(it.id);
-      li.classList.toggle("open"); head.setAttribute("aria-expanded", String(li.classList.contains("open")));
+      li.classList.toggle("open");
+      head.setAttribute("aria-expanded", String(li.classList.contains("open")));
     },
-  },
-    el("span", { class: "t", text: ago(it.ms), title: exact(it.ms) }),
-    el("span", { class: "desk " + it.desk, text: it.desk }),
-    title);
+  }, meta, headline);
   const more = el("div", { class: "more" },
     it.summary ? el("p", { text: it.summary }) : null,
-    el("p", {}, el("a", { href: it.link, target: "_blank", rel: "noopener", text: "Open ↗" }), "  ",
+    el("p", {}, el("a", { href: it.link, target: "_blank", rel: "noopener", text: "Open ↗" }),
       el("span", { class: "exact", text: exact(it.ms) })));
   li.append(head, more);
   return li;
 }
 
-function renderHealth() {
+// --------------------------------------------------------------- pinned Beacon block
+function pinnedItems() {
+  if (desk !== "ALL") return [];
+  const cutoff = Date.now() - PIN_HOURS * 3600000;
+  return data.items.filter((it) => it.desk === "BEACON" && !it.alert && it.ms >= cutoff && (!newOnly || !isSeen(it))).slice(0, PIN_MAX);
+}
+
+function renderPinned() {
+  const items = pinnedItems();
+  $("pinned").hidden = !items.length;
+  $("pinned-list").replaceChildren(...items.map(row));
+}
+
+// --------------------------------------------------------------- scoreboard
+function vs(g) { return (g.home ? "v " : "@ ") + g.opp + (g.comp ? " (" + g.comp + ")" : ""); }
+function score(g) { return (g.us || "0") + "–" + (g.them || "0"); }
+function result(g) {
+  if (g.winner === true) return "W";
+  if (g.us !== "" && g.us === g.them) return "D";
+  return g.winner === false ? "L" : "";
+}
+
+function renderScoreboard() {
+  const box = $("scoreboard");
+  const teams = data.teams || [];
+  box.hidden = desk !== "SPORTS" || !teams.length;
+  if (box.hidden) return;
+  box.replaceChildren(...teams.map((t) => {
+    const lines = [el("span", { class: "name", text: t.short })];
+    if (t.live) {
+      lines.push(el("span", { class: "live", text: "LIVE " + score(t.live) + " " + vs(t.live) + " · " + t.live.detail }));
+    } else if (t.last) {
+      const r = result(t.last);
+      lines.push(el("span", { class: "last" },
+        r ? el("span", { class: "res " + r, text: r + " " }) : null,
+        score(t.last) + " " + vs(t.last) + " · " + fmtDay.format(new Date(Date.parse(t.last.at)))));
+    } else {
+      lines.push(el("span", { class: "last", text: t.error ? "schedule unavailable" : "no recent result" }));
+    }
+    lines.push(el("span", { class: "next", text: t.next ? "Next " + when(Date.parse(t.next.at)) + " " + vs(t.next) : "No game scheduled" }));
+    return el("div", { class: "team" }, ...lines);
+  }));
+}
+
+// --------------------------------------------------------------- feed
+function renderFeed() {
+  const pinned = new Set(pinnedItems().map((it) => it.id));
+  const items = data.items.filter((it) => (desk === "ALL" || it.desk === desk) && !pinned.has(it.id) && (!newOnly || !isSeen(it)));
   const rows = [];
-  let bad = 0;
-  for (const s of data.sources) {
+  let dividerPlaced = !prevVisit || newOnly;
+  for (const it of items) {
+    if (!dividerPlaced && isSeen(it)) {
+      if (rows.length) rows.push(el("li", { class: "divider", text: "SINCE YOU LAST OPENED" }));
+      dividerPlaced = true;
+    }
+    rows.push(row(it));
+  }
+  if (!rows.length) rows.push(el("li", { class: "empty", text: newOnly ? "Nothing new on this desk." : "No items on this desk yet." }));
+  $("feed").replaceChildren(...rows);
+}
+
+// --------------------------------------------------------------- source health
+function renderHealth() {
+  const bad = new Set(failingSources().map((s) => s.id));
+  const rows = data.sources.map((s) => {
     const ok = s.last_success ? Date.parse(s.last_success) : null;
-    const staleAfter = Math.max(3 * s.poll, 60) * 60000;
-    const stale = !ok || Date.now() - ok > staleAfter;
-    const failing = Boolean(s.last_error) || stale;
-    if (failing) bad++;
-    const status = s.last_error ? s.last_error : stale ? "stale" : "ok";
-    rows.push(el("tr", {},
+    const failing = bad.has(s.id);
+    return el("tr", {},
       el("td", {}, s.name, s.robots === "subscription" ? el("span", { class: "sub", text: " · subscription" }) : null),
       el("td", { class: "desk " + s.desk, text: s.desk }),
       el("td", { text: String(s.items) }),
       el("td", { text: ok ? ago(ok) : "never", title: ok ? exact(ok) : "" }),
-      el("td", { class: failing ? "err" : "ok", text: status })));
-  }
+      el("td", { class: failing ? "err" : "ok", text: s.last_error || (failing ? "stale" : "ok") }));
+  });
+  const teamErr = (data.teams || []).filter((t) => t.error);
+  for (const t of teamErr) rows.push(el("tr", {}, el("td", { text: t.name + " schedule" }), el("td", { class: "desk SPORTS", text: "SPORTS" }), el("td", { text: "–" }), el("td", { text: "–" }), el("td", { class: "err", text: t.error })));
   $("health-rows").replaceChildren(...rows);
-  const sum = $("health-summary");
-  sum.replaceChildren(bad ? el("span", { class: "bad", text: "· " + bad + " need attention" }) : "· all " + data.sources.length + " ok");
-  if (bad) $("health").open = false;
+  const n = data.sources.length;
+  const line = $("health-line");
+  line.replaceChildren("SOURCES " + n + " · ", bad.size ? el("span", { class: "bad", text: bad.size + " down" }) : "all ok", "  ▾");
+  line.onclick = () => {
+    const h = $("health");
+    h.hidden = !h.hidden;
+    line.setAttribute("aria-expanded", String(!h.hidden));
+  };
 }
 
 // --------------------------------------------------------------- visit tracking
-function markVisit() { store.set(LAST_VISIT_KEY, Date.now()); }
+function markVisit() { store.set(KEY.visit, Date.now()); }
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") {
     markVisit();
   } else {
-    // Coming back: everything seen up to the moment you left becomes "read".
-    prevVisit = Number(store.get(LAST_VISIT_KEY)) || prevVisit;
+    prevVisit = Number(store.get(KEY.visit)) || prevVisit;
+    newOnly = false;
     load();
   }
 });
