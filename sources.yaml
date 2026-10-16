@@ -13,7 +13,8 @@
 # type: rss | api | html | pdf_index | youtube_channel | youtube_playlist
 # poll: minutes between fetches (V1 runs every 15; skip a source until its poll interval has passed)
 # fast: true  = eligible for the "Last hour" list in the breaking strip
-# desk: BEACON | GOV | LAW | WORLD (V1 desk tag; defaults by section if absent)
+# short: display name on the page (optional)
+# desk: BEACON | GOV | LAW | WORLD | SPORTS (V1 desk tag; defaults by section if absent)
 # robots: subscription = the publisher offers this URL as a feed or API to subscribe to,
 #   so it is fetched like any feed reader would. Every other source honors robots.txt.
 # Rule: never invent an endpoint. A null url means "find it before enabling."
@@ -27,6 +28,7 @@ beacon:
     poll: 15
     notes: Every City Council, Planning Board, and ZBA meeting, including upcoming ones with time, Agenda, and Agenda Packet links. No frame-blocking header, so its player is an embed candidate.
   - id: beacon_granicus_agendas
+    short: "City of Beacon"
     enabled: true
     desk: BEACON
     robots: subscription
@@ -42,6 +44,7 @@ beacon:
     status: OK
     poll: 60
   - id: beacon_wp_media
+    short: "City of Beacon"
     enabled: true
     desk: BEACON
     name: City of Beacon new documents (WordPress media API)
@@ -51,6 +54,7 @@ beacon:
     poll: 15
     notes: Live feed of every PDF the city uploads (resolutions, hearing notices, RFPs, daily police blotters). Classify by title and filename.
   - id: beacon_wp_posts
+    short: "City of Beacon"
     enabled: true
     desk: BEACON
     name: City of Beacon news posts
@@ -85,6 +89,7 @@ beacon:
     status: OK
     poll: 60
   - id: highlands_current
+    short: "Highlands Current"
     enabled: true
     desk: BEACON
     name: The Highlands Current
@@ -104,6 +109,7 @@ beacon:
     exclude_domains: [realtor.com, zillow.com, redfin.com, legacy.com, maxpreps.com, apartments.com, trulia.com]
     notes: Noisy (real estate listings, obituaries, school sports). Drop exclude_domains; extend the list as junk appears.
   - id: nws_beacon
+    short: "NWS"
     enabled: true
     desk: BEACON
     fast: true
@@ -123,7 +129,7 @@ beacon:
     notes: District site https://www.beaconk12.org/ is server-rendered. Find where current board agendas are posted (may be BoardDocs or similar).
 
 regional:
-  - {id: midhudson_news, enabled: true, desk: BEACON, name: Mid-Hudson News, type: rss, url: "https://midhudsonnews.com/feed/", status: OK, poll: 30}
+  - {id: midhudson_news, short: "Mid-Hudson News", enabled: true, desk: BEACON, name: Mid-Hudson News, type: rss, url: "https://midhudsonnews.com/feed/", status: OK, poll: 30}
   - {id: hv_post, name: Hudson Valley Post, type: rss, url: "https://hudsonvalleypost.com/feed/", status: OK, poll: 30}
   - {id: news10, name: News10 (Albany), type: rss, url: "https://www.news10.com/feed/", status: OK, poll: 30}
   - {id: wamc, name: WAMC, type: rss, url: "https://www.wamc.org/news.rss", status: OK, poll: 30}
@@ -151,7 +157,7 @@ new_york:
     status: KEY
     key_env: NYSENATE_API_KEY
     poll: 60
-  - {id: city_state, enabled: true, desk: GOV, name: City & State NY, type: rss, url: "https://www.cityandstateny.com/rss/all/", status: OK, poll: 30}
+  - {id: city_state, short: "City & State", enabled: true, desk: GOV, name: City & State NY, type: rss, url: "https://www.cityandstateny.com/rss/all/", status: OK, poll: 30}
   - {id: ny_focus, name: New York Focus, type: rss, url: "https://nysfocus.com/feed", status: OK, poll: 60}
   - {id: gothamist, name: Gothamist, type: rss, url: "https://gothamist.com/feed", status: OK, poll: 30}
   - {id: governor_ny, name: Governor's press releases, type: html, url: "https://www.governor.ny.gov/news", status: OK, poll: 30}
@@ -167,7 +173,7 @@ courts:
     notes: The path segment is the term year. The October 2026 term likely uses /26; confirm before enabling and make the term configurable.
   - {id: scotus_home, name: Supreme Court homepage (opinions, calendar), type: html, url: "https://www.supremecourt.gov/", status: OK, poll: 15}
   - {id: courtlistener, name: CourtListener API v4, type: api, url: "https://www.courtlistener.com/api/rest/v4/", status: OK, poll: 30, notes: "Free account token raises rate limits; store as COURTLISTENER_TOKEN."}
-  - {id: scotusblog, enabled: true, desk: GOV, name: SCOTUSblog, type: rss, url: "https://www.scotusblog.com/feed/", status: OK, poll: 30}
+  - {id: scotusblog, short: "SCOTUSblog", enabled: true, desk: GOV, name: SCOTUSblog, type: rss, url: "https://www.scotusblog.com/feed/", status: OK, poll: 30}
   - {id: lawfare, name: Lawfare, type: rss, url: "https://www.lawfaremedia.org/feeds/articles", status: OK, poll: 60, notes: "Feed returned only 2 items; check for a fuller feed."}
 
 federal:
@@ -179,15 +185,15 @@ federal:
   - {id: house_committee_calendar, name: House committee calendar, type: html, url: "https://docs.house.gov/Committee/Calendar/ByWeek.aspx", status: OK, poll: 60}
   - {id: senate_floor, name: Senate floor activity, type: html, url: "https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm", status: OK, poll: 10}
   - {id: senate_hearings, name: Senate hearings and meetings, type: html, url: "https://www.senate.gov/committees/hearings_meetings.htm", status: OK, poll: 60}
-  - {id: the_hill, enabled: true, desk: GOV, fast: true, name: The Hill, type: rss, url: "https://thehill.com/feed/", status: OK, poll: 15}
+  - {id: the_hill, short: "The Hill", enabled: true, desk: GOV, fast: true, name: The Hill, type: rss, url: "https://thehill.com/feed/", status: OK, poll: 15}
   - {id: politico_congress, name: Politico Congress, type: rss, url: "https://rss.politico.com/congress.xml", status: DC-BLOCK, poll: 15}
 
 national_world:
-  - {id: abc, enabled: true, desk: WORLD, fast: true, name: ABC News, type: rss, url: "https://abcnews.go.com/abcnews/topstories", status: OK, poll: 10}
-  - {id: cbs, enabled: true, desk: WORLD, fast: true, name: CBS News, type: rss, url: "https://www.cbsnews.com/latest/rss/main", status: OK, poll: 10}
+  - {id: abc, short: "ABC", enabled: true, desk: WORLD, fast: true, name: ABC News, type: rss, url: "https://abcnews.go.com/abcnews/topstories", status: OK, poll: 10}
+  - {id: cbs, short: "CBS", enabled: true, desk: WORLD, fast: true, name: CBS News, type: rss, url: "https://www.cbsnews.com/latest/rss/main", status: OK, poll: 10}
   - {id: euronews, name: Euronews, type: rss, url: "https://www.euronews.com/rss", status: OK, poll: 15}
-  - {id: aljazeera, enabled: true, desk: WORLD, fast: true, name: Al Jazeera English, type: rss, url: "https://www.aljazeera.com/xml/rss/all.xml", status: OK, poll: 10}
-  - {id: france24_en, enabled: true, desk: WORLD, fast: true, name: France 24 English, type: rss, url: "https://www.france24.com/en/rss", status: OK, poll: 15}
+  - {id: aljazeera, short: "Al Jazeera", enabled: true, desk: WORLD, fast: true, name: Al Jazeera English, type: rss, url: "https://www.aljazeera.com/xml/rss/all.xml", status: OK, poll: 10}
+  - {id: france24_en, short: "France 24", enabled: true, desk: WORLD, fast: true, name: France 24 English, type: rss, url: "https://www.france24.com/en/rss", status: OK, poll: 15}
   - {id: bbc_world, name: BBC World, type: rss, url: "https://feeds.bbci.co.uk/news/world/rss.xml", status: DC-BLOCK, poll: 10}
   - {id: npr, name: NPR News, type: rss, url: "https://feeds.npr.org/1001/rss.xml", status: DC-BLOCK, poll: 10}
   - {id: guardian_world, name: The Guardian World, type: rss, url: "https://www.theguardian.com/world/rss", status: DC-BLOCK, poll: 15}
@@ -227,10 +233,10 @@ osint:
   - {id: usgs_significant, name: USGS significant earthquakes (day), type: api, url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_day.geojson", status: OK, poll: 15}
 
 law:
-  - {id: nysba, name: NYSBA (CasePrepPlus, State Law Digest, ethics opinions), type: rss, url: "https://nysba.org/feed/", status: OK, poll: 60, enabled: true, desk: LAW, notes: "Weekly CasePrepPlus summarizes NY appellate decisions; also NYSBA ethics opinions and the monthly State Law Digest."}
-  - {id: cl_ny_court_of_appeals, name: NY Court of Appeals opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ny/", status: OK, poll: 60, enabled: true, desk: LAW}
-  - {id: cl_ca2, name: Second Circuit opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ca2/", status: OK, poll: 60, enabled: true, desk: LAW}
-  - {id: how_appealing, name: How Appealing (appellate news), type: rss, url: "https://howappealing.abovethelaw.com/feed/", status: OK, poll: 60, enabled: true, desk: LAW}
+  - {id: nysba, name: "NYSBA (CasePrepPlus, State Law Digest, ethics opinions)", short: NYSBA, type: rss, url: "https://nysba.org/feed/", status: OK, poll: 60, enabled: true, desk: LAW, notes: "Weekly CasePrepPlus summarizes NY appellate decisions; also NYSBA ethics opinions and the monthly State Law Digest."}
+  - {id: cl_ny_court_of_appeals, short: "NY Ct. App.", name: NY Court of Appeals opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ny/", status: OK, poll: 60, enabled: true, desk: LAW}
+  - {id: cl_ca2, short: "2d Cir.", name: Second Circuit opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ca2/", status: OK, poll: 60, enabled: true, desk: LAW}
+  - {id: how_appealing, short: "How Appealing", name: How Appealing (appellate news), type: rss, url: "https://howappealing.abovethelaw.com/feed/", status: OK, poll: 60, enabled: true, desk: LAW}
   - {id: jdsupra_environmental, name: JD Supra Environmental Law, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=EnvironmentalLaw", status: DC-BLOCK, poll: 120, desk: LAW, notes: "Worked from the sandbox; GitHub runners get a block page (2026-10-15). Candidate for the V8 home fetcher."}
   - {id: nylj, name: New York Law Journal headlines, type: rss, url: "https://www.law.com/newyorklawjournal/feed/", status: DC-BLOCK, poll: 60, desk: LAW, notes: "Paywalled; headlines and links only. HTTP 403 from GitHub runners (2026-10-15). Candidate for the V8 home fetcher."}
   - id: dec_enb
@@ -269,9 +275,101 @@ watchlist:
   courts: [emergency application, shadow docket, stay application]
   bar: [Rules of Professional Conduct, attorney registration, CLE, ethics opinion]
 
+sports:
+  - {id: nypost_rangers, short: "NY Post", name: NY Post · Rangers, type: rss, url: "https://nypost.com/tag/new-york-rangers/feed/", status: OK, poll: 30, enabled: true, desk: SPORTS}
+  - {id: blueshirt_banter, short: "Blueshirt Banter", name: Blueshirt Banter (Rangers), type: rss, url: "https://www.blueshirtbanter.com/rss/", status: OK, poll: 60, enabled: true, desk: SPORTS}
+  - {id: nypost_nycfc, short: "NY Post", name: NY Post · NYCFC, type: rss, url: "https://nypost.com/tag/new-york-city-fc/feed/", status: OK, poll: 60, enabled: true, desk: SPORTS}
+  - {id: football_london_spurs, short: "football.london", name: football.london · Spurs, type: rss, url: "https://www.football.london/tottenham-hotspur-fc/?service=rss", status: OK, poll: 30, enabled: true, desk: SPORTS}
+  - {id: cartilage_free_captain, short: "Cartilage Free Captain", name: Cartilage Free Captain (Spurs), type: rss, url: "https://cartilagefreecaptain.sbnation.com/rss/current.xml", status: OK, poll: 60, enabled: true, desk: SPORTS}
+  - {id: sky_spurs, short: "Sky Sports", name: Sky Sports · Spurs, type: rss, url: "https://www.skysports.com/rss/11675", status: OK, poll: 60, enabled: true, desk: SPORTS}
+  - {id: stars_stripes_fc, short: "Stars & Stripes FC", name: Stars and Stripes FC (USMNT/USWNT), type: rss, url: "https://www.starsandstripesfc.com/rss/current.xml", status: OK, poll: 60, enabled: true, desk: SPORTS}
+  - {id: nypost_gotham, short: "NY Post", name: NY Post · Gotham FC, type: rss, url: "https://nypost.com/tag/gotham-fc/feed/", status: OK, poll: 60, enabled: true, desk: SPORTS}
+  - {id: equalizer, short: "The Equalizer", name: The Equalizer (NWSL), type: rss, url: "https://equalizersoccer.com/feed/", status: OK, poll: 60, enabled: true, desk: SPORTS, notes: "League-wide NWSL coverage, not Gotham-only."}
+  - {id: nypost_usmnt, name: NY Post · USMNT, type: rss, url: "https://nypost.com/tag/usmnt/feed/", status: UNTESTED, poll: 120, notes: "Tag feed returned zero items on 2026-10-16."}
+  - {id: hudson_river_blue, name: Hudson River Blue (NYCFC), type: rss, url: "https://www.hudsonriverblue.com/rss/current.xml", status: UNTESTED, poll: 60, notes: "404 on 2026-10-16; the blog may have closed or moved."}
+
+# Scores and fixtures: ESPN's public schedule JSON (unofficial, no key, no robots.txt
+# restrictions). Each team merges its listed schedule URLs; "?fixture=true" returns
+# upcoming games. Shown on the SPORTS desk and in the TODAY line.
+teams:
+  - id: rangers
+    name: New York Rangers
+    short: Rangers
+    espn_id: "13"
+    schedules: ["https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams/nyr/schedule"]
+  - id: nycfc
+    name: NYCFC
+    short: NYCFC
+    espn_id: "17606"
+    schedules:
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/teams/17606/schedule"
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/teams/17606/schedule?fixture=true"
+  - id: spurs
+    name: Tottenham Hotspur
+    short: Spurs
+    espn_id: "367"
+    schedules:
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/367/schedule"
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/367/schedule?fixture=true"
+  - id: usmnt
+    name: USMNT
+    short: USMNT
+    espn_id: "660"
+    schedules:
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.friendly/teams/660/schedule"
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/660/schedule?fixture=true"
+  - id: uswnt
+    name: USWNT
+    short: USWNT
+    espn_id: "2765"
+    schedules:
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.friendly.w/teams/2765/schedule"
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/2765/schedule?fixture=true"
+  - id: gotham
+    name: Gotham FC
+    short: Gotham
+    espn_id: "15364"
+    schedules:
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/usa.nwsl/teams/15364/schedule"
+      - "https://site.api.espn.com/apis/site/v2/sports/soccer/usa.nwsl/teams/15364/schedule?fixture=true"
+
+# Live player lineup (V1), one row per group, in order. channel_id = YouTube channel
+# live embed; link = open elsewhere (embedding not allowed). Tested 2026-10-16 evening;
+# Israeli channels were off air for Shabbat, so a daytime retest decides which stay.
+live_lineup:
+  US:
+    - {name: NBC News NOW, channel_id: UCeY0bbntWzzVIaj2z3QigXg}
+    - {name: CBS News 24/7, channel_id: UC8p1vwvWtl6T73JiExfWs1g}
+    - {name: Bloomberg, channel_id: UCIALMKvObZNtJ6AmdCLP7Lg}
+    - {name: C-SPAN events, channel_id: UCb--64Gl51jIEVE-GLDAVTg}
+    - {name: White House, channel_id: UCYxRlFDqcWM4y7FfpiAN3KQ}
+    - {name: House floor, channel_id: UCqU8qiVHYmLsF0JIMByCTvw, note: "when in session"}
+    - {name: NY Senate, channel_id: UCVJzgJ1u9YANbvHDHryZO2g, note: "when in session"}
+    - {name: C-SPAN floor & hearings, link: "https://www.c-span.org/live/"}
+  World:
+    - {name: Al Jazeera, channel_id: UCNye-wNBqNL5ZzHSJj3l8Bg}
+    - {name: France 24 English, channel_id: UCQfwfsi5VrQ8yKZ-UWmAEFg}
+    - {name: DW News, channel_id: UCknLrEdhRCp1aegoMqRaCZg}
+    - {name: Reuters, channel_id: UChqUTb7kYRX8-EiaN3XFrSQ, note: "events"}
+  France:
+    - {name: France 24, channel_id: UCCCPCZNChQdGa9EkATeye4g}
+    - {name: franceinfo, channel_id: UCO6K_kkdP-lnSCiO3tPx7WA}
+    - {name: BFMTV, channel_id: UCXwDLMDV86ldKoFVc_g8P0g}
+    - {name: Euronews FR, channel_id: UCW2QcKZiU8aUGg4yxCIditg}
+    - {name: LCP Assemblée, channel_id: UCHGFbA0KWBgf6gMbyUCZeCQ, note: "in session"}
+    - {name: Public Sénat, channel_id: UCTa1bPArjpvNMgSHAb_pflA}
+  Israel:
+    - {name: i24NEWS English, channel_id: UCvHDpsWKADrDia0c99X37vg}
+    - {name: i24NEWS עברית, channel_id: UCisowXt5wZkp2sR3rFh9lnQ}
+    - {name: Kan 11, channel_id: UCKqFqiCe1dCUxRe0_YNZ6gg}
+    - {name: Channel 13, channel_id: UCvQmPpU20hw1Trss_CVwaew}
+    - {name: Channel 14, channel_id: UCKEImtWikw9usC1pl_9m1nQ}
+    - {name: Knesset 99, channel_id: UCpjNXONNE-JUz7QACB1Cgcw, note: "in session"}
+    - {name: ILTV, channel_id: UCuxgEyMeaks7HS5gAw6Tt7w}
+    - {name: i24NEWS Français, link: "https://www.youtube.com/channel/UCgPYsPyGhhQJQ9zOUQDWDMA/live"}
+
 # ---------------------------------------------------------------
-# VIDEO. V1 uses only the presets marked enabled: true, through the no-key
-# channel live embed (see V1.md), in the order listed. Everything else is for V4.
+# VIDEO REGISTRY for V4 (Watch Now). V1's live player uses live_lineup above.
 # Embed test 2026-10-14 4:20 PM ET: NBC, CBS, Reuters, Al Jazeera, France 24, DW and
 # Bloomberg played; LiveNOW, ABC, Sky, PBS and C-SPAN showed "video unavailable"
 # (offline at the time or embedding disabled). Reuters is event-driven, not 24/7. Live detection uses the YouTube Data API
@@ -294,10 +392,10 @@ video_youtube:
     - {id: yt_beacon, name: City of Beacon, channel_id: UCvPpigGwZDeR7WYmw-SuDxg}
     - {id: yt_committees, name: House and Senate committee channels, channel_id: null, notes: "V4: build the list from official committee websites. Also resolve Senate floor stream, Pentagon, and Governor channels."}
   breaking:
-    - {id: yt_nbc, enabled: true, name: NBC News, channel_id: UCeY0bbntWzzVIaj2z3QigXg}
-    - {id: yt_cbs, enabled: true, name: CBS News, channel_id: UC8p1vwvWtl6T73JiExfWs1g}
-    - {id: yt_reuters, enabled: true, name: Reuters, channel_id: UChqUTb7kYRX8-EiaN3XFrSQ}
-    - {id: yt_aljazeera, enabled: true, name: Al Jazeera English, channel_id: UCNye-wNBqNL5ZzHSJj3l8Bg, notes: "24/7 live, embeddable (verified)."}
+    - {id: yt_nbc, name: NBC News, channel_id: UCeY0bbntWzzVIaj2z3QigXg}
+    - {id: yt_cbs, name: CBS News, channel_id: UC8p1vwvWtl6T73JiExfWs1g}
+    - {id: yt_reuters, name: Reuters, channel_id: UChqUTb7kYRX8-EiaN3XFrSQ}
+    - {id: yt_aljazeera, name: Al Jazeera English, channel_id: UCNye-wNBqNL5ZzHSJj3l8Bg, notes: "24/7 live, embeddable (verified)."}
     - {id: yt_livenow_fox, name: LiveNOW from FOX, channel_id: UCJg9wBPyKMNA5sRDnvzmkdg, notes: "Raw, unedited live feeds of pressers, hearings, events."}
     - {id: yt_france24, name: France 24 English, channel_id: UCQfwfsi5VrQ8yKZ-UWmAEFg}
     - {id: yt_dw, name: DW News, channel_id: UCknLrEdhRCp1aegoMqRaCZg}

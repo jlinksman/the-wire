@@ -17,6 +17,7 @@ Every item gets one desk tag. V1 shows a single newest-first feed with desk filt
 - **GOV:** courts, Congress, and Albany as news.
 - **LAW:** legal developments, for me as a New York attorney. See below.
 - **WORLD:** national and international news.
+- **SPORTS:** Rangers, NYCFC, Tottenham, USMNT, USWNT, Gotham FC, with a scoreboard.
 
 ## The LAW desk: what counts as signal
 I'm admitted in New York and not currently practicing. My background is AML compliance, commercial real estate finance, and bankruptcy, and I run an environmental remediation and spill response company. Signal, in this order:
