@@ -65,6 +65,10 @@ jobs:
         run: |
           npx --yes wrangler@4 kv key put data.json --path dist/data.json --namespace-id "$WIRE_KV_ID" --remote
           # Push-alert candidates for the Worker (V6). About 96 writes a day, like data.json.
+          # Signal for the on-demand briefing (Brief me button).
+          if [ -f dist/brief.json ]; then
+            npx --yes wrangler@4 kv key put brief.json --path dist/brief.json --namespace-id "$WIRE_KV_ID" --remote
+          fi
           if [ -f dist/alerts.json ]; then
             npx --yes wrangler@4 kv key put alerts.json --path dist/alerts.json --namespace-id "$WIRE_KV_ID" --remote
           fi

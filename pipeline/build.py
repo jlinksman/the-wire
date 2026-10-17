@@ -35,6 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import agendas  # noqa: E402
 import stories  # noqa: E402
 import alerts  # noqa: E402
+import brief  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "sources.yaml"
@@ -954,6 +955,10 @@ def main() -> int:
         alerts.run(data, yaml.safe_load(CONFIG.read_text()).get("push_alerts") or {}, DIST, log)
     except Exception as exc:
         log(f"[alerts] failed: {type(exc).__name__}: {exc}")
+    try:
+        brief.build(data, yaml.safe_load(CONFIG.read_text()).get("briefing") or {}, DIST, log, state.get("texts"))
+    except Exception as exc:
+        log(f"[brief] failed: {type(exc).__name__}: {exc}")
     (DIST / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     save_state(state)
     failing = sum(1 for h in data["sources"] if h["last_error"])

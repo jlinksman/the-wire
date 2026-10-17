@@ -21,6 +21,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -33,5 +34,28 @@ jobs:
       - name: Create the Pages project (first run only)
         run: npx --yes wrangler@4 pages project create the-wire --production-branch main || echo "Project already exists."
 
+      # Bindings for the Pages Functions: the data in KV (WIRE) and Workers AI (AI) for the
+      # Brief me button. Written at deploy time so the KV namespace ID stays in secrets.
+      - name: Write Pages bindings
+        run: |
+          cat > wrangler.toml <<EOF
+          name = "the-wire"
+          pages_build_output_dir = "site"
+          compatibility_date = "2026-10-01"
+
+          [[kv_namespaces]]
+          binding = "WIRE"
+          id = "$WIRE_KV_ID"
+
+          [ai]
+          binding = "AI"
+          EOF
+
       - name: Deploy
         run: npx --yes wrangler@4 pages deploy site --project-name the-wire --branch main --commit-dirty=true
+
+      - name: Show the live bindings (no secret values)
+        run: |
+          curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/the-wire" \
+            | python3 -c "import sys,json; c=json.load(sys.stdin)['result']['deployment_configs']['production']; print('KV bindings:', list((c.get('kv_namespaces') or {}).keys())); print('AI bindings:', list((c.get('ai_bindings') or {}).keys()))"

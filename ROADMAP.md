@@ -38,6 +38,8 @@ Everything here was researched and scoped, then held back so V1 could start simp
   - *Route 2, morning edition (optional evening):* a Claude scheduled task on Joe's plan writes a front page with analysis and implications ("what this means for Optima, Beacon, my practice areas"). It publishes as a private page, linked from a FRONT PAGE line at the top of The Wire. It holds no Cloudflare or GitHub secrets.
   - *Rules:* analysis is styled differently from reporting and labeled as such; every claim cites its sources; the quote integrity rule applies to both routes; a summary that can't be traced to source text is dropped, not shown.
 
+- [x] **Brief me (built 2026-10-17):** on-demand spoken briefing from the build's signal list (`briefing:` in sources.yaml, `pipeline/brief.py`, `functions/brief.js`). Later: a Siri Shortcut ("Hey Siri, brief me") using a Cloudflare Access service token, and optional generated audio (MeloTTS) for lock-screen playback.
+
 ## V6 — Push alerts (built 2026-10-16)
 - [x] Through ntfy.sh (free) to the ntfy iPhone app, on a private topic kept in the NTFY_TOPIC secret.
 - [x] Beacon: National Weather Service warnings (checked directly every 3 minutes) and City of Beacon posts matching approved keywords.
