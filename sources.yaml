@@ -182,7 +182,7 @@ federal:
   - {id: congress_committee_meetings, name: Congress.gov committee meetings, type: api, url: "https://api.congress.gov/v3/committee-meeting", status: KEY, key_env: DATA_GOV_API_KEY, poll: 15}
   - {id: govinfo, name: GovInfo (Federal Register, Congressional Record), type: api, url: "https://api.govinfo.gov/", status: KEY, key_env: DATA_GOV_API_KEY, poll: 60}
   - {id: federal_register, name: Federal Register API, type: api, url: "https://www.federalregister.gov/api/v1/documents.json", status: OK, poll: 60, notes: "No key. Filter by agency (EPA, FinCEN, Treasury, DOJ). Worked from the sandbox on 10-05, then returned 'Your IP address has been blocked' on 10-14; may rate-limit cloud IPs. GovInfo (FR collection) is the fallback."}
-  - {id: house_bills_week, name: "House: bills scheduled this week", short: "House floor", type: rss, url: "https://docs.house.gov/BillsThisWeek-RSS.xml", status: OK, poll: 120, enabled: true, desk: GOV}
+  - {id: house_bills_week, name: "House: bills scheduled this week", short: "House floor", type: rss, url: "https://docs.house.gov/BillsThisWeek-RSS.xml", status: OK, poll: 120, max_items: 25, enabled: true, desk: GOV}
   - {id: senate_floor_activity, name: "Senate: recent floor activity", short: "Senate floor", type: html, url: "https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm", status: OK, poll: 120, enabled: true, desk: GOV}
   - {id: house_floor, name: House floor summary, type: html, url: "https://clerk.house.gov/floorsummary/floor-download.aspx", status: OK, poll: 10}
   - {id: house_committee_calendar, name: House committee calendar, type: html, url: "https://docs.house.gov/Committee/Calendar/ByWeek.aspx", status: OK, poll: 60}

@@ -733,6 +733,8 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
         # Alerts are only as current as the latest response: drop ones that ended.
         for k in [k for k, v in store.items() if v["source_id"] == src["id"]]:
             del store[k]
+    if src.get("max_items"):
+        items = items[: src["max_items"]]
     if src.get("exclude_title"):
         pat = re.compile(src["exclude_title"], re.IGNORECASE)
         items = [it for it in items if not pat.search(it["title"])]
