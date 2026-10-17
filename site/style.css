@@ -27,6 +27,8 @@
   --tabh: 54px;
   --side: 0px;
   --toph: 52px;
+  --pw: min(100vw - var(--side), 760px + var(--gutter-l) + var(--gutter-r));   /* player width */
+  --ph: calc(var(--pw) * 9 / 16 + 44px);                                      /* player + its bar */
   color-scheme: dark;
 }
 
@@ -224,10 +226,17 @@ body.has-stage .stage { height: calc(min(100vw - var(--side), 760px + var(--gutt
 .chip[aria-pressed="true"]::before { content: "● LIVE"; font: 700 0.58rem var(--mono); color: var(--red); letter-spacing: 0.08em; }
 
 .player { position: fixed; z-index: 15; background: #000; }
-.player:not(.mini) {
-  top: var(--toph); left: var(--side);
-  width: min(100vw - var(--side), 760px + var(--gutter-l) + var(--gutter-r));
+.player:not(.mini) { top: var(--toph); left: var(--side); width: var(--pw); }
+/* While a stream plays on the Live tab, the page itself doesn't scroll: the video sits
+   fixed under the top bar and only the channel list scrolls below it. */
+html.stage-lock, html.stage-lock body { overflow: hidden; height: 100%; }
+html.stage-lock #view-live {
+  position: fixed; left: var(--side); width: var(--pw); max-width: none; margin: 0;
+  top: calc(var(--toph) + var(--ph)); bottom: calc(var(--tabh) + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-bottom: 24px;
 }
+html.stage-lock .stage { display: none; }
+.psound { min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; font: 600 0.72rem var(--sans); color: var(--text); white-space: nowrap; }
 .frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; }
 .frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .pbar { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 6px 0 12px; background: var(--panel2); border-bottom: 1px solid var(--line); }
@@ -240,6 +249,7 @@ body.has-stage .stage { height: calc(min(100vw - var(--side), 760px + var(--gutt
   width: min(56vw, 260px); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6); border: 1px solid #2a323b;
 }
 .player.mini .pyt { display: none; }
+.player.mini .psound { padding: 0 8px; }
 .player.mini .pbar { min-height: 40px; border-bottom: 0; }
 
 /* ------------------------------------------------ tab bar (bottom on phones, sidebar on desktop) */
