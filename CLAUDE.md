@@ -16,7 +16,7 @@ You are my build partner on a private, single-user news site. I set scope; you i
 1. **$0 running cost.** Free tiers only. No paid APIs, including the Anthropic API. V1 needs no API keys at all.
 2. **No computer of mine runs 24/7.** Everything runs on GitHub and Cloudflare.
 3. **Config, not code, for sources.** Every source lives in `sources.yaml`. V1 uses only entries marked `enabled: true`. Turning a source on or off is a config edit.
-4. **Headlines and links, not articles.** Show headlines, the feed's own short description, and a link. Never republish full articles. Never scrape paywalled text (WSJ and the New York Law Journal are headlines and links only).
+4. **Headlines and links, not articles.** Show headlines, the feed's own short description, our own summary, short verified quotes, and a link. Never republish full articles. The build may read the text of open (non-paywalled) articles to write summaries and pull quotes (approved 2026-10-16), honoring robots.txt; that text is never displayed or stored in git. Never scrape paywalled text (WSJ and the New York Law Journal are headlines and links only).
 5. **Polite fetching.** Honor robots.txt, use ETag and If-Modified-Since, send an honest User-Agent, and back off on 403 and 429. Never try to get around a block.
 6. **Video is official embed or link only.** Never rehost, restream, or download video.
 7. **No silent failures.** Every source records its last success, last error, and item count, and the page shows a source-health list. A broken source must be visible, never hidden.

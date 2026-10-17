@@ -32,6 +32,11 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - Group the same story across outlets into one card with several sources.
 - Rule-based extraction of verbatim, attributed quotes from open text. **Quote integrity rule:** a quote shown in quote styling must be string-matched against the stored source text before display; never show a generated or paraphrased quote as a quote.
 - Ranking by desk weight (see BRIEF.md), recency, number of sources, and my "more like this / less like this" feedback, after a two-week calibration.
+- **Synthesis (approved 2026-10-16: both routes, open article text allowed):**
+  - *Input:* the build reads the text of open (non-paywalled) articles and the primary documents already fetched (agendas, minutes, Federal Register abstracts, opinions, floor logs). That text feeds summaries and quotes only; it is never displayed, and it lives in the Actions cache, never git. Paywalled sources stay headlines only.
+  - *Route 1, every build:* Cloudflare Workers AI (free plan, 10,000 neurons a day; hard stop at the cap, no billing) writes a one- or two-sentence summary per story cluster with a small model (Llama 3.1 8B class). It sees only the source text; every sentence links to the sources it came from. Needs the Cloudflare API token to gain the Workers AI permission.
+  - *Route 2, morning edition (optional evening):* a Claude scheduled task on Joe's plan writes a front page with analysis and implications ("what this means for Optima, Beacon, my practice areas"). It publishes as a private page, linked from a FRONT PAGE line at the top of The Wire. It holds no Cloudflare or GitHub secrets.
+  - *Rules:* analysis is styled differently from reporting and labeled as such; every claim cites its sources; the quote integrity rule applies to both routes; a summary that can't be traced to source text is dropped, not shown.
 
 ## V6 — Push alerts
 - Through ntfy.sh (free). Beacon: National Weather Service warnings and official city or police posts matching approved keywords. Geopolitical: the same event from at least three independent outlets within 30 minutes, or a confirmed alert source. At most 5 a day, deduplicated.
@@ -48,6 +53,6 @@ Everything here was researched and scoped, then held back so V1 could start simp
 ## Parked (no version yet)
 - Morning email digest, once I know what belongs in it.
 - Quotes from hearing and council-meeting transcripts.
-- Paid AI summaries (would break the $0 rule).
+- Paid AI summaries (would break the $0 rule; free routes are in V5).
 - Multi-stream video wall. More city desks.
 - **Local color sources:** A Little Beacon Blog, Chronogram, Hudson Valley One, Hudson Valley Magazine, Patch Fishkill, Spectrum News Hudson Valley, Metro-North service alerts, NYSDEC press releases, Secret Tel Aviv, ISRAEL21c. Still to find: Times Union, Riverkeeper, Dia Beacon events, Dutchess County news, Sortir à Paris.
