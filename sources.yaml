@@ -439,3 +439,7 @@ gov_panel:
   - {label: DUTCHESS, sources: [dutchess_leg_board_minutes, dutchess_leg_committee_minutes], watch: "https://totalwebcasting.com/view/?id=dutchess"}
   - {label: FED REG, sources: [federal_register_rules]}
   - {label: NY REG, sources: [nys_register, dec_regs]}
+
+# ---------------------------------------------------------------- V5 edition
+# The written edition is a private Claude page (only Joe can open it); The Wire links to it.
+front_page_url: "https://claude.ai/artifact/LJCLHjSbCA8yycwHy8Zze4"

@@ -200,7 +200,7 @@ def extract_quotes(text: str, limit: int = 2) -> list[dict]:
         for m in pat.finditer(text):
             groups = m.groups()
             quote, name = (groups[1], groups[0]) if pat is PATTERNS[2] else (groups[0], groups[1])
-            quote, name = quote.strip(), name.strip()
+            quote, name = quote.strip(), name.strip().rstrip(".,")
             name = re.sub(r"^(?:Mr|Mrs|Ms|Dr|Sen|Rep|Gov)\.\s+", "", name)
             first = name.split()[0]
             if first in NOT_NAMES:
