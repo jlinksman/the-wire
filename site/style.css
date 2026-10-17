@@ -226,14 +226,18 @@ body.has-stage .stage { height: calc(min(100vw - var(--side), 760px + var(--gutt
 .chip[aria-pressed="true"]::before { content: "● LIVE"; font: 700 0.58rem var(--mono); color: var(--red); letter-spacing: 0.08em; }
 
 .player { position: fixed; z-index: 15; background: #000; }
-.player:not(.mini) { top: var(--toph); left: var(--side); width: var(--pw); }
-/* While a stream plays on the Live tab, the page itself doesn't scroll: the video sits
-   fixed under the top bar and only the channel list scrolls below it. */
-html.stage-lock, html.stage-lock body { overflow: hidden; height: 100%; }
+/* While a stream plays on the Live tab, the screen is a plain column: top bar, video,
+   then the channel list, which is the only thing that scrolls. Nothing is positioned
+   by measurement, so the top bar can never overlap the video. The player only changes
+   position styles here (never moves in the page), so the stream doesn't reload. */
+html.stage-lock { height: 100%; overflow: hidden; }
+html.stage-lock body { height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+html.stage-lock .top { position: relative; flex: none; order: 0; }
+html.stage-lock .player { position: relative; order: 1; flex: none; margin-left: var(--side); width: var(--pw); }
 html.stage-lock #view-live {
-  position: fixed; left: var(--side); width: var(--pw); max-width: none; margin: 0;
-  top: calc(var(--toph) + var(--ph)); bottom: calc(var(--tabh) + env(safe-area-inset-bottom, 0px));
-  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-bottom: 24px;
+  order: 2; flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  margin-left: var(--side); width: var(--pw); max-width: none;
+  padding-bottom: calc(var(--tabh) + env(safe-area-inset-bottom, 0px) + 24px);
 }
 html.stage-lock .stage { display: none; }
 .psound { min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; font: 600 0.72rem var(--sans); color: var(--text); white-space: nowrap; }
