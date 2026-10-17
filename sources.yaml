@@ -146,8 +146,8 @@ dutchess:
     poll: 120
   - {id: dutchess_leg_agenda, name: Legislature meeting agenda, type: html, url: "https://www.dutchessny.gov/Departments/County-Legislature/County-Legislature-Meeting-Agenda.htm", status: OK, poll: 120}
   - {id: dutchess_leg_dates, name: Legislature meeting dates, type: html, url: "https://www.dutchessny.gov/Departments/County-Legislature/County-Legislature-Meeting-Dates.htm", status: OK, poll: 1440}
-  - {id: dutchess_leg_board_minutes, name: Board meeting minutes, type: html, url: "https://www.dutchessny.gov/Departments/County-Legislature/Board-Meeting-Minutes.htm", status: OK, poll: 360}
-  - {id: dutchess_leg_committee_minutes, name: Committee meeting minutes, type: html, url: "https://www.dutchessny.gov/Departments/County-Legislature/Committee-Meeting-Minutes.htm", status: OK, poll: 360}
+  - {id: dutchess_leg_board_minutes, name: Dutchess Legislature board minutes, short: "Dutchess Leg.", type: links, url: "https://www.dutchessny.gov/Departments/County-Legislature/Board-Meeting-Minutes.htm", status: OK, poll: 360, enabled: true, desk: GOV, link_pattern: "/County-Legislature/Docs/.*\\.pdf$", title_prefix: "Dutchess Legislature minutes: ", max_items: 6}
+  - {id: dutchess_leg_committee_minutes, name: Dutchess Legislature committee minutes, short: "Dutchess Leg.", type: links, url: "https://www.dutchessny.gov/Departments/County-Legislature/Committee-Meeting-Minutes.htm", status: OK, poll: 360, enabled: true, desk: GOV, link_pattern: "/County-Legislature/Docs/.*\\.pdf$", title_prefix: "Dutchess committee minutes: ", max_items: 10}
   - {id: gnews_dutchess_leg, name: Google News — Dutchess County Legislature, type: rss, url: "https://news.google.com/rss/search?q=%22Dutchess+County+Legislature%22&hl=en-US&gl=US&ceid=US:en", status: OK, poll: 60}
 
 new_york:
@@ -182,6 +182,8 @@ federal:
   - {id: congress_committee_meetings, name: Congress.gov committee meetings, type: api, url: "https://api.congress.gov/v3/committee-meeting", status: KEY, key_env: DATA_GOV_API_KEY, poll: 15}
   - {id: govinfo, name: GovInfo (Federal Register, Congressional Record), type: api, url: "https://api.govinfo.gov/", status: KEY, key_env: DATA_GOV_API_KEY, poll: 60}
   - {id: federal_register, name: Federal Register API, type: api, url: "https://www.federalregister.gov/api/v1/documents.json", status: OK, poll: 60, notes: "No key. Filter by agency (EPA, FinCEN, Treasury, DOJ). Worked from the sandbox on 10-05, then returned 'Your IP address has been blocked' on 10-14; may rate-limit cloud IPs. GovInfo (FR collection) is the fallback."}
+  - {id: house_bills_week, name: "House: bills scheduled this week", short: "House floor", type: rss, url: "https://docs.house.gov/BillsThisWeek-RSS.xml", status: OK, poll: 120, enabled: true, desk: GOV}
+  - {id: senate_floor_activity, name: "Senate: recent floor activity", short: "Senate floor", type: html, url: "https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm", status: OK, poll: 120, enabled: true, desk: GOV}
   - {id: house_floor, name: House floor summary, type: html, url: "https://clerk.house.gov/floorsummary/floor-download.aspx", status: OK, poll: 10}
   - {id: house_committee_calendar, name: House committee calendar, type: html, url: "https://docs.house.gov/Committee/Calendar/ByWeek.aspx", status: OK, poll: 60}
   - {id: senate_floor, name: Senate floor activity, type: html, url: "https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm", status: OK, poll: 10}
@@ -248,16 +250,19 @@ law:
     poll: 360
     notes: DISABLED 2026-10-14 because dec.ny.gov/robots.txt explicitly disallows /news/environmental-notice-bulletin for all bots. Roadmap idea - DEC's email subscription for the ENB. Published weekly (Wednesdays). Item links follow /news/environmental-notice-bulletin/YYYY-MM-DD/<category>/<slug>; list new items with their category (seqr, permits, remediation, etc.). Link scraping only in V1.
   - {id: cl_ny_appdiv, name: Appellate Division opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/nyappdiv/", status: OK, poll: 60, notes: "All four departments, dozens a day. Roadmap: filter to watchlist terms and the Second Department."}
-  - {id: cl_nysd, name: SDNY opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/nysd/", status: OK, poll: 120}
-  - {id: cl_nysb, name: SDNY Bankruptcy opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/nysb/", status: OK, poll: 120}
+  - {id: cl_nysd, name: SDNY opinions (CourtListener), short: "S.D.N.Y.", type: rss, url: "https://www.courtlistener.com/feed/court/nysd/", status: OK, poll: 120, enabled: true, desk: LAW, require_watch: true, notes: "High volume; only watchlist matches are shown."}
+  - {id: cl_nysb, name: SDNY Bankruptcy opinions (CourtListener), short: "Bankr. S.D.N.Y.", type: rss, url: "https://www.courtlistener.com/feed/court/nysb/", status: OK, poll: 120, enabled: true, desk: LAW}
   - {id: cl_scotus, name: Supreme Court opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/scotus/", status: OK, poll: 60}
   - {id: jdsupra_bankruptcy, name: JD Supra Bankruptcy, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=BankruptcyLaw", status: OK, poll: 120}
   - {id: jdsupra_real_estate, name: JD Supra Real Estate, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=RealEstate", status: OK, poll: 120}
   - {id: jdsupra_finance, name: JD Supra Finance and Banking, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=FinanceBanking", status: OK, poll: 120}
   - {id: volokh, name: Volokh Conspiracy, type: rss, url: "https://reason.com/volokh/feed/", status: OK, poll: 60}
   - {id: above_the_law, name: Above the Law, type: rss, url: "https://abovethelaw.com/feed/", status: OK, poll: 60, notes: "Legal-industry news; noisy."}
-  - {id: dec_regs, name: NYSDEC proposed, emergency, and adopted regulations, type: html, url: "https://dec.ny.gov/regulatory/regulations/proposed-emergency-recently-adopted-regulations", status: OK, poll: 1440}
-  - {id: nys_register, name: NYS Register (weekly proposed state rules), type: html, url: "https://dos.ny.gov/state-register", status: OK, poll: 1440, notes: "Page loads; issue links not yet located."}
+  - {id: dec_regs, name: "NYSDEC proposed, emergency and adopted regulations", short: "NYSDEC regs", type: links, url: "https://dec.ny.gov/regulatory/regulations/proposed-emergency-recently-adopted-regulations", status: OK, poll: 720, enabled: true, desk: LAW, text_pattern: "^(6 NYCRR|Part \\d|Parts \\d|Proposed|Pre-Proposal|Advanced Notice|Draft Program Policy|DER-|DMN|Emergency)", title_prefix: "DEC rulemaking: ", exclude_text: "^Proposed, Emergency,? and Recently Adopted Regulations$", summary: "Listed on NYSDEC's proposed, emergency and recently adopted regulations page.", notes: "No dates on the page; new entries appear as new items."}
+  - {id: nys_register, name: NYS Register (weekly proposed state rules), short: "NYS Register", type: links, url: "https://dos.ny.gov/state-register", status: OK, poll: 720, enabled: true, desk: LAW, link_pattern: "dos\\.ny\\.gov/[a-z]+-\\d{1,2}-\\d{4}vol-", title_prefix: "NYS Register: ", exclude_text: "^see the latest", summary: "Weekly issue of proposed and adopted state rules (PDF).", max_items: 4}
+  - {id: cl_2d_dept, name: "Appellate Division, Second Department (CourtListener search)", short: "2d Dept.", type: api, url: "https://www.courtlistener.com/api/rest/v4/search/?type=o&court=nyappdiv&q=%22Second%20Department%22&order_by=dateFiled%20desc", status: OK, poll: 180, enabled: true, desk: LAW, notes: "The Second Department covers Dutchess. Feed of the newest 20 by filing date."}
+  - {id: cl_ny_spill_law, name: "NY courts: Navigation Law, Oil Spill Fund, petroleum bulk storage (CourtListener search)", short: "NY courts · spill law", keep_days: 365, type: api, url: "https://www.courtlistener.com/api/rest/v4/search/?type=o&court=ny%20nyappdiv%20nyappterm%20nysupct%20nyclaimsct&q=%22Navigation%20Law%22%20OR%20%22Oil%20Spill%20Fund%22%20OR%20%22petroleum%20bulk%20storage%22&order_by=dateFiled%20desc", status: OK, poll: 720, enabled: true, desk: LAW}
+  - {id: federal_register_rules, name: "Federal Register: EPA, Coast Guard, PHMSA, FinCEN rules", short: "Fed. Reg.", type: api, url: "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bagencies%5D%5B%5D=environmental-protection-agency&conditions%5Bagencies%5D%5B%5D=coast-guard&conditions%5Bagencies%5D%5B%5D=pipeline-and-hazardous-materials-safety-administration&conditions%5Bagencies%5D%5B%5D=financial-crimes-enforcement-network&conditions%5Btype%5D%5B%5D=RULE&conditions%5Btype%5D%5B%5D=PRORULE&order=newest&per_page=40&fields%5B%5D=title&fields%5B%5D=html_url&fields%5B%5D=publication_date&fields%5B%5D=abstract&fields%5B%5D=agencies&fields%5B%5D=type", status: OK, poll: 180, enabled: true, desk: LAW, exclude_title: "Safety Zones?;|Security Zones?;|Special Local Regulations?;|Drawbridge Operation|Anchorage (Ground|Regulations)|Regulated Navigation Area|Air Plan (Approval|Revisions?); (?!New York)", notes: "Final and proposed rules only (no notices). Routine Coast Guard zone notices and other states' air plans are dropped. Agencies chosen for spill response (EPA, Coast Guard, PHMSA) and AML (FinCEN)."}
   - {id: nycourts_press, name: NY Unified Court System news and notices, type: html, url: "https://ww2.nycourts.gov/press/index.shtml", status: DC-BLOCK, poll: 360, notes: "nycourts.gov blocked the sandbox on every page (Court of Appeals, CLE Board, attorney registration). Retest from GitHub; otherwise V8 home fetcher."}
   - {id: fincen, name: FinCEN press releases, type: html, url: null, status: UNTESTED, poll: 360, notes: "Guessed URLs returned 404. FinCEN rules also arrive through the Federal Register."}
 
@@ -342,6 +347,7 @@ live_lineup:
   Beacon:
     - {name: City meetings, channel_id: UCvPpigGwZDeR7WYmw-SuDxg, note: "council, boards", meetings: true}
     - {name: School board, channel_id: UCUxD5Qj1i__1hCVsPilNjGw, note: "BCSD"}
+    - {name: Dutchess Legislature, link: "https://totalwebcasting.com/view/?id=dutchess"}
   US:
     - {name: NBC News NOW, channel_id: UCeY0bbntWzzVIaj2z3QigXg}
     - {name: CBS News 24/7, channel_id: UC8p1vwvWtl6T73JiExfWs1g}
@@ -421,3 +427,12 @@ video_other:
   - {id: un_webtv, name: UN Web TV, url: "https://webtv.un.org/en/schedule", mode: link_out, notes: "Page blocks framing; uses Kaltura players. Prefer the UN YouTube channel."}
   - {id: dvids_webcast, name: DVIDS (Pentagon) webcasts, url: "https://www.dvidshub.net/webcast", mode: link_out, notes: "Framing blocked. DVIDS API needs a free key."}
   - {id: cspan_live, name: C-SPAN networks, url: "https://www.c-span.org/live/", mode: link_out, notes: "Automated requests blocked. Link only; never scrape."}
+
+# ---------------------------------------------------------------- GOV desk: "Today in government"
+# One line per body: its latest item from the listed sources, plus where to watch.
+gov_panel:
+  - {label: HOUSE, sources: [house_bills_week], watch: "https://live.house.gov/"}
+  - {label: SENATE, sources: [senate_floor_activity], watch: "https://www.c-span.org/networks/?channel=c-span-2"}
+  - {label: DUTCHESS, sources: [dutchess_leg_board_minutes, dutchess_leg_committee_minutes], watch: "https://totalwebcasting.com/view/?id=dutchess"}
+  - {label: FED REG, sources: [federal_register_rules]}
+  - {label: NY REG, sources: [nys_register, dec_regs]}

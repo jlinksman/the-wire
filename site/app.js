@@ -114,6 +114,7 @@ function render() {
   renderDesks();
   renderNewLine();
   renderScoreboard();
+  renderGovPanel();
   renderPinned();
   renderFeed();
   renderHealth();
@@ -148,7 +149,7 @@ function renderNotices() {
     kids.push(el("a", {
       class: "down", href: "#footer",
       onclick: () => { $("health").hidden = false; $("health-line").setAttribute("aria-expanded", "true"); },
-      text: "⚠ " + bad.length + " source" + (bad.length > 1 ? "s" : "") + " down: " + bad.map((s) => s.name).join(", "),
+      text: "⚠ " + bad.length + " source" + (bad.length > 1 ? "s" : "") + " down: " + bad.map((s) => s.short || s.name).join(", "),
     }));
   }
   box.replaceChildren(...kids);
@@ -407,6 +408,23 @@ function renderScoreboard() {
     }
     lines.push(el("span", { class: "next", text: t.next ? "Next " + when(Date.parse(t.next.at)) + " " + vs(t.next) : "No game scheduled" }));
     return el("div", { class: "team" }, ...lines);
+  }));
+}
+
+// --------------------------------------------------------------- today in government
+function renderGovPanel() {
+  const box = $("govpanel");
+  const rows = data.gov_panel || [];
+  box.hidden = desk !== "GOV" || !rows.length;
+  if (box.hidden) return;
+  box.replaceChildren(el("div", { class: "section-label", text: "TODAY IN GOVERNMENT" }), ...rows.map((g) => {
+    const it = g.item;
+    const body = it
+      ? el("div", {}, el("a", { class: "gi", href: it.link, target: "_blank", rel: "noopener", text: it.title }),
+          el("span", { class: "ga", text: ago(Date.parse(it.t)) }))
+      : el("span", { class: "none", text: "nothing recent" });
+    const w = g.watch ? el("a", { class: "gw", href: g.watch, target: "_blank", rel: "noopener", text: "WATCH ↗" }) : el("span");
+    return el("div", { class: "gline" }, el("span", { class: "gl", text: g.label }), body, w);
   }));
 }
 

@@ -439,6 +439,102 @@ def parse_dec_enb(src: dict, content: bytes) -> list[dict]:
     return items
 
 
+# ---------------------------------------------------------------- V3 parsers
+
+DATE_IN_TEXT = [
+    (re.compile(r"\b([A-Z][a-z]+ \d{1,2}, \d{4})\b"), "%B %d, %Y"),
+    (re.compile(r"\b(\d{4}-\d{2}-\d{2})\b"), "%Y-%m-%d"),
+]
+
+
+def date_from_text(text: str) -> str | None:
+    for pat, fmt in DATE_IN_TEXT:
+        m = pat.search(text)
+        if m:
+            try:
+                return iso(datetime.strptime(m.group(1), fmt).replace(hour=12, tzinfo=NY))
+            except ValueError:
+                continue
+    return None
+
+
+def parse_links(src: dict, content: bytes) -> list[dict]:
+    """Generic link list: every link whose href matches link_pattern (and text matches
+    text_pattern, if given) becomes an item. Dates come from the link text when present."""
+    soup = BeautifulSoup(content, "html.parser")
+    href_pat = re.compile(src.get("link_pattern", "."), re.IGNORECASE)
+    text_pat = re.compile(src["text_pattern"], re.IGNORECASE) if src.get("text_pattern") else None
+    skip_pat = re.compile(src["exclude_text"], re.IGNORECASE) if src.get("exclude_text") else None
+    seen, items = set(), []
+    for a in soup.find_all("a", href=True):
+        href = urljoin(src["url"], a["href"].strip())
+        text = re.sub(r"\s+", " ", a.get_text(" ")).strip()
+        if not text or href in seen or not href_pat.search(href) or (text_pat and not text_pat.search(text)) \
+                or (skip_pat and skip_pat.search(text)):
+            continue
+        seen.add(href)
+        items.append({
+            "title": (src.get("title_prefix", "") + text)[:300],
+            "link": href,
+            "summary": src.get("summary", ""),
+            "published": date_from_text(text + " " + href),
+        })
+    return items[: src.get("max_items", 40)]
+
+
+def parse_cl_search(src: dict, content: bytes) -> list[dict]:
+    items = []
+    for x in json.loads(content).get("results", []):
+        url = x.get("absolute_url")
+        if not url:
+            continue
+        snippet = " ".join(o.get("snippet", "") for o in (x.get("opinions") or [])[:1])
+        court = x.get("court_citation_string") or x.get("court") or ""
+        items.append({
+            "title": (x.get("caseName") or "Opinion") + (f" ({court})" if court else ""),
+            "link": "https://www.courtlistener.com" + url,
+            "summary": clean_text(snippet),
+            "published": iso(datetime.strptime(x["dateFiled"][:10], "%Y-%m-%d").replace(hour=12, tzinfo=NY)) if x.get("dateFiled") else None,
+        })
+    return items
+
+
+def parse_federal_register(src: dict, content: bytes) -> list[dict]:
+    items = []
+    for d in json.loads(content).get("results", []):
+        agencies = ", ".join(a.get("name", "") for a in d.get("agencies", []) if a.get("name"))
+        kind = {"Rule": "Final rule", "Proposed Rule": "Proposed rule"}.get(d.get("type"), d.get("type") or "")
+        items.append({
+            "title": f"{kind}: {d.get('title', '')}" if kind else d.get("title", ""),
+            "link": d.get("html_url"),
+            "summary": clean_text((agencies + ". " if agencies else "") + (d.get("abstract") or "")),
+            "published": iso(datetime.strptime(d["publication_date"], "%Y-%m-%d").replace(hour=9, tzinfo=NY)) if d.get("publication_date") else None,
+        })
+    return [i for i in items if i["link"]]
+
+
+SENATE_DAY = re.compile(r"(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), ([A-Z][a-z]+ \d{1,2}, \d{4})")
+
+
+def parse_senate_floor(src: dict, content: bytes) -> list[dict]:
+    text = re.sub(r"\s+", " ", BeautifulSoup(content, "html.parser").get_text(" "))
+    parts = SENATE_DAY.split(text)
+    items = []
+    # split() gives [pre, weekday, date, body, weekday, date, body, ...]
+    for i in range(1, len(parts) - 2, 3):
+        day, body = parts[i + 1], parts[i + 2].strip()
+        when = datetime.strptime(day, "%B %d, %Y").replace(hour=18, tzinfo=NY)
+        items.append({
+            "title": f"Senate floor, {parts[i][:3]} {when.month}/{when.day}: " + (body.split(". ")[1][:120] if ". " in body else body[:120]),
+            "link": src["url"] + "#" + day.replace(" ", "-").replace(",", ""),
+            "summary": clean_text(body, 500),
+            "published": iso(when),
+        })
+        if len(items) >= 3:
+            break
+    return items
+
+
 def pick_parser(src: dict):
     url = src["url"]
     if "wp-json/wp/v2/media" in url:
@@ -449,6 +545,14 @@ def pick_parser(src: dict):
         return parse_nws
     if "environmental-notice-bulletin" in url:
         return parse_dec_enb
+    if "courtlistener.com/api/rest/v4/search" in url:
+        return parse_cl_search
+    if "federalregister.gov/api" in url:
+        return parse_federal_register
+    if "floor_activity" in url:
+        return parse_senate_floor
+    if src.get("type") == "links":
+        return parse_links
     if src.get("type") == "rss":
         return parse_rss
     raise ValueError(f"no parser for type={src.get('type')} url={url}")
@@ -629,6 +733,18 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
         # Alerts are only as current as the latest response: drop ones that ended.
         for k in [k for k, v in store.items() if v["source_id"] == src["id"]]:
             del store[k]
+    if src.get("exclude_title"):
+        pat = re.compile(src["exclude_title"], re.IGNORECASE)
+        items = [it for it in items if not pat.search(it["title"])]
+    if src.get("type") == "links":
+        # Undated link lists: the first fetch only records what's already there, so
+        # existing entries don't flood the feed as "new"; later additions show up.
+        seen = state.setdefault("links_seen", {})
+        first = src["id"] not in seen
+        known = set(seen.get(src["id"], []))
+        kept = [it for it in items if it.get("published") or (not first and it["link"] not in known)]
+        seen[src["id"]] = list((known | {it["link"] for it in items}))[-500:]
+        items = kept
     for it in items:
         key = item_id(it["link"] + ("|" + it["alert"]["key"] if it.get("alert") else ""))
         text = f"{it['title']} {it.get('summary', '')}"
@@ -641,6 +757,8 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
                 groups.add(g)
                 if m.group(0).lower() not in (x.lower() for x in terms):
                     terms.append(m.group(0))
+        if src.get("require_watch") and not groups:
+            continue  # this source only shows watchlist matches
         existing = store.get(key)
         store[key] = {
             "id": key,
@@ -662,8 +780,10 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
         }
 
 
-def prune(state: dict) -> None:
+def prune(state: dict, sources: list[dict] | None = None) -> None:
     cutoff = now_utc() - timedelta(days=KEEP_DAYS)
+    # Rare-event sources (a spill-law case search) keep items longer.
+    long_keep = {s["id"]: now_utc() - timedelta(days=s["keep_days"]) for s in (sources or []) if s.get("keep_days")}
     floor = now_utc() - timedelta(days=MIN_KEEP_DAYS)
     store = state["items"]
     newest: dict[str, list[tuple[datetime, str]]] = {}
@@ -673,7 +793,8 @@ def prune(state: dict) -> None:
     for rows in newest.values():
         rows.sort(reverse=True)
         protected.update(k for t, k in rows[:MIN_PER_SOURCE] if t >= floor)
-    for k in [k for k, v in store.items() if sort_time(v) < cutoff and k not in protected]:
+    for k in [k for k, v in store.items()
+              if sort_time(v) < long_keep.get(v["source_id"], cutoff) and k not in protected]:
         del store[k]
     for k, v in list(store.items()):
         exp = parse_iso((v.get("alert") or {}).get("expires"))
@@ -682,6 +803,16 @@ def prune(state: dict) -> None:
 
 
 # ---------------------------------------------------------------- output
+
+def gov_panel(items: list[dict]) -> list[dict]:
+    """The GOV desk's "Today in government" lines, from sources.yaml's gov_panel."""
+    rows = []
+    for g in yaml.safe_load(CONFIG.read_text()).get("gov_panel") or []:
+        latest = next((it for it in items if it["source_id"] in g.get("sources", [])), None)
+        rows.append({"label": g["label"], "watch": g.get("watch"),
+                     "item": {k: latest[k] for k in ("id", "title", "link", "t")} if latest else None})
+    return rows
+
 
 def write_dist(state: dict, sources: list[dict], video: list[dict], teams: list[dict]) -> dict:
     items = sorted(state["items"].values(), key=sort_time, reverse=True)[:MAX_ITEMS]
@@ -694,7 +825,7 @@ def write_dist(state: dict, sources: list[dict], video: list[dict], teams: list[
     for s in sources:
         st = state["sources"].get(s["id"], {})
         health.append({
-            "id": s["id"], "name": s["name"], "desk": s["desk"], "poll": s["poll"],
+            "id": s["id"], "name": s["name"], "short": s.get("short") or s["name"], "desk": s["desk"], "poll": s["poll"],
             "last_success": st.get("last_success"), "last_attempt": st.get("last_attempt"),
             "last_error": st.get("last_error"), "last_status": st.get("last_status"),
             "robots": src_robots(s),
@@ -785,10 +916,11 @@ def main() -> int:
     track = agendas.tracker(state)
     attach_agendas(state, track, watch)
 
-    prune(state)
+    prune(state, sources)
     data = write_dist(state, sources, video, teams)
     data_tracker = {a: track[a] for a in {x["addr"] for it in data["items"] for x in it.get("agenda") or [] if x.get("addr")} if a in track}
     data["tracker"] = data_tracker
+    data["gov_panel"] = gov_panel(data["items"])
     (DIST / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     save_state(state)
     failing = sum(1 for h in data["sources"] if h["last_error"])
