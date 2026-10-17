@@ -740,6 +740,9 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
     if src.get("exclude_title"):
         pat = re.compile(src["exclude_title"], re.IGNORECASE)
         items = [it for it in items if not pat.search(it["title"])]
+        # A tightened rule also clears matching items already in the store.
+        for k in [k for k, v in store.items() if v["source_id"] == src["id"] and pat.search(v["title"])]:
+            del store[k]
     if src.get("type") == "links":
         # Undated link lists: the first fetch only records what's already there, so
         # existing entries don't flood the feed as "new"; later additions show up.
@@ -770,6 +773,7 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             "source": src.get("short") or src["name"],
             "desk": src["desk"],
             "fast": bool(src.get("fast")),
+            **({"regional": True} if src.get("regional") else {}),
             "title": it["title"],
             "link": it["link"],
             "summary": it.get("summary", ""),
@@ -790,6 +794,15 @@ def prune(state: dict, sources: list[dict] | None = None) -> None:
     long_keep = {s["id"]: now_utc() - timedelta(days=s["keep_days"]) for s in (sources or []) if s.get("keep_days")}
     floor = now_utc() - timedelta(days=MIN_KEEP_DAYS)
     store = state["items"]
+    # Rules in sources.yaml apply to stored items too, even when the source wasn't
+    # fetched this run: tightened title filters, and the regional label.
+    for s in sources or []:
+        pat = re.compile(s["exclude_title"], re.IGNORECASE) if s.get("exclude_title") else None
+        for k in [k for k, v in store.items() if v["source_id"] == s["id"]]:
+            if pat and pat.search(store[k]["title"]):
+                del store[k]
+            elif s.get("regional"):
+                store[k]["regional"] = True
     newest: dict[str, list[tuple[datetime, str]]] = {}
     for k, v in store.items():
         newest.setdefault(v["source_id"], []).append((sort_time(v), k))

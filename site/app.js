@@ -12,7 +12,14 @@ const TABS = [
   { id: "world", label: "World", icon: "◍" },
   { id: "live", label: "Live", icon: "▶" },
 ];
-const SEGMENTS = { gov: [["GOV", "Government"], ["LAW", "Law & courts"]], world: [["WORLD", "World"], ["SPORTS", "Sports"]] };
+const SEGMENTS = {
+  beacon: [["BEACON", "Beacon"], ["REGION", "Region"]],
+  gov: [["GOV", "Government"], ["LAW", "Law & courts"]],
+  world: [["WORLD", "World"], ["SPORTS", "Sports"]],
+};
+const DESK_NAME = { BEACON: "Beacon", REGION: "Region", GOV: "Gov", LAW: "Law", WORLD: "World", SPORTS: "Sports", SYSTEM: "System" };
+// Region items are Beacon-desk items from regional outlets (sources.yaml `regional: true`).
+const deskOf = (it) => (it.desk === "BEACON" && it.regional ? "REGION" : it.desk);
 const KEY = {
   visit: "wire.lastVisit", tab: "wire.tab", seg: "wire.seg", channel: "wire.channel",
   prefs: "wire.prefs", saved: "wire.saved",
@@ -21,8 +28,9 @@ const REFRESH_MS = 5 * 60 * 1000;
 const STALE_MIN = 45;
 const FRESH_MIN = 30;
 const PAGE = 30;
-const KIND_MARK = { VIDEO: "▶ VIDEO", DOC: "DOC", QUOTE: "“ QUOTE", BLOTTER: "BLOTTER" };
+const KIND_MARK = { VIDEO: "Video", DOC: "Document", QUOTE: "Quote", BLOTTER: "Police blotter" };
 const SIZES = [["system", "iPhone"], ["15", "S"], ["17", "M"], ["19", "L"], ["21", "XL"]];
+const THEMES = [["auto", "Match iPhone"], ["dark", "Dark"], ["light", "Light"]];
 
 // --------------------------------------------------------------- storage (never throws)
 const store = {
@@ -30,7 +38,7 @@ const store = {
   set(k, v) { try { window.localStorage.setItem(k, String(v)); } catch (e) { /* private mode */ } },
   json(k, d) { try { return JSON.parse(store.get(k)) ?? d; } catch (e) { return d; } },
 };
-const prefs = Object.assign({ size: "system", clocks: true, newOnly: false, mutedSources: [], mutedWords: "" }, store.json(KEY.prefs, {}));
+const prefs = Object.assign({ size: "system", theme: "auto", clocks: true, newOnly: false, mutedSources: [], mutedWords: "", pins: [], liveRegion: null }, store.json(KEY.prefs, {}));
 const savePrefs = () => store.set(KEY.prefs, JSON.stringify(prefs));
 let saved = store.json(KEY.saved, []);           // [{id, title, link, source, ms}]
 const saveSaved = () => store.set(KEY.saved, JSON.stringify(saved.slice(0, 100)));
@@ -38,7 +46,7 @@ const saveSaved = () => store.set(KEY.saved, JSON.stringify(saved.slice(0, 100))
 let data = null;
 let pending = null;                                // fresh data held while you're scrolled down
 let tab = TABS.some((t) => t.id === store.get(KEY.tab)) ? store.get(KEY.tab) : "today";
-const seg = Object.assign({ gov: "GOV", world: "WORLD" }, store.json(KEY.seg, {}));
+const seg = Object.assign({ beacon: "BEACON", gov: "GOV", world: "WORLD" }, store.json(KEY.seg, {}));
 let prevVisit = Number(store.get(KEY.visit)) || null;
 let channel = store.get(KEY.channel);
 let playing = false;
@@ -84,12 +92,22 @@ function when(ms) {
   return fmtDate.format(new Date(ms)) + " " + fmtTime.format(new Date(ms));
 }
 function dayLabel(ms) {
-  if (isToday(ms)) return "TODAY";
-  if (isYesterday(ms)) return "YESTERDAY";
-  return fmtDate.format(new Date(ms)).toUpperCase();
+  if (isToday(ms)) return "Today";
+  if (isYesterday(ms)) return "Yesterday";
+  return fmtDate.format(new Date(ms));
 }
 
 // --------------------------------------------------------------- text size (follows the iPhone setting by default)
+// Appearance follows the iPhone's Light/Dark setting unless locked in Settings.
+function applyTheme() {
+  const root = document.documentElement;
+  if (prefs.theme === "auto") delete root.dataset.theme; else root.dataset.theme = prefs.theme;
+  const dark = prefs.theme === "dark" || (prefs.theme === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute("content", dark ? "#141619" : "#f5f3ee");
+}
+try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme); } catch (e) { /* old Safari */ }
+
 function applySize() {
   const root = document.documentElement;
   root.classList.toggle("dyn", prefs.size === "system");
@@ -195,7 +213,7 @@ function renderTop() {
 }
 
 function inView(it) {
-  if (tab === "beacon") return it.desk === "BEACON";
+  if (tab === "beacon") return deskOf(it) === seg.beacon;
   if (tab === "gov") return it.desk === seg.gov;
   if (tab === "world") return it.desk === seg.world;
   return false;
@@ -203,19 +221,20 @@ function inView(it) {
 
 function newCount(desks) {
   if (!prevVisit || !data) return 0;
-  return data.items.filter((it) => desks.includes(it.desk) && !isSeen(it) && !folded.has(it.id) && !isMuted(it)).length;
+  return data.items.filter((it) => desks.includes(deskOf(it)) && !isSeen(it) && !folded.has(it.id) && !isMuted(it)).length;
 }
 
 function renderTabbar() {
-  const counts = { beacon: newCount(["BEACON"]), gov: newCount(["GOV", "LAW"]), world: newCount(["WORLD", "SPORTS"]) };
+  const counts = { beacon: newCount(["BEACON", "REGION"]), gov: newCount(["GOV", "LAW"]), world: newCount(["WORLD", "SPORTS"]) };
   const liveOn = playing;
   $("tabbar").replaceChildren(...TABS.map((t) => el("button", {
     class: "tabbtn", "aria-current": t.id === tab ? "page" : null, "data-tab": t.id,
+    "aria-label": t.label + (counts[t.id] ? ", " + counts[t.id] + " new" : ""),
     onclick: () => go(t.id),
   },
     el("span", { class: "ico" + (t.id === "live" && liveOn ? " on" : ""), "aria-hidden": "true", text: t.icon }),
     el("span", { class: "tl", text: t.label }),
-    counts[t.id] ? el("span", { class: "badge", text: counts[t.id] > 99 ? "99+" : String(counts[t.id]) }) : null)));
+    counts[t.id] ? el("span", { class: "badge", "aria-hidden": "true" }) : null)));
 }
 
 // Tapping the tab you're on goes to the top, as in iPhone apps.
@@ -237,7 +256,7 @@ function renderView(id) {
   for (const t of TABS) $("view-" + t.id).hidden = t.id !== id;
   document.body.dataset.tab = id;
   if (id === "today") v.replaceChildren(...todayView());
-  if (id === "beacon") v.replaceChildren(...deskView("beacon", "BEACON"));
+  if (id === "beacon") v.replaceChildren(segBar("beacon"), ...deskView("beacon", seg.beacon));
   if (id === "gov") v.replaceChildren(segBar("gov"), ...(seg.gov === "GOV" ? govPanel() : []), ...deskView("gov", seg.gov));
   if (id === "world") v.replaceChildren(segBar("world"), ...(seg.world === "SPORTS" ? scoreboard() : []), ...deskView("world", seg.world));
   if (id === "live") v.replaceChildren(...liveView());
@@ -255,44 +274,44 @@ function todayView() {
   const bad = failingSources();
   if (bad.length) {
     out.push(el("button", { class: "down", onclick: openHealth },
-      "⚠ " + bad.length + (bad.length > 1 ? " sources" : " source") + " down", el("span", { class: "chev", text: " ›" })));
+      el("span", { class: "dot bad" }), bad.length + (bad.length > 1 ? " sources aren't updating" : " source isn't updating"), el("span", { class: "chev", text: "›" })));
   }
   const ahead = aheadBlock();
   if (ahead) out.push(ahead);
   if (data.front_page_url) {
     out.push(el("a", { class: "edition", href: data.front_page_url, target: "_blank", rel: "noopener" },
-      el("span", { class: "ed-k", text: "THE EDITION" }),
-      el("span", { class: "ed-t", text: "Read today's written front page" }),
-      el("span", { class: "ed-a", text: "↗" })));
+      el("span", { class: "ed-k", text: new Date().getHours() < 15 ? "Morning Edition" : "The Edition" }),
+      el("span", { class: "ed-t", text: "Your written front page for " + new Intl.DateTimeFormat(undefined, { weekday: "long" }).format(new Date()) }),
+      el("span", { class: "ed-a", text: "›" })));
   }
 
   const cutoff = Date.now() - 48 * 3600000;
-  const beacon = data.items.filter((it) => it.desk === "BEACON" && !it.alert && it.kind !== "BLOTTER" && it.ms >= cutoff && !isMuted(it)).slice(0, 3);
+  const beacon = data.items.filter((it) => deskOf(it) === "BEACON" && !it.alert && it.kind !== "BLOTTER" && it.ms >= cutoff && !isMuted(it)).slice(0, 3);
   if (beacon.length) {
-    out.push(sectionHead("BEACON", "Last 48 hours", () => go("beacon"), "All Beacon"));
+    out.push(sectionHead("Beacon", null, () => { seg.beacon = "BEACON"; store.set(KEY.seg, JSON.stringify(seg)); go("beacon"); }, "See all"));
     out.push(el("ol", { class: "list" }, ...beacon.map((it) => row(it, { desk: false }))));
   }
 
   const stories = (data.stories || []).filter((s) => storyOf.get(s.lead) === s && !isMuted(byId.get(s.lead))).slice(0, 6);
   if (stories.length) {
-    out.push(sectionHead("FRONT PAGE", "Stories covered by several outlets"));
+    out.push(sectionHead("Front page"));
     out.push(...stories.map(storyCard));
   }
 
   const hour = data.items.filter((it) => it.fast && it.ms >= Date.now() - 3600000 && !it.alert && !folded.has(it.id) && !isMuted(it)).slice(0, 5);
   if (hour.length) {
-    out.push(sectionHead("LAST HOUR"));
+    out.push(sectionHead("Last hour"));
     out.push(el("ol", { class: "list" }, ...hour.map((it) => row(it, { desk: true }))));
   }
 
   const teams = (data.teams || []).filter((t) => t.live || (t.last && Date.now() - Date.parse(t.last.at) < 3 * 86400000));
   if (teams.length) {
-    out.push(sectionHead("SCORES", null, () => { seg.world = "SPORTS"; store.set(KEY.seg, JSON.stringify(seg)); go("world"); }, "Sports"));
+    out.push(sectionHead("Scores", null, () => { seg.world = "SPORTS"; store.set(KEY.seg, JSON.stringify(seg)); go("world"); }, "Sports"));
     out.push(el("div", { class: "scores" }, ...teams.map(teamLine)));
   }
 
   out.push(el("div", { class: "caughtup" },
-    el("div", { class: "cu-k", text: "YOU'RE CAUGHT UP" }),
+    el("div", { class: "cu-k", text: "You're caught up" }),
     el("div", { class: "cu-t", text: "Feed as of " + exact(Date.parse(data.generated_at)) + ". More on each desk:" }),
     el("div", { class: "cu-links" }, ...[["beacon", "Beacon"], ["gov", "Gov"], ["gov:LAW", "Law"], ["world", "World"], ["world:SPORTS", "Sports"]].map(([k, label]) =>
       el("button", { class: "pill", text: label, onclick: () => {
@@ -308,7 +327,7 @@ function sectionHead(label, sub, action, actionLabel) {
   return el("div", { class: "shead" },
     el("span", { class: "sk", text: label }),
     sub ? el("span", { class: "ss", text: sub }) : null,
-    action ? el("button", { class: "sa", onclick: action, text: actionLabel + " ›" }) : null);
+    action ? el("button", { class: "sa", onclick: action, text: actionLabel }) : null);
 }
 
 function aheadBlock() {
@@ -335,17 +354,17 @@ function aheadBlock() {
   const watchable = (m) => m.meeting && meetingFeed && Date.now() > m.ms - 30 * 60000 && Date.now() < m.ms + 4 * 3600000;
   rows.sort((a, b) => a.ms - b.ms);
   return el("div", { class: "ahead" },
-    el("div", { class: "shead" }, el("span", { class: "sk", text: "AHEAD" })),
+    el("div", { class: "lbl", text: "Ahead" }),
     ...rows.map((m) => el("div", { class: "arow" + (m.live ? " live" : "") },
-      el("span", { class: "aw", text: m.live ? "LIVE" : (isToday(m.ms) ? "" : "Tmrw ") + fmtTime.format(new Date(m.ms)) }),
+      el("span", { class: "aw", text: m.live ? "Live" : (isToday(m.ms) ? "" : "Tmrw ") + fmtTime.format(new Date(m.ms)) }),
       m.item
         ? el("button", { class: "at", onclick: () => openItem(m.item) }, m.label, m.n ? el("span", { class: "an", text: " · " + m.n + " items" }) : null)
         : el("span", { class: "at", text: m.label }),
-      watchable(m) ? el("button", { class: "watch", text: "▶ WATCH", onclick: () => play(meetingFeed.id) }) : null)));
+      watchable(m) ? el("button", { class: "watch", text: "▶ Watch", onclick: () => play(meetingFeed.id) }) : null)));
 }
 
 function clocks() {
-  const CLOCKS = [["BEACON", "America/New_York", true], ["PARIS", "Europe/Paris", false], ["TEL AVIV", "Asia/Jerusalem", false]];
+  const CLOCKS = [["Beacon", "America/New_York", true], ["Paris", "Europe/Paris", false], ["Tel Aviv", "Asia/Jerusalem", false]];
   const now = new Date();
   const here = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(now);
   return el("div", { class: "clocks", id: "clocks" }, ...CLOCKS.flatMap(([name, tz, h12], i) => {
@@ -371,7 +390,7 @@ function segBar(t) {
 function deskView(t, desk) {
   const key = t + ":" + desk;
   shown[key] = shown[key] || PAGE;
-  const all = data.items.filter((it) => it.desk === desk && !folded.has(it.id) && !it.alert && !isMuted(it));
+  const all = data.items.filter((it) => deskOf(it) === desk && !folded.has(it.id) && !it.alert && !isMuted(it));
   const fresh = prevVisit ? all.filter((it) => !isSeen(it)).length : 0;
   const list = prefs.newOnly && fresh ? all.filter((it) => !isSeen(it)) : all;
   const out = [];
@@ -389,7 +408,7 @@ function deskView(t, desk) {
     const d = dayKey(it.ms);
     if (d !== lastDay) { ol.append(el("li", { class: "day", text: dayLabel(it.ms) })); lastDay = d; }
     if (!dividerPlaced && isSeen(it)) {
-      ol.append(el("li", { class: "divider", text: "SINCE YOU LAST OPENED" }));
+      ol.append(el("li", { class: "divider", text: "Since you last opened" }));
       dividerPlaced = true;
     }
     ol.append(row(it, { desk: false }));
@@ -397,10 +416,10 @@ function deskView(t, desk) {
   if (!list.length) ol.append(el("li", { class: "empty", text: "Nothing on this desk yet." }));
   out.push(ol);
   if (list.length > shown[key]) {
-    out.push(el("button", { class: "more-btn", text: "Show " + Math.min(PAGE, list.length - shown[key]) + " more · " + (list.length - shown[key]) + " left",
+    out.push(el("button", { class: "more-btn", text: "Show " + Math.min(PAGE, list.length - shown[key]) + " more",
       onclick: () => { const y = window.scrollY; shown[key] += PAGE; renderView(tab); window.scrollTo(0, y); } }));
   } else if (list.length) {
-    out.push(el("div", { class: "endline", text: "End of desk · " + list.length + " items in the last 7 days" }));
+    out.push(el("div", { class: "endline", text: "That's everything from the last 7 days." }));
   }
   return out;
 }
@@ -409,17 +428,17 @@ function deskView(t, desk) {
 function row(it, opt = {}) {
   const st = storyOf.get(it.id);
   const watch = it.watch && it.watch.length;
-  const meta = el("span", { class: "meta" },
-    el("span", { class: "t" + (isFresh(it.ms) ? " fresh" : ""), text: ago(it.ms) }),
-    opt.desk ? el("span", { class: "desk " + it.desk, text: it.desk }) : null,
-    el("span", { class: "src", text: it.source }),
-    it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null,
-    st ? el("span", { class: "plus", text: "+" + (st.sources - 1) }) : null);
-  const headline = el("span", { class: "headline" }, it.title);
+  const headline = el("span", { class: "headline", text: it.title });
   const tags = (it.watch_terms && it.watch_terms.length ? it.watch_terms : it.watch || []).slice(0, 2);
-  for (const tg of tags) headline.append(el("span", { class: "tag", text: String(tg).toUpperCase() }));
+  const meta = el("span", { class: "meta" },
+    el("span", { class: "t" + (isFresh(it.ms) && !isSeen(it) ? " fresh" : ""), text: ago(it.ms) }),
+    el("span", { class: "src", text: it.source }),
+    opt.desk ? el("span", { class: "dk", style: "--c: var(--" + deskOf(it).toLowerCase() + ")", text: DESK_NAME[deskOf(it)] }) : null,
+    it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null,
+    st ? el("span", { class: "plus", text: st.sources + " sources" }) : null,
+    ...tags.map((tg) => el("span", { class: "tag", text: String(tg) })));
   return el("li", { class: "row" + (watch ? " watch" : "") + (isSeen(it) ? " seen" : "") },
-    el("button", { class: "head", onclick: () => openItem(it) }, meta, headline));
+    el("button", { class: "head", onclick: () => openItem(it) }, headline, meta));
 }
 
 function storyCard(s) {
@@ -427,13 +446,11 @@ function storyCard(s) {
   const q = storyQuotes(s)[0];
   return el("article", { class: "story" + (isSeen(lead) ? " seen" : "") },
     el("button", { class: "head", onclick: () => openItem(lead) },
-      el("span", { class: "meta" },
-        el("span", { class: "t" + (isFresh(Date.parse(s.last)) ? " fresh" : ""), text: ago(Date.parse(s.last)) }),
-        el("span", { class: "desk " + s.desk, text: s.desk }),
-        el("span", { class: "plus", text: s.sources + " sources" })),
+      el("span", { class: "lbl" }, s.sources + " sources · ", el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
       el("span", { class: "headline", text: lead.title }),
-      s.summary ? el("span", { class: "msum" }, el("span", { class: "mlabel", text: "MACHINE SUMMARY " }), s.summary) : null,
-      q ? el("span", { class: "qline" }, "“" + q.text + "” ", el("span", { class: "qby", text: "— " + q.by })) : null));
+      s.summary ? el("span", { class: "msum" }, el("span", { class: "mlabel", text: "Machine summary" }), s.summary) : null,
+      q ? el("span", { class: "qline" }, "“" + q.text + "”", el("span", { class: "qby", text: q.by + " · " + q.item.source })) : null,
+      el("span", { class: "meta" }, el("span", { class: "t" + (isFresh(Date.parse(s.last)) && !isSeen(lead) ? " fresh" : ""), text: "Updated " + ago(Date.parse(s.last)) + (ago(Date.parse(s.last)) === "now" ? "" : " ago") }))));
 }
 
 // --------------------------------------------------------------- detail sheet
@@ -491,7 +508,7 @@ function openItem(it) {
   };
   const nodes = [
     el("div", { class: "smeta" },
-      el("span", { class: "desk " + it.desk, text: it.desk }),
+      el("span", { class: "dk", style: "--c: var(--" + deskOf(it).toLowerCase() + ")", text: DESK_NAME[deskOf(it)] }),
       el("span", { text: it.source }),
       el("span", { text: exact(it.ms) }),
       it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null),
@@ -507,18 +524,18 @@ function openItem(it) {
       link(it.link, "Open " + it.source + " ↗", "sbtn primary"),
       navigator.share ? el("button", { class: "sbtn", text: "Share", onclick: () => navigator.share({ title: it.title, url: it.link }).catch(() => {}) }) : null,
       saveBtn),
-    st ? el("div", { class: "salso" }, el("div", { class: "shead" }, el("span", { class: "sk", text: "ALSO COVERING · " + (st.sources - 1) + (st.sources === 2 ? " OUTLET" : " OUTLETS") })), alsoList(st, it.id)) : null,
+    st ? el("div", { class: "salso" }, el("h3", { class: "sh3", text: "Also covering this · " + (st.sources - 1) + (st.sources === 2 ? " outlet" : " outlets") }), alsoList(st, it.id)) : null,
   ];
   openSheet(nodes.filter(Boolean), it.title);
 }
 
 function agendaList(it) {
-  const box = el("div", { class: "agenda" }, el("div", { class: "shead" }, el("span", { class: "sk", text: it.agenda.length + " AGENDA ITEMS" })));
+  const box = el("div", { class: "agenda" }, el("h3", { class: "sh3", text: it.agenda.length + " agenda items" }));
   let section = null;
   for (const a of it.agenda) {
     if (a.section && a.section !== section) {
       section = a.section;
-      box.append(el("div", { class: "asec", text: section.toUpperCase() }));
+      box.append(el("div", { class: "asec", text: section }));
     }
     const hist = a.addr ? ((data.tracker || {})[a.addr] || []).filter((h) => h.link !== it.link) : [];
     const histBox = el("div", { class: "ahist", hidden: true },
@@ -568,7 +585,7 @@ function indexStories() {
 
 function machine(text, n) {
   return el("div", { class: "machine" },
-    el("span", { class: "mlabel", text: "MACHINE SUMMARY · " + n + (n === 1 ? " report" : " reports") }),
+    el("span", { class: "mlabel", text: "Machine summary · from " + n + (n === 1 ? " report" : " reports") }),
     el("p", { text }));
 }
 
@@ -584,7 +601,7 @@ function quoteList(qs) {
   if (!qs.length) return null;
   return el("div", { class: "quotes" }, ...qs.map((q) => el("blockquote", {},
     el("span", { class: "qt", text: "“" + q.text + "”" }),
-    el("span", { class: "qby" }, "— " + q.by + " · ", link(q.item.link, q.item.source + " ↗")))));
+    el("span", { class: "qby" }, q.by + " · ", link(q.item.link, q.item.source)))));
 }
 
 function alsoList(s, except) {
@@ -597,14 +614,14 @@ function govPanel() {
   const rows = data.gov_panel || [];
   if (!rows.length) return [];
   return [el("section", { class: "govpanel" },
-    el("div", { class: "shead" }, el("span", { class: "sk", text: "TODAY IN GOVERNMENT" })),
+    el("div", { class: "lbl", text: "Today in government" }),
     ...rows.map((g) => {
       const it = g.item && byId.get(g.item.id);
       return el("div", { class: "gline" },
         el("span", { class: "gl", text: g.label }),
         it ? el("button", { class: "gi", onclick: () => openItem(it) }, it.title, el("span", { class: "ga", text: ago(it.ms) }))
           : el("span", { class: "none", text: g.item ? g.item.title : "nothing recent" }),
-        g.watch ? link(g.watch, "WATCH ↗", "gw") : el("span"));
+        g.watch ? link(g.watch, "Watch ↗", "gw") : el("span"));
     }))];
 }
 
@@ -619,7 +636,7 @@ function result(g) {
 function teamLine(t) {
   const lines = [el("span", { class: "name", text: t.short })];
   if (t.live) {
-    lines.push(el("span", { class: "live", text: "LIVE " + score(t.live) + " " + vs(t.live) + " · " + t.live.detail }));
+    lines.push(el("span", { class: "live", text: "Live " + score(t.live) + " " + vs(t.live) + " · " + t.live.detail }));
   } else if (t.last) {
     const r = result(t.last);
     lines.push(el("span", { class: "last" }, r ? el("span", { class: "res " + r, text: r + " " }) : null,
@@ -636,23 +653,38 @@ function scoreboard() {
 }
 
 // --------------------------------------------------------------- live (one player, docked as a mini-player elsewhere)
+// Live: region pills, then a short list of channels as rows. Each region fits on one
+// screen, so nothing long scrolls under the video. Starred channels form "Pinned".
 function liveView() {
   const vids = data.video || [];
-  const groups = [];
-  for (const v of vids) {
-    let g = groups.find((x) => x.name === v.group);
-    if (!g) groups.push((g = { name: v.group, items: [] }));
-    g.items.push(v);
-  }
+  const regions = [];
+  if (prefs.pins.some((id) => vids.some((v) => v.id === id))) regions.push("Pinned");
+  for (const v of vids) if (!regions.includes(v.group)) regions.push(v.group);
+  let region = regions.includes(prefs.liveRegion) ? prefs.liveRegion : regions[0];
+  const current = vids.find((v) => v.id === channel);
+  if (!prefs.liveRegion && playing && current) region = current.group;
+  const list = region === "Pinned" ? prefs.pins.map((id) => vids.find((v) => v.id === id)).filter(Boolean) : vids.filter((v) => v.group === region);
+  const pills = el("div", { class: "pills", role: "tablist" }, ...regions.map((r) => el("button", {
+    role: "tab", "aria-selected": String(r === region),
+    onclick: () => { prefs.liveRegion = r; savePrefs(); renderView("live"); },
+  }, r === "Pinned" ? "★ Pinned" : r)));
+  const rows = list.map((v) => {
+    const on = playing && v.id === channel;
+    const pinned = prefs.pins.includes(v.id);
+    const star = el("button", { class: "star" + (pinned ? " on" : ""), "aria-label": (pinned ? "Unpin " : "Pin ") + v.name, text: pinned ? "★" : "☆",
+      onclick: (e) => { e.stopPropagation(); prefs.pins = pinned ? prefs.pins.filter((x) => x !== v.id) : [...prefs.pins, v.id]; savePrefs(); renderView("live"); } });
+    const info = el("span", { class: "chi" },
+      el("span", { class: "chn", text: v.name }),
+      el("span", { class: "cht", text: on ? "Playing" : v.link ? "Opens their site" : (v.note || "Live stream") }));
+    return v.link
+      ? el("div", { class: "chrow" }, el("a", { class: "chmain", href: v.link, target: "_blank", rel: "noopener" }, info, el("span", { class: "chgo out", "aria-hidden": "true", text: "↗" })), star)
+      : el("div", { class: "chrow" + (on ? " on" : "") }, el("button", { class: "chmain", onclick: () => play(v.id) }, info, el("span", { class: "chgo", "aria-hidden": "true", text: on ? "■" : "▶" })), star);
+  });
   return [
-    el("div", { class: "stage", id: "stage" }, playing ? null : el("div", { class: "stage-empty", text: "Pick a channel. It keeps playing in a mini-player while you read the other tabs." })),
-    ...groups.map((g) => el("section", { class: "cgroup" },
-      el("div", { class: "shead" }, el("span", { class: "sk", text: g.name.toUpperCase() })),
-      el("div", { class: "chips" }, ...g.items.map((v) => v.link
-        ? el("a", { class: "chip out", href: v.link, target: "_blank", rel: "noopener" }, v.name, el("span", { class: "note", text: "opens site ↗" }))
-        : el("button", { class: "chip", "aria-pressed": String(playing && v.id === channel), onclick: () => play(v.id) },
-            v.name, v.note ? el("span", { class: "note", text: v.note }) : null))))),
-    el("p", { class: "fine", text: "Official YouTube live streams, embedded. If a channel isn't live, YouTube shows its latest video or an offline card." }),
+    el("div", { class: "stage", id: "stage" }, playing ? null : el("div", { class: "stage-empty", text: "Choose a channel below. It keeps playing in a small player while you read other tabs." })),
+    pills,
+    el("div", { class: "chlist" }, ...rows),
+    el("p", { class: "fine", text: "Official YouTube live streams. If a channel isn't live right now, YouTube shows its latest video." }),
   ];
 }
 
@@ -660,6 +692,8 @@ function play(id) {
   channel = id;
   playing = true;
   store.set(KEY.channel, id);
+  const v = (data.video || []).find((x) => x.id === id);
+  if (v && prefs.liveRegion !== "Pinned") { prefs.liveRegion = v.group; savePrefs(); }
   if (tab !== "live") go("live"); else render();
 }
 
@@ -717,13 +751,13 @@ function healthTable() {
     const failing = bad.has(s.id);
     return el("tr", {},
       el("td", {}, s.short || s.name, s.robots === "subscription" ? el("span", { class: "sub", text: " · sub" }) : null),
-      el("td", { class: "desk " + s.desk, text: s.desk }),
+      el("td", {}, el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
       el("td", { class: "num", text: String(s.items) }),
       el("td", { text: ok ? ago(ok) : "never", title: ok ? exact(ok) : "" }),
       el("td", { class: failing ? "err" : "ok", text: s.last_error || (failing ? "stale" : "ok") }));
   });
   for (const t of (data.teams || []).filter((t) => t.error)) {
-    rows.unshift(el("tr", {}, el("td", { text: t.name + " schedule" }), el("td", { class: "desk SPORTS", text: "SPORTS" }), el("td", { text: "–" }), el("td", { text: "–" }), el("td", { class: "err", text: t.error })));
+    rows.unshift(el("tr", {}, el("td", { text: t.name + " schedule" }), el("td", { text: "Sports" }), el("td", { text: "–" }), el("td", { text: "–" }), el("td", { class: "err", text: t.error })));
   }
   return el("div", { class: "tablewrap" }, el("table", { class: "health" },
     el("thead", {}, el("tr", {}, ...["Source", "Desk", "Items", "Last ok", "Status"].map((h) => el("th", { text: h })))),
@@ -754,7 +788,7 @@ function openSettings() {
     onchange: (e) => { prefs.mutedWords = e.target.value; savePrefs(); render(); } });
   const srcs = (data ? data.sources : []).filter((s) => !["SYSTEM"].includes(s.desk));
   const srcList = el("div", { class: "srclist" }, ...srcs.map((s) => el("label", { class: "trow" },
-    el("span", {}, s.name, el("span", { class: "dk desk " + s.desk, text: " " + s.desk })),
+    el("span", {}, s.name, el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
     el("input", { type: "checkbox", id: "src-" + s.id, checked: prefs.mutedSources.includes(s.id) ? null : true,
       onchange: (e) => {
         prefs.mutedSources = prefs.mutedSources.filter((x) => x !== s.id);
@@ -769,18 +803,23 @@ function openSettings() {
     : el("p", { class: "sdesc", text: "Nothing saved yet. Use ☆ Save on any item." });
   openSheet([
     el("h2", { id: "sheet-title", class: "stitle", text: "Settings" }),
-    el("div", { class: "shead" }, el("span", { class: "sk", text: "TEXT SIZE" })),
+    el("h3", { class: "sh3", text: "Appearance" }),
+    el("div", { class: "segmini three" }, ...THEMES.map(([v, label]) => el("button", {
+      "aria-pressed": String(prefs.theme === v),
+      onclick: (e) => { prefs.theme = v; savePrefs(); applyTheme(); [...e.currentTarget.parentNode.children].forEach((b) => b.setAttribute("aria-pressed", String(b === e.currentTarget))); },
+    }, label))),
+    el("h3", { class: "sh3", text: "Text size" }),
     sizeRow,
     el("p", { class: "fine", text: "“iPhone” follows Settings › Display & Brightness › Text Size." }),
-    el("div", { class: "shead" }, el("span", { class: "sk", text: "DISPLAY" })),
+    el("h3", { class: "sh3", text: "Display" }),
     toggle("World clocks on Today", "clocks"),
     toggle("Desks open on new items only", "newOnly"),
-    el("div", { class: "shead" }, el("span", { class: "sk", text: "SAVED" })),
+    el("h3", { class: "sh3", text: "Saved" }),
     savedList,
-    el("div", { class: "shead" }, el("span", { class: "sk", text: "MUTE WORDS" })),
+    el("h3", { class: "sh3", text: "Mute words" }),
     words,
     el("p", { class: "fine", text: "Comma-separated. Items whose headline or description contains one are hidden everywhere." }),
-    el("div", { class: "shead" }, el("span", { class: "sk", text: "SOURCES SHOWN" })),
+    el("h3", { class: "sh3", text: "Sources shown" }),
     srcList,
     el("button", { class: "sbtn wide", text: "Source health ›", onclick: openHealth }),
     el("p", { class: "fine", text: "Settings and saved items stay on this device." }),
@@ -805,6 +844,7 @@ window.addEventListener("pagehide", markVisit);
 // Sticky elements sit under the top bar, whose height depends on the text size.
 const setTopH = () => document.documentElement.style.setProperty("--toph", document.querySelector(".top").offsetHeight + "px");
 if (window.ResizeObserver) new ResizeObserver(setTopH).observe(document.querySelector(".top"));
+applyTheme();
 applySize();
 setTopH();
 document.body.dataset.tab = tab;
