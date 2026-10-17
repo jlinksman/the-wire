@@ -2,6 +2,7 @@
 # Verified from a cloud sandbox on 2026-10-05 (legal sources on 2026-10-14).
 # V1 builds only entries with `enabled: true`. Everything else is the roadmap backlog
 # (see ROADMAP.md); `enabled` defaults to false when absent.
+# `fulltext: true`: the build may read the open article text (never displayed) to write summaries and pull quotes.
 #
 # status:
 #   OK        fetched cleanly with plain HTTP, no JavaScript
@@ -55,6 +56,7 @@ beacon:
     poll: 15
     notes: Live feed of every PDF the city uploads (resolutions, hearing notices, RFPs, daily police blotters). Classify by title and filename.
   - id: beacon_wp_posts
+    fulltext: true
     short: "City of Beacon"
     enabled: true
     desk: BEACON
@@ -90,6 +92,7 @@ beacon:
     status: OK
     poll: 60
   - id: highlands_current
+    fulltext: true
     short: "Highlands Current"
     enabled: true
     desk: BEACON
@@ -130,7 +133,7 @@ beacon:
     notes: BoardDocs (CloudFront) returns 403 to cloud servers (2026-10-16). Candidate for the V8 home fetcher. Board meetings stream on YouTube @BCSDBOE (UCUxD5Qj1i__1hCVsPilNjGw), in live_lineup.
 
 regional:
-  - {id: midhudson_news, short: "Mid-Hudson News", enabled: true, desk: BEACON, name: Mid-Hudson News, type: rss, url: "https://midhudsonnews.com/feed/", status: OK, poll: 30}
+  - {id: midhudson_news, short: "Mid-Hudson News", enabled: true, desk: BEACON, name: Mid-Hudson News, type: rss, url: "https://midhudsonnews.com/feed/", status: OK, poll: 30, fulltext: true}
   - {id: hv_post, name: Hudson Valley Post, type: rss, url: "https://hudsonvalleypost.com/feed/", status: OK, poll: 30}
   - {id: news10, name: News10 (Albany), type: rss, url: "https://www.news10.com/feed/", status: OK, poll: 30}
   - {id: wamc, name: WAMC, type: rss, url: "https://www.wamc.org/news.rss", status: OK, poll: 30}
@@ -158,7 +161,7 @@ new_york:
     status: KEY
     key_env: NYSENATE_API_KEY
     poll: 60
-  - {id: city_state, short: "City & State", enabled: true, desk: GOV, name: City & State NY, type: rss, url: "https://www.cityandstateny.com/rss/all/", status: OK, poll: 30}
+  - {id: city_state, short: "City & State", enabled: true, desk: GOV, name: City & State NY, type: rss, url: "https://www.cityandstateny.com/rss/all/", status: OK, poll: 30, fulltext: true}
   - {id: ny_focus, name: New York Focus, type: rss, url: "https://nysfocus.com/feed", status: OK, poll: 60}
   - {id: gothamist, name: Gothamist, type: rss, url: "https://gothamist.com/feed", status: OK, poll: 30}
   - {id: governor_ny, name: Governor's press releases, type: html, url: "https://www.governor.ny.gov/news", status: OK, poll: 30}
@@ -174,7 +177,7 @@ courts:
     notes: The path segment is the term year. The October 2026 term likely uses /26; confirm before enabling and make the term configurable.
   - {id: scotus_home, name: Supreme Court homepage (opinions, calendar), type: html, url: "https://www.supremecourt.gov/", status: OK, poll: 15}
   - {id: courtlistener, name: CourtListener API v4, type: api, url: "https://www.courtlistener.com/api/rest/v4/", status: OK, poll: 30, notes: "Free account token raises rate limits; store as COURTLISTENER_TOKEN."}
-  - {id: scotusblog, short: "SCOTUSblog", enabled: true, desk: GOV, name: SCOTUSblog, type: rss, url: "https://www.scotusblog.com/feed/", status: OK, poll: 30}
+  - {id: scotusblog, short: "SCOTUSblog", enabled: true, desk: GOV, name: SCOTUSblog, type: rss, url: "https://www.scotusblog.com/feed/", status: OK, poll: 30, fulltext: true}
   - {id: lawfare, name: Lawfare, type: rss, url: "https://www.lawfaremedia.org/feeds/articles", status: OK, poll: 60, notes: "Feed returned only 2 items; check for a fuller feed."}
 
 federal:
@@ -188,15 +191,15 @@ federal:
   - {id: house_committee_calendar, name: House committee calendar, type: html, url: "https://docs.house.gov/Committee/Calendar/ByWeek.aspx", status: OK, poll: 60}
   - {id: senate_floor, name: Senate floor activity, type: html, url: "https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm", status: OK, poll: 10}
   - {id: senate_hearings, name: Senate hearings and meetings, type: html, url: "https://www.senate.gov/committees/hearings_meetings.htm", status: OK, poll: 60}
-  - {id: the_hill, short: "The Hill", enabled: true, desk: GOV, fast: true, name: The Hill, type: rss, url: "https://thehill.com/feed/", status: OK, poll: 15}
+  - {id: the_hill, short: "The Hill", enabled: true, desk: GOV, fast: true, name: The Hill, type: rss, url: "https://thehill.com/feed/", status: OK, poll: 15, fulltext: true}
   - {id: politico_congress, name: Politico Congress, type: rss, url: "https://rss.politico.com/congress.xml", status: DC-BLOCK, poll: 15}
 
 national_world:
-  - {id: abc, short: "ABC", enabled: true, desk: WORLD, fast: true, name: ABC News, type: rss, url: "https://abcnews.go.com/abcnews/topstories", status: OK, poll: 10}
-  - {id: cbs, short: "CBS", enabled: true, desk: WORLD, fast: true, name: CBS News, type: rss, url: "https://www.cbsnews.com/latest/rss/main", status: OK, poll: 10}
+  - {id: abc, short: "ABC", enabled: true, desk: WORLD, fast: true, name: ABC News, type: rss, url: "https://abcnews.go.com/abcnews/topstories", status: OK, poll: 10, fulltext: true}
+  - {id: cbs, short: "CBS", enabled: true, desk: WORLD, fast: true, name: CBS News, type: rss, url: "https://www.cbsnews.com/latest/rss/main", status: OK, poll: 10, fulltext: true}
   - {id: euronews, name: Euronews, type: rss, url: "https://www.euronews.com/rss", status: OK, poll: 15}
-  - {id: aljazeera, short: "Al Jazeera", enabled: true, desk: WORLD, fast: true, name: Al Jazeera English, type: rss, url: "https://www.aljazeera.com/xml/rss/all.xml", status: OK, poll: 10}
-  - {id: france24_en, short: "France 24", enabled: true, desk: WORLD, fast: true, name: France 24 English, type: rss, url: "https://www.france24.com/en/rss", status: OK, poll: 15}
+  - {id: aljazeera, short: "Al Jazeera", enabled: true, desk: WORLD, fast: true, name: Al Jazeera English, type: rss, url: "https://www.aljazeera.com/xml/rss/all.xml", status: OK, poll: 10, fulltext: true}
+  - {id: france24_en, short: "France 24", enabled: true, desk: WORLD, fast: true, name: France 24 English, type: rss, url: "https://www.france24.com/en/rss", status: OK, poll: 15, fulltext: true}
   - {id: bbc_world, name: BBC World, type: rss, url: "https://feeds.bbci.co.uk/news/world/rss.xml", status: DC-BLOCK, poll: 10}
   - {id: npr, name: NPR News, type: rss, url: "https://feeds.npr.org/1001/rss.xml", status: DC-BLOCK, poll: 10}
   - {id: guardian_world, name: The Guardian World, type: rss, url: "https://www.theguardian.com/world/rss", status: DC-BLOCK, poll: 15}
@@ -239,7 +242,7 @@ law:
   - {id: nysba, name: "NYSBA (CasePrepPlus, State Law Digest, ethics opinions)", short: NYSBA, type: rss, url: "https://nysba.org/feed/", status: OK, poll: 60, enabled: true, desk: LAW, notes: "Weekly CasePrepPlus summarizes NY appellate decisions; also NYSBA ethics opinions and the monthly State Law Digest."}
   - {id: cl_ny_court_of_appeals, short: "NY Ct. App.", name: NY Court of Appeals opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ny/", status: OK, poll: 60, enabled: true, desk: LAW}
   - {id: cl_ca2, short: "2d Cir.", name: Second Circuit opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ca2/", status: OK, poll: 60, enabled: true, desk: LAW}
-  - {id: how_appealing, short: "How Appealing", name: How Appealing (appellate news), type: rss, url: "https://howappealing.abovethelaw.com/feed/", status: OK, poll: 60, enabled: true, desk: LAW}
+  - {id: how_appealing, short: "How Appealing", name: How Appealing (appellate news), type: rss, url: "https://howappealing.abovethelaw.com/feed/", status: OK, poll: 60, enabled: true, desk: LAW, fulltext: true}
   - {id: jdsupra_environmental, name: JD Supra Environmental Law, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=EnvironmentalLaw", status: DC-BLOCK, poll: 120, desk: LAW, notes: "Worked from the sandbox; GitHub runners get a block page (2026-10-15). Candidate for the V8 home fetcher."}
   - {id: nylj, name: New York Law Journal headlines, type: rss, url: "https://www.law.com/newyorklawjournal/feed/", status: DC-BLOCK, poll: 60, desk: LAW, notes: "Paywalled; headlines and links only. HTTP 403 from GitHub runners (2026-10-15). Candidate for the V8 home fetcher."}
   - id: dec_enb
