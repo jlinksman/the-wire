@@ -100,7 +100,7 @@ def group(items: list[dict], now: datetime | None = None) -> list[dict]:
         desk = Counter(m["desk"] for m in c).most_common(1)[0][0]
         out.append({
             "id": c[0]["id"],
-            "lead": c[0]["id"],
+            "lead": max(c, key=ms)["id"],      # newest headline leads; id stays the first report
             "members": [m["id"] for m in sorted(c, key=ms, reverse=True)],
             "sources": len(sources),
             "desk": desk,

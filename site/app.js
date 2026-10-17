@@ -74,6 +74,7 @@ const DATA_CACHE = "wire-data";
 function accept(json) {
   data = json;
   for (const it of data.items) it.ms = Date.parse(it.t);
+  indexStories();
   render();
 }
 
@@ -116,6 +117,7 @@ function render() {
   renderScoreboard();
   renderGovPanel();
   renderPinned();
+  renderFront();
   renderFeed();
   renderHealth();
 }
@@ -301,7 +303,9 @@ function row(it) {
     el("span", { class: "sep", text: "·" }),
     el("span", { class: "src", text: it.source }),
     it.kind ? el("span", { class: "sep", text: "·" }) : null,
-    it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null);
+    it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null,
+    storyOf.has(it.id) ? el("span", { class: "sep", text: "·" }) : null,
+    storyOf.has(it.id) ? el("span", { class: "plus", text: "+" + (storyOf.get(it.id).sources - 1) + " sources" }) : null);
   const headline = el("span", { class: "headline" }, it.title);
   const tags = (it.watch_terms && it.watch_terms.length ? it.watch_terms : it.watch || []).slice(0, 2);
   for (const tg of tags) headline.append(el("span", { class: "tag", text: String(tg).toUpperCase() }));
@@ -314,7 +318,11 @@ function row(it) {
     },
   }, meta, headline);
   const more = el("div", { class: "more" },
+    storyOf.has(it.id) && storyOf.get(it.id).summary ? machine(storyOf.get(it.id).summary, storyOf.get(it.id).sources) : null,
+    it.machine_summary && !storyOf.has(it.id) ? machine(it.machine_summary, 1) : null,
     it.summary && !it.agenda ? el("p", { text: it.summary }) : null,
+    quoteList(storyOf.has(it.id) ? storyQuotes(storyOf.get(it.id)) : (it.quotes || []).map((q) => ({ ...q, item: it }))),
+    storyOf.has(it.id) ? alsoList(storyOf.get(it.id), it.id) : null,
     it.blotter ? blotterTable(it.blotter) : null,
     it.agenda ? agendaList(it) : null,
     el("p", {}, el("a", { href: it.link, target: "_blank", rel: "noopener", text: "Open ↗" }),
@@ -411,6 +419,87 @@ function renderScoreboard() {
   }));
 }
 
+// --------------------------------------------------------------- stories (V5)
+// Same story across outlets: one row (the first report), the rest folded beneath it.
+const storyOf = new Map();   // lead item id -> story
+const folded = new Set();    // item ids shown only inside their story
+const byId = new Map();
+const FRONT_MAX = 6;
+
+function indexStories() {
+  storyOf.clear(); folded.clear(); byId.clear();
+  for (const it of data.items) byId.set(it.id, it);
+  for (const s of data.stories || []) {
+    const members = s.members.filter((m) => byId.has(m));
+    if (members.length < 2) continue;
+    s.members = members;
+    storyOf.set(s.lead, s);
+    for (const m of members) if (m !== s.lead) folded.add(m);
+  }
+}
+
+function machine(text, n) {
+  return el("div", { class: "machine" },
+    el("span", { class: "mlabel", text: "MACHINE SUMMARY · " + n + (n === 1 ? " report" : " reports") }),
+    el("p", { text: text }));
+}
+
+function storyQuotes(s) {
+  const out = [];
+  for (const m of s.members) for (const q of byId.get(m).quotes || []) {
+    if (out.length < 2 && !out.some((o) => o.by === q.by)) out.push({ ...q, item: byId.get(m) });
+  }
+  return out;
+}
+
+function quoteList(qs) {
+  if (!qs.length) return null;
+  return el("div", { class: "quotes" }, ...qs.map((q) => el("blockquote", {},
+    el("span", { class: "qt", text: "“" + q.text + "”" }),
+    el("span", { class: "qby" }, "— " + q.by + " · ", el("a", { href: q.item.link, target: "_blank", rel: "noopener", text: q.item.source + " ↗" })))));
+}
+
+function alsoList(s, except) {
+  const rows = s.members.filter((m) => m !== except).map((m) => byId.get(m));
+  return el("ul", { class: "also" }, ...rows.map((it) => el("li", {},
+    el("span", { class: "asrc", text: ago(it.ms) + " · " + it.source + " " }),
+    el("a", { href: it.link, target: "_blank", rel: "noopener", text: it.title }))));
+}
+
+function renderFront() {
+  const box = $("front");
+  const stories = (data.stories || []).filter((s) => storyOf.get(s.lead) === s && (!newOnly || !isSeen(byId.get(s.lead))));
+  box.hidden = desk !== "ALL" || (!stories.length && !data.front_page_url);
+  if (box.hidden) return;
+  const cards = stories.slice(0, FRONT_MAX).map((s) => {
+    const lead = byId.get(s.lead);
+    const open = openRows.has("f" + s.id);
+    const card = el("article", { class: "story" + (isSeen(lead) ? " seen" : "") + (open ? " open" : "") });
+    const head = el("button", { class: "head", "aria-expanded": String(open), onclick: () => {
+      openRows.has("f" + s.id) ? openRows.delete("f" + s.id) : openRows.add("f" + s.id);
+      card.classList.toggle("open");
+      head.setAttribute("aria-expanded", String(card.classList.contains("open")));
+    } },
+      el("span", { class: "meta" },
+        el("span", { class: "t" + (isFresh(Date.parse(s.last)) ? " fresh" : ""), text: ago(Date.parse(s.last)) }),
+        el("span", { class: "sep", text: "·" }),
+        el("span", { class: "desk " + s.desk, text: s.desk }),
+        el("span", { class: "sep", text: "·" }),
+        el("span", { class: "plus", text: s.sources + " sources" })),
+      el("span", { class: "headline", text: lead.title }));
+    const q = storyQuotes(s);
+    card.append(...[head,
+      s.summary ? machine(s.summary, s.sources) : null,
+      q.length ? quoteList(q.slice(0, 1)) : null,
+      el("div", { class: "more" }, q.length > 1 ? quoteList(q.slice(1)) : null, alsoList(s, s.lead))].filter(Boolean));
+    return card;
+  });
+  box.replaceChildren(
+    el("div", { class: "section-label" }, "FRONT PAGE",
+      data.front_page_url ? el("a", { class: "edition", href: data.front_page_url, target: "_blank", rel: "noopener", text: "MORNING EDITION ↗" }) : null),
+    ...cards);
+}
+
 // --------------------------------------------------------------- today in government
 function renderGovPanel() {
   const box = $("govpanel");
@@ -431,7 +520,7 @@ function renderGovPanel() {
 // --------------------------------------------------------------- feed
 function renderFeed() {
   const pinned = new Set(pinnedItems().map((it) => it.id));
-  const items = data.items.filter((it) => (desk === "ALL" || it.desk === desk) && !pinned.has(it.id) && (!newOnly || !isSeen(it)));
+  const items = data.items.filter((it) => (desk === "ALL" || it.desk === desk) && !pinned.has(it.id) && !folded.has(it.id) && (!newOnly || !isSeen(it)));
   const rows = [];
   let dividerPlaced = !prevVisit || newOnly;
   for (const it of items) {
