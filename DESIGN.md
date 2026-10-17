@@ -5,18 +5,30 @@ Research done 2026-10-16: iPhone-size screenshots of Techmeme, Memeorandum, Drud
 ## Core idea: an audience of one
 Mass-audience sites sort by recency or popularity and explain everything to strangers. The Wire has one reader with stated interests, one phone and a known routine (a morning catch-up, then glances). So it ranks by his priorities, uses shorthand, skips anything meant for newcomers, and is tuned for a 428px iPhone screen.
 
-## Rules
-- **Type.** Headlines in the system sans font, 16–17px, line height about 1.3. Monospace only where it carries meaning: times, desk tags, counts, metadata, the terminal chrome. (Monospace headlines fit about 46 characters per line on the phone; sans fits about 60, and reads faster.)
-- **Rows.** A gray meta line (time · desk · source · type), then the headline on its own line (Hacker News, Techmeme).
-- **Color is a signal, never decoration.** Amber means new or matched: fresh times under 30 minutes, new counts, watchlist hits. Red means weather alerts and failures only (Drudge's siren works because it's rare). Desk colors are muted so they don't compete.
-- **Priority beats recency.** Beacon is pinned above the feed (last 48 hours, up to 5 items).
-- **Respect the routine.** Items seen on the last visit are dimmed; desk buttons count what's new; a "new only" toggle exists.
-- **Say what's coming.** A TODAY / TOMORROW line for meetings and games (Punchbowl's "what to expect").
-- **Label the kind of item.** ▶ VIDEO, DOC, “ QUOTE, following his preference order: quotes, video, primary documents, then summaries (Semafor, Axios).
-- **Quiet when healthy.** Source health is one line; a warning shows at the top only when something is down.
-- **Fast beats dense.** The page opens instantly from a local copy, then refreshes.
-- **Now is literal.** Clocks for Beacon, Paris and Tel Aviv (Semafor's world clocks).
-- **Tap targets** at least 36–44px; 14px side gutters; nothing under 11px.
+## Principles (design pass 2, 2026-10-17)
+Research: Apple HIG (dark mode, typography, layout), Material's dark-theme guidance (soft surfaces, desaturated accents, no pure white), Level Access on halation for readers with astigmatism, Particle and Artifact for calm news layouts. These rules govern every new feature.
+1. **Content is the brightest thing on screen.** Labels, lines and buttons stay quiet.
+2. **One color, one meaning.** Amber = new or unread. Coral = live video and alerts. Sage = where you are. Desk colors appear only as small dots. A new feature doesn't get a new color.
+3. **Hierarchy from size, weight and space,** not capitals, color or outlines. Sentence case everywhere except the wordmark.
+4. **Serif for reading, sans for using.** Headlines, the edition, quotes: New York (`ui-serif`). Labels, buttons, metadata: San Francisco. Monospace only for the THE WIRE wordmark.
+5. **Calm by default, loud by exception.** Motion and strong color only for live video and alerts.
+6. **Every screen ends and fits a thumb.** Lists stop; choices come in short sets (segments, pills, regions); actions sit in the bottom half.
+7. **Same thing, same piece.** Row, card, section header, sheet, pill, segmented control. Build new features from these before inventing a seventh.
+8. **One gesture each.** Tap opens, swipe down closes, the tab bar goes home.
+9. **Respect the phone.** Follow the iPhone's text size and its Light/Dark setting (lockable in Settings). Tap targets 44pt or larger.
+10. **Glanceable in three seconds.** The top of Today answers: anything urgent, what's next, what's new.
+
+## Components
+- **Row:** headline (serif, 18pt regular) first; one gray line beneath: time (amber only if new) · source · kind · source count · watch tags (amber pill).
+- **Card:** soft surface, 16pt corners, no outline. Story cards: "N sources · desk dot", serif semibold headline, machine summary in secondary gray, one italic quote, "Updated N ago".
+- **Section header:** sentence case, 20pt semibold, with a quiet "See all".
+- **Sheet:** slides up for any detail or setting; title in serif; one green primary button.
+- **Segmented control:** Beacon | Region · Government | Law & courts · World | Sports.
+- **Pills:** Live regions (★ Pinned · Beacon · US · World · France · Israel); each region is a short list of channel rows with ▶ (or ↗ for sites) and a ☆ to pin.
+
+## Palette
+Dark: background #141619 · surface #1c1f23 · raised #252a2f · text #e8e5df / #aaaba7 / #7b7f82 · amber #e2b66a · coral #e98d7f · sage #93cfa8.
+Light: background #f5f3ee · surface #ffffff · raised #ebe8e2 · text #1d1f22 / #575b60 / #82868a · amber #9a6510 · coral #c0473a · sage #2f7a52.
 
 ## Navigation and reading (UX pass, 2026-10-16)
 Research: Apple HIG (tab bars, typography, layout), NN/g (hidden navigation, scrolling and attention, infinite scroll, dark mode), Hoober's thumb-zone study, NetNewsWire and Reeder.
@@ -28,9 +40,6 @@ Research: Apple HIG (tab bars, typography, layout), NN/g (hidden navigation, scr
 - **Top bar:** brand (taps to top), as-of time, a source-health dot (green, or amber with a count), refresh, settings.
 - **Text follows the iPhone's Text Size setting** (rem units on the system body font), with S/M/L/XL overrides in Settings. Tap targets 44pt or larger. Monospace only for times, labels and counts.
 - **Settings (per device):** text size, world clocks, new-only default, saved items, muted words, sources shown, source health.
-
-## Palette (dark)
-Background #0b0d10 · panel #12161b · lines #20262d · text #e6e6e6 · meta #8a9099 · faint #5c636b · amber #ffb000 · red #ff5d5d · green #5be38f · desks: Beacon #7fd1a0, Gov #8fb6e8, Law #c9a2e0, World #b8a98a, Sports #6fc7c7.
 
 ## Backlog from the research
 - **Story grouping** (Techmeme): one entry per story, other outlets' coverage indented beneath it with a "+3 sources" count. Planned for V5.

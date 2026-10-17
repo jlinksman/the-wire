@@ -75,7 +75,7 @@ def main(ed_path, data_path, state_path, out_path):
         if cards:
             color = DESK_COLOR.get(sec.get("desk", ""), "text")
             sections_html.append(
-                f'<section class="desk" style="--desk: var(--{color})"><h2><span>{esc(sec.get("desk", ""))}</span> {esc(sec.get("title", ""))}</h2>'
+                f'<section class="desk" style="--desk: var(--{color})"><h2><span>{esc(sec.get("desk", "")).title()}</span> {esc(sec.get("title", ""))}</h2>'
                 + "".join(cards) + "</section>")
 
     ahead = "".join(
@@ -91,7 +91,7 @@ def main(ed_path, data_path, state_path, out_path):
 
     page = TEMPLATE.format(
         title=f"The Wire Edition",
-        edition=esc(ed.get("edition", "Morning")).upper(),
+        edition=esc(ed.get("edition", "Morning")),
         stamp=esc(stamp),
         data_at=esc(data_at.strftime("%-I:%M %p ET")),
         lede=esc(ed.get("lede", "")),
@@ -109,56 +109,74 @@ def main(ed_path, data_path, state_path, out_path):
 TEMPLATE = """<title>{title}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* Layout: one reading column; desk sections in The Wire's colors; reporting in plain type, analysis set apart in a dashed box. */
+/* Layout: one reading column. Same design rules as The Wire: serif for reading, sans for
+   labels, sentence case, one color per meaning (amber = new, coral = live), analysis set
+   apart on its own surface. Follows the phone's light or dark setting. */
 :root {{
-  --bg: #0b0d10; --panel: #12161b; --line: #20262d; --text: #e6e6e6; --meta: #8a9099; --faint: #5c636b;
-  --amber: #ffb000; --green: #5be38f;
-  --beacon: #7fd1a0; --gov: #8fb6e8; --law: #c9a2e0; --world: #b8a98a; --sports: #6fc7c7;
-  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color-scheme: dark;
+  --bg: #f5f3ee; --surface: #ffffff; --raised: #ebe8e2; --hair: rgba(0,0,0,.08);
+  --text: #1d1f22; --text2: #575b60; --text3: #82868a; --new: #9a6510; --link: #2f7a52;
+  --beacon: #2f7a52; --gov: #3a66a0; --law: #7553a3; --world: #86682e; --sports: #2a7a77;
+  --serif: ui-serif, "New York", "Iowan Old Style", Charter, Georgia, serif;
+  --sans: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}}
+@media (prefers-color-scheme: dark) {{
+  :root:not([data-theme="light"]) {{
+    --bg: #141619; --surface: #1c1f23; --raised: #252a2f; --hair: rgba(255,255,255,.075);
+    --text: #e8e5df; --text2: #aaaba7; --text3: #7b7f82; --new: #e2b66a; --link: #93cfa8;
+    --beacon: #93cfa8; --gov: #9db9de; --law: #c4abd9; --world: #cdbd99; --sports: #88c6c3; color-scheme: dark;
+  }}
+}}
+:root[data-theme="dark"] {{
+  --bg: #141619; --surface: #1c1f23; --raised: #252a2f; --hair: rgba(255,255,255,.075);
+  --text: #e8e5df; --text2: #aaaba7; --text3: #7b7f82; --new: #e2b66a; --link: #93cfa8;
+  --beacon: #93cfa8; --gov: #9db9de; --law: #c4abd9; --world: #cdbd99; --sports: #88c6c3; color-scheme: dark;
 }}
 * {{ box-sizing: border-box; }}
-body {{ background: var(--bg); color: var(--text); font: 16px/1.45 var(--sans);
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 40px; }}
-main {{ max-width: 680px; margin: 0 auto; }}
-a {{ color: var(--green); }}
-:focus-visible {{ outline: 2px solid var(--amber); outline-offset: 2px; }}
-header {{ display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
-  font-family: var(--mono); border-bottom: 1px solid var(--line); padding-bottom: 10px; }}
-.brand {{ color: var(--green); font-weight: 700; letter-spacing: 0.12em; font-size: 15px; }}
-.asof {{ color: var(--meta); font-size: 12.5px; font-variant-numeric: tabular-nums; }}
-h1 {{ font-size: 28px; line-height: 1.15; margin: 18px 0 6px; text-wrap: balance; letter-spacing: -0.01em; }}
-.lede {{ font-size: 17px; color: #d5d8dc; margin: 0 0 6px; max-width: 65ch; }}
-.lede-label, .label {{ font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }}
-.ahead {{ margin: 18px 0 8px; border: 1px solid var(--line); padding: 10px 12px; font-family: var(--mono); }}
-.ahead h2, .desk h2 {{ font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--meta); margin: 0 0 6px; font-weight: 600; }}
-.ahead ul {{ list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }}
-.ahead li {{ display: grid; grid-template-columns: 8.4em 1fr; gap: 10px; font-size: 13px; }}
-.ahead .when {{ white-space: nowrap; color: var(--amber); font-variant-numeric: tabular-nums; }}
+body {{ background: var(--bg); color: var(--text); font: 17px/1.5 var(--sans); -webkit-font-smoothing: antialiased;
+  padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); padding-block: 16px 48px; }}
+main {{ max-width: 660px; margin: 0 auto; }}
+a {{ color: var(--link); }}
+:focus-visible {{ outline: 2px solid var(--link); outline-offset: 2px; }}
+header {{ display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }}
+.brand {{ font: 600 14px var(--mono); letter-spacing: .08em; color: var(--link); }}
+.asof {{ color: var(--text3); font-size: 13px; font-variant-numeric: tabular-nums; }}
+h1 {{ font: 600 30px/1.15 var(--serif); letter-spacing: -.015em; margin: 14px 0 0; text-wrap: balance; }}
+.lede-label, .label {{ display: block; font-size: 13px; color: var(--text3); }}
+.lede {{ margin: 16px 0 0; padding: 16px 18px; border-radius: 16px; background: var(--surface); }}
+.lede p {{ margin: 4px 0 0; font: 18px/1.5 var(--serif); }}
+.ahead {{ margin: 12px 0 0; padding: 14px 18px 10px; border-radius: 16px; background: var(--surface); }}
+.ahead h2 {{ margin: 0 0 4px; font-size: 13px; font-weight: 500; color: var(--text3); }}
+.ahead ul {{ list-style: none; margin: 0; padding: 0; }}
+.ahead li {{ display: grid; grid-template-columns: 8em 1fr; gap: 12px; padding: 6px 0; font-size: 15px; }}
+.ahead .when {{ white-space: nowrap; color: var(--text2); font-variant-numeric: tabular-nums; }}
 .ahead .what {{ min-width: 0; }}
 .ahead a {{ color: var(--text); }}
-.desk {{ margin-top: 26px; }}
-.desk h2 span {{ color: var(--desk); font-weight: 700; margin-right: 6px; }}
-.desk h2 {{ border-bottom: 1px solid var(--line); padding-bottom: 6px; }}
-.story {{ padding: 14px 0 12px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }}
-.story h3 {{ font-size: 19px; line-height: 1.25; margin: 0; text-wrap: balance; }}
-.report {{ margin: 0; color: #d0d3d7; max-width: 65ch; }}
-blockquote {{ margin: 0; padding-left: 12px; border-left: 2px solid var(--meta); }}
-blockquote p {{ margin: 0; font-size: 16px; }}
-cite {{ display: block; font-style: normal; font-family: var(--mono); font-size: 12px; color: var(--meta); margin-top: 3px; }}
-.why {{ border: 1px dashed var(--line); padding: 8px 10px; background: var(--panel); }}
-.why p {{ margin: 3px 0 0; font-size: 15px; color: #c5c9ce; }}
-.srcs {{ margin: 0; font-family: var(--mono); font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }}
-footer {{ margin-top: 28px; font-family: var(--mono); font-size: 11.5px; color: var(--faint); line-height: 1.5; }}
+.desk {{ margin-top: 34px; }}
+.desk h2 {{ display: flex; align-items: center; gap: 8px; margin: 0 0 2px; font: 650 21px var(--sans); letter-spacing: -.01em; }}
+.desk h2 span {{ display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text3); order: 2; }}
+.desk h2 span::before {{ content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--desk); }}
+.story {{ padding: 18px 0; border-bottom: 1px solid var(--hair); display: grid; gap: 10px; }}
+.story:last-child {{ border-bottom: 0; }}
+.story h3 {{ margin: 0; font: 600 21px/1.25 var(--serif); letter-spacing: -.01em; text-wrap: balance; }}
+.report {{ margin: 0; color: var(--text); max-width: 65ch; }}
+blockquote {{ margin: 0; padding-left: 14px; border-left: 2px solid var(--raised); }}
+blockquote p {{ margin: 0; font: italic 17px/1.45 var(--serif); }}
+cite {{ display: block; font-style: normal; font-size: 13px; color: var(--text3); margin-top: 4px; }}
+cite a {{ color: var(--text2); }}
+.why {{ padding: 12px 14px; border-radius: 12px; background: var(--surface); }}
+.why p {{ margin: 3px 0 0; font-size: 16px; color: var(--text); }}
+.srcs {{ margin: 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; color: var(--text3); }}
+.srcs a {{ color: var(--text2); }}
+footer {{ margin-top: 36px; font-size: 13px; color: var(--text3); line-height: 1.55; }}
 </style>
 <main>
-<header><span class="brand">THE WIRE · {edition} EDITION</span><span class="asof">{stamp} · feed as of {data_at}</span></header>
-<span class="lede-label">The day so far · analysis</span>
-<p class="lede">{lede}</p>
+<header><span class="brand">THE WIRE</span><span class="asof">{stamp} · feed as of {data_at}</span></header>
+<h1>{edition} Edition</h1>
+<div class="lede"><span class="lede-label">The day so far · analysis</span><p>{lede}</p></div>
 {ahead}
 {sections}
-<footer>{n} stories. Written by Claude from The Wire's sources; reporting is drawn from the cited outlets, and boxed text marked analysis is Claude's reading of it. {foot}</footer>
+<footer>{n} stories. Written by Claude from The Wire's sources. Reporting comes from the cited outlets; text marked analysis is Claude's reading of it. {foot}</footer>
 </main>
 """
 
