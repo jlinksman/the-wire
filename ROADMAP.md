@@ -38,9 +38,13 @@ Everything here was researched and scoped, then held back so V1 could start simp
   - *Route 2, morning edition (optional evening):* a Claude scheduled task on Joe's plan writes a front page with analysis and implications ("what this means for Optima, Beacon, my practice areas"). It publishes as a private page, linked from a FRONT PAGE line at the top of The Wire. It holds no Cloudflare or GitHub secrets.
   - *Rules:* analysis is styled differently from reporting and labeled as such; every claim cites its sources; the quote integrity rule applies to both routes; a summary that can't be traced to source text is dropped, not shown.
 
-## V6 — Push alerts
-- Through ntfy.sh (free). Beacon: National Weather Service warnings and official city or police posts matching approved keywords. Geopolitical: the same event from at least three independent outlets within 30 minutes, or a confirmed alert source. At most 5 a day, deduplicated.
-- A Cloudflare Worker on a 1–5 minute cron for the fast checks, which also triggers the GitHub build on time instead of relying on GitHub's scheduler.
+## V6 — Push alerts (built 2026-10-16)
+- [x] Through ntfy.sh (free) to the ntfy iPhone app, on a private topic kept in the NTFY_TOPIC secret.
+- [x] Beacon: National Weather Service warnings (checked directly every 3 minutes) and City of Beacon posts matching approved keywords.
+- [x] Geopolitical: the same story from at least three independent outlets within 30 minutes, with a keyword gate for military and major events.
+- [x] At most 5 a day (New York time), never the same thing twice; nothing from before the first run.
+- [x] The Cloudflare Worker that times the build also runs the 3-minute alert check; its state shows in source health.
+- Rules live in sources.yaml under `push_alerts`.
 
 ## V7 — World expansion
 - **City desks:** Paris and Tel Aviv, with original-language headlines and labeled machine translation.

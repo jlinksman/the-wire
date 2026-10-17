@@ -443,3 +443,27 @@ gov_panel:
 # ---------------------------------------------------------------- V5 edition
 # The written edition is a private Claude page (only Joe can open it); The Wire links to it.
 front_page_url: "https://claude.ai/artifact/LJCLHjSbCA8yycwHy8Zze4"
+
+# ---------------------------------------------------------------- V6 push alerts (ntfy.sh)
+# Rules for phone pushes. The build turns these into a short candidate list; the
+# Cloudflare Worker checks NWS directly every 3 minutes, sends at most daily_cap pushes
+# a day (New York time), and never sends the same thing twice. The ntfy topic is a
+# secret (NTFY_TOPIC), never stored here.
+push_alerts:
+  daily_cap: 5
+  nws:
+    url: "https://api.weather.gov/alerts/active?point=41.5048,-73.9696"
+    page: "https://forecast.weather.gov/MapClick.php?lat=41.5048&lon=-73.9696"
+    # Warnings only (not watches or advisories), plus anything NWS rates Extreme.
+    event_pattern: "Warning$"
+    always_severity: [Extreme]
+  beacon_official:
+    sources: [beacon_wp_posts]
+    # Whole words; a trailing * matches any ending.
+    keywords: [emergency, evacuat*, shelter in place, boil water, water main, gas leak, power outage, road closure, closed until further notice, missing, police activity, hazmat, hazardous, fire, flood, state of emergency, curfew, lockdown]
+  geopolitical:
+    desks: [WORLD, GOV]
+    min_outlets: 3          # distinct outlets on the same story
+    window_minutes: 30      # first three reports within this window
+    max_age_minutes: 90     # ignore stories older than this when first seen
+    keywords: [attack, strike, strikes, missile, invasion, invades, war, troops, explosion, bombing, killed, dead, coup, assassinat*, nuclear, earthquake, tsunami, hostage, terror, shot down, declares, martial law, blockade, ceasefire]

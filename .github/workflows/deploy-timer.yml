@@ -1,6 +1,7 @@
 name: Deploy build timer
 
-# Deploys the Cloudflare Worker that starts "Build feed" every 15 minutes.
+# Deploys the Cloudflare Worker that starts "Build feed" every 15 minutes and checks
+# push alerts every 3 minutes (V6).
 on:
   push:
     branches: [main]
@@ -20,6 +21,8 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+      WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
     steps:
       - uses: actions/checkout@v4
 
@@ -29,9 +32,22 @@ jobs:
           echo "::error::Add a GH_DISPATCH_TOKEN repository secret (fine-grained token, Actions read and write on this repo), then re-run."
           exit 1
 
+      - name: Bind the Worker to the KV namespace (ID stays in secrets, not git)
+        working-directory: worker
+        run: printf '\n[[kv_namespaces]]\nbinding = "WIRE"\nid = "%s"\n' "$WIRE_KV_ID" >> wrangler.toml
+
       - name: Deploy the Worker
         working-directory: worker
         run: npx --yes wrangler@4 deploy
+
+      - name: Give the Worker its ntfy topic
+        working-directory: worker
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then
+            echo "::warning::No NTFY_TOPIC secret yet. Push alerts stay off (and show as down in source health) until it's added."
+          else
+            printf '%s' "$NTFY_TOPIC" | npx --yes wrangler@4 secret put NTFY_TOPIC
+          fi
 
       - name: Give the Worker its GitHub token
         working-directory: worker

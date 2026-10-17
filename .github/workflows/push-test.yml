@@ -1,0 +1,24 @@
+name: Push alert test
+
+# Sends one test notification to the ntfy topic, to confirm the phone is subscribed.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+    steps:
+      - name: Send a test push
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "::error::Add the NTFY_TOPIC secret first."; exit 1; fi
+          code=$(curl -s -o /tmp/r -w "%{http_code}" -H "Content-Type: application/json" \
+            -d "{\"topic\":\"$NTFY_TOPIC\",\"title\":\"The Wire\",\"message\":\"Push alerts are connected. You'll get Beacon warnings and major breaking events here, at most 5 a day.\",\"tags\":[\"white_check_mark\"],\"priority\":3}" \
+            https://ntfy.sh/)
+          echo "ntfy answered HTTP $code"
+          [ "$code" = "200" ]
