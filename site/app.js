@@ -38,7 +38,7 @@ const store = {
   set(k, v) { try { window.localStorage.setItem(k, String(v)); } catch (e) { /* private mode */ } },
   json(k, d) { try { return JSON.parse(store.get(k)) ?? d; } catch (e) { return d; } },
 };
-const prefs = Object.assign({ size: "system", theme: "auto", clocks: true, newOnly: false, mutedSources: [], mutedWords: "", pins: [], liveRegion: null }, store.json(KEY.prefs, {}));
+const prefs = Object.assign({ size: "system", theme: "auto", speak: true, rate: 1, clocks: true, newOnly: false, mutedSources: [], mutedWords: "", pins: [], liveRegion: null }, store.json(KEY.prefs, {}));
 const savePrefs = () => store.set(KEY.prefs, JSON.stringify(prefs));
 let saved = store.json(KEY.saved, []);           // [{id, title, link, source, ms}]
 const saveSaved = () => store.set(KEY.saved, JSON.stringify(saved.slice(0, 100)));
@@ -276,6 +276,12 @@ function todayView() {
     out.push(el("button", { class: "down", onclick: openHealth },
       el("span", { class: "dot bad" }), bad.length + (bad.length > 1 ? " sources aren't updating" : " source isn't updating"), el("span", { class: "chev", text: "›" })));
   }
+  const since = prevVisit && Date.now() - prevVisit < 30 * 3600e3 ? prevVisit : null;
+  out.push(el("button", { class: "briefcard", onclick: openBrief },
+    el("span", { class: "bc-ico", "aria-hidden": "true", text: "▶" }),
+    el("span", { class: "bc-txt" },
+      el("span", { class: "bc-t", text: "Brief me" }),
+      el("span", { class: "bc-s", text: (since ? "What's new since " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) : "What matters today") + " · about 90 seconds" }))));
   const ahead = aheadBlock();
   if (ahead) out.push(ahead);
   if (data.front_page_url) {
@@ -453,6 +459,71 @@ function storyCard(s) {
       el("span", { class: "meta" }, el("span", { class: "t" + (isFresh(Date.parse(s.last)) && !isSeen(lead) ? " fresh" : ""), text: "Updated " + ago(Date.parse(s.last)) + (ago(Date.parse(s.last)) === "now" ? "" : " ago") }))));
 }
 
+// --------------------------------------------------------------- Brief me (written on demand, read aloud)
+let speechQueue = [];
+function stopSpeech() { try { speechSynthesis.cancel(); } catch (e) { /* no speech */ } speechQueue = []; }
+function bestVoice() {
+  try {
+    const vs = speechSynthesis.getVoices().filter((v) => /^en(-|_)US/i.test(v.lang));
+    const rank = (v) => (/premium/i.test(v.name) ? 3 : /enhanced/i.test(v.name) ? 2 : /^(Ava|Evan|Zoe|Nathan|Samantha|Allison|Tom)/.test(v.name) ? 1 : 0);
+    return vs.sort((a, b) => rank(b) - rank(a))[0] || null;
+  } catch (e) { return null; }
+}
+function speak(paragraphs, btn) {
+  if (!("speechSynthesis" in window)) return;
+  stopSpeech();
+  const voice = bestVoice();
+  speechQueue = paragraphs.map((text, i) => {
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.rate = prefs.rate || 1;
+    u.onend = () => { if (i === paragraphs.length - 1 && btn) btn.textContent = "▶ Listen"; };
+    return u;
+  });
+  for (const u of speechQueue) speechSynthesis.speak(u);
+  if (btn) btn.textContent = "■ Stop";
+}
+
+async function openBrief() {
+  // Safari only lets a page talk after a tap: start (silent) speech inside this tap.
+  try { if (prefs.speak && "speechSynthesis" in window) { stopSpeech(); speechSynthesis.speak(new SpeechSynthesisUtterance(" ")); } } catch (e) { /* ignore */ }
+  const status = el("p", { class: "sdesc", text: "Writing your briefing…" });
+  openSheet([el("div", { class: "smeta" }, el("span", { text: "Brief me" })), el("h2", { id: "sheet-title", class: "stitle", text: "Your briefing" }), status], "Your briefing");
+  const since = prevVisit && Date.now() - prevVisit < 30 * 3600e3 ? prevVisit : Date.now() - 12 * 3600e3;
+  let b;
+  try {
+    const r = await fetch("brief?since=" + Math.round(since), { credentials: "same-origin", redirect: "manual" });
+    if (r.type === "opaqueredirect" || r.status === 401 || r.status === 403) throw new Error("You're signed out. Reload the page to sign in.");
+    b = await r.json();
+    if (!r.ok) throw new Error(b.error || "HTTP " + r.status);
+  } catch (e) {
+    status.textContent = "Couldn't write the briefing: " + e.message;
+    return;
+  }
+  const texts = b.paragraphs.map((p) => p.text);
+  const listen = el("button", { class: "sbtn primary", text: "▶ Listen" });
+  listen.onclick = () => {
+    if (speechQueue.length && speechSynthesis.speaking) { stopSpeech(); listen.textContent = "▶ Listen"; } else speak(texts, listen);
+  };
+  const rate = el("div", { class: "segmini three rate" }, ...[[0.9, "Slower"], [1, "Normal"], [1.15, "Faster"]].map(([v, label]) => el("button", {
+    "aria-pressed": String((prefs.rate || 1) === v),
+    onclick: (e) => { prefs.rate = v; savePrefs(); [...e.currentTarget.parentNode.children].forEach((x) => x.setAttribute("aria-pressed", String(x === e.currentTarget))); if (speechSynthesis.speaking) speak(texts, listen); },
+  }, label)));
+  const byIdLocal = Object.fromEntries((b.sources || []).map((s) => [s.id, s]));
+  $("sheet-body").replaceChildren(...[
+    el("div", { class: "smeta" }, el("span", { text: "Machine-written from The Wire's sources" }), el("span", { text: "feed as of " + fmtTime.format(new Date(Date.parse(b.as_of))) })),
+    el("h2", { id: "sheet-title", class: "stitle", text: b.mode === "new" ? "What's new" : "Where things stand" }),
+    el("div", { class: "sactions" }, listen),
+    rate,
+    el("div", { class: "brief" }, ...b.paragraphs.map((p) => el("p", {}, p.text,
+      ...(p.refs || []).map((id) => byIdLocal[id]).filter(Boolean).map((s) => el("a", { class: "bref", href: s.link, target: "_blank", rel: "noopener", text: s.outlets > 1 ? s.source + " +" + (s.outlets - 1) : s.source }))))),
+    b.notice ? el("p", { class: "fine", text: b.notice }) : null,
+    b.dropped ? el("p", { class: "fine", text: (b.dropped === 1 ? "One line was left out because it couldn't" : b.dropped + " lines were left out because they couldn't") + " be traced to a source." }) : null,
+    el("p", { class: "fine", text: "Reading stops if the screen locks. Voice: download an Enhanced or Premium English voice in Settings › Accessibility › Spoken Content › Voices for the best sound." }),
+  ].filter(Boolean));
+  if (prefs.speak) speak(texts, listen);
+}
+
 // --------------------------------------------------------------- detail sheet
 let sheetReturn = null;
 function openSheet(nodes, title) {
@@ -467,6 +538,7 @@ function openSheet(nodes, title) {
   $("sheet-close").focus({ preventScroll: true });
 }
 function closeSheet() {
+  stopSpeech();
   $("sheet").classList.remove("up");
   $("scrim").hidden = true;
   document.documentElement.classList.remove("locked");
@@ -813,6 +885,7 @@ function openSettings() {
     el("p", { class: "fine", text: "“iPhone” follows Settings › Display & Brightness › Text Size." }),
     el("h3", { class: "sh3", text: "Display" }),
     toggle("World clocks on Today", "clocks"),
+    toggle("Read briefings aloud right away", "speak"),
     toggle("Desks open on new items only", "newOnly"),
     el("h3", { class: "sh3", text: "Saved" }),
     savedList,

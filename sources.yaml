@@ -467,3 +467,16 @@ push_alerts:
     window_minutes: 30      # first three reports within this window
     max_age_minutes: 90     # ignore stories older than this when first seen
     keywords: [attack, strike, strikes, missile, invasion, invades, war, troops, explosion, bombing, killed, dead, coup, assassinat*, nuclear, earthquake, tsunami, hostage, terror, shot down, declares, martial law, blockade, ceasefire]
+
+# ---------------------------------------------------------------- "Brief me" (on-demand spoken briefing)
+# The build picks the signal (below); the page's Brief me button asks Workers AI to write
+# a radio-style briefing from it, only when tapped. Noise patterns drop items by headline.
+briefing:
+  max_items: 32
+  target_words: 260           # about 90 seconds read aloud
+  noise_title: "^(opinion|op-ed|letter to the editor|letters?:|watch:|photos?:|quiz|crossword|the cartoon|on the spot|looking back|roots and shoots|5 questions|around town|the week ahead|calendar|sponsored|varsity update|history fest|halloween)|\\b(horoscope|recipe|best deals|review:|podcast)\\b"
+  # Local news (e.g. the Highlands Current) makes the briefing when it's about these places or bodies.
+  local_pattern: "\\b(Beacon|Dutchess|Fishkill|Wappinger|Newburgh|City Council|Planning Board|Zoning Board|Legislature|Serino|Kyriacou)\\b"
+  per_section: {Alert: 4, Beacon: 8, Government: 8, Law: 6, World: 10, Sports: 4}
+  # Single-outlet items only make the briefing from these sources (official or primary).
+  primary_sources: [beacon_wp_posts, beacon_wp_media, beacon_granicus_agendas, nws_beacon, dutchess_leg_board_minutes, dutchess_leg_committee_minutes, house_bills_week, senate_floor_activity, cl_ny_spill_law, dec_regs, nys_register, cl_ny_court_of_appeals]

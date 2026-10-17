@@ -24,6 +24,7 @@ Research: Apple HIG (dark mode, typography, layout), Material's dark-theme guida
 - **Section header:** sentence case, 20pt semibold, with a quiet "See all".
 - **Sheet:** slides up for any detail or setting; title in serif; one green primary button.
 - **Segmented control:** Beacon | Region · Government | Law & courts · World | Sports.
+- **Brief me:** a card near the top of Today. Tapping it writes a fresh spoken briefing of what's new since the last visit (Workers AI, only on tap, cached 15 minutes) and reads it aloud with the iPhone's own voice. Radio rules from NPR's newscast desk and broadcast writing guides: lead with what happened and why it matters, attribution before the claim, short present-tense sentences, few rounded numbers, about 90 seconds. Signal comes from the build: official and primary items, watchlist matches, and stories carried by two or more outlets; single-outlet national items, regional items, opinion and features stay out. Every sentence is checked against its cited items; untraceable lines are dropped and counted.
 - **Pills:** Live regions (★ Pinned · Beacon · US · World · France · Israel); each region is a short list of channel rows with ▶ (or ↗ for sites) and a ☆ to pin.
 
 ## Palette
