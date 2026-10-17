@@ -17,53 +17,41 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand">THE WIRE<span class="cursor">_</span></div>
-  <div class="asof" id="asof">loading…</div>
+  <button class="brand" id="brand" aria-label="Back to top">THE WIRE<span class="cursor">_</span></button>
+  <span class="asof" id="asof">loading…</span>
+  <div class="tools">
+    <button class="tool status" id="status-btn" aria-label="Source health"><span class="dot" id="status-dot"></span><span id="status-n"></span></button>
+    <button class="tool" id="refresh-btn" aria-label="Refresh">↻</button>
+    <button class="tool" id="settings-btn" aria-label="Settings">⚙</button>
+  </div>
 </header>
-<div class="clocks" id="clocks"></div>
+<button class="newpill" id="newpill" hidden></button>
 
-<div id="notices"></div>
-<div class="today" id="today"></div>
+<main id="view-today" class="view" data-tab="today" aria-label="Today"></main>
+<main id="view-beacon" class="view" data-tab="beacon" aria-label="Beacon" hidden></main>
+<main id="view-gov" class="view" data-tab="gov" aria-label="Government and law" hidden></main>
+<main id="view-world" class="view" data-tab="world" aria-label="World and sports" hidden></main>
+<main id="view-live" class="view" data-tab="live" aria-label="Live video" hidden></main>
 
-<section class="live" aria-label="Live video">
-  <button class="live-toggle" id="live-toggle" aria-expanded="false">
-    <span class="live-dot" aria-hidden="true"></span><span class="label">LIVE</span>
-    <span class="live-now" id="live-now">Watch a live channel</span>
-    <span class="chev" aria-hidden="true">▾</span>
-  </button>
-  <div class="live-panel" id="live-panel" hidden>
-    <div class="player" id="player"></div>
-    <div class="channel-groups" id="channels"></div>
+<!-- One player for the whole app: it moves between the Live tab and a mini-player by CSS
+     only, so the stream never reloads while you browse. -->
+<div class="player" id="player" hidden>
+  <div class="frame" id="frame"></div>
+  <div class="pbar">
+    <button class="pname" id="pname" aria-label="Open Live tab"></button>
+    <a class="pyt" id="pyt" target="_blank" rel="noopener">YouTube ↗</a>
+    <button class="pclose" id="pclose" aria-label="Stop video">✕</button>
   </div>
+</div>
+
+<nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
+
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+  <div class="grab" id="grab"><span></span></div>
+  <button class="sheet-close" id="sheet-close" aria-label="Close">✕</button>
+  <div class="sheet-body" id="sheet-body"></div>
 </section>
-
-<section class="lasthour" id="lasthour" hidden>
-  <div class="section-label">LAST HOUR</div>
-  <ol id="lasthour-list"></ol>
-</section>
-
-<nav class="desks" id="desks" aria-label="Desks"></nav>
-<button class="newline" id="newline" hidden></button>
-
-<section class="scoreboard" id="scoreboard" hidden aria-label="Scores and fixtures"></section>
-<section class="govpanel" id="govpanel" hidden aria-label="Today in government"></section>
-<section class="pinned" id="pinned" hidden aria-label="Beacon, last 48 hours">
-  <div class="section-label">BEACON · 48H</div>
-  <ol id="pinned-list"></ol>
-</section>
-<section class="front" id="front" hidden aria-label="Front page"></section>
-
-<main>
-  <ol class="feed" id="feed"></ol>
-</main>
-
-<footer id="footer">
-  <button class="health-line" id="health-line" aria-expanded="false"></button>
-  <div id="health" hidden>
-    <table><thead><tr><th>source</th><th>desk</th><th>items</th><th>last ok</th><th>status</th></tr></thead><tbody id="health-rows"></tbody></table>
-  </div>
-  <div class="fineprint">Headlines and links only. Updated every 15 minutes.</div>
-</footer>
 
 <script src="app.js"></script>
 </body>

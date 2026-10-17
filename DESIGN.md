@@ -18,6 +18,17 @@ Mass-audience sites sort by recency or popularity and explain everything to stra
 - **Now is literal.** Clocks for Beacon, Paris and Tel Aviv (Semafor's world clocks).
 - **Tap targets** at least 36–44px; 14px side gutters; nothing under 11px.
 
+## Navigation and reading (UX pass, 2026-10-16)
+Research: Apple HIG (tab bars, typography, layout), NN/g (hidden navigation, scrolling and attention, infinite scroll, dark mode), Hoober's thumb-zone study, NetNewsWire and Reeder.
+- **Bottom tab bar, five tabs:** Today · Beacon · Gov (Government | Law & courts) · World (World | Sports) · Live. Always visible; single-word labels; amber badges count new items; tapping the current tab scrolls to top. On desktop (≥900px) it becomes a left sidebar.
+- **Today ends.** Alerts, a one-line source warning, Ahead, the written edition, top 3 Beacon items, top 6 multi-source stories, last hour, recent scores, then "You're caught up." About three screens.
+- **Feeds stop.** 30 rows at a time with "Show more", sticky day dividers, the "since you last opened" line, and an end line. Background refreshes never move the list: a "N new" pill waits at the top.
+- **Detail sheet, not inline expansion.** Tapping an item opens a bottom sheet (summary, quotes, other outlets, agenda, blotter, Open / Share / Save); swipe down or ✕ to close.
+- **One player.** Live plays at the top of the Live tab and docks as a mini-player above the tab bar elsewhere, without reloading.
+- **Top bar:** brand (taps to top), as-of time, a source-health dot (green, or amber with a count), refresh, settings.
+- **Text follows the iPhone's Text Size setting** (rem units on the system body font), with S/M/L/XL overrides in Settings. Tap targets 44pt or larger. Monospace only for times, labels and counts.
+- **Settings (per device):** text size, world clocks, new-only default, saved items, muted words, sources shown, source health.
+
 ## Palette (dark)
 Background #0b0d10 · panel #12161b · lines #20262d · text #e6e6e6 · meta #8a9099 · faint #5c636b · amber #ffb000 · red #ff5d5d · green #5be38f · desks: Beacon #7fd1a0, Gov #8fb6e8, Law #c9a2e0, World #b8a98a, Sports #6fc7c7.
 
