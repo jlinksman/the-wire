@@ -924,6 +924,7 @@ def main() -> int:
     data_tracker = {a: track[a] for a in {x["addr"] for it in data["items"] for x in it.get("agenda") or [] if x.get("addr")} if a in track}
     data["tracker"] = data_tracker
     data["gov_panel"] = gov_panel(data["items"])
+    data["front_page_url"] = yaml.safe_load(CONFIG.read_text()).get("front_page_url")
     # V5: story grouping, open-text quotes, machine summaries. A failure here is
     # recorded in source health and never stops the feed from publishing.
     try:
