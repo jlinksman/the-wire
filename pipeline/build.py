@@ -33,6 +33,7 @@ from protego import Protego
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import agendas  # noqa: E402
+import stories  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "sources.yaml"
@@ -923,6 +924,16 @@ def main() -> int:
     data_tracker = {a: track[a] for a in {x["addr"] for it in data["items"] for x in it.get("agenda") or [] if x.get("addr")} if a in track}
     data["tracker"] = data_tracker
     data["gov_panel"] = gov_panel(data["items"])
+    # V5: story grouping, open-text quotes, machine summaries. A failure here is
+    # recorded in source health and never stops the feed from publishing.
+    try:
+        stories.run(state, data, {s["id"]: s for s in sources}, session, robots_allows, TIMEOUT, log)
+    except Exception as exc:
+        log(f"[v5] failed: {type(exc).__name__}: {exc}")
+        data["sources"].append({"id": "v5", "name": "Story grouping and summaries", "short": "Stories", "desk": "SYSTEM",
+                                "poll": 15, "last_success": None, "last_attempt": iso(now_utc()),
+                                "last_error": f"{type(exc).__name__}: {exc}"[:300], "last_status": None,
+                                "robots": "n/a", "items": 0})
     (DIST / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     save_state(state)
     failing = sum(1 for h in data["sources"] if h["last_error"])
