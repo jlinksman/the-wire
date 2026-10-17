@@ -34,6 +34,7 @@ from protego import Protego
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import agendas  # noqa: E402
 import stories  # noqa: E402
+import alerts  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "sources.yaml"
@@ -935,6 +936,11 @@ def main() -> int:
                                 "poll": 15, "last_success": None, "last_attempt": iso(now_utc()),
                                 "last_error": f"{type(exc).__name__}: {exc}"[:300], "last_status": None,
                                 "robots": "n/a", "items": 0})
+    # V6: push-alert candidates for the Cloudflare Worker, and its health.
+    try:
+        alerts.run(data, yaml.safe_load(CONFIG.read_text()).get("push_alerts") or {}, DIST, log)
+    except Exception as exc:
+        log(f"[alerts] failed: {type(exc).__name__}: {exc}")
     (DIST / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     save_state(state)
     failing = sum(1 for h in data["sources"] if h["last_error"])

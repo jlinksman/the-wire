@@ -21,13 +21,14 @@ You are my build partner on a private, single-user news site. I set scope; you i
 6. **Video is official embed or link only.** Never rehost, restream, or download video.
 7. **No silent failures.** Every source records its last success, last error, and item count, and the page shows a source-health list. A broken source must be visible, never hidden.
 8. **Private.** The site sits behind Cloudflare Access, locked to my email. The code repository is public, so it must never contain fetched content, my data, or keys. Fetched data goes straight to Cloudflare, not into git.
-9. **Secrets** (Cloudflare API token, account ID, KV namespace ID, GitHub dispatch token) live in GitHub Actions secrets. Never commit them.
+9. **Secrets** (Cloudflare API token, account ID, KV namespace ID, GitHub dispatch token, ntfy topic) live in GitHub Actions secrets. Never commit them.
 
 ## V1 architecture
 - **GitHub Actions in a public repository** (Actions minutes are free in public repos).
   - `build.yml` runs every 15 minutes: fetch the enabled sources, build `data.json`, and write it to **Workers KV** (free plan: 1,000 writes a day; this uses about 96). Fetch state lives in the Actions cache, never in git.
   - `deploy-site.yml` deploys the page to **Cloudflare Pages** only when site code changes, so deploys stay far under Pages' free build limits. A Pages Function (`functions/data.json.js`) serves the latest data from KV.
   - `worker/` is a Cloudflare Worker on a 15-minute cron that starts `build.yml` through GitHub's dispatch API, because GitHub's own scheduler ran it 3–5 hours late. `deploy-timer.yml` deploys it. GitHub's schedule stays as a backup.
+  - The same Worker runs a 3-minute push-alert check (V6): it reads `alerts.json` from KV (written by the build), checks NWS directly, and sends at most 5 pushes a day through ntfy.sh. `push-test.yml` sends one test push.
   - `keepalive.yml` makes a tiny monthly commit, because GitHub disables scheduled workflows in public repos after 60 days without commits.
 - **Cloudflare Access** (Zero Trust free plan) locks the whole site, data included, to my email.
 - GitHub's scheduler can run late under load. That's acceptable for V1; the page's "as of" time shows true freshness.

@@ -8,4 +8,7 @@ preview_urls = false
 REPO = "jlinksman/the-wire"
 
 [triggers]
-crons = ["*/15 * * * *"]
+crons = ["*/15 * * * *", "*/3 * * * *"]   # build timer; push-alert check
+
+# The KV binding (WIRE) is added at deploy time from the WIRE_KV_ID secret, so the
+# namespace ID never sits in this public repo. See .github/workflows/deploy-timer.yml.

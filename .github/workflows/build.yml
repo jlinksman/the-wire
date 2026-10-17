@@ -62,7 +62,12 @@ jobs:
 
       - name: Publish data to Workers KV
         if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
-        run: npx --yes wrangler@4 kv key put data.json --path dist/data.json --namespace-id "$WIRE_KV_ID" --remote
+        run: |
+          npx --yes wrangler@4 kv key put data.json --path dist/data.json --namespace-id "$WIRE_KV_ID" --remote
+          # Push-alert candidates for the Worker (V6). About 96 writes a day, like data.json.
+          if [ -f dist/alerts.json ]; then
+            npx --yes wrangler@4 kv key put alerts.json --path dist/alerts.json --namespace-id "$WIRE_KV_ID" --remote
+          fi
 
       - name: Note missing Cloudflare setup
         if: env.CLOUDFLARE_API_TOKEN == '' || env.WIRE_KV_ID == ''
