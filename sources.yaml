@@ -191,7 +191,7 @@ federal:
   - {id: house_committee_calendar, name: House committee calendar, type: html, url: "https://docs.house.gov/Committee/Calendar/ByWeek.aspx", status: OK, poll: 60}
   - {id: senate_floor, name: Senate floor activity, type: html, url: "https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm", status: OK, poll: 10}
   - {id: senate_hearings, name: Senate hearings and meetings, type: html, url: "https://www.senate.gov/committees/hearings_meetings.htm", status: OK, poll: 60}
-  - {id: the_hill, short: "The Hill", enabled: true, desk: GOV, fast: true, name: The Hill, type: rss, url: "https://thehill.com/feed/", status: OK, poll: 15, fulltext: true}
+  - {id: the_hill, short: "The Hill", enabled: true, desk: GOV, fast: true, name: The Hill, type: rss, url: "https://thehill.com/feed/", status: OK, poll: 15, notes: "Article pages return 403 to the build, so no full text; headlines and descriptions only."}
   - {id: politico_congress, name: Politico Congress, type: rss, url: "https://rss.politico.com/congress.xml", status: DC-BLOCK, poll: 15}
 
 national_world:
