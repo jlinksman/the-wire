@@ -19,6 +19,11 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - **Courts:** Appellate Division decisions filtered by watchlist terms and by the Second Department (which covers Dutchess); Southern District of New York and its bankruptcy court; court system notices on attorney registration, CLE, and the Rules of Professional Conduct; the weekly NYS Register for proposed state rules (NYSDEC especially); NYSDEC's proposed and adopted regulations page; JD Supra bankruptcy, real estate, and finance feeds; Volokh Conspiracy.
 - **Docket following:** follow specific federal cases by docket number through CourtListener. State cases on NYSCEF have no public API, so those stay manual.
 
+**V3 to-dos (Joe, when ready; deferred 2026-10-16):**
+- [ ] Get a free api.data.gov key (https://api.data.gov/signup/) and save it as the GitHub secret `DATA_GOV_API_KEY`. Unlocks Congress.gov bills and committee meetings.
+- [ ] Get a free NY Senate Open Legislation key (https://legislation.nysenate.gov/) and save it as the GitHub secret `NYSENATE_API_KEY`. Unlocks following NY bills by number and watch-term bill search.
+- [ ] Send the federal and NY bill numbers to follow (optional; watch terms work without them).
+
 ## V4 — Video Desk and Watch Now
 - Live and upcoming detection across government and news YouTube channels (free YouTube Data API key), a Watch Now rail with LIVE and STARTING IN badges, schedule merging (hearings, floor sessions, Supreme Court arguments, Beacon meetings), a docked player that keeps playing while I scroll, and video attached to related items.
 - Link out where embedding is blocked (C-SPAN's own networks, Pentagon webcasts, UN Web TV pages).
