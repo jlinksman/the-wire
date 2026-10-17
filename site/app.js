@@ -157,7 +157,7 @@ async function load(force) {
     try { (await caches.open(DATA_CACHE)).put("data.json", r); } catch (e) { /* ignore */ }
     if (!data || force || window.scrollY < 200) {
       pending = null;
-      $("newpill").hidden = true;
+      if (!updateReady) $("newpill").hidden = true;
       accept(json);
     } else {
       const known = new Set(data.items.map((it) => it.id));
@@ -184,12 +184,13 @@ async function load(force) {
 }
 
 $("newpill").addEventListener("click", () => {
+  if (updateReady) { applyUpdate(true); return; }
   $("newpill").hidden = true;
   if (pending) accept(pending);
   pending = null;
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
-$("refresh-btn").addEventListener("click", () => load(true));
+$("refresh-btn").addEventListener("click", () => { checkVersion(); load(true); });
 
 // --------------------------------------------------------------- render
 function render() {
@@ -896,9 +897,55 @@ function openSettings() {
     srcList,
     el("button", { class: "sbtn wide", text: "Source health ›", onclick: openHealth }),
     el("p", { class: "fine", text: "Settings and saved items stay on this device." }),
+    el("p", { class: "fine", text: "Version " + (APP_VERSION.startsWith("__") ? "local" : APP_VERSION) + (deployedAt ? " · deployed " + exact(Date.parse(deployedAt)) : "") + ". The Wire checks for a new version every time you open it." }),
+    el("button", { class: "sbtn wide", text: "Check for updates now", onclick: async (e) => { e.currentTarget.textContent = "Checking…"; const b = e.currentTarget; await checkVersion(); if (!updateReady) b.textContent = "You're on the newest version"; } }),
   ], "Settings");
 }
 $("settings-btn").addEventListener("click", openSettings);
+
+// --------------------------------------------------------------- always the newest version
+// Each deploy stamps a version (the commit) into this page and into version.json. The page
+// checks version.json whenever it's opened or brought back, and every 5 minutes. A newer
+// version reloads right away if nothing is in progress (no open sheet, video or
+// briefing); otherwise a pill offers the reload. Home-screen apps on iPhone resume
+// without reloading, so this check is what keeps them current.
+const APP_VERSION = (document.querySelector('meta[name="wire-version"]') || {}).content || "";
+if (location.search.includes("v=")) { try { history.replaceState(null, "", location.pathname); } catch (e) { /* ignore */ } }
+let updateReady = null;
+let deployedAt = null;
+const busy = () => !$("sheet").hidden || playing || (window.speechSynthesis && speechSynthesis.speaking);
+
+// Reload into the new version. At most two automatic tries per version in 10 minutes (the
+// second bypasses every cache with a versioned URL); after that only the pill reloads,
+// so a page that is briefly out of step with version.json can never loop.
+function updateAttempts() {
+  try { const a = JSON.parse(sessionStorage.getItem("wire.reloadTried")); if (a && a.v === updateReady && Date.now() - a.at < 600000) return a; } catch (e) { /* ignore */ }
+  return { v: updateReady, n: 0, at: Date.now() };
+}
+function applyUpdate(byHand) {
+  const a = updateAttempts();
+  if (!byHand && a.n >= 2) return false;
+  try { sessionStorage.setItem("wire.reloadTried", JSON.stringify({ v: updateReady, n: a.n + 1, at: a.n ? a.at : Date.now() })); } catch (e) { /* ignore */ }
+  if (navigator.serviceWorker) navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {});
+  if (a.n >= 1) location.replace(location.pathname + "?v=" + encodeURIComponent(updateReady));
+  else location.reload();
+  return true;
+}
+
+async function checkVersion() {
+  if (!APP_VERSION || APP_VERSION.startsWith("__")) return;   // local copy, not a deploy
+  try {
+    const r = await fetch("version.json?ts=" + Date.now(), { cache: "no-store", credentials: "same-origin", redirect: "manual" });
+    if (!r.ok) return;
+    const v = await r.json();
+    deployedAt = v.deployed_at || null;
+    if (!v.version || v.version === APP_VERSION) return;
+    updateReady = v.version;
+    if (!busy() && applyUpdate(false)) return;
+    $("newpill").textContent = "New version ready · Reload";
+    $("newpill").hidden = false;
+  } catch (e) { /* offline: try again next time */ }
+}
 
 // --------------------------------------------------------------- visit tracking
 function markVisit() { store.set(KEY.visit, Date.now()); }
@@ -908,6 +955,7 @@ document.addEventListener("visibilitychange", () => {
   } else {
     prevVisit = Number(store.get(KEY.visit)) || prevVisit;
     for (const k in shown) delete shown[k];
+    checkVersion();
     load(true);
   }
 });
@@ -923,7 +971,13 @@ setTopH();
 document.body.dataset.tab = tab;
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 loadCached().then(() => load(true));
-setInterval(() => { if (document.visibilityState === "visible") load(false); }, REFRESH_MS);
+checkVersion();
+setInterval(() => { if (document.visibilityState === "visible") { load(false); checkVersion(); } }, REFRESH_MS);
+if (navigator.serviceWorker) {
+  // A freshly deployed worker took over: reload once so page and worker match.
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (!reloaded && updateReady && !busy()) { reloaded = true; location.reload(); } });
+}
 setInterval(() => {
   if (!data) return;
   renderTop();

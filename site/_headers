@@ -1,0 +1,14 @@
+# Cloudflare Pages headers. The page, worker and version file must never be served stale,
+# so the app always picks up the newest deploy.
+/
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache
+/app.js
+  Cache-Control: no-cache
+/style.css
+  Cache-Control: no-cache
+/version.json
+  Cache-Control: no-store

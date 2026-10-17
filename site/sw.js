@@ -1,10 +1,15 @@
-// The Wire — offline shell. The page opens instantly from cache, then refreshes.
-// data.json is never cached here (app.js keeps its own copy); auth redirects pass through.
-const SHELL = "wire-shell-v7";
+// The Wire — service worker. Goal: always run the newest deployed version, and still
+// open when offline.
+//   - Page, script and styles: network first (3.5 s timeout), saved copy only as a fallback.
+//   - data.json, brief, version.json and sign-in redirects are never touched here.
+// Every deploy stamps VERSION, so the browser sees a changed worker and installs it at once.
+const VERSION = "__VERSION__";
+const SHELL = "wire-shell-" + VERSION;
 const FILES = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icon-180.png", "icon-192.png"];
+const TIMEOUT_MS = 3500;
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: "reload" })))).catch(() => {}).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {
@@ -13,18 +18,27 @@ self.addEventListener("activate", (e) => {
     .then(() => self.clients.claim()));
 });
 
+self.addEventListener("message", (e) => { if (e.data === "SKIP_WAITING") self.skipWaiting(); });
+
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
-  if (url.pathname.endsWith("/data.json") || url.searchParams.has("reauth")) return;
-  // Stale-while-revalidate: answer from cache now, update the cache in the background.
-  e.respondWith(caches.open(SHELL).then(async (cache) => {
-    const key = e.request.mode === "navigate" ? "index.html" : e.request;
-    const cached = await cache.match(key);
-    const fresh = fetch(e.request, { redirect: "manual" }).then((res) => {
+  const p = url.pathname;
+  if (p.endsWith("/data.json") || p.endsWith("/brief") || p.endsWith("/version.json") || url.searchParams.has("reauth")) return;
+  const key = e.request.mode === "navigate" ? "index.html" : e.request;
+  e.respondWith((async () => {
+    const cache = await caches.open(SHELL);
+    try {
+      const res = await Promise.race([
+        fetch(e.request, { redirect: "manual", cache: "no-cache" }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), TIMEOUT_MS)),
+      ]);
       if (res.ok && res.type === "basic") cache.put(key, res.clone());
       return res;
-    }).catch(() => cached);
-    return cached || fresh;
-  }));
+    } catch (err) {
+      const saved = await cache.match(key);
+      if (saved) return saved;
+      throw err;
+    }
+  })());
 });

@@ -29,6 +29,7 @@ You are my build partner on a private, single-user news site. I set scope; you i
   - `deploy-site.yml` deploys the page to **Cloudflare Pages** only when site code changes, so deploys stay far under Pages' free build limits. A Pages Function (`functions/data.json.js`) serves the latest data from KV.
   - `worker/` is a Cloudflare Worker on a 15-minute cron that starts `build.yml` through GitHub's dispatch API, because GitHub's own scheduler ran it 3–5 hours late. `deploy-timer.yml` deploys it. GitHub's schedule stays as a backup.
   - The same Worker runs a 3-minute push-alert check (V6): it reads `alerts.json` from KV (written by the build), checks NWS directly, and sends at most 5 pushes a day through ntfy.sh. `push-test.yml` sends one test push.
+  - Every site deploy stamps the commit into the page, `sw.js` and `version.json`. The page checks `version.json` each time it's opened or resumed and reloads into a newer version when nothing is in progress (otherwise a pill offers it). The service worker is network-first with an offline fallback, and `_headers` keeps the page files from being cached stale.
   - `keepalive.yml` makes a tiny monthly commit, because GitHub disables scheduled workflows in public repos after 60 days without commits.
 - **Cloudflare Access** (Zero Trust free plan) locks the whole site, data included, to my email.
 - GitHub's scheduler can run late under load. That's acceptable for V1; the page's "as of" time shows true freshness.
