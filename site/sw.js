@@ -1,6 +1,6 @@
 // The Wire — offline shell. The page opens instantly from cache, then refreshes.
 // data.json is never cached here (app.js keeps its own copy); auth redirects pass through.
-const SHELL = "wire-shell-v3";
+const SHELL = "wire-shell-v4";
 const FILES = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icon-180.png", "icon-192.png"];
 
 self.addEventListener("install", (e) => {

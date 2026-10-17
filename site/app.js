@@ -670,6 +670,7 @@ function renderPlayer() {
     p.hidden = true;
     $("frame").replaceChildren();
     document.body.classList.remove("has-mini", "has-stage");
+    document.documentElement.classList.remove("stage-lock");
     return;
   }
   p.hidden = false;
@@ -677,12 +678,14 @@ function renderPlayer() {
   p.classList.toggle("mini", docked);
   document.body.classList.toggle("has-mini", docked);
   document.body.classList.toggle("has-stage", !docked);
+  // On the Live tab the video stays put and only the channel list scrolls beneath it.
+  document.documentElement.classList.toggle("stage-lock", !docked);
   $("pname").textContent = v.name;
   $("pyt").href = "https://www.youtube.com/channel/" + v.channel_id + "/live";
   const existing = $("frame").querySelector("iframe");
   if (!existing || existing.dataset.channel !== v.channel_id) {
     $("frame").replaceChildren(el("iframe", {
-      src: "https://www.youtube.com/embed/live_stream?channel=" + encodeURIComponent(v.channel_id) + "&autoplay=1&mute=1&playsinline=1",
+      src: "https://www.youtube.com/embed/live_stream?channel=" + encodeURIComponent(v.channel_id) + "&autoplay=1&mute=0&playsinline=1&enablejsapi=1&origin=" + encodeURIComponent(location.origin),
       title: v.name + " live", "data-channel": v.channel_id,
       allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: true,
       referrerpolicy: "strict-origin-when-cross-origin",
@@ -690,6 +693,13 @@ function renderPlayer() {
   }
 }
 $("pclose").addEventListener("click", () => { playing = false; render(); });
+// Safari only allows sound after a tap. If the stream started silent, this tap turns
+// sound on through YouTube's embed API.
+function ytCommand(func, args = []) {
+  const f = $("frame").querySelector("iframe");
+  if (f && f.contentWindow) f.contentWindow.postMessage(JSON.stringify({ event: "command", func, args }), "*");
+}
+$("psound").addEventListener("click", () => { ytCommand("unMute"); ytCommand("setVolume", [100]); ytCommand("playVideo"); });
 $("pname").addEventListener("click", () => go("live"));
 
 // --------------------------------------------------------------- source health (sheet)
