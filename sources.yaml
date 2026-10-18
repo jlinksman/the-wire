@@ -371,13 +371,24 @@ teams:
       - "https://site.api.espn.com/apis/site/v2/sports/soccer/usa.nwsl/teams/15364/schedule?fixture=true"
 
 # Live player lineup (V1), one row per group, in order. channel_id = YouTube channel
-# live embed; link = open elsewhere (embedding not allowed). Tested 2026-10-16 evening;
+# live embed; audio = official live radio stream (played with the browser's audio player);
+# embed = the publisher's own player page (only where it allows framing); link = open
+# elsewhere (embedding not allowed). Round 2 added 2026-10-17. Tested 2026-10-16 evening;
 # Israeli channels were off air for Shabbat, so a daytime retest decides which stay.
 live_lineup:
   Beacon:
     - {name: City meetings, channel_id: UCvPpigGwZDeR7WYmw-SuDxg, note: "council, boards", meetings: true}
     - {name: School board, channel_id: UCUxD5Qj1i__1hCVsPilNjGw, note: "BCSD"}
     - {name: Dutchess Legislature, link: "https://totalwebcasting.com/view/?id=dutchess"}
+    - {name: Dutchess County, channel_id: UC55upj7VD0p945dtBDWuGQg, note: "when live"}
+    - {name: City of Newburgh, channel_id: UCV5WAVf4DXJLCSU2yXImM2g, note: "council, 2nd & 4th Mon 7pm"}
+  Radio:
+    - {name: WAMC, audio: "https://playerservices.streamtheworld.com/api/livestream-redirect/WAMCFM.mp3", site: "https://www.wamc.org/", note: "Northeast Public Radio, 24/7"}
+    - {name: WNYC 93.9, audio: "https://fm939.wnyc.org/wnycfm", site: "https://www.wnyc.org/", note: "NPR New York, 24/7"}
+  New York:
+    - {name: State Assembly, embed: "https://nystateassembly.granicus.com/ViewPublisher.php?view_id=13", site: "https://nyassembly.gov/av/live/", note: "floor and hearings, when in session"}
+    - {name: Governor Hochul, channel_id: UCQJp4eSJgbFroNySGthEiqA, note: "when live"}
+    - {name: NY Senate, channel_id: UCVJzgJ1u9YANbvHDHryZO2g, note: "when in session"}
   US:
     - {name: NBC News NOW, channel_id: UCeY0bbntWzzVIaj2z3QigXg}
     - {name: CBS News 24/7, channel_id: UC8p1vwvWtl6T73JiExfWs1g}
@@ -385,13 +396,20 @@ live_lineup:
     - {name: C-SPAN events, channel_id: UCb--64Gl51jIEVE-GLDAVTg}
     - {name: White House, channel_id: UCYxRlFDqcWM4y7FfpiAN3KQ}
     - {name: House floor, channel_id: UCqU8qiVHYmLsF0JIMByCTvw, note: "when in session"}
-    - {name: NY Senate, channel_id: UCVJzgJ1u9YANbvHDHryZO2g, note: "when in session"}
+    - {name: Scripps News, channel_id: UCTln5ss6h6L_xNfMeujfPbg}
+    - {name: PBS NewsHour, channel_id: UC6ZFN9Tx6xh-skXCuRHCDpQ, note: "evenings and hearings"}
+    - {name: NASA, channel_id: UCLA_DiR1FfKNvjuUpBHmylQ, note: "launches and events"}
     - {name: C-SPAN floor & hearings, link: "https://www.c-span.org/live/"}
+    - {name: Supreme Court arguments, link: "https://www.supremecourt.gov/oral_arguments/live.aspx", note: "live audio on argument days"}
   World:
     - {name: Al Jazeera, channel_id: UCNye-wNBqNL5ZzHSJj3l8Bg}
     - {name: France 24 English, channel_id: UCQfwfsi5VrQ8yKZ-UWmAEFg}
     - {name: DW News, channel_id: UCknLrEdhRCp1aegoMqRaCZg}
     - {name: Reuters, channel_id: UChqUTb7kYRX8-EiaN3XFrSQ, note: "events"}
+    - {name: TRT World, channel_id: UC7fWeaHhqgM4Ry-RMpM2YYw}
+    - {name: Euronews, channel_id: UCSrZ3UV4jOidv8ppoVuvW9Q}
+    - {name: European Parliament, channel_id: UCvU4p_w08osQsrNi_I4ZtDA, note: "plenary, when live"}
+    - {name: United Nations, channel_id: UC5O114-PQNYkurlTg6hekZw, note: "Security Council, when live"}
   France:
     - {name: France 24, channel_id: UCCCPCZNChQdGa9EkATeye4g}
     - {name: franceinfo, channel_id: UCO6K_kkdP-lnSCiO3tPx7WA}
