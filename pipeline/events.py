@@ -133,14 +133,23 @@ SECTION_SCOPE = {
 }
 
 
+PEOPLE_INFO: dict = {}
+
+
 def tag(data: dict, src_by_id: dict, beats_cfg: dict) -> None:
     """Add quiet, scope and beats to each item in data.json (computed every build, so
     config changes apply to stored items too)."""
     beat_re = {k: re.compile(v["pattern"], re.IGNORECASE) for k, v in (beats_cfg or {}).items()}
+    PEOPLE_INFO["map"] = {p["id"]: p for p in data.get("people", [])}
     for it in data["items"]:
         src = src_by_id.get(it["source_id"], {})
-        if src.get("quiet"):
-            it["quiet"] = True
+        if src.get("quiet") or src.get("person_feed"):
+            it["quiet"] = True          # person feeds show in Following and inside stories, not as desk rows
+        if it.get("people"):
+            pmap = PEOPLE_INFO.get("map", {})
+            persp = [pmap[p]["perspective"] for p in it["people"] if p in pmap and pmap[p].get("perspective")]
+            if persp:
+                it["perspective"] = persp[0]
         if src.get("no_ai"):
             it["no_ai"] = True
         if src.get("no_brief"):
@@ -154,6 +163,8 @@ def tag(data: dict, src_by_id: dict, beats_cfg: dict) -> None:
         text = f"{it['title']} {it.get('summary', '')[:200]}"
         b = [k for k, rx in beat_re.items() if rx.search(it["title"]) or (scope == "world" and rx.search(text))]
         b += [k for k in src.get("beats") or [] if k not in b]      # a city outlet is always on its beat
+        if it.get("people") and it.get("kind") != "POST":
+            b.append("following")
         if b:
             it["beats"] = b
 

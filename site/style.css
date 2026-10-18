@@ -452,3 +452,15 @@ html.stage-lock .stage { display: none; }
 .ptr.busy .ptr-i { animation: ptrspin 0.8s linear infinite; }
 @keyframes ptrspin { to { transform: rotate(360deg); } }
 html { overscroll-behavior-y: contain; }
+
+/* People and range of views */
+.views { list-style: none; margin: 0; padding: 0; }
+.views li { display: grid; gap: 3px; padding: 10px 0; border-bottom: 1px solid var(--hair); }
+.views li:last-child { border-bottom: 0; }
+.vlab { font-size: 0.8rem; color: var(--text3); }
+.views a { color: var(--text); text-decoration: none; font-family: var(--serif); font-size: 1.02rem; }
+.vsum { font-size: 0.9rem; color: var(--text2); }
+.trow.person { align-items: flex-start; }
+.pinfo { display: grid; gap: 2px; min-width: 0; }
+.pn { font-weight: 600; }
+.pr, .pl { font-size: 0.84rem; color: var(--text3); }

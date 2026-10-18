@@ -22,6 +22,7 @@ always:
       - Never smooth over a conflict between outlets; say who reports what.
       - No color you didn't see in the reports. No "sources say" unless a report says it.
       - When a figure changes during the day, give the latest and say it is the latest.
+      - Opinion and analysis are always attributed to the person ("Lowry argues...", "Klein says on his podcast..."); never state an opinion as fact.
   copy:
     inspired_by: E.B. White
     rules:
