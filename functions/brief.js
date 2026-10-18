@@ -8,6 +8,7 @@
 //
 // GET /brief?since=<ms>            -> JSON {paragraphs, sources, ...}
 // GET /brief?since=<ms>&beat=state  -> one category only (local, state, national, world, or a city beat)
+// &style=narrative                 -> connected prose instead of a newscast
 // GET /brief?since=<ms>&format=text -> plain text (for a Siri Shortcut)
 
 const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
@@ -22,6 +23,20 @@ const ALLOWED_NAMES = new Set(("Beacon Dutchess Hudson Valley New York Joe Optim
   + "Supreme Court Congress Senate House State States Department County City Council Board Democrats Republicans Democrat Republican "
   + "US U.S American Americans Federal European EU United White Administration Officials Lawmakers "
   + "January February March April May June July August September October November December").split(" "));
+
+// Narrative style: one connected story of the day, for reading or a longer listen.
+const NARRATIVE = (target, label) => `You write a short narrative account of the news for one reader, Joe, who lives in Beacon, New York. He owns an environmental remediation and spill-response company and is a New York attorney with a background in environmental law, bankruptcy, anti-money-laundering, commercial real estate and land use.
+
+Write it as connected prose, like a good host telling the story of the day, not a list of headlines:
+- Use only facts stated in the numbered items. Never add outside knowledge, background, guesses, or your own opinion.
+- Open with the biggest development and why it is the day's main story, according to the items. Then move through the rest in an order that makes sense, with real transitions that connect related stories ("That same pressure shows up in Albany...", "Closer to home..."). Group stories that share a theme.
+- Where outlets disagree, say so and name them. Attribute every opinion to its author.
+- Write in paragraphs of three to five sentences. Plain, vivid, exact; no hype, no clichés.
+- You may quote only from an item's Quote line, word for word, and name the speaker.
+- About ${target} words in total.${label ? `
+- Cover ${label} news only.` : ""}
+
+Reply with JSON only, no other text: {"stories":[{"text":"one paragraph","refs":[1,4]}]} in reading order, where refs are the item numbers each paragraph uses.`;
 
 const SYSTEM = (target, label) => `You write a short spoken news briefing for one listener, Joe, who lives in Beacon, New York. He owns an environmental remediation and spill-response company and is a New York attorney with a background in environmental law, bankruptcy, anti-money-laundering, commercial real estate and land use.
 
@@ -51,7 +66,8 @@ export async function onRequestGet({ request, env }) {
   const beats = input.beats || [{ id: "all", label: "All" }];
   const beatId = beats.some((b) => b.id === url.searchParams.get("beat")) ? url.searchParams.get("beat") : "all";
   const beat = beats.find((b) => b.id === beatId) || beats[0];
-  const cacheKey = new Request(`https://the-wire.brief/${encodeURIComponent(input.generated_at)}/${bucket}/${beatId}/${format}`);
+  const style = url.searchParams.get("style") === "narrative" ? "narrative" : "newscast";
+  const cacheKey = new Request(`https://the-wire.brief/${encodeURIComponent(input.generated_at)}/${bucket}/${beatId}/${style}/${format}`);
   const cache = caches.default;
   if (!url.searchParams.has("fresh")) {
     const hit = await cache.match(cacheKey);
@@ -79,9 +95,9 @@ export async function onRequestGet({ request, env }) {
     for (const m of [MODEL, FALLBACK_MODEL]) {
       try {
         const out = await env.AI.run(m, {
-          messages: [{ role: "system", content: SYSTEM(beatId === "all" ? input.target_words || 260 : 180, beatId === "all" ? null : beat.label)
+          messages: [{ role: "system", content: (style === "narrative" ? NARRATIVE(beatId === "all" ? 450 : 300, beatId === "all" ? null : beat.label) : SYSTEM(beatId === "all" ? input.target_words || 260 : 180, beatId === "all" ? null : beat.label))
             + ((input.house_rules || {})[beatId] || (input.house_rules || {}).all ? "\n\n" + ((input.house_rules || {})[beatId] || input.house_rules.all) : "") }, { role: "user", content: prompt }],
-          max_tokens: 900, temperature: 0.2,
+          max_tokens: style === "narrative" ? 1300 : 900, temperature: 0.2,
         });
         const parsed = parseStories(out && out.response);
         if (parsed.length) { stories = parsed; model = m; break; }
@@ -105,7 +121,7 @@ export async function onRequestGet({ request, env }) {
   }
 
   const where = beatId === "all" ? "on The Wire" : BEAT_PHRASE[beatId] || `in ${beat.label}`;
-  const opener = `It's ${fmtTime(now)}. ` + (!numbered.length
+  const opener = style === "narrative" && numbered.length ? `It's ${fmtTime(now)}. Here's the story of the day ${where}.` : `It's ${fmtTime(now)}. ` + (!numbered.length
     ? `There's nothing new ${where} in the last day.`
     : mode === "new"
     ? `Here's what's new ${where} since ${fmt(since)}.`
@@ -117,7 +133,7 @@ export async function onRequestGet({ request, env }) {
   const byId = Object.fromEntries(items.map((it) => [it.id, it]));
   const body = {
     as_of: input.generated_at, written_at: new Date(now).toISOString(), since: new Date(since).toISOString(),
-    mode, model, dropped, notice, paragraphs, beat: beatId, beats,
+    mode, model, dropped, notice, paragraphs, beat: beatId, beats, style,
     sources: usedIds.map((id) => byId[id]).filter(Boolean).map((it) => ({ id: it.id, title: it.title, source: it.source, outlets: it.outlets, link: it.link })),
   };
   const res = reply(body, format, 200);

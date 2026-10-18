@@ -464,3 +464,10 @@ html { overscroll-behavior-y: contain; }
 .pinfo { display: grid; gap: 2px; min-width: 0; }
 .pn { font-weight: 600; }
 .pr, .pl { font-size: 0.84rem; color: var(--text3); }
+
+/* Brief me chooser */
+.linkbtn { color: var(--link, var(--text2)); text-decoration: underline; font-size: inherit; padding: 0; }
+.sbtn.wide { width: 100%; }
+.brief.narrative p { font-size: 1.08rem; line-height: 1.6; }
+.segmini.two { display: grid; grid-template-columns: 1fr 1fr; }
+.segmini.two button { width: 100%; }
