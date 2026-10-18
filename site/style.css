@@ -400,3 +400,7 @@ html.stage-lock .stage { display: none; }
   .player.mini { bottom: 20px; }
   .sheet { left: calc(50% - 320px + var(--side) / 2); right: auto; width: 640px; }
 }
+
+/* Signed out / offline */
+.signin { margin: 40px 0; padding: 22px 20px; border-radius: var(--radius); background: var(--surface); display: grid; gap: 10px; }
+.signin .sbtn { justify-self: stretch; }

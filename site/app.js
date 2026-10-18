@@ -175,6 +175,7 @@ async function load(force) {
     a.classList.add("stale");
     if (e.message === "signed out" || e instanceof TypeError) {
       a.replaceChildren(el("a", { href: "./?reauth=" + Date.now(), text: data ? "offline · sign in" : "sign in" }));
+      if (!data) showSignIn(e.message === "signed out");
     } else if (!data) {
       a.textContent = "couldn't load (" + e.message + ")";
     }
@@ -191,6 +192,19 @@ $("newpill").addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 $("refresh-btn").addEventListener("click", () => { checkVersion(); load(true); });
+
+// The home-screen app keeps its own sign-in, separate from Safari's, so it can be signed
+// out while Safari is signed in. Say so plainly instead of showing an empty page.
+function showSignIn(signedOut) {
+  $("view-today").hidden = false;
+  $("view-today").replaceChildren(el("div", { class: "signin" },
+    el("h2", { class: "stitle", text: signedOut ? "Sign in to The Wire" : "Can't reach The Wire" }),
+    el("p", { class: "sdesc", text: signedOut
+      ? "The home-screen app keeps its own sign-in, separate from Safari. Sign in once here with your email code and it stays signed in for a month."
+      : "No connection right now. The Wire will load as soon as you're back online." }),
+    el("a", { class: "sbtn primary", href: "./?reauth=" + Date.now(), text: signedOut ? "Sign in" : "Try again" }),
+    el("p", { class: "fine", text: "Tip: when the code arrives, copy it from Mail and come straight back; the sign-in page stays open in the app." })));
+}
 
 // --------------------------------------------------------------- render
 function render() {

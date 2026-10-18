@@ -1,16 +1,15 @@
-// The Wire — service worker. Goal: always run the newest deployed version, and still
-// open when offline.
-//   - Page, script and styles: network first (3.5 s timeout), saved copy only as a fallback.
-//   - data.json, brief, version.json and sign-in redirects are never touched here.
-// Every deploy stamps VERSION, so the browser sees a changed worker and installs it at once.
+// The Wire — service worker. Goals, in order: never stop the app from opening, always
+// run the newest deployed version, and still open when offline.
+//   - Opening the app (navigation): the browser's own request, untouched, so sign-in
+//     redirects and slow connections behave exactly as without a service worker. Only
+//     if the network fails outright does the saved copy of the page open instead.
+//   - Script, styles, icons: network first, saved copy if the network fails.
+//   - data.json, brief, version.json and sign-in requests are never touched.
+// Every deploy stamps VERSION, so the browser sees a changed worker and installs it.
 const VERSION = "__VERSION__";
 const SHELL = "wire-shell-" + VERSION;
-const FILES = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icon-180.png", "icon-192.png"];
-const TIMEOUT_MS = 3500;
 
-self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: "reload" })))).catch(() => {}).then(() => self.skipWaiting()));
-});
+self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(caches.keys()
@@ -18,27 +17,22 @@ self.addEventListener("activate", (e) => {
     .then(() => self.clients.claim()));
 });
 
-self.addEventListener("message", (e) => { if (e.data === "SKIP_WAITING") self.skipWaiting(); });
-
 self.addEventListener("fetch", (e) => {
-  const url = new URL(e.request.url);
-  if (e.request.method !== "GET" || url.origin !== location.origin) return;
+  const req = e.request;
+  const url = new URL(req.url);
+  if (req.method !== "GET" || url.origin !== location.origin) return;
   const p = url.pathname;
-  if (p.endsWith("/data.json") || p.endsWith("/brief") || p.endsWith("/version.json") || url.searchParams.has("reauth")) return;
-  const key = e.request.mode === "navigate" ? "index.html" : e.request;
-  e.respondWith((async () => {
-    const cache = await caches.open(SHELL);
-    try {
-      const res = await Promise.race([
-        fetch(e.request, { redirect: "manual", cache: "no-cache" }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), TIMEOUT_MS)),
-      ]);
-      if (res.ok && res.type === "basic") cache.put(key, res.clone());
+  if (p.endsWith("/data.json") || p.endsWith("/brief") || p.endsWith("/version.json") || p.startsWith("/cdn-cgi/") || url.searchParams.has("reauth")) return;
+
+  if (req.mode === "navigate") {
+    e.respondWith(fetch(req).then((res) => {
+      if (res.ok && res.type === "basic") { const copy = res.clone(); caches.open(SHELL).then((c) => c.put("index.html", copy)); }
       return res;
-    } catch (err) {
-      const saved = await cache.match(key);
-      if (saved) return saved;
-      throw err;
-    }
-  })());
+    }).catch(async () => (await (await caches.open(SHELL)).match("index.html")) || Response.error()));
+    return;
+  }
+  e.respondWith(fetch(req).then((res) => {
+    if (res.ok && res.type === "basic") { const copy = res.clone(); caches.open(SHELL).then((c) => c.put(req, copy)); }
+    return res;
+  }).catch(async () => (await (await caches.open(SHELL)).match(req)) || Response.error()));
 });
