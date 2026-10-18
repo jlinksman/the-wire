@@ -118,11 +118,12 @@ def load_config():
     video = []
     for group, chans in (cfg.get("live_lineup") or {}).items():
         for v in chans or []:
-            if v.get("channel_id") or v.get("link"):
+            if v.get("channel_id") or v.get("link") or v.get("audio") or v.get("embed"):
                 video.append({
                     "id": re.sub(r"[^a-z0-9]+", "-", v["name"].lower()).strip("-"),
                     "group": group, "name": v["name"],
                     "channel_id": v.get("channel_id"), "link": v.get("link"), "note": v.get("note"),
+                    "audio": v.get("audio"), "embed": v.get("embed"), "site": v.get("site"),
                     "meetings": bool(v.get("meetings")),
                 })
 

@@ -783,7 +783,7 @@ function liveView() {
       onclick: (e) => { e.stopPropagation(); prefs.pins = pinned ? prefs.pins.filter((x) => x !== v.id) : [...prefs.pins, v.id]; savePrefs(); renderView("live"); } });
     const info = el("span", { class: "chi" },
       el("span", { class: "chn", text: v.name }),
-      el("span", { class: "cht", text: on ? "Playing" : v.link ? "Opens their site" : (v.note || "Live stream") }));
+      el("span", { class: "cht", text: on ? "Playing" : v.link ? "Opens their site" : (v.note || (v.audio ? "Live radio" : "Live stream")) }));
     return v.link
       ? el("div", { class: "chrow" }, el("a", { class: "chmain", href: v.link, target: "_blank", rel: "noopener" }, info, el("span", { class: "chgo out", "aria-hidden": "true", text: "↗" })), star)
       : el("div", { class: "chrow" + (on ? " on" : "") }, el("button", { class: "chmain", onclick: () => play(v.id) }, info, el("span", { class: "chgo", "aria-hidden": "true", text: on ? "■" : "▶" })), star);
@@ -792,7 +792,7 @@ function liveView() {
     el("div", { class: "stage", id: "stage" }, playing ? null : el("div", { class: "stage-empty", text: "Choose a channel below. It keeps playing in a small player while you read other tabs." })),
     pills,
     el("div", { class: "chlist" }, ...rows),
-    el("p", { class: "fine", text: "Official YouTube live streams. If a channel isn't live right now, YouTube shows its latest video." }),
+    el("p", { class: "fine", text: "Official streams only: the publishers' own YouTube channels, players and radio streams. Channels marked \"when live\" only carry events; between events YouTube says the video is unavailable." }),
   ];
 }
 
@@ -807,7 +807,7 @@ function play(id) {
 
 function renderPlayer() {
   const p = $("player");
-  const v = (data && data.video || []).find((x) => x.id === channel && x.channel_id);
+  const v = (data && data.video || []).find((x) => x.id === channel && (x.channel_id || x.audio || x.embed));
   if (!playing || !v) {
     p.hidden = true;
     $("frame").replaceChildren();
@@ -823,9 +823,27 @@ function renderPlayer() {
   // On the Live tab the video stays put and only the channel list scrolls beneath it.
   document.documentElement.classList.toggle("stage-lock", !docked);
   $("pname").textContent = v.name;
-  $("pyt").href = "https://www.youtube.com/channel/" + v.channel_id + "/live";
-  const existing = $("frame").querySelector("iframe");
-  if (!existing || existing.dataset.channel !== v.channel_id) {
+  p.classList.toggle("audio", Boolean(v.audio));
+  $("pyt").href = v.site || (v.channel_id ? "https://www.youtube.com/channel/" + v.channel_id + "/live" : v.embed || v.audio);
+  $("pyt").textContent = v.channel_id ? "YouTube ↗" : "Site ↗";
+  $("psound").hidden = Boolean(v.embed || v.audio);   // radio has its own controls
+  const key = v.channel_id || v.audio || v.embed;
+  const existing = $("frame").firstElementChild;
+  if (existing && existing.dataset.channel === key) return;
+  if (v.audio) {
+    // Official live radio stream, played by the browser's own audio player.
+    const a = el("audio", { src: v.audio, controls: true, autoplay: true, preload: "none", "data-channel": key, "aria-label": v.name + " live" });
+    $("frame").replaceChildren(a);
+    a.play().catch(() => { /* Safari may need the Sound tap */ });
+    return;
+  }
+  if (v.embed) {
+    // The publisher's own player page (e.g. the State Assembly's Granicus player).
+    $("frame").replaceChildren(el("iframe", { src: v.embed, title: v.name + " live", "data-channel": key,
+      allow: "autoplay; encrypted-media; fullscreen", allowfullscreen: true, referrerpolicy: "strict-origin-when-cross-origin" }));
+    return;
+  }
+  {
     $("frame").replaceChildren(el("iframe", {
       src: "https://www.youtube.com/embed/live_stream?channel=" + encodeURIComponent(v.channel_id) + "&autoplay=1&mute=0&playsinline=1&enablejsapi=1&origin=" + encodeURIComponent(location.origin),
       title: v.name + " live", "data-channel": v.channel_id,
@@ -841,7 +859,11 @@ function ytCommand(func, args = []) {
   const f = $("frame").querySelector("iframe");
   if (f && f.contentWindow) f.contentWindow.postMessage(JSON.stringify({ event: "command", func, args }), "*");
 }
-$("psound").addEventListener("click", () => { ytCommand("unMute"); ytCommand("setVolume", [100]); ytCommand("playVideo"); });
+$("psound").addEventListener("click", () => {
+  const a = $("frame").querySelector("audio");
+  if (a) { a.muted = false; a.play().catch(() => {}); return; }
+  ytCommand("unMute"); ytCommand("setVolume", [100]); ytCommand("playVideo");
+});
 $("pname").addEventListener("click", () => go("live"));
 
 // --------------------------------------------------------------- source health (sheet)

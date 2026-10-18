@@ -278,6 +278,9 @@ body[data-tab="gov"] .day, body[data-tab="world"] .day, body[data-tab="beacon"] 
   width: min(58vw, 270px); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 .player.mini .pyt { display: none; }
+/* Radio: no picture, just the browser's audio controls on a dark strip. */
+.player.audio .frame { aspect-ratio: auto; height: 56px; display: flex; align-items: center; padding: 0 10px; }
+.player.audio .frame audio { width: 100%; height: 40px; }
 .player.mini .pbar { min-height: 44px; padding-left: 12px; }
 .player.mini .psound { padding: 0 10px; font-size: 0.78rem; }
 
