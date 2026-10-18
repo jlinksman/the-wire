@@ -63,15 +63,19 @@ jobs:
       - name: Publish data to Workers KV
         if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
         run: |
-          npx --yes wrangler@4 kv key put data.json --path dist/data.json --namespace-id "$WIRE_KV_ID" --remote
-          # Push-alert candidates for the Worker (V6). About 96 writes a day, like data.json.
-          # Signal for the on-demand briefing (Brief me button).
-          if [ -f dist/brief.json ]; then
-            npx --yes wrangler@4 kv key put brief.json --path dist/brief.json --namespace-id "$WIRE_KV_ID" --remote
-          fi
-          if [ -f dist/alerts.json ]; then
-            npx --yes wrangler@4 kv key put alerts.json --path dist/alerts.json --namespace-id "$WIRE_KV_ID" --remote
-          fi
+          # The build's timestamp rides along as metadata so the page can ask "anything new?"
+          # and get a tiny "not modified" answer between builds.
+          npx --yes wrangler@4 kv key put data.json --path dist/data.json --namespace-id "$WIRE_KV_ID" --remote \
+            --metadata "{\"v\":\"$(cat dist/version.txt)\"}"
+          # Briefing signal and push-alert candidates: written only when their content changed
+          # (or every two hours), per dist/publish.txt from the build.
+          for key in brief.json alerts.json; do
+            if [ -f "dist/$key" ] && ! grep -q "^$key=0" dist/publish.txt 2>/dev/null; then
+              npx --yes wrangler@4 kv key put "$key" --path "dist/$key" --namespace-id "$WIRE_KV_ID" --remote
+            else
+              echo "$key unchanged; not written"
+            fi
+          done
 
       - name: Note missing Cloudflare setup
         if: env.CLOUDFLARE_API_TOKEN == '' || env.WIRE_KV_ID == ''
