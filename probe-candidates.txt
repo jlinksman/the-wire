@@ -1,59 +1,14 @@
-# label | url   (candidates for the V-next source round; tested from GitHub's servers)
-# --- national / international wires and papers
-NPR top stories | https://feeds.npr.org/1001/rss.xml
-NPR world | https://feeds.npr.org/1004/rss.xml
-BBC world | https://feeds.bbci.co.uk/news/world/rss.xml
-Guardian world | https://www.theguardian.com/world/rss
-Guardian US | https://www.theguardian.com/us-news/rss
-NYT world (headlines) | https://rss.nytimes.com/services/xml/rss/nyt/World.xml
-NYT US (headlines) | https://rss.nytimes.com/services/xml/rss/nyt/US.xml
-NYT NY region (headlines) | https://rss.nytimes.com/services/xml/rss/nyt/NYRegion.xml
-WSJ world (headlines) | https://feeds.a.dj.com/rss/RSSWorldNews.xml
-WSJ US business (headlines) | https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml
-Washington Post world | https://feeds.washingtonpost.com/rss/world
-Washington Post national | https://feeds.washingtonpost.com/rss/national
-PBS NewsHour | https://www.pbs.org/newshour/feeds/rss/headlines
-NBC News | https://feeds.nbcnews.com/nbcnews/public/news
-Axios | https://api.axios.com/feed/
-Semafor | https://www.semafor.com/rss.xml
-CNBC world | https://www.cnbc.com/id/100727362/device/rss/rss.html
-Fox News world | https://moxie.foxnews.com/google-publisher/world.xml
-Fox News politics | https://moxie.foxnews.com/google-publisher/politics.xml
-Sky News world | https://feeds.skynews.com/feeds/rss/world.xml
-The Independent world | https://www.independent.co.uk/news/world/rss
-Christian Science Monitor | https://rss.csmonitor.com/feeds/all
-ProPublica | https://www.propublica.org/feeds/propublica/main
-UN News | https://news.un.org/feed/subscribe/en/news/all/rss.xml
-Euronews | https://www.euronews.com/rss
-Politico Europe | https://www.politico.eu/feed/
-DW English | https://rss.dw.com/rdf/rss-en-all
-# --- city / country beats
-Le Monde in English | https://www.lemonde.fr/en/rss/une.xml
-RFI English | https://www.rfi.fr/en/rss
-France 24 Europe | https://www.france24.com/en/europe/rss
-The Connexion (France, English) | https://www.connexionfrance.com/rss
-Le Parisien (French) | https://feeds.leparisien.fr/leparisien/rss
-Times of Israel | https://www.timesofisrael.com/feed/
-Jerusalem Post | https://www.jpost.com/rss/rssfeedsheadlines.aspx
-Ynetnews | https://www.ynetnews.com/Integration/StoryRss3082.xml
-Haaretz English (headlines) | https://www.haaretz.com/srv/haaretz-latest-headlines
-Kyiv Independent | https://kyivindependent.com/rss/
-# --- New York State
-Gothamist | https://gothamist.com/feed
-NY Focus | https://nysfocus.com/feed
-Times Union | https://www.timesunion.com/search/?action=search&firstRequest=1&searchindex=solr&query=albany&sort=date&rss=1
-Spectrum State of Politics | https://www.stateofpolitics.com/feed/
-WAMC | https://www.wamc.org/news.rss
-NYS Senate articles | https://www.nysenate.gov/rss/articles
-Governor press releases | https://www.governor.ny.gov/rss.xml
-# --- Hudson Valley
-Hudson Valley Post | https://hudsonvalleypost.com/feed/
-Daily Freeman | https://www.dailyfreeman.com/feed/
-News10 Albany | https://www.news10.com/feed/
-Putnam County News & Recorder | https://www.pcnr.com/feed/
-River Journal | https://riverjournalonline.com/feed/
-# --- law
-Above the Law | https://abovethelaw.com/feed/
-Lawfare | https://www.lawfaremedia.org/feeds/articles
-Volokh Conspiracy | https://reason.com/volokh/feed/
-EPA news releases | https://www.epa.gov/newsreleases/search/rss
+# label | url   (round 4: French and Hebrew feeds for the city desks; tested from GitHub's servers)
+Le Parisien (all) | https://feeds.leparisien.fr/leparisien/rss
+Le Parisien Paris | https://feeds.leparisien.fr/leparisien/rss/paris-75
+Le Monde (French) | https://www.lemonde.fr/rss/une.xml
+franceinfo titres | https://www.francetvinfo.fr/titres.rss
+Actu Paris | https://actu.fr/ile-de-france/paris_75056/rss.xml
+20 Minutes Paris | https://www.20minutes.fr/feeds/rss-paris.xml
+Ynet (Hebrew) | https://www.ynet.co.il/Integration/StoryRss2.xml
+Walla | https://rss.walla.co.il/feed/1?type=main
+Globes | https://www.globes.co.il/webservice/rss/rssfeeder.asmx/FeederNode?iID=2
+Haaretz (Hebrew) | https://www.haaretz.co.il/srv/htz---all-articles
+Ynetnews (English) | https://www.ynetnews.com/Integration/StoryRss2.xml
+Bing News · Paris (French) | https://www.bing.com/news/search?q=Paris+mairie&format=rss&setlang=fr&cc=FR
+Bing News · Tel Aviv (Hebrew) | https://www.bing.com/news/search?q=%D7%AA%D7%9C+%D7%90%D7%91%D7%99%D7%91&format=rss&setlang=he&cc=IL
