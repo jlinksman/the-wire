@@ -361,6 +361,171 @@ def summarize(state, data, session, log) -> dict:
     return stats
 
 
+# ---------------------------------------------------------------- story pages: synthesis, figures, timeline
+
+SYNTH_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+SYNTH_IN, SYNTH_OUT = 26668, 204805          # neurons per million tokens (Workers AI pricing)
+SYNTH_TOP = 12                               # stories written per build, by rank
+SYNTH_DAILY_NEURONS = 4000                   # of the build's AI_DAILY_NEURONS
+SYNTH_MAX_CALLS = 6                          # per build
+SYNTH_REFRESH_MIN = {True: 45, False: 120}   # developing stories refresh sooner
+SYNTH_SYSTEM = (
+    "You write a short synthesis of one news story for one reader, from several outlets' reports. "
+    "Use only facts stated in the reports. No outside knowledge, no opinion, no speculation, no quotes. "
+    "When reports disagree on a fact or a figure, say so and name the outlets. Prefer the newest figures and say they are the latest. "
+    "Plain, short sentences, present tense where natural.\n"
+    "Reply with JSON only: {\"card\": \"two sentences, under 45 words: what happened and the most important detail\", "
+    "\"what\": \"one paragraph, under 120 words: what happened, where, who is involved, what officials say, what happens next if reported\", "
+    "\"latest\": \"one sentence on the newest development, only from reports marked NEW; empty string if none\", "
+    "\"why\": \"one sentence on why it matters to the reader, only if a Reader line is given and the reports support it; otherwise empty string\"}")
+
+
+def _parse_json(text: str) -> dict:
+    m = re.search(r"\{[\s\S]*\}", text or "")
+    if not m:
+        return {}
+    try:
+        j = json.loads(m.group(0))
+        return j if isinstance(j, dict) else {}
+    except ValueError:
+        return {}
+
+
+def synthesize(state, data, session, log) -> dict:
+    """Write the story pages' text for the top stories with the large model, under budget.
+    Every sentence must trace to the cited reports (grounded); untraceable sentences are dropped."""
+    ai = state.setdefault("ai", {})
+    today = datetime.now(timezone.utc).date().isoformat()
+    if ai.get("day") != today:
+        ai.update({"day": today, "neurons": 0.0})
+    ai.setdefault("synth_neurons_day", today)
+    if ai.get("synth_neurons_day") != today:
+        ai.update({"synth_neurons_day": today, "synth_neurons": 0.0})
+    cache = ai.setdefault("synth", {})
+    texts = state.get("texts", {})
+    by_id = {it["id"]: it for it in data["items"]}
+    now = datetime.now(timezone.utc)
+    stats = {"calls": 0, "kept": 0, "dropped": 0, "error": None}
+    top = [s for s in data["stories"] if s["desk"] != "SPORTS"][:SYNTH_TOP]
+    live = {s["id"] for s in data["stories"][:40]}
+    for k in [k for k in cache if k not in live]:
+        del cache[k]
+    for s in top:
+        members = diverse(s, by_id, 6)
+        if len(members) < 2:
+            continue
+        sig = hashlib.sha1(json.dumps(sorted(m for m in s["members"] if not by_id[m].get("no_ai"))).encode()).hexdigest()[:12]
+        rec = cache.get(s["id"])
+        if rec and (rec["sig"] == sig or now - datetime.fromisoformat(rec["at"]) < timedelta(minutes=SYNTH_REFRESH_MIN[bool(s.get("developing"))])):
+            continue
+        if stats["calls"] >= SYNTH_MAX_CALLS or ai.get("synth_neurons", 0) >= SYNTH_DAILY_NEURONS or ai["neurons"] >= AI_DAILY_NEURONS:
+            break
+        recent_cut = now - timedelta(hours=3)
+        blocks = []
+        for i, m in enumerate(sorted(members, key=lambda x: ms(by_id[x])), 1):
+            it = by_id[m]
+            body = (texts.get(m) or {}).get("text", "")[:1500]
+            new = " · NEW" if ms(it) >= recent_cut else ""
+            blocks.append(f"Report {i} · {it['source']} · {ms(it).strftime('%b %d %H:%M UTC')}{new}\n{it['title']}\n{it.get('summary', '')}\n{body}".strip())
+        corpus = "\n\n".join(blocks)
+        watch = sorted({t for m in s["members"] for t in by_id[m].get("watch_terms", [])})
+        reader = ("Reader: lives in Beacon, NY; this story matched his watchlist: " + ", ".join(watch) + ".\n\n") if watch else ""
+        prompt = reader + corpus
+        acct, token = os.environ.get("CLOUDFLARE_ACCOUNT_ID"), os.environ.get("CLOUDFLARE_API_TOKEN")
+        if not acct or not token:
+            stats["error"] = "Cloudflare account ID or API token not set"
+            break
+        try:
+            r = session.post(f"https://api.cloudflare.com/client/v4/accounts/{acct}/ai/run/{SYNTH_MODEL}",
+                             headers={"Authorization": f"Bearer {token}"},
+                             json={"messages": [{"role": "system", "content": SYNTH_SYSTEM}, {"role": "user", "content": prompt}],
+                                   "max_tokens": 420, "temperature": 0.2}, timeout=90)
+            body = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
+            if r.status_code != 200 or not body.get("success"):
+                raise RuntimeError(("; ".join(e.get("message", "") for e in body.get("errors", [])) or f"HTTP {r.status_code}")[:200])
+        except Exception as exc:
+            stats["error"] = f"{type(exc).__name__}: {exc}"[:240]
+            log(f"[synth] {stats['error']}")
+            break
+        res = body.get("result") or {}
+        usage = res.get("usage") or {}
+        out = res.get("response")
+        out_text = json.dumps(out) if isinstance(out, dict) else (out or "")
+        tin = usage.get("prompt_tokens") or len(SYNTH_SYSTEM + prompt) / 4
+        tout = usage.get("completion_tokens") or len(out_text) / 4
+        neurons = tin / 1e6 * SYNTH_IN + tout / 1e6 * SYNTH_OUT
+        ai["neurons"] += neurons
+        ai["synth_neurons"] = ai.get("synth_neurons", 0) + neurons
+        stats["calls"] += 1
+        j = out if isinstance(out, dict) else _parse_json(out_text)
+        allowed = corpus + " Beacon New York"
+        kept = {k: grounded(str(j.get(k) or ""), allowed) for k in ("card", "what", "latest", "why")}
+        if not watch:
+            kept["why"] = ""
+        if kept["card"] or kept["what"]:
+            stats["kept"] += 1
+        else:
+            stats["dropped"] += 1
+        cache[s["id"]] = {"sig": sig, "at": now.isoformat(), **kept,
+                          "latest_at": max((by_id[m]["t"] for m in members), default=None),
+                          "n": len(members), "dropped": sum(1 for k in ("card", "what", "latest", "why") if (j.get(k) or "") and not kept[k])}
+    return stats
+
+
+COUNT_RE = re.compile(
+    r"(?:\b(more than|over|at least|nearly|about|almost|around|some|roughly|up to)\s+)?\b(\d{1,3}(?:,\d{3})+|\d+)\s+"
+    r"(?:(?:people|protesters|demonstrators|civilians|others|officers|police officers|children|students|migrants|soldiers|troops|residents|passengers|workers)\s+)?"
+    r"(?:(?:were|have been|had been|are|was)\s+)?"
+    r"(killed|dead|died|deaths|injured|wounded|hurt|arrested|detained|arrests|missing|evacuated|displaced)\b", re.IGNORECASE)
+COUNT_CLASS = {"killed": "killed", "dead": "killed", "died": "killed", "deaths": "killed", "injured": "injured", "wounded": "injured",
+               "hurt": "injured", "arrested": "arrested", "detained": "arrested", "arrests": "arrested", "missing": "missing",
+               "evacuated": "displaced", "displaced": "displaced"}
+COUNT_LABEL = {"killed": "Deaths", "injured": "Injured", "arrested": "Arrests", "missing": "Missing", "displaced": "Displaced or evacuated"}
+
+
+def figures(s, by_id, texts) -> list[dict]:
+    """Casualty and arrest counts as each outlet reported them, when outlets' numbers differ.
+    Pure pattern matching; no model. Each figure shows its outlet, time and wording."""
+    per: dict[str, dict[str, dict]] = {}
+    for m in s["members"]:
+        it = by_id[m]
+        if it.get("no_ai"):
+            continue
+        text = " ".join([it["title"], it.get("summary", ""), (texts.get(m) or {}).get("text", "")[:700]])   # the lede, not background paragraphs
+        for mt in COUNT_RE.finditer(text):
+            n = int(mt.group(2).replace(",", ""))
+            if n < 2 or 1900 <= n <= 2100:
+                continue      # skip "1 killed" noise and years
+            cls = COUNT_CLASS[mt.group(3).lower()]
+            cur = per.setdefault(cls, {}).get(it["source"])
+            if not cur or n > cur["n"] or (n == cur["n"] and it["t"] > cur["t"]):
+                per[cls][it["source"]] = {"n": n, "text": mt.group(0).strip(), "source": it["source"], "t": it["t"], "link": it["link"]}
+    out = []
+    for cls, by_src in per.items():
+        vals = sorted(by_src.values(), key=lambda x: x["t"])
+        nums = {v["n"] for v in vals}
+        if len(vals) >= 2 and len(nums) >= 2:
+            out.append({"what": COUNT_LABEL[cls], "reports": vals[-6:]})
+    return out
+
+
+def timeline(s, by_id) -> list[dict]:
+    """First report, then one headline per two-hour stretch, then the latest (max 6)."""
+    mem = sorted((by_id[m] for m in s["members"]), key=ms)
+    if len(mem) < 5 or (ms(mem[-1]) - ms(mem[0])) < timedelta(hours=4):
+        return []
+    picks, last_t = [], None
+    for it in mem:
+        if last_t is None or ms(it) - last_t >= timedelta(hours=2):
+            picks.append(it)
+            last_t = ms(it)
+    if picks[-1] is not mem[-1]:
+        picks.append(mem[-1])
+    if len(picks) > 6:
+        picks = picks[:1] + picks[-5:]
+    return [{"t": it["t"], "title": it["title"], "source": it["source"], "link": it["link"]} for it in picks]
+
+
 # ---------------------------------------------------------------- one entry point for build.py
 
 def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
@@ -387,17 +552,36 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
         st["text_error"] = tstats["errors"][0] if tstats["errors"] else "all fetches failed"
     elif tstats["ok"]:
         st["text_error"], st["text_ok"] = None, stamp
+    sstats = synthesize(state, data, session, log)
     astats = summarize(state, data, session, log)
+    if sstats["error"] and not astats["error"] and "not set" not in sstats["error"]:
+        astats["error"] = "story pages: " + sstats["error"]
     if astats["error"]:
         st["ai_error"] = astats["error"]
     elif astats["calls"] or not st.get("ai_ok"):
         st["ai_error"], st["ai_ok"] = None, stamp if astats["calls"] else st.get("ai_ok")
 
     summaries = state["ai"]["summaries"]
+    synth = state["ai"].get("synth", {})
+    by_id = {it["id"]: it for it in data["items"]}
     for s in stories:
         rec = summaries.get(s["id"])
         if rec and rec["summary"]:
             s["summary"] = rec["summary"]
+        sy = synth.get(s["id"])
+        if sy:
+            for k in ("card", "what", "latest", "why"):
+                if sy.get(k):
+                    s[k] = sy[k]
+            s["written_at"] = sy["at"]
+            if sy.get("latest"):
+                s["latest_at"] = sy.get("latest_at")
+        figs = figures(s, by_id, texts)
+        if figs:
+            s["figures"] = figs
+        tl = timeline(s, by_id)
+        if tl:
+            s["timeline"] = tl
     for it in data["items"]:
         rec = summaries.get(it["id"])
         if rec and rec["summary"] and rec["sources"] == [it["id"]]:
@@ -405,7 +589,8 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
 
     log(f"[v5] stories={len(stories)} texts kept={tstats['kept']} new={tstats['ok']} robots-skip={tstats['robots']} "
         f"quotes on {nq} items · ai calls={astats['calls']} kept={astats['kept']} dropped={astats['dropped']} "
-        f"neurons today≈{state['ai']['neurons']:.0f}")
+        f"neurons today≈{state['ai']['neurons']:.0f} · story pages written={sstats['calls']} kept={sstats['kept']} "
+        f"dropped={sstats['dropped']}{' error=' + sstats['error'] if sstats['error'] else ''}")
     # Health rows: these steps fail visibly, like any source.
     data["sources"] += [
         {"id": "article_text", "name": "Open article text (for summaries and quotes)", "short": "Article text",

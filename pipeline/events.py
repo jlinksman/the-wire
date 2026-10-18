@@ -173,12 +173,15 @@ def merge_events(clusters: list[list[dict]], ms) -> list[list[dict]]:
     def profile(c):
         n = len(c)
         pc: dict[str, int] = {}
-        ks: set[str] = set()
+        kc: dict[str, int] = {}
         for m in c:
             for p in places(m["title"]):
                 pc[p] = pc.get(p, 0) + 1
-            ks |= kinds(m["title"])
+            for k in kinds(m["title"]):
+                kc[k] = kc.get(k, 0) + 1
         main = {p for p, k in pc.items() if k * 2 >= n}
+        # Kinds count only when at least half the headlines name them (a passing "election" doesn't).
+        ks = {k for k, v in kc.items() if v * 2 >= n}
         return main, set(pc), ks
 
     news = [c for c in clusters if c[0]["desk"] != "SPORTS"]
