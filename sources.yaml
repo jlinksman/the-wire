@@ -13,6 +13,11 @@
 #   UNTESTED  not yet checked; url may be null
 # type: rss | api | html | pdf_index | youtube_channel | youtube_playlist
 # poll: minutes between fetches (V1 runs every 15; skip a source until its poll interval has passed)
+# quiet: true = a corroborating source: its items count toward story grouping, ranking and the
+#   briefing, but a lone item from it isn't listed on the desks (it shows inside its story).
+# scope: local | state | national | world | mixed (mixed = per item: world if the headline names a
+#   foreign place, else national). Defaults by section; used by the briefing's category choices.
+# no_brief: true = never used as a single-outlet item in a category briefing (filler-heavy feeds).
 # fast: true  = eligible for the "Last hour" list in the breaking strip
 # short: display name on the page (optional)
 # desk: BEACON | GOV | LAW | WORLD | SPORTS (V1 desk tag; defaults by section if absent)
@@ -134,9 +139,9 @@ beacon:
 
 regional:
   - {id: midhudson_news, short: "Mid-Hudson News", enabled: true, desk: BEACON, name: Mid-Hudson News, type: rss, url: "https://midhudsonnews.com/feed/", status: OK, poll: 30, fulltext: true, regional: true, notes: "Covers Orange, Ulster, Sullivan and Dutchess; shown under Beacon › Region, not in the Beacon top items."}
-  - {id: hv_post, name: Hudson Valley Post, type: rss, url: "https://hudsonvalleypost.com/feed/", status: OK, poll: 30}
-  - {id: news10, name: News10 (Albany), type: rss, url: "https://www.news10.com/feed/", status: OK, poll: 30}
-  - {id: wamc, name: WAMC, type: rss, url: "https://www.wamc.org/news.rss", status: OK, poll: 30}
+  - {id: hv_post, no_brief: true, short: "HV Post", enabled: true, quiet: true, desk: BEACON, regional: true, name: Hudson Valley Post, type: rss, url: "https://hudsonvalleypost.com/feed/", status: OK, poll: 30}
+  - {id: news10, no_brief: true, short: "News10", enabled: true, quiet: true, desk: GOV, scope: state, name: News10 (Albany), type: rss, url: "https://www.news10.com/feed/", status: OK, poll: 30}
+  - {id: wamc, short: "WAMC", enabled: true, desk: BEACON, regional: true, name: WAMC Northeast Public Radio, type: rss, url: "https://www.wamc.org/news.rss", status: OK, poll: 30}
   - {id: pojo, name: Poughkeepsie Journal, type: rss, url: "https://rssfeeds.poughkeepsiejournal.com/poughkeepsiejournal/home", status: DC-BLOCK, poll: 30}
   - {id: reddit_beacon, name: r/BeaconNY, type: rss, url: "https://www.reddit.com/r/BeaconNY/.rss", status: DC-BLOCK, poll: 60}
 
@@ -162,8 +167,9 @@ new_york:
     key_env: NYSENATE_API_KEY
     poll: 60
   - {id: city_state, short: "City & State", enabled: true, desk: GOV, name: City & State NY, type: rss, url: "https://www.cityandstateny.com/rss/all/", status: OK, poll: 30, fulltext: true}
-  - {id: ny_focus, name: New York Focus, type: rss, url: "https://nysfocus.com/feed", status: OK, poll: 60}
-  - {id: gothamist, name: Gothamist, type: rss, url: "https://gothamist.com/feed", status: OK, poll: 30}
+  - {id: ny_focus, short: "NY Focus", enabled: true, desk: GOV, name: New York Focus, type: rss, url: "https://nysfocus.com/feed", status: OK, poll: 60, fulltext: true}
+  - {id: nyt_nyregion, short: "NYT", enabled: true, quiet: true, desk: GOV, name: New York Times · New York (headlines), type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/NYRegion.xml", status: OK, poll: 30, notes: "Paywalled: headlines and links only, never article text."}
+  - {id: gothamist, short: "Gothamist", enabled: true, quiet: true, desk: GOV, name: Gothamist, type: rss, url: "https://gothamist.com/feed", status: OK, poll: 30, fulltext: true}
   - {id: governor_ny, name: Governor's press releases, type: html, url: "https://www.governor.ny.gov/news", status: OK, poll: 30}
   - {id: nysenate_press, name: NY Senate articles RSS, type: rss, url: "https://www.nysenate.gov/rss/articles", status: DC-BLOCK, poll: 60}
 
@@ -197,13 +203,30 @@ federal:
 national_world:
   - {id: abc, short: "ABC", enabled: true, desk: WORLD, fast: true, name: ABC News, type: rss, url: "https://abcnews.go.com/abcnews/topstories", status: OK, poll: 10, fulltext: true}
   - {id: cbs, short: "CBS", enabled: true, desk: WORLD, fast: true, name: CBS News, type: rss, url: "https://www.cbsnews.com/latest/rss/main", status: OK, poll: 10, fulltext: true}
-  - {id: euronews, name: Euronews, type: rss, url: "https://www.euronews.com/rss", status: OK, poll: 15}
-  - {id: aljazeera, short: "Al Jazeera", enabled: true, desk: WORLD, fast: true, name: Al Jazeera English, type: rss, url: "https://www.aljazeera.com/xml/rss/all.xml", status: OK, poll: 10, fulltext: true}
-  - {id: france24_en, short: "France 24", enabled: true, desk: WORLD, fast: true, name: France 24 English, type: rss, url: "https://www.france24.com/en/rss", status: OK, poll: 15, fulltext: true}
-  - {id: bbc_world, name: BBC World, type: rss, url: "https://feeds.bbci.co.uk/news/world/rss.xml", status: DC-BLOCK, poll: 10}
-  - {id: npr, name: NPR News, type: rss, url: "https://feeds.npr.org/1001/rss.xml", status: DC-BLOCK, poll: 10}
-  - {id: guardian_world, name: The Guardian World, type: rss, url: "https://www.theguardian.com/world/rss", status: DC-BLOCK, poll: 15}
-  - {id: dw, name: DW, type: rss, url: "https://rss.dw.com/rdf/rss-en-all", status: DC-BLOCK, poll: 15}
+  - {id: euronews, short: "Euronews", enabled: true, quiet: true, desk: WORLD, scope: world, name: Euronews, type: rss, url: "https://www.euronews.com/rss", status: OK, poll: 15}
+  - {id: aljazeera, short: "Al Jazeera", enabled: true, scope: world, desk: WORLD, fast: true, name: Al Jazeera English, type: rss, url: "https://www.aljazeera.com/xml/rss/all.xml", status: OK, poll: 10, fulltext: true}
+  - {id: france24_en, short: "France 24", enabled: true, scope: world, desk: WORLD, fast: true, name: France 24 English, type: rss, url: "https://www.france24.com/en/rss", status: OK, poll: 15, fulltext: true}
+  - {id: bbc_world, short: "BBC", enabled: true, quiet: true, desk: WORLD, scope: world, fast: true, name: BBC World, type: rss, url: "https://feeds.bbci.co.uk/news/world/rss.xml", status: OK, poll: 15, fulltext: true, notes: "Reachable from GitHub runners (probe 2026-10-17)."}
+  - {id: npr, short: "NPR", enabled: true, quiet: true, desk: WORLD, fast: true, name: NPR News, type: rss, url: "https://feeds.npr.org/1001/rss.xml", status: OK, poll: 15, fulltext: true}
+  - {id: npr_world, short: "NPR", enabled: true, quiet: true, desk: WORLD, scope: world, name: NPR World, type: rss, url: "https://feeds.npr.org/1004/rss.xml", status: OK, poll: 30, fulltext: true}
+  - {id: guardian_world, short: "Guardian", enabled: true, quiet: true, desk: WORLD, scope: world, name: The Guardian World, type: rss, url: "https://www.theguardian.com/world/rss", status: OK, poll: 15, fulltext: true}
+  - {id: guardian_us, short: "Guardian", enabled: true, quiet: true, desk: WORLD, scope: national, name: The Guardian US, type: rss, url: "https://www.theguardian.com/us-news/rss", status: OK, poll: 15, fulltext: true}
+  - {id: dw, short: "DW", enabled: true, quiet: true, desk: WORLD, scope: world, name: Deutsche Welle, type: rss, url: "https://rss.dw.com/rdf/rss-en-all", status: OK, poll: 15, fulltext: true}
+  - {id: nyt_world, short: "NYT", enabled: true, quiet: true, desk: WORLD, scope: world, name: New York Times · World (headlines), type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml", status: OK, poll: 15, notes: "Paywalled: headlines and links only."}
+  - {id: nyt_us, short: "NYT", enabled: true, quiet: true, desk: WORLD, scope: national, name: New York Times · U.S. (headlines), type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/US.xml", status: OK, poll: 15, notes: "Paywalled: headlines and links only."}
+  - {id: pbs_newshour, short: "PBS NewsHour", enabled: true, quiet: true, desk: WORLD, name: PBS NewsHour, type: rss, url: "https://www.pbs.org/newshour/feeds/rss/headlines", status: OK, poll: 30, fulltext: true}
+  - {id: nbc, short: "NBC", enabled: true, quiet: true, desk: WORLD, fast: true, name: NBC News, type: rss, url: "https://feeds.nbcnews.com/nbcnews/public/news", status: OK, poll: 15}
+  - {id: semafor, short: "Semafor", enabled: true, quiet: true, desk: WORLD, name: Semafor, type: rss, url: "https://www.semafor.com/rss.xml", status: OK, poll: 60}
+  - {id: cnbc_world, short: "CNBC", enabled: true, quiet: true, desk: WORLD, scope: world, name: CNBC World, type: rss, url: "https://www.cnbc.com/id/100727362/device/rss/rss.html", status: OK, poll: 30}
+  - {id: fox_world, short: "Fox News", enabled: true, quiet: true, desk: WORLD, scope: world, name: Fox News World, type: rss, url: "https://moxie.foxnews.com/google-publisher/world.xml", status: OK, poll: 30}
+  - {id: fox_politics, short: "Fox News", enabled: true, quiet: true, desk: GOV, scope: national, name: Fox News Politics, type: rss, url: "https://moxie.foxnews.com/google-publisher/politics.xml", status: OK, poll: 30}
+  - {id: sky_world, short: "Sky News", enabled: true, quiet: true, desk: WORLD, scope: world, name: Sky News World, type: rss, url: "https://feeds.skynews.com/feeds/rss/world.xml", status: OK, poll: 15}
+  - {id: independent_world, short: "Independent", enabled: true, quiet: true, desk: WORLD, scope: world, name: The Independent World, type: rss, url: "https://www.independent.co.uk/news/world/rss", status: OK, poll: 30}
+  - {id: csmonitor, short: "CS Monitor", enabled: true, quiet: true, desk: WORLD, name: Christian Science Monitor, type: rss, url: "https://rss.csmonitor.com/feeds/all", status: OK, poll: 60, fulltext: true}
+  - {id: propublica, short: "ProPublica", enabled: true, quiet: true, desk: GOV, scope: national, name: ProPublica, type: rss, url: "https://www.propublica.org/feeds/propublica/main", status: OK, poll: 60}
+  - {id: politico_eu, short: "Politico Europe", enabled: true, quiet: true, desk: WORLD, scope: world, name: Politico Europe, type: rss, url: "https://www.politico.eu/feed/", status: OK, poll: 30}
+  - {id: washpost_world, name: Washington Post World, type: rss, url: "https://feeds.washingtonpost.com/rss/world", status: UNTESTED, poll: 30, notes: "HTTP 502 from GitHub runners (probe 2026-10-17); retest."}
+  - {id: axios, name: Axios, type: rss, url: "https://api.axios.com/feed/", status: OK, poll: 30, notes: "robots.txt disallows the feed for bots (probe 2026-10-17). Not used."}
   - {id: ap, name: Associated Press, type: rss, url: null, status: UNTESTED, poll: 10, notes: "apnews.com blocked the sandbox; find a current official feed from home."}
   - {id: wsj, name: Wall Street Journal headlines, type: rss, url: null, status: UNTESTED, poll: 15, notes: "Headlines and links only. Never fetch article text."}
   - {id: gdelt, name: GDELT DOC API, type: api, url: "https://api.gdeltproject.org/api/v2/doc/doc", status: UNTESTED, poll: 30, notes: "Timed out from the sandbox. Best tool for multilingual city-level monitoring; retest from home."}
@@ -212,6 +235,10 @@ paris:
   - {id: gnews_paris_fr, name: Google News Paris (French), type: rss, url: "https://news.google.com/rss/search?q=Paris+mairie+OR+arrondissement&hl=fr&gl=FR&ceid=FR:fr", status: OK, poll: 30, language: fr}
   - {id: paris_events, name: Que faire à Paris (open data), type: api, url: "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/que-faire-a-paris-/records", status: OK, poll: 360, language: fr}
   - {id: paris_roadworks, name: Paris disruptive roadworks (open data), type: api, url: "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/chantiers-perturbants/records", status: OK, poll: 360, language: fr}
+  - {id: le_monde_en, short: "Le Monde", enabled: true, quiet: true, desk: WORLD, scope: world, name: Le Monde in English, type: rss, url: "https://www.lemonde.fr/en/rss/une.xml", status: OK, poll: 30}
+  - {id: rfi_en, short: "RFI", enabled: true, quiet: true, desk: WORLD, scope: world, name: RFI English, type: rss, url: "https://www.rfi.fr/en/rss", status: OK, poll: 30, fulltext: true}
+  - {id: france24_europe, short: "France 24", enabled: true, quiet: true, desk: WORLD, scope: world, name: France 24 · Europe, type: rss, url: "https://www.france24.com/en/europe/rss", status: OK, poll: 30, fulltext: true}
+  - {id: le_parisien, name: Le Parisien (French), type: rss, url: "https://feeds.leparisien.fr/leparisien/rss", status: OK, poll: 30, language: fr, notes: "Reachable (probe 2026-10-17). French headlines need the city-desk translation step before they can group with English coverage."}
   - {id: le_monde, name: Le Monde, type: rss, url: "https://www.lemonde.fr/rss/une.xml", status: DC-BLOCK, poll: 30, language: fr}
   - {id: le_parisien_paris, name: Le Parisien Paris, type: rss, url: "https://feeds.leparisien.fr/leparisien/rss/paris-75", status: DC-BLOCK, poll: 30, language: fr}
   - {id: actu_paris, name: Actu Paris, type: rss, url: "https://actu.fr/ile-de-france/paris_75056/rss.xml", status: DC-BLOCK, poll: 30, language: fr}
@@ -224,7 +251,7 @@ tel_aviv:
   - {id: ynet_he, name: Ynet (Hebrew), type: rss, url: "https://www.ynet.co.il/Integration/StoryRss2.xml", status: OK, poll: 15, language: he}
   - {id: walla, name: Walla, type: rss, url: "https://rss.walla.co.il/feed/1?type=main", status: OK, poll: 15, language: he}
   - {id: globes, name: Globes, type: rss, url: "https://www.globes.co.il/webservice/rss/rssfeeder.asmx/FeederNode?iID=2", status: OK, poll: 30, language: he}
-  - {id: haaretz_en, name: Haaretz (English), type: rss, url: "https://www.haaretz.com/srv/haaretz-latest-headlines", status: OK, poll: 15, language: en}
+  - {id: haaretz_en, short: "Haaretz", enabled: true, quiet: true, desk: WORLD, scope: world, name: Haaretz (English), type: rss, url: "https://www.haaretz.com/srv/haaretz-latest-headlines", status: OK, poll: 15, language: en, notes: "Partly paywalled: headlines and links only."}
   - {id: haaretz_he, name: Haaretz (Hebrew), type: rss, url: "https://www.haaretz.co.il/srv/htz---all-articles", status: OK, poll: 15, language: he}
   - {id: jpost, name: Jerusalem Post, type: rss, url: "https://www.jpost.com/rss/rssfeedsfrontpage.aspx", status: OK, poll: 15, language: en}
   - {id: times_of_israel, name: Times of Israel, type: rss, url: "https://www.timesofisrael.com/feed/", status: DC-BLOCK, poll: 15, language: en}
@@ -239,9 +266,9 @@ osint:
   - {id: usgs_significant, name: USGS significant earthquakes (day), type: api, url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_day.geojson", status: OK, poll: 15}
 
 law:
-  - {id: nysba, name: "NYSBA (CasePrepPlus, State Law Digest, ethics opinions)", short: NYSBA, type: rss, url: "https://nysba.org/feed/", status: OK, poll: 60, enabled: true, desk: LAW, notes: "Weekly CasePrepPlus summarizes NY appellate decisions; also NYSBA ethics opinions and the monthly State Law Digest."}
-  - {id: cl_ny_court_of_appeals, short: "NY Ct. App.", name: NY Court of Appeals opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ny/", status: OK, poll: 60, enabled: true, desk: LAW}
-  - {id: cl_ca2, short: "2d Cir.", name: Second Circuit opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ca2/", status: OK, poll: 60, enabled: true, desk: LAW}
+  - {id: nysba, scope: state, name: "NYSBA (CasePrepPlus, State Law Digest, ethics opinions)", short: NYSBA, type: rss, url: "https://nysba.org/feed/", status: OK, poll: 60, enabled: true, desk: LAW, notes: "Weekly CasePrepPlus summarizes NY appellate decisions; also NYSBA ethics opinions and the monthly State Law Digest."}
+  - {id: cl_ny_court_of_appeals, scope: state, short: "NY Ct. App.", name: NY Court of Appeals opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ny/", status: OK, poll: 60, enabled: true, desk: LAW}
+  - {id: cl_ca2, scope: state, short: "2d Cir.", name: Second Circuit opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/ca2/", status: OK, poll: 60, enabled: true, desk: LAW}
   - {id: how_appealing, short: "How Appealing", name: How Appealing (appellate news), type: rss, url: "https://howappealing.abovethelaw.com/feed/", status: OK, poll: 60, enabled: true, desk: LAW, fulltext: true}
   - {id: jdsupra_environmental, name: JD Supra Environmental Law, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=EnvironmentalLaw", status: DC-BLOCK, poll: 120, desk: LAW, notes: "Worked from the sandbox; GitHub runners get a block page (2026-10-15). Candidate for the V8 home fetcher."}
   - {id: nylj, name: New York Law Journal headlines, type: rss, url: "https://www.law.com/newyorklawjournal/feed/", status: DC-BLOCK, poll: 60, desk: LAW, notes: "Paywalled; headlines and links only. HTTP 403 from GitHub runners (2026-10-15). Candidate for the V8 home fetcher."}
@@ -253,18 +280,18 @@ law:
     poll: 360
     notes: DISABLED 2026-10-14 because dec.ny.gov/robots.txt explicitly disallows /news/environmental-notice-bulletin for all bots. Roadmap idea - DEC's email subscription for the ENB. Published weekly (Wednesdays). Item links follow /news/environmental-notice-bulletin/YYYY-MM-DD/<category>/<slug>; list new items with their category (seqr, permits, remediation, etc.). Link scraping only in V1.
   - {id: cl_ny_appdiv, name: Appellate Division opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/nyappdiv/", status: OK, poll: 60, notes: "All four departments, dozens a day. Roadmap: filter to watchlist terms and the Second Department."}
-  - {id: cl_nysd, name: SDNY opinions (CourtListener), short: "S.D.N.Y.", type: rss, url: "https://www.courtlistener.com/feed/court/nysd/", status: OK, poll: 120, enabled: true, desk: LAW, require_watch: true, notes: "High volume; only watchlist matches are shown."}
-  - {id: cl_nysb, name: SDNY Bankruptcy opinions (CourtListener), short: "Bankr. S.D.N.Y.", type: rss, url: "https://www.courtlistener.com/feed/court/nysb/", status: OK, poll: 120, enabled: true, desk: LAW}
+  - {id: cl_nysd, scope: state, name: SDNY opinions (CourtListener), short: "S.D.N.Y.", type: rss, url: "https://www.courtlistener.com/feed/court/nysd/", status: OK, poll: 120, enabled: true, desk: LAW, require_watch: true, notes: "High volume; only watchlist matches are shown."}
+  - {id: cl_nysb, scope: state, name: SDNY Bankruptcy opinions (CourtListener), short: "Bankr. S.D.N.Y.", type: rss, url: "https://www.courtlistener.com/feed/court/nysb/", status: OK, poll: 120, enabled: true, desk: LAW}
   - {id: cl_scotus, name: Supreme Court opinions (CourtListener), type: rss, url: "https://www.courtlistener.com/feed/court/scotus/", status: OK, poll: 60}
   - {id: jdsupra_bankruptcy, name: JD Supra Bankruptcy, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=BankruptcyLaw", status: OK, poll: 120}
   - {id: jdsupra_real_estate, name: JD Supra Real Estate, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=RealEstate", status: OK, poll: 120}
   - {id: jdsupra_finance, name: JD Supra Finance and Banking, type: rss, url: "https://www.jdsupra.com/resources/syndication/docsRSSfeed.aspx?ftype=FinanceBanking", status: OK, poll: 120}
-  - {id: volokh, name: Volokh Conspiracy, type: rss, url: "https://reason.com/volokh/feed/", status: OK, poll: 60}
-  - {id: above_the_law, name: Above the Law, type: rss, url: "https://abovethelaw.com/feed/", status: OK, poll: 60, notes: "Legal-industry news; noisy."}
-  - {id: dec_regs, name: "NYSDEC proposed, emergency and adopted regulations", short: "NYSDEC regs", type: links, url: "https://dec.ny.gov/regulatory/regulations/proposed-emergency-recently-adopted-regulations", status: OK, poll: 720, enabled: true, desk: LAW, text_pattern: "^(6 NYCRR|Part \\d|Parts \\d|Proposed|Pre-Proposal|Advanced Notice|Draft Program Policy|DER-|DMN|Emergency)", title_prefix: "DEC rulemaking: ", exclude_text: "^Proposed, Emergency,? and Recently Adopted Regulations$", summary: "Listed on NYSDEC's proposed, emergency and recently adopted regulations page.", notes: "No dates on the page; new entries appear as new items."}
-  - {id: nys_register, name: NYS Register (weekly proposed state rules), short: "NYS Register", type: links, url: "https://dos.ny.gov/state-register", status: OK, poll: 720, enabled: true, desk: LAW, link_pattern: "dos\\.ny\\.gov/[a-z]+-\\d{1,2}-\\d{4}vol-", title_prefix: "NYS Register: ", exclude_text: "^see the latest", summary: "Weekly issue of proposed and adopted state rules (PDF).", max_items: 4}
-  - {id: cl_2d_dept, name: "Appellate Division, Second Department (CourtListener search)", short: "2d Dept.", type: api, url: "https://www.courtlistener.com/api/rest/v4/search/?type=o&court=nyappdiv&q=%22Second%20Department%22&order_by=dateFiled%20desc", status: OK, poll: 180, enabled: true, desk: LAW, notes: "The Second Department covers Dutchess. Feed of the newest 20 by filing date."}
-  - {id: cl_ny_spill_law, name: "NY courts: Navigation Law, Oil Spill Fund, petroleum bulk storage (CourtListener search)", short: "NY courts · spill law", keep_days: 365, type: api, url: "https://www.courtlistener.com/api/rest/v4/search/?type=o&court=ny%20nyappdiv%20nyappterm%20nysupct%20nyclaimsct&q=%22Navigation%20Law%22%20OR%20%22Oil%20Spill%20Fund%22%20OR%20%22petroleum%20bulk%20storage%22&order_by=dateFiled%20desc", status: OK, poll: 720, enabled: true, desk: LAW}
+  - {id: volokh, short: "Volokh", enabled: true, quiet: true, desk: LAW, scope: national, name: Volokh Conspiracy, type: rss, url: "https://reason.com/volokh/feed/", status: OK, poll: 60}
+  - {id: above_the_law, no_brief: true, short: "Above the Law", enabled: true, quiet: true, desk: LAW, scope: national, name: Above the Law, type: rss, url: "https://abovethelaw.com/feed/", status: OK, poll: 60, notes: "Legal-industry news; noisy, so quiet."}
+  - {id: dec_regs, scope: state, name: "NYSDEC proposed, emergency and adopted regulations", short: "NYSDEC regs", type: links, url: "https://dec.ny.gov/regulatory/regulations/proposed-emergency-recently-adopted-regulations", status: OK, poll: 720, enabled: true, desk: LAW, text_pattern: "^(6 NYCRR|Part \\d|Parts \\d|Proposed|Pre-Proposal|Advanced Notice|Draft Program Policy|DER-|DMN|Emergency)", title_prefix: "DEC rulemaking: ", exclude_text: "^Proposed, Emergency,? and Recently Adopted Regulations$", summary: "Listed on NYSDEC's proposed, emergency and recently adopted regulations page.", notes: "No dates on the page; new entries appear as new items."}
+  - {id: nys_register, scope: state, name: NYS Register (weekly proposed state rules), short: "NYS Register", type: links, url: "https://dos.ny.gov/state-register", status: OK, poll: 720, enabled: true, desk: LAW, link_pattern: "dos\\.ny\\.gov/[a-z]+-\\d{1,2}-\\d{4}vol-", title_prefix: "NYS Register: ", exclude_text: "^see the latest", summary: "Weekly issue of proposed and adopted state rules (PDF).", max_items: 4}
+  - {id: cl_2d_dept, scope: state, name: "Appellate Division, Second Department (CourtListener search)", short: "2d Dept.", type: api, url: "https://www.courtlistener.com/api/rest/v4/search/?type=o&court=nyappdiv&q=%22Second%20Department%22&order_by=dateFiled%20desc", status: OK, poll: 180, enabled: true, desk: LAW, notes: "The Second Department covers Dutchess. Feed of the newest 20 by filing date."}
+  - {id: cl_ny_spill_law, scope: state, name: "NY courts: Navigation Law, Oil Spill Fund, petroleum bulk storage (CourtListener search)", short: "NY courts · spill law", keep_days: 365, type: api, url: "https://www.courtlistener.com/api/rest/v4/search/?type=o&court=ny%20nyappdiv%20nyappterm%20nysupct%20nyclaimsct&q=%22Navigation%20Law%22%20OR%20%22Oil%20Spill%20Fund%22%20OR%20%22petroleum%20bulk%20storage%22&order_by=dateFiled%20desc", status: OK, poll: 720, enabled: true, desk: LAW}
   - {id: federal_register_rules, name: "Federal Register: EPA, Coast Guard, PHMSA, FinCEN rules", short: "Fed. Reg.", type: api, url: "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bagencies%5D%5B%5D=environmental-protection-agency&conditions%5Bagencies%5D%5B%5D=coast-guard&conditions%5Bagencies%5D%5B%5D=pipeline-and-hazardous-materials-safety-administration&conditions%5Bagencies%5D%5B%5D=financial-crimes-enforcement-network&conditions%5Btype%5D%5B%5D=RULE&conditions%5Btype%5D%5B%5D=PRORULE&order=newest&per_page=40&fields%5B%5D=title&fields%5B%5D=html_url&fields%5B%5D=publication_date&fields%5B%5D=abstract&fields%5B%5D=agencies&fields%5B%5D=type", status: OK, poll: 180, enabled: true, desk: LAW, exclude_title: "Safety Zones?;|Security Zones?;|Special Local Regulations?;|Drawbridge Operation|Anchorage (Ground|Regulations)|Regulated Navigation Area|\\b(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Mexico|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington State|Washington|West Virginia|Wisconsin|Wyoming|Puerto Rico|Guam|Virgin Islands|Pinal County|Maricopa)\\b", notes: "Final and proposed rules only (no notices). Routine Coast Guard zone notices and rules naming another state (other than New York, New Jersey or Connecticut) are dropped. Agencies chosen for spill response (EPA, Coast Guard, PHMSA) and AML (FinCEN)."}
   - {id: nycourts_press, name: NY Unified Court System news and notices, type: html, url: "https://ww2.nycourts.gov/press/index.shtml", status: DC-BLOCK, poll: 360, notes: "nycourts.gov blocked the sandbox on every page (Court of Appeals, CLE Board, attorney registration). Retest from GitHub; otherwise V8 home fetcher."}
   - {id: fincen, name: FinCEN press releases, type: html, url: null, status: UNTESTED, poll: 360, notes: "Guessed URLs returned 404. FinCEN rules also arrive through the Federal Register."}
@@ -480,3 +507,12 @@ briefing:
   per_section: {Alert: 4, Beacon: 8, Government: 8, Law: 6, World: 10, Sports: 4}
   # Single-outlet items only make the briefing from these sources (official or primary).
   primary_sources: [beacon_wp_posts, beacon_wp_media, beacon_granicus_agendas, nws_beacon, dutchess_leg_board_minutes, dutchess_leg_committee_minutes, house_bills_week, senate_floor_activity, cl_ny_spill_law, dec_regs, nys_register, cl_ny_court_of_appeals]
+  # Briefing categories: All, Local, State, National, World, then these city beats. An item
+  # joins a beat when its headline (or, for world items, its description) matches.
+  beats:
+    paris: {label: Paris, pattern: "\\b(Paris|Parisian|France|French|Macron|Élysée|Elysee|Lyon|Marseille)\\b"}
+    israel: {label: Israel, pattern: "\\b(Israel|Israeli|Israelis|Tel Aviv|Jerusalem|Knesset|Netanyahu|Gaza|West Bank|Hezbollah|IDF)\\b"}
+  # In the State briefing, single-outlet items about state government rank first.
+  state_pattern: "\\b(Albany|Hochul|Legislature|Assembly|state Senate|Senate Majority|Heastie|Stewart-Cousins|DEC|NYSDEC|Comptroller|DiNapoli|Attorney General|Letitia James|state budget|Court of Appeals|PSC|Public Service Commission|MTA|SUNY|Delgado)\\b"
+  # A category briefing also uses single-outlet items from that scope, up to this many.
+  beat_extra: 14

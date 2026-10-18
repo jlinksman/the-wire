@@ -49,12 +49,14 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - Rules live in sources.yaml under `push_alerts`.
 
 ## V7 — World expansion
+- **Built 2026-10-17 (source round 2):** 30 more outlets as quiet, corroborating sources (they count toward grouping, ranking and the briefing but don't add lone rows to the desks); event-level grouping (same foreign place + same kind of event within 30 hours) with volume and a "Developing" flag in ranking; Brief me by category (All, Local, State, National, World, Paris, Israel).
+- Still to do: Le Parisien (French) and other non-English feeds need the translation step before they can group with English coverage.
 - **City desks:** Paris and Tel Aviv, with original-language headlines and labeled machine translation.
 - **OSINT desk:** military flight activity compared against a regional baseline, as a signal only.
 - GDELT for multilingual city monitoring.
 
 ## V8 — Home fetcher
-- An optional fetcher on a home machine (an old Intel MacBook is the candidate) for the sources that block cloud servers: AP, BBC, NPR, the Guardian, Le Monde, Le Parisien, Times of Israel, the Poughkeepsie Journal, Reddit, and the NY court system's own site. The site keeps working without it.
+- An optional fetcher on a home machine (an old Intel MacBook is the candidate) for the sources that block cloud servers: AP, Le Parisien's local feeds, Times of Israel, the Poughkeepsie Journal, Reddit, and the NY court system's own site. The site keeps working without it.
 
 ## Parked (no version yet)
 - Morning email digest, once I know what belongs in it.

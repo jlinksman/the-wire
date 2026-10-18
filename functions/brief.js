@@ -7,6 +7,7 @@
 // cited items are dropped. If the model is unavailable it falls back to reading headlines.
 //
 // GET /brief?since=<ms>            -> JSON {paragraphs, sources, ...}
+// GET /brief?since=<ms>&beat=state  -> one category only (local, state, national, world, or a city beat)
 // GET /brief?since=<ms>&format=text -> plain text (for a Siri Shortcut)
 
 const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
@@ -22,7 +23,7 @@ const ALLOWED_NAMES = new Set(("Beacon Dutchess Hudson Valley New York Joe Optim
   + "US U.S American Americans Federal European EU United White Administration Officials Lawmakers "
   + "January February March April May June July August September October November December").split(" "));
 
-const SYSTEM = (target) => `You write a short spoken news briefing for one listener, Joe, who lives in Beacon, New York. He owns an environmental remediation and spill-response company and is a New York attorney with a background in environmental law, bankruptcy, anti-money-laundering, commercial real estate and land use.
+const SYSTEM = (target, label) => `You write a short spoken news briefing for one listener, Joe, who lives in Beacon, New York. He owns an environmental remediation and spill-response company and is a New York attorney with a background in environmental law, bankruptcy, anti-money-laundering, commercial real estate and land use.
 
 Write for the ear, like an NPR newscast:
 - Use only facts stated in the numbered items. Never add outside knowledge, background, or guesses.
@@ -31,7 +32,9 @@ Write for the ear, like an NPR newscast:
 - Use few numbers and round them. No parentheses, abbreviations, web addresses, or headline fragments.
 - Say why something matters to Joe only when an item says it matched his watchlist or it is plainly about Beacon or Dutchess. Never invent a connection.
 - You may quote only from an item's Quote line, word for word, and name the speaker.
-- About ${target} words in total; fewer when there is little news.
+- About ${target} words in total; fewer when there is little news.${label ? `
+- This briefing covers ${label} news only. Stay on that beat.` : ""}
+- An item marked "developing" is a big, fast-moving story: lead its section with it.
 
 Reply with JSON only, no other text: {"stories":[{"text":"...","refs":[1,4]}]} in reading order, where refs are the item numbers each story uses.`;
 
@@ -45,14 +48,20 @@ export async function onRequestGet({ request, env }) {
   let since = Number(url.searchParams.get("since")) || now - 12 * 3600e3;
   since = Math.min(Math.max(since, now - 30 * 3600e3), now);
   const bucket = Math.floor(since / (15 * 60e3));
-  const cacheKey = new Request(`https://the-wire.brief/${encodeURIComponent(input.generated_at)}/${bucket}/${format}`);
+  const beats = input.beats || [{ id: "all", label: "All" }];
+  const beatId = beats.some((b) => b.id === url.searchParams.get("beat")) ? url.searchParams.get("beat") : "all";
+  const beat = beats.find((b) => b.id === beatId) || beats[0];
+  const cacheKey = new Request(`https://the-wire.brief/${encodeURIComponent(input.generated_at)}/${bucket}/${beatId}/${format}`);
   const cache = caches.default;
   if (!url.searchParams.has("fresh")) {
     const hit = await cache.match(cacheKey);
     if (hit) return hit;
   }
 
-  const items = input.items || [];
+  // "All" is the signal list; a category uses its own items, including single-outlet ones.
+  const items = (input.items || []).filter((it) => beatId === "all" ? it.core !== false
+    : it.scope === beatId || (it.beats || []).includes(beatId))
+    .sort((a, b) => b.score - a.score);
   const fresh = items.filter((it) => Date.parse(it.t) > since);
   const mode = fresh.length >= 2 ? "new" : "top";
   const use = (mode === "new" ? fresh : items).slice(0, 18);
@@ -70,7 +79,7 @@ export async function onRequestGet({ request, env }) {
     for (const m of [MODEL, FALLBACK_MODEL]) {
       try {
         const out = await env.AI.run(m, {
-          messages: [{ role: "system", content: SYSTEM(input.target_words || 260) }, { role: "user", content: prompt }],
+          messages: [{ role: "system", content: SYSTEM(beatId === "all" ? input.target_words || 260 : 180, beatId === "all" ? null : beat.label) }, { role: "user", content: prompt }],
           max_tokens: 900, temperature: 0.2,
         });
         const parsed = parseStories(out && out.response);
@@ -94,17 +103,20 @@ export async function onRequestGet({ request, env }) {
     if (!notice && numbered.length) notice = "Read from headlines.";
   }
 
-  const opener = `It's ${fmtTime(now)}. ` + (mode === "new"
-    ? `Here's what's new on The Wire since ${fmt(since)}.`
-    : `Not much has changed since ${fmt(since)}. Here's where things stand.`);
-  const sports = (input.sports || []).length ? [{ text: "In sports: " + input.sports.join(" "), refs: [] }] : [];
+  const where = beatId === "all" ? "on The Wire" : BEAT_PHRASE[beatId] || `in ${beat.label}`;
+  const opener = `It's ${fmtTime(now)}. ` + (!numbered.length
+    ? `There's nothing new ${where} in the last day.`
+    : mode === "new"
+    ? `Here's what's new ${where} since ${fmt(since)}.`
+    : `Not much has changed ${where} since ${fmt(since)}. Here's where things stand.`);
+  const sports = beatId === "all" && (input.sports || []).length ? [{ text: "In sports: " + input.sports.join(" "), refs: [] }] : [];
   const paragraphs = [{ text: opener, refs: [] }, ...stories, ...sports, { text: "That's The Wire.", refs: [] }];
 
   const usedIds = [...new Set(stories.flatMap((s) => s.refs))];
   const byId = Object.fromEntries(items.map((it) => [it.id, it]));
   const body = {
     as_of: input.generated_at, written_at: new Date(now).toISOString(), since: new Date(since).toISOString(),
-    mode, model, dropped, notice, paragraphs,
+    mode, model, dropped, notice, paragraphs, beat: beatId, beats,
     sources: usedIds.map((id) => byId[id]).filter(Boolean).map((it) => ({ id: it.id, title: it.title, source: it.source, outlets: it.outlets, link: it.link })),
   };
   const res = reply(body, format, 200);
@@ -112,10 +124,12 @@ export async function onRequestGet({ request, env }) {
   return res;
 }
 
+const BEAT_PHRASE = { local: "in Beacon and the Hudson Valley", state: "in New York State", national: "in national news", world: "around the world" };
+
 function itemBlock(it) {
   const age = Math.max(1, Math.round((Date.now() - Date.parse(it.t)) / 60e3));
   const lines = [
-    `[${it.n}] ${it.section} · ${age < 60 ? age + " minutes" : Math.round(age / 60) + " hours"} ago · ${it.outlets > 1 ? it.outlets + " outlets" : it.source}${it.why ? " · " + it.why : ""}`,
+    `[${it.n}] ${it.section} · ${age < 60 ? age + " minutes" : Math.round(age / 60) + " hours"} ago · ${it.outlets > 1 ? it.outlets + " outlets" : it.source}${it.reports ? ", " + it.reports + " reports" : ""}${it.developing ? " · developing" : ""}${it.why ? " · " + it.why : ""}`,
     `Headline: ${it.title}`,
   ];
   if (it.summary) lines.push(`Details: ${it.summary}`);

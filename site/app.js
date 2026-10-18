@@ -319,7 +319,7 @@ function todayView() {
     out.push(...stories.map(storyCard));
   }
 
-  const hour = data.items.filter((it) => it.fast && it.ms >= Date.now() - 3600000 && !it.alert && !folded.has(it.id) && !isMuted(it)).slice(0, 5);
+  const hour = data.items.filter((it) => it.fast && it.ms >= Date.now() - 3600000 && !it.alert && !folded.has(it.id) && !isMuted(it) && (!it.quiet || storyOf.has(it.id))).slice(0, 5);
   if (hour.length) {
     out.push(sectionHead("Last hour"));
     out.push(el("ol", { class: "list" }, ...hour.map((it) => row(it, { desk: true }))));
@@ -411,7 +411,8 @@ function segBar(t) {
 function deskView(t, desk) {
   const key = t + ":" + desk;
   shown[key] = shown[key] || PAGE;
-  const all = data.items.filter((it) => deskOf(it) === desk && !folded.has(it.id) && !it.alert && !isMuted(it));
+  // Quiet (corroborating) sources show only as part of a story, never as lone rows.
+  const all = data.items.filter((it) => deskOf(it) === desk && !folded.has(it.id) && !it.alert && !isMuted(it) && (!it.quiet || storyOf.has(it.id)));
   const fresh = prevVisit ? all.filter((it) => !isSeen(it)).length : 0;
   const list = prefs.newOnly && fresh ? all.filter((it) => !isSeen(it)) : all;
   const out = [];
@@ -456,6 +457,7 @@ function row(it, opt = {}) {
     el("span", { class: "src", text: it.source }),
     opt.desk ? el("span", { class: "dk", style: "--c: var(--" + deskOf(it).toLowerCase() + ")", text: DESK_NAME[deskOf(it)] }) : null,
     it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null,
+    st && st.developing ? el("span", { class: "dev", text: "Developing" }) : null,
     st ? el("span", { class: "plus", text: st.sources + " sources" }) : null,
     ...tags.map((tg) => el("span", { class: "tag", text: String(tg) })));
   return el("li", { class: "row" + (watch ? " watch" : "") + (isSeen(it) ? " seen" : "") },
@@ -467,7 +469,8 @@ function storyCard(s) {
   const q = storyQuotes(s)[0];
   return el("article", { class: "story" + (isSeen(lead) ? " seen" : "") },
     el("button", { class: "head", onclick: () => openItem(lead) },
-      el("span", { class: "lbl" }, s.sources + " sources · ", el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
+      el("span", { class: "lbl" }, s.developing ? el("span", { class: "dev", text: "Developing" }) : null,
+        s.sources + " sources" + (s.reports > s.sources ? " · " + s.reports + " reports" : "") + " · ", el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
       el("span", { class: "headline", text: lead.title }),
       s.summary ? el("span", { class: "msum" }, el("span", { class: "mlabel", text: "Machine summary" }), s.summary) : null,
       q ? el("span", { class: "qline" }, "“" + q.text + "”", el("span", { class: "qby", text: q.by + " · " + q.item.source })) : null,
@@ -499,22 +502,37 @@ function speak(paragraphs, btn) {
   if (btn) btn.textContent = "■ Stop";
 }
 
-async function openBrief() {
+// Categories: All, Local, State, National, World, then city beats (from brief.json).
+let briefBeats = [["all", "All"], ["local", "Local"], ["state", "State"], ["national", "National"], ["world", "World"], ["paris", "Paris"], ["israel", "Israel"]];
+let briefSeq = 0;
+function beatPills(current) {
+  return el("div", { class: "pills bpills", role: "tablist", "aria-label": "Briefing category" }, ...briefBeats.map(([id, label]) => el("button", {
+    role: "tab", "aria-selected": String(id === current), text: label,
+    onclick: () => { if (id !== current) openBrief(id); },
+  })));
+}
+
+async function openBrief(beat) {
+  beat = typeof beat === "string" ? beat : "all";
+  const seq = ++briefSeq;
   // Safari only lets a page talk after a tap: start (silent) speech inside this tap.
   try { if (prefs.speak && "speechSynthesis" in window) { stopSpeech(); speechSynthesis.speak(new SpeechSynthesisUtterance(" ")); } } catch (e) { /* ignore */ }
   const status = el("p", { class: "sdesc", text: "Writing your briefing…" });
-  openSheet([el("div", { class: "smeta" }, el("span", { text: "Brief me" })), el("h2", { id: "sheet-title", class: "stitle", text: "Your briefing" }), status], "Your briefing");
+  const head = [el("div", { class: "smeta" }, el("span", { text: "Brief me" })), el("h2", { id: "sheet-title", class: "stitle", text: "Your briefing" }), beatPills(beat), status];
+  if ($("sheet").hidden) openSheet(head, "Your briefing"); else $("sheet-body").replaceChildren(...head);
   const since = prevVisit && Date.now() - prevVisit < 30 * 3600e3 ? prevVisit : Date.now() - 12 * 3600e3;
   let b;
   try {
-    const r = await fetch("brief?since=" + Math.round(since), { credentials: "same-origin", redirect: "manual" });
+    const r = await fetch("brief?since=" + Math.round(since) + (beat === "all" ? "" : "&beat=" + encodeURIComponent(beat)), { credentials: "same-origin", redirect: "manual" });
     if (r.type === "opaqueredirect" || r.status === 401 || r.status === 403) throw new Error("You're signed out. Reload the page to sign in.");
     b = await r.json();
     if (!r.ok) throw new Error(b.error || "HTTP " + r.status);
   } catch (e) {
-    status.textContent = "Couldn't write the briefing: " + e.message;
+    if (seq === briefSeq) status.textContent = "Couldn't write the briefing: " + e.message;
     return;
   }
+  if (seq !== briefSeq || $("sheet").hidden) return;   // another category was chosen, or the sheet closed
+  if (b.beats && b.beats.length) briefBeats = b.beats.map((x) => [x.id, x.label]);
   const texts = b.paragraphs.map((p) => p.text);
   const listen = el("button", { class: "sbtn primary", text: "▶ Listen" });
   listen.onclick = () => {
@@ -528,6 +546,7 @@ async function openBrief() {
   $("sheet-body").replaceChildren(...[
     el("div", { class: "smeta" }, el("span", { text: "Machine-written from The Wire's sources" }), el("span", { text: "feed as of " + fmtTime.format(new Date(Date.parse(b.as_of))) })),
     el("h2", { id: "sheet-title", class: "stitle", text: b.mode === "new" ? "What's new" : "Where things stand" }),
+    beatPills(beat),
     el("div", { class: "sactions" }, listen),
     rate,
     el("div", { class: "brief" }, ...b.paragraphs.map((p) => el("p", {}, p.text,
@@ -536,6 +555,8 @@ async function openBrief() {
     b.dropped ? el("p", { class: "fine", text: (b.dropped === 1 ? "One line was left out because it couldn't" : b.dropped + " lines were left out because they couldn't") + " be traced to a source." }) : null,
     el("p", { class: "fine", text: "Reading stops if the screen locks. Voice: download an Enhanced or Premium English voice in Settings › Accessibility › Spoken Content › Voices for the best sound." }),
   ].filter(Boolean));
+  const sel = document.querySelector(".bpills [aria-selected='true']");
+  if (sel) sel.scrollIntoView({ inline: "center", block: "nearest" });
   if (prefs.speak) speak(texts, listen);
 }
 
