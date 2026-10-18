@@ -43,7 +43,7 @@ def build(data: dict, cfg: dict, dist, log, texts: dict | None = None) -> None:
         return bool(local and local.search(f"{it['title']} {it.get('summary', '')}"))
 
     for it in data["items"]:
-        if it["id"] in folded or it.get("kind") == "BLOTTER":
+        if it["id"] in folded or it.get("kind") == "BLOTTER" or it.get("no_ai"):
             continue
         t = _t(it["t"])
         if now - t > timedelta(hours=WINDOW_H) or noise.search(it["title"]):

@@ -141,6 +141,8 @@ def tag(data: dict, src_by_id: dict, beats_cfg: dict) -> None:
         src = src_by_id.get(it["source_id"], {})
         if src.get("quiet"):
             it["quiet"] = True
+        if src.get("no_ai"):
+            it["no_ai"] = True
         if src.get("no_brief"):
             it["no_brief"] = True
         scope = src.get("scope") or SECTION_SCOPE.get(src.get("_section", ""), "mixed")
