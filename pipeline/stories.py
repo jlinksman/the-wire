@@ -470,7 +470,10 @@ def synthesize(state, data, session, log, room: dict | None = None) -> dict:
         if len(members) < 2:
             continue
         sig = hashlib.sha1(json.dumps(sorted(m for m in s["members"] if not by_id[m].get("no_ai"))).encode()).hexdigest()[:12]
+        rules_sig = hashlib.sha1(json.dumps(room or {}, sort_keys=True, default=str).encode()).hexdigest()[:8]
         rec = cache.get(s["id"])
+        if rec and rec.get("rules") != rules_sig:
+            rec = None        # the room's rules changed: rewrite under the new rules
         if rec and (rec["sig"] == sig or now - datetime.fromisoformat(rec["at"]) < timedelta(minutes=SYNTH_REFRESH_MIN[bool(s.get("developing"))])):
             continue
         if stats["calls"] >= SYNTH_MAX_CALLS or ai.get("synth_neurons", 0) >= SYNTH_DAILY_NEURONS or ai["neurons"] >= AI_DAILY_NEURONS:
@@ -526,7 +529,7 @@ def synthesize(state, data, session, log, room: dict | None = None) -> dict:
             stats["kept"] += 1
         else:
             stats["dropped"] += 1
-        cache[s["id"]] = {"sig": sig, "at": now.isoformat(), **kept,
+        cache[s["id"]] = {"sig": sig, "rules": rules_sig, "at": now.isoformat(), **kept,
                           "latest_at": max((by_id[m]["t"] for m in members), default=None),
                           "n": len(members), "dropped": sum(1 for k in ("card", "what", "latest", "why") if (j.get(k) or "") and not kept[k])}
     return stats
@@ -570,6 +573,7 @@ def editor_notes(state, data, session, log, room: dict | None = None) -> None:
                 if why:
                     notes[st["id"]] = why
             ed.update({"at": now.isoformat(), "notes": notes})
+            log(f"[editor] front-page notes for {len(notes)} of {len(top)} stories")
         except Exception as exc:
             log(f"[editor] {type(exc).__name__}: {str(exc)[:120]}")
     for s in data["stories"]:
