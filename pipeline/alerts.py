@@ -56,8 +56,8 @@ def candidates(data: dict, cfg: dict, now: datetime | None = None) -> list[dict]
             first_by_outlet: dict[str, datetime] = {}
             for it in members:
                 t = _t(it)
-                if it["source_id"] not in first_by_outlet or t < first_by_outlet[it["source_id"]]:
-                    first_by_outlet[it["source_id"]] = t
+                if it["source"] not in first_by_outlet or t < first_by_outlet[it["source"]]:
+                    first_by_outlet[it["source"]] = t
             times = sorted(first_by_outlet.values())
             if len(times) < g.get("min_outlets", 3):
                 continue

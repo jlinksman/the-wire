@@ -36,6 +36,7 @@ import agendas  # noqa: E402
 import stories  # noqa: E402
 import alerts  # noqa: E402
 import brief  # noqa: E402
+import events  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "sources.yaml"
@@ -53,6 +54,8 @@ KEEP_DAYS = 7
 MIN_PER_SOURCE = 5
 MIN_KEEP_DAYS = 45
 MAX_ITEMS = 1500
+QUIET_KEEP_HOURS = 48   # corroborating (quiet) sources only matter for grouping recent stories
+MAX_QUIET_ITEMS = 1500
 SUMMARY_CHARS = 300
 ROBOTS_TTL_HOURS = 24
 BLOCKED_BACKOFF_MIN = 60
@@ -107,6 +110,7 @@ def load_config():
                 continue
             s = dict(s)
             s.setdefault("desk", SECTION_DESK.get(section, "WORLD"))
+            s["_section"] = section
             s.setdefault("poll", 15)
             sources.append(s)
 
@@ -808,6 +812,10 @@ def prune(state: dict, sources: list[dict] | None = None) -> None:
     for k, v in store.items():
         newest.setdefault(v["source_id"], []).append((sort_time(v), k))
     protected = set()
+    quiet = {s["id"] for s in sources or [] if s.get("quiet")}
+    quiet_cut = now_utc() - timedelta(hours=QUIET_KEEP_HOURS)
+    for k in [k for k, v in store.items() if v["source_id"] in quiet and sort_time(v) < quiet_cut]:
+        del store[k]
     for rows in newest.values():
         rows.sort(reverse=True)
         protected.update(k for t, k in rows[:MIN_PER_SOURCE] if t >= floor)
@@ -833,7 +841,11 @@ def gov_panel(items: list[dict]) -> list[dict]:
 
 
 def write_dist(state: dict, sources: list[dict], video: list[dict], teams: list[dict]) -> dict:
-    items = sorted(state["items"].values(), key=sort_time, reverse=True)[:MAX_ITEMS]
+    quiet_ids = {s["id"] for s in sources if s.get("quiet")}
+    ordered = sorted(state["items"].values(), key=sort_time, reverse=True)
+    # Quiet items have their own cap, so they can never push Beacon or court items out.
+    items = sorted([it for it in ordered if it["source_id"] not in quiet_ids][:MAX_ITEMS]
+                   + [it for it in ordered if it["source_id"] in quiet_ids][:MAX_QUIET_ITEMS], key=sort_time, reverse=True)
     for it in items:
         it["t"] = iso(sort_time(it))
     counts: dict[str, int] = {}
@@ -940,6 +952,8 @@ def main() -> int:
     data["tracker"] = data_tracker
     data["gov_panel"] = gov_panel(data["items"])
     data["front_page_url"] = yaml.safe_load(CONFIG.read_text()).get("front_page_url")
+    # Scope (local, state, national, world), city beats, and the quiet flag for each item.
+    events.tag(data, {s["id"]: s for s in sources}, (yaml.safe_load(CONFIG.read_text()).get("briefing") or {}).get("beats"))
     # V5: story grouping, open-text quotes, machine summaries. A failure here is
     # recorded in source health and never stops the feed from publishing.
     try:

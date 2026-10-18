@@ -92,17 +92,27 @@ def group(items: list[dict], now: datetime | None = None) -> list[dict]:
         else:
             clusters.append([it])
 
+    # Second pass: fragments of one big event (same foreign place, same kind of event).
+    from events import merge_events
+    clusters = merge_events(clusters, ms)
+
     out = []
     for c in clusters:
-        sources = {m["source_id"] for m in c}
-        if len(sources) < 2:
+        outlets = {m["source"] for m in c}       # outlets, not feeds: NYT World and NYT U.S. count once
+        if len(outlets) < 2:
             continue
         desk = Counter(m["desk"] for m in c).most_common(1)[0][0]
+        last = max(ms(m) for m in c)
+        recent = sum(1 for m in c if ms(m) >= now - timedelta(hours=6))
         out.append({
             "id": c[0]["id"],
-            "lead": max(c, key=ms)["id"],      # newest headline leads; id stays the first report
+            "lead": max(c, key=lambda m: (ms(m), not m.get("quiet")))["id"],   # newest headline leads; id stays the first report
             "members": [m["id"] for m in sorted(c, key=ms, reverse=True)],
-            "sources": len(sources),
+            "sources": len(outlets),
+            "reports": len(c),
+            "recent": recent,
+            # Developing: a burst of reports from several outlets in the last six hours.
+            "developing": recent >= 6 and len({m["source"] for m in c if ms(m) >= now - timedelta(hours=6)}) >= 3,
             "desk": desk,
             "first": c[0]["t"],
             "last": max(m["t"] for m in c),
@@ -116,10 +126,23 @@ def group(items: list[dict], now: datetime | None = None) -> list[dict]:
 DESK_WEIGHT = {"BEACON": 3.0, "GOV": 2.0, "LAW": 2.0, "WORLD": 1.5, "SPORTS": 0.6}
 
 
+def diverse(s: dict, by_id: dict, n: int = 4) -> list[str]:
+    """Up to n members, one per outlet first (newest first), for summaries and text fetches."""
+    seen, first, rest = set(), [], []
+    for m in s["members"]:
+        src = (by_id.get(m) or {}).get("source")
+        (rest if src in seen else first).append(m)
+        seen.add(src)
+    return (first + rest)[:n]
+
+
 def rank(stories: list[dict], now: datetime) -> None:
     for s in stories:
         age_h = (now - datetime.fromisoformat(s["last"].replace("Z", "+00:00"))).total_seconds() / 3600
-        s["score"] = round(DESK_WEIGHT.get(s["desk"], 1.0) * (1 + 0.6 * (s["sources"] - 1)) * math.exp(-age_h / 12), 3)
+        # Outlets count most; volume and a recent burst add to it (a big event gets many reports).
+        volume = 1 + 0.35 * math.log2(max(s.get("reports", s["sources"]), 1))
+        burst = 1.4 if s.get("developing") else 1.0
+        s["score"] = round(DESK_WEIGHT.get(s["desk"], 1.0) * (1 + 0.6 * (s["sources"] - 1)) * volume * burst * math.exp(-age_h / 12), 3)
     stories.sort(key=lambda s: s["score"], reverse=True)
 
 
@@ -144,7 +167,7 @@ def fetch_texts(state, data, src_by_id, session, robots_allows, timeout, log) ->
     by_id = {it["id"]: it for it in data["items"]}
     wanted: list[dict] = []
     for s in data["stories"][:20]:
-        wanted += [by_id[m] for m in s["members"][:4]]
+        wanted += [by_id[m] for m in diverse(s, by_id)]
     day_ago = now - timedelta(hours=24)
     wanted += [it for it in data["items"] if it["desk"] in ("BEACON", "GOV", "LAW") and ms(it) >= day_ago][:40]
 
@@ -292,7 +315,7 @@ def summarize(state, data, session, log) -> dict:
     now = datetime.now(timezone.utc)
     stats = {"calls": 0, "kept": 0, "dropped": 0, "error": None}
 
-    jobs = [("story", s["id"], s["members"][:4]) for s in data["stories"][:15]]
+    jobs = [("story", s["id"], diverse(s, by_id)) for s in data["stories"][:15]]
     day_ago = now - timedelta(hours=24)
     jobs += [("item", it["id"], [it["id"]]) for it in data["items"]
              if it["desk"] in ("BEACON", "GOV", "LAW") and ms(it) >= day_ago and (texts.get(it["id"]) or {}).get("text")][:10]

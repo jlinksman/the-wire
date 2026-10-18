@@ -404,3 +404,10 @@ html.stage-lock .stage { display: none; }
 /* Signed out / offline */
 .signin { margin: 40px 0; padding: 22px 20px; border-radius: var(--radius); background: var(--surface); display: grid; gap: 10px; }
 .signin .sbtn { justify-self: stretch; }
+
+/* Brief me: category pills inside the sheet */
+.sheet .pills.bpills { margin: 6px calc(-1 * var(--gutter-r)) 4px calc(-1 * var(--gutter-l)); padding: 4px var(--gutter-r) 8px var(--gutter-l); }
+.sheet .pills.bpills button { background: var(--raised); }
+.sheet .pills.bpills button[aria-selected="true"] { background: var(--inverse); color: var(--on-inverse); }
+/* A burst of reports from several outlets in the last six hours (coral = live) */
+.dev { color: var(--live, #e0796b); font-weight: 600; margin-right: 6px; }
