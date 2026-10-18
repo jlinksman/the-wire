@@ -21,7 +21,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qs, urljoin, urlparse
 
 import feedparser
 import requests
@@ -226,6 +226,25 @@ def struct_to_dt(st) -> datetime | None:
         return None
 
 
+# Publisher names as Bing reports them -> the short names The Wire already uses, so the
+# same outlet arriving two ways counts once in a story.
+OUTLET_ALIASES = {
+    "the wall street journal": "WSJ", "wsj": "WSJ", "associated press": "AP", "associated press news": "AP", "ap news": "AP",
+    "reuters": "Reuters", "the new york times": "NYT", "new york times": "NYT", "the guardian": "Guardian", "bbc": "BBC",
+    "bbc news": "BBC", "npr": "NPR", "cbs news": "CBS", "abc news": "ABC", "nbc news": "NBC", "fox news": "Fox News",
+    "al jazeera": "Al Jazeera", "france 24": "France 24", "mid hudson news": "Mid-Hudson News", "times union": "Times Union",
+    "spectrum news": "Spectrum News", "spectrumlocalnews": "Spectrum News", "poughkeepsie journal": "Poughkeepsie Journal",
+    "the poughkeepsie journal": "Poughkeepsie Journal", "times herald-record": "Times Herald-Record", "recordonline": "Times Herald-Record",
+    "politico": "Politico", "the times of israel": "Times of Israel", "the hill": "The Hill", "city & state": "City & State",
+    "gothamist": "Gothamist", "pbs newshour": "PBS NewsHour", "the independent": "Independent", "sky news": "Sky News",
+}
+
+
+def canonical_outlet(name: str) -> str:
+    n = re.sub(r"\s+on msn$", "", name.strip(), flags=re.IGNORECASE)
+    return OUTLET_ALIASES.get(n.lower(), n)
+
+
 def parse_rss(src: dict, content: bytes) -> list[dict]:
     feed = feedparser.parse(content)
     if not feed.entries:
@@ -237,12 +256,23 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
             raise ValueError(f"unparseable feed: {feed.bozo_exception}")
     exclude = {d.lower() for d in src.get("exclude_domains", [])}
     is_gnews = "news.google.com" in src["url"]
+    is_bing = "bing.com/news" in src["url"]
     items = []
     for e in feed.entries:
         link = e.get("link")
         title = clean_text(e.get("title"), 400)
         if not link or not title:
             continue
+        outlet = None
+        if is_bing:
+            # Bing News search feed: the publisher's own URL is in the url= parameter, and
+            # the publisher's name in <News:Source>. Each publisher counts as its own outlet.
+            real = parse_qs(urlparse(link).query).get("url")
+            if real:
+                link = real[0]
+            outlet = canonical_outlet(e.get("news_source") or "")
+            if not outlet or re.search(src.get("exclude_outlets", "$^"), e.get("news_source") or "", re.IGNORECASE):
+                continue
         if is_gnews:
             src_href = (e.get("source") or {}).get("href", "") if isinstance(e.get("source"), dict) else getattr(e.get("source"), "href", "")
             domain = urlparse(src_href or "").netloc.lower().removeprefix("www.")
@@ -254,6 +284,7 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
             "link": link,
             "summary": "" if is_gnews else clean_text(e.get("summary")),
             "published": iso(published),
+            **({"outlet": outlet} if outlet and not src.get("site_feed") else {}),
         })
     return items
 
@@ -741,6 +772,10 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
         # Alerts are only as current as the latest response: drop ones that ended.
         for k in [k for k, v in store.items() if v["source_id"] == src["id"]]:
             del store[k]
+    if src.get("max_age_days"):
+        # Search feeds sort by relevance, not date: keep only recent items.
+        floor_t = now_utc() - timedelta(days=src["max_age_days"])
+        items = [it for it in items if (parse_iso(it.get("published")) or now_utc()) >= floor_t]
     if src.get("max_items"):
         items = items[: src["max_items"]]
     if src.get("exclude_title"):
@@ -776,7 +811,7 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
         store[key] = {
             "id": key,
             "source_id": src["id"],
-            "source": src.get("short") or src["name"],
+            "source": it.get("outlet") or src.get("short") or src["name"],
             "desk": src["desk"],
             "fast": bool(src.get("fast")),
             **({"regional": True} if src.get("regional") else {}),
