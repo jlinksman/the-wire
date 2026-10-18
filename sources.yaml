@@ -429,7 +429,7 @@ live_lineup:
     - {name: C-SPAN events, channel_id: UCb--64Gl51jIEVE-GLDAVTg}
     - {name: White House, channel_id: UCYxRlFDqcWM4y7FfpiAN3KQ}
     - {name: House floor, channel_id: UCqU8qiVHYmLsF0JIMByCTvw, note: "when in session"}
-    - {name: Scripps News, channel_id: UCTln5ss6h6L_xNfMeujfPbg}
+    - {name: Scripps News, link: "https://www.youtube.com/channel/UCTln5ss6h6L_xNfMeujfPbg/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
     - {name: PBS NewsHour, channel_id: UC6ZFN9Tx6xh-skXCuRHCDpQ, note: "evenings and hearings"}
     - {name: NASA, channel_id: UCLA_DiR1FfKNvjuUpBHmylQ, note: "launches and events"}
     - {name: C-SPAN floor & hearings, link: "https://www.c-span.org/live/"}
@@ -440,21 +440,21 @@ live_lineup:
     - {name: DW News, channel_id: UCknLrEdhRCp1aegoMqRaCZg}
     - {name: Reuters, channel_id: UChqUTb7kYRX8-EiaN3XFrSQ, note: "events"}
     - {name: TRT World, channel_id: UC7fWeaHhqgM4Ry-RMpM2YYw}
-    - {name: Euronews, channel_id: UCSrZ3UV4jOidv8ppoVuvW9Q}
+    - {name: Euronews, link: "https://www.youtube.com/channel/UCSrZ3UV4jOidv8ppoVuvW9Q/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
     - {name: European Parliament, channel_id: UCvU4p_w08osQsrNi_I4ZtDA, note: "plenary, when live"}
     - {name: United Nations, channel_id: UC5O114-PQNYkurlTg6hekZw, note: "Security Council, when live"}
   France:
     - {name: France 24, channel_id: UCCCPCZNChQdGa9EkATeye4g}
-    - {name: franceinfo, channel_id: UCO6K_kkdP-lnSCiO3tPx7WA}
+    - {name: franceinfo, link: "https://www.youtube.com/channel/UCO6K_kkdP-lnSCiO3tPx7WA/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
     - {name: BFMTV, channel_id: UCXwDLMDV86ldKoFVc_g8P0g}
     - {name: Euronews FR, channel_id: UCW2QcKZiU8aUGg4yxCIditg}
     - {name: LCP Assemblée, channel_id: UCHGFbA0KWBgf6gMbyUCZeCQ, note: "in session"}
-    - {name: Public Sénat, channel_id: UCTa1bPArjpvNMgSHAb_pflA}
+    - {name: Public Sénat, channel_id: UCTa1bPArjpvNMgSHAb_pflA, note: "when live"}
   Israel:
     - {name: i24NEWS English, channel_id: UCvHDpsWKADrDia0c99X37vg}
-    - {name: i24NEWS עברית, channel_id: UCisowXt5wZkp2sR3rFh9lnQ}
-    - {name: Kan 11, channel_id: UCKqFqiCe1dCUxRe0_YNZ6gg}
-    - {name: Channel 13, channel_id: UCvQmPpU20hw1Trss_CVwaew}
+    - {name: i24NEWS עברית, link: "https://www.youtube.com/channel/UCisowXt5wZkp2sR3rFh9lnQ/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
+    - {name: Kan 11, link: "https://www.youtube.com/channel/UCKqFqiCe1dCUxRe0_YNZ6gg/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
+    - {name: Channel 13, link: "https://www.youtube.com/channel/UCvQmPpU20hw1Trss_CVwaew/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
     - {name: Channel 14, channel_id: UCKEImtWikw9usC1pl_9m1nQ}
     - {name: Knesset 99, channel_id: UCpjNXONNE-JUz7QACB1Cgcw, note: "in session"}
     - {name: ILTV, channel_id: UCuxgEyMeaks7HS5gAw6Tt7w}
