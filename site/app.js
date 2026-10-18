@@ -313,7 +313,7 @@ function todayView() {
     el("span", { class: "bc-ico", "aria-hidden": "true", text: "▶" }),
     el("span", { class: "bc-txt" },
       el("span", { class: "bc-t", text: "Brief me" }),
-      el("span", { class: "bc-s", text: (since ? "What's new since " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) : "What matters today") + " · about 90 seconds" }))));
+      el("span", { class: "bc-s", text: (since ? "What's new since " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) : "What matters today") + " · newscast or narrative" }))));
   const ahead = aheadBlock();
   if (ahead) out.push(ahead);
   if (data.front_page_url) {
@@ -552,27 +552,54 @@ function speak(paragraphs, btn) {
 }
 
 // Categories: All, Local, State, National, World, then city beats (from brief.json).
-let briefBeats = [["all", "All"], ["local", "Local"], ["state", "State"], ["national", "National"], ["world", "World"], ["paris", "Paris"], ["israel", "Israel"]];
+let briefBeats = [["all", "All"], ["local", "Local"], ["state", "State"], ["national", "National"], ["world", "World"], ["paris", "Paris"], ["israel", "Israel"], ["following", "Following"]];
 let briefSeq = 0;
-function beatPills(current) {
+function beatPills(current, onPick) {
   return el("div", { class: "pills bpills", role: "tablist", "aria-label": "Briefing category" }, ...briefBeats.map(([id, label]) => el("button", {
     role: "tab", "aria-selected": String(id === current), text: label,
-    onclick: () => { if (id !== current) openBrief(id); },
+    onclick: (e) => { [...e.currentTarget.parentNode.children].forEach((x) => x.setAttribute("aria-selected", String(x === e.currentTarget))); onPick(id); },
   })));
 }
+const BRIEF_STYLES = [["newscast", "Newscast", "About 90 seconds, story by story, for listening"], ["narrative", "Narrative", "The story of the day in connected paragraphs, about 3 minutes"]];
 
-async function openBrief(beat) {
-  beat = typeof beat === "string" ? beat : "all";
+// Brief me opens a chooser first: nothing is written (and no free AI allowance is spent)
+// until you pick a category and a style and tap Write.
+function openBrief() {
+  let beat = briefBeats.some(([id]) => id === prefs.briefBeat) ? prefs.briefBeat : "all";
+  let style = prefs.briefStyle === "narrative" ? "narrative" : "newscast";
+  const desc = el("p", { class: "fine", text: BRIEF_STYLES.find((x) => x[0] === style)[2] });
+  const styleRow = el("div", { class: "segmini two" }, ...BRIEF_STYLES.map(([id, label, d]) => el("button", {
+    "aria-pressed": String(id === style), text: label,
+    onclick: (e) => { style = id; desc.textContent = d; [...e.currentTarget.parentNode.children].forEach((x) => x.setAttribute("aria-pressed", String(x === e.currentTarget))); },
+  })));
+  openSheet([
+    el("div", { class: "smeta" }, el("span", { text: "Brief me" })),
+    el("h2", { id: "sheet-title", class: "stitle", text: "What do you want to hear?" }),
+    el("h3", { class: "sh3", text: "Category" }),
+    beatPills(beat, (id) => { beat = id; }),
+    el("h3", { class: "sh3", text: "Style" }),
+    styleRow, desc,
+    el("div", { class: "sactions" }, el("button", { class: "sbtn primary wide", text: "Write my briefing", onclick: () => {
+      prefs.briefBeat = beat; prefs.briefStyle = style; savePrefs(); writeBrief(beat, style);
+    } })),
+    el("p", { class: "fine", text: "Nothing is written until you tap. The same briefing asked for again within 15 minutes comes back instantly at no cost." }),
+  ], "Brief me");
+}
+
+async function writeBrief(beat, style) {
+  beat = beat || "all";
+  style = style || "newscast";
   const seq = ++briefSeq;
   // Safari only lets a page talk after a tap: start (silent) speech inside this tap.
   try { if (prefs.speak && "speechSynthesis" in window) { stopSpeech(); speechSynthesis.speak(new SpeechSynthesisUtterance(" ")); } } catch (e) { /* ignore */ }
   const status = el("p", { class: "sdesc", text: "Writing your briefing…" });
-  const head = [el("div", { class: "smeta" }, el("span", { text: "Brief me" })), el("h2", { id: "sheet-title", class: "stitle", text: "Your briefing" }), beatPills(beat), status];
+  const label = (briefBeats.find(([id]) => id === beat) || [beat, beat])[1] + " · " + (style === "narrative" ? "Narrative" : "Newscast");
+  const head = [el("div", { class: "smeta" }, el("span", { text: "Brief me · " + label })), el("h2", { id: "sheet-title", class: "stitle", text: "Your briefing" }), status];
   if ($("sheet").hidden) openSheet(head, "Your briefing"); else $("sheet-body").replaceChildren(...head);
   const since = prevVisit && Date.now() - prevVisit < 30 * 3600e3 ? prevVisit : Date.now() - 12 * 3600e3;
   let b;
   try {
-    const r = await fetch("brief?since=" + Math.round(since) + (beat === "all" ? "" : "&beat=" + encodeURIComponent(beat)), { credentials: "same-origin", redirect: "manual" });
+    const r = await fetch("brief?since=" + Math.round(since) + (beat === "all" ? "" : "&beat=" + encodeURIComponent(beat)) + (style === "narrative" ? "&style=narrative" : ""), { credentials: "same-origin", redirect: "manual" });
     if (r.type === "opaqueredirect" || r.status === 401 || r.status === 403) throw new Error("You're signed out. Reload the page to sign in.");
     b = await r.json();
     if (!r.ok) throw new Error(b.error || "HTTP " + r.status);
@@ -594,11 +621,11 @@ async function openBrief(beat) {
   const byIdLocal = Object.fromEntries((b.sources || []).map((s) => [s.id, s]));
   $("sheet-body").replaceChildren(...[
     el("div", { class: "smeta" }, el("span", { text: "Machine-written from The Wire's sources" }), el("span", { text: "feed as of " + fmtTime.format(new Date(Date.parse(b.as_of))) })),
-    el("h2", { id: "sheet-title", class: "stitle", text: b.mode === "new" ? "What's new" : "Where things stand" }),
-    beatPills(beat),
+    el("h2", { id: "sheet-title", class: "stitle", text: style === "narrative" ? "The story of the day" : b.mode === "new" ? "What's new" : "Where things stand" }),
+    el("p", { class: "fine" }, label + " · ", el("button", { class: "linkbtn", text: "Change", onclick: openBrief })),
     el("div", { class: "sactions" }, listen),
     rate,
-    el("div", { class: "brief" }, ...b.paragraphs.map((p) => el("p", {}, p.text,
+    el("div", { class: "brief" + (style === "narrative" ? " narrative" : "") }, ...b.paragraphs.map((p) => el("p", {}, p.text,
       ...(p.refs || []).map((id) => byIdLocal[id]).filter(Boolean).map((s) => el("a", { class: "bref", href: s.link, target: "_blank", rel: "noopener", text: s.outlets > 1 ? s.source + " +" + (s.outlets - 1) : s.source }))))),
     b.notice ? el("p", { class: "fine", text: b.notice }) : null,
     b.dropped ? el("p", { class: "fine", text: (b.dropped === 1 ? "One line was left out because it couldn't" : b.dropped + " lines were left out because they couldn't") + " be traced to a source." }) : null,
