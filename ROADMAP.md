@@ -54,7 +54,8 @@ Everything here was researched and scoped, then held back so V1 could start simp
 ## V7 — World expansion
 - **Built 2026-10-17 (source round 2):** 30 more outlets as quiet, corroborating sources (they count toward grouping, ranking and the briefing but don't add lone rows to the desks); event-level grouping (same foreign place + same kind of event within 30 hours) with volume and a "Developing" flag in ranking; Brief me by category (All, Local, State, National, World, Paris, Israel).
 - **Built 2026-10-17 (round 3):** Bing News search feeds (Google News RSS is disallowed by its robots.txt): WSJ, AP, Reuters, Politico (Congress and New York), Times Union, Spectrum News, Poughkeepsie Journal, Times Herald-Record and Times of Israel as quiet sources; topic watches on the Law desk for PFAS in New York, NYS DEC, Indian Point, Hudson River PCBs, NY bankruptcy filings, NYC commercial real estate, FinCEN and beneficial ownership.
-- Still to do: Le Parisien (French) and other non-English feeds need the translation step before they can group with English coverage.
+- **Built 2026-10-17 (city desks):** French (Le Parisien Paris, Le Monde, franceinfo, 20 Minutes Paris) and Hebrew (Ynet, Walla, Globes) headlines machine-translated with Workers AI m2m100, labeled, original kept; they join English stories and feed the Paris and Israel briefings. Untranslated headlines are held back until translated.
+- Still to do: translated descriptions (budget), Haaretz Hebrew (volume), Paris open-data events and roadworks.
 - **City desks:** Paris and Tel Aviv, with original-language headlines and labeled machine translation.
 - **OSINT desk:** military flight activity compared against a regional baseline, as a signal only.
 - GDELT for multilingual city monitoring.

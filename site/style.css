@@ -437,3 +437,18 @@ html.stage-lock .stage { display: none; }
 .hgroup summary { display: flex; justify-content: space-between; align-items: center; min-height: 40px; cursor: pointer; list-style: none; }
 .hgroup summary::-webkit-details-marker { display: none; }
 .hcount { color: var(--text3); font-size: 0.88rem; }
+
+/* Machine-translated original headline */
+.orig { margin: 8px 0 0; font-size: 0.95rem; color: var(--text2); }
+.orig .mlabel { display: block; }
+
+/* Pull to refresh (home-screen app) */
+.ptr { position: fixed; z-index: 25; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 52px); transform: translate(-50%, 0);
+  display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--surface);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); font-size: 0.85rem; color: var(--text2); opacity: 0; pointer-events: none; transition: opacity 0.12s; }
+.ptr.show { opacity: 1; }
+.ptr .ptr-i { display: inline-block; transition: transform 0.15s; }
+.ptr.ready .ptr-i { transform: rotate(180deg); color: var(--link, var(--text)); }
+.ptr.busy .ptr-i { animation: ptrspin 0.8s linear infinite; }
+@keyframes ptrspin { to { transform: rotate(360deg); } }
+html { overscroll-behavior-y: contain; }

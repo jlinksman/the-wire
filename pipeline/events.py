@@ -153,6 +153,7 @@ def tag(data: dict, src_by_id: dict, beats_cfg: dict) -> None:
         it["scope"] = scope
         text = f"{it['title']} {it.get('summary', '')[:200]}"
         b = [k for k, rx in beat_re.items() if rx.search(it["title"]) or (scope == "world" and rx.search(text))]
+        b += [k for k in src.get("beats") or [] if k not in b]      # a city outlet is always on its beat
         if b:
             it["beats"] = b
 
