@@ -1,0 +1,21 @@
+name: Source probe
+
+# Tests candidate feeds from GitHub's servers (where the build runs), one polite request
+# each. Run by hand when choosing sources. Prints a table; stores nothing.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install feedparser requests protego
+      - run: python pipeline/probe.py probe-candidates.txt
