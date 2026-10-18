@@ -37,6 +37,7 @@ import stories  # noqa: E402
 import alerts  # noqa: E402
 import brief  # noqa: E402
 import events  # noqa: E402
+import translate  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "sources.yaml"
@@ -1027,6 +1028,21 @@ def main() -> int:
 
     prune(state, sources)
     data = write_dist(state, sources, video, teams)
+    # City desks: French and Hebrew headlines in English (machine-translated, labeled).
+    try:
+        tstats = translate.run(state, data["items"], {s["id"]: s for s in sources}, session, log)
+        data["items"] = translate.apply(data["items"], state, {s["id"]: s for s in sources})
+        if tstats["error"] or tstats["done"] or not state.get("tr_ok"):
+            state["tr_error"] = tstats["error"]
+            if tstats["done"]:
+                state["tr_ok"] = iso(now_utc())
+    except Exception as exc:
+        state["tr_error"] = f"{type(exc).__name__}: {exc}"[:240]
+        log(f"[translate] failed: {state['tr_error']}")
+    data["sources"].append({"id": "translation", "name": "Headline translation, French and Hebrew (Workers AI)", "short": "Translation",
+                            "desk": "SYSTEM", "poll": 15, "last_success": state.get("tr_ok"), "last_attempt": iso(now_utc()),
+                            "last_error": state.get("tr_error"), "last_status": None, "robots": "n/a",
+                            "items": sum(1 for it in data["items"] if it.get("translated"))})
     data_tracker = {a: track[a] for a in {x["addr"] for it in data["items"] for x in it.get("agenda") or [] if x.get("addr")} if a in track}
     data["tracker"] = data_tracker
     data["gov_panel"] = gov_panel(data["items"])

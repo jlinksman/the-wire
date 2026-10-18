@@ -28,6 +28,7 @@ const REFRESH_MS = 5 * 60 * 1000;
 const STALE_MIN = 45;
 const FRESH_MIN = 30;
 const PAGE = 30;
+const LANG_NAME = { fr: "French", he: "Hebrew" };
 const KIND_MARK = { VIDEO: "Video", DOC: "Document", QUOTE: "Quote", BLOTTER: "Police blotter" };
 const SIZES = [["system", "iPhone"], ["15", "S"], ["17", "M"], ["19", "L"], ["21", "XL"]];
 const THEMES = [["auto", "Match iPhone"], ["dark", "Dark"], ["light", "Light"]];
@@ -461,6 +462,7 @@ function row(it, opt = {}) {
   const meta = el("span", { class: "meta" },
     el("span", { class: "t" + (isFresh(it.ms) && !isSeen(it) ? " fresh" : ""), text: ago(it.ms) }),
     el("span", { class: "src", text: it.source }),
+    it.translated ? el("span", { class: "kind", text: "Translated from " + (LANG_NAME[it.lang] || it.lang) }) : null,
     opt.desk ? el("span", { class: "dk", style: "--c: var(--" + deskOf(it).toLowerCase() + ")", text: DESK_NAME[deskOf(it)] }) : null,
     it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null,
     st && st.developing ? el("span", { class: "dev", text: "Developing" }) : null,
@@ -677,6 +679,8 @@ function openItem(it) {
       el("span", { text: exact(it.ms) }),
       it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null),
     el("h2", { id: "sheet-title", class: "stitle", text: it.title }),
+    it.translated ? el("p", { class: "orig" }, el("span", { class: "mlabel", text: "Machine-translated from " + (LANG_NAME[it.lang] || it.lang) + " · original" }),
+      el("span", { dir: "auto", lang: it.lang, text: it.orig_title })) : null,
     st && st.summary ? machine(st.summary, st.sources) : null,
     it.machine_summary && !st ? machine(it.machine_summary, 1) : null,
     it.summary && !it.agenda ? el("p", { class: "sdesc", text: it.summary }) : null,
@@ -770,7 +774,7 @@ function quoteList(qs) {
 
 function alsoList(s, except) {
   return el("ul", { class: "also" }, ...s.members.filter((m) => m !== except).map((m) => byId.get(m)).map((it) =>
-    el("li", {}, el("span", { class: "asrc", text: ago(it.ms) + " · " + it.source }), link(it.link, it.title))));
+    el("li", {}, el("span", { class: "asrc", text: ago(it.ms) + " · " + it.source + (it.translated ? " · translated from " + (LANG_NAME[it.lang] || it.lang) : "") }), link(it.link, it.title))));
 }
 
 // --------------------------------------------------------------- government panel
@@ -1131,3 +1135,39 @@ setInterval(() => {
   const c = $("clocks");
   if (c) c.replaceWith(clocks());
 }, 30000);
+
+// --------------------------------------------------------------- pull down to refresh
+// The home-screen app has no browser pull-to-refresh, so the page provides its own:
+// pull down from the top of a list and let go to check for new data (and a new version).
+(() => {
+  const ind = el("div", { class: "ptr", "aria-hidden": "true" }, el("span", { class: "ptr-i", text: "↓" }), el("span", { class: "ptr-t", text: "Pull to refresh" }));
+  document.body.append(ind);
+  let y0 = null, dy = 0, armed = false;
+  const blocked = () => !$("sheet").hidden || document.documentElement.classList.contains("stage-lock") || tab === "live";
+  window.addEventListener("touchstart", (e) => {
+    if (blocked() || window.scrollY > 0 || e.touches.length !== 1) { y0 = null; return; }
+    y0 = e.touches[0].clientY; dy = 0; armed = false;
+  }, { passive: true });
+  window.addEventListener("touchmove", (e) => {
+    if (y0 == null) return;
+    dy = e.touches[0].clientY - y0;
+    if (dy <= 0 || window.scrollY > 0) { ind.classList.remove("show", "ready"); return; }
+    const pull = Math.min(dy, 120);
+    armed = pull >= 80;
+    ind.style.transform = "translate(-50%, " + (pull * 0.6) + "px)";
+    ind.classList.add("show");
+    ind.classList.toggle("ready", armed);
+    ind.lastChild.textContent = armed ? "Release to refresh" : "Pull to refresh";
+  }, { passive: true });
+  window.addEventListener("touchend", async () => {
+    if (y0 == null) return;
+    y0 = null;
+    if (!armed) { ind.classList.remove("show", "ready"); ind.style.transform = ""; return; }
+    ind.classList.add("busy");
+    ind.lastChild.textContent = "Refreshing…";
+    try { checkVersion(); await load(true); } finally {
+      ind.classList.remove("show", "ready", "busy");
+      ind.style.transform = "";
+    }
+  });
+})();

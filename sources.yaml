@@ -17,6 +17,8 @@
 #   briefing, but a lone item from it isn't listed on the desks (it shows inside its story).
 # scope: local | state | national | world | mixed (mixed = per item: world if the headline names a
 #   foreign place, else national). Defaults by section; used by the briefing's category choices.
+# language: fr | he = the build translates the headline to English (Workers AI m2m100, free plan),
+#   labeled machine-translated, original kept. beats: [paris] puts every item on that city beat.
 # no_brief: true = never used as a single-outlet item in a category briefing (filler-heavy feeds).
 # fast: true  = eligible for the "Last hour" list in the breaking strip
 # short: display name on the page (optional)
@@ -260,18 +262,18 @@ paris:
   - {id: rfi_en, short: "RFI", enabled: true, quiet: true, desk: WORLD, scope: world, name: RFI English, type: rss, url: "https://www.rfi.fr/en/rss", status: OK, poll: 30, fulltext: true}
   - {id: france24_europe, short: "France 24", enabled: true, quiet: true, desk: WORLD, scope: world, name: France 24 · Europe, type: rss, url: "https://www.france24.com/en/europe/rss", status: OK, poll: 30, fulltext: true}
   - {id: le_parisien, name: Le Parisien (French), type: rss, url: "https://feeds.leparisien.fr/leparisien/rss", status: OK, poll: 30, language: fr, notes: "Reachable (probe 2026-10-17). French headlines need the city-desk translation step before they can group with English coverage."}
-  - {id: le_monde, name: Le Monde, type: rss, url: "https://www.lemonde.fr/rss/une.xml", status: DC-BLOCK, poll: 30, language: fr}
-  - {id: le_parisien_paris, name: Le Parisien Paris, type: rss, url: "https://feeds.leparisien.fr/leparisien/rss/paris-75", status: DC-BLOCK, poll: 30, language: fr}
+  - {id: le_monde, short: "Le Monde", enabled: true, quiet: true, desk: WORLD, scope: world, name: Le Monde (French), type: rss, url: "https://www.lemonde.fr/rss/une.xml", status: OK, poll: 30, language: fr}
+  - {id: le_parisien_paris, short: "Le Parisien", enabled: true, quiet: true, desk: WORLD, scope: world, beats: [paris], name: Le Parisien Paris, type: rss, url: "https://feeds.leparisien.fr/leparisien/rss/paris-75", status: OK, poll: 30, language: fr, max_items: 40}
   - {id: actu_paris, name: Actu Paris, type: rss, url: "https://actu.fr/ile-de-france/paris_75056/rss.xml", status: DC-BLOCK, poll: 30, language: fr}
-  - {id: 20min_paris, name: 20 Minutes Paris, type: rss, url: "https://www.20minutes.fr/feeds/rss-paris.xml", status: DC-BLOCK, poll: 30, language: fr}
-  - {id: franceinfo, name: franceinfo, type: rss, url: "https://www.francetvinfo.fr/titres.rss", status: DC-BLOCK, poll: 15, language: fr}
+  - {id: 20min_paris, short: "20 Minutes", enabled: true, quiet: true, desk: WORLD, scope: world, beats: [paris], name: 20 Minutes Paris, type: rss, url: "https://www.20minutes.fr/feeds/rss-paris.xml", status: OK, poll: 60, language: fr}
+  - {id: franceinfo, short: "franceinfo", enabled: true, quiet: true, desk: WORLD, scope: world, beats: [paris], name: franceinfo, type: rss, url: "https://www.francetvinfo.fr/titres.rss", status: OK, poll: 30, language: fr}
 
 tel_aviv:
   - {id: gnews_tlv_he, name: Google News Tel Aviv (Hebrew), type: rss, url: "https://news.google.com/rss/search?q=%D7%AA%D7%9C+%D7%90%D7%91%D7%99%D7%91&hl=he&gl=IL&ceid=IL:he", status: OK, poll: 30, language: he}
   - {id: ynet_en, name: Ynetnews (English), type: rss, url: "https://www.ynetnews.com/Integration/StoryRss2.xml", status: OK, poll: 15, language: en}
-  - {id: ynet_he, name: Ynet (Hebrew), type: rss, url: "https://www.ynet.co.il/Integration/StoryRss2.xml", status: OK, poll: 15, language: he}
-  - {id: walla, name: Walla, type: rss, url: "https://rss.walla.co.il/feed/1?type=main", status: OK, poll: 15, language: he}
-  - {id: globes, name: Globes, type: rss, url: "https://www.globes.co.il/webservice/rss/rssfeeder.asmx/FeederNode?iID=2", status: OK, poll: 30, language: he}
+  - {id: ynet_he, short: "Ynet", enabled: true, quiet: true, desk: WORLD, scope: world, beats: [israel], name: Ynet (Hebrew), type: rss, url: "https://www.ynet.co.il/Integration/StoryRss2.xml", status: OK, poll: 30, language: he}
+  - {id: walla, short: "Walla", enabled: true, quiet: true, desk: WORLD, scope: world, beats: [israel], name: Walla, type: rss, url: "https://rss.walla.co.il/feed/1?type=main", status: OK, poll: 30, language: he}
+  - {id: globes, short: "Globes", enabled: true, quiet: true, desk: WORLD, scope: world, beats: [israel], name: Globes (business), type: rss, url: "https://www.globes.co.il/webservice/rss/rssfeeder.asmx/FeederNode?iID=2", status: OK, poll: 60, language: he}
   - {id: haaretz_en, short: "Haaretz", enabled: true, quiet: true, desk: WORLD, scope: world, name: Haaretz (English), type: rss, url: "https://www.haaretz.com/srv/haaretz-latest-headlines", status: OK, poll: 15, language: en, notes: "Partly paywalled: headlines and links only."}
   - {id: haaretz_he, name: Haaretz (Hebrew), type: rss, url: "https://www.haaretz.co.il/srv/htz---all-articles", status: OK, poll: 15, language: he}
   - {id: jpost, name: Jerusalem Post, type: rss, url: "https://www.jpost.com/rss/rssfeedsfrontpage.aspx", status: OK, poll: 15, language: en}
