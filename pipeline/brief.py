@@ -132,7 +132,16 @@ def build(data: dict, cfg: dict, dist, log, texts: dict | None = None) -> None:
             if timedelta(hours=-1) < ev - now < timedelta(hours=30):
                 ahead.append({"t": it["event_at"], "what": it["title"].split(" - ")[0]})
 
+    # The editorial room's rules for the spoken briefing: the radio desk and copy rules for
+    # every briefing, plus the beat chair for a category briefing.
+    from editorial import load as load_room, rules_text
+    room = load_room()
+    beat_chairs = {"all": [], "local": ["beacon_hall", "hudson_valley"], "state": ["documents"], "national": ["documents", "courts"],
+                   "world": ["world"], "paris": ["paris", "world"], "israel": ["israel", "world"]}
+    house = {k: rules_text(room, v, ("radio",)) for k, v in beat_chairs.items()} if room else {}
+
     (dist / "brief.json").write_text(json.dumps({
+        "house_rules": house,
         "generated_at": data["generated_at"], "target_words": cfg.get("target_words", 260),
         "items": picked + extras, "sports": sports, "ahead": ahead,
         "beats": [{"id": "all", "label": "All"}, {"id": "local", "label": "Local"}, {"id": "state", "label": "State"},

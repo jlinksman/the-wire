@@ -79,7 +79,8 @@ export async function onRequestGet({ request, env }) {
     for (const m of [MODEL, FALLBACK_MODEL]) {
       try {
         const out = await env.AI.run(m, {
-          messages: [{ role: "system", content: SYSTEM(beatId === "all" ? input.target_words || 260 : 180, beatId === "all" ? null : beat.label) }, { role: "user", content: prompt }],
+          messages: [{ role: "system", content: SYSTEM(beatId === "all" ? input.target_words || 260 : 180, beatId === "all" ? null : beat.label)
+            + ((input.house_rules || {})[beatId] || (input.house_rules || {}).all ? "\n\n" + ((input.house_rules || {})[beatId] || input.house_rules.all) : "") }, { role: "user", content: prompt }],
           max_tokens: 900, temperature: 0.2,
         });
         const parsed = parseStories(out && out.response);

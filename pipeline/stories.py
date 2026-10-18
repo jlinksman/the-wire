@@ -285,14 +285,14 @@ def grounded(summary: str, corpus: str) -> str:
     return " ".join(keep)
 
 
-def _ai_call(session, prompt: str, log) -> tuple[str, float]:
+def _ai_call(session, prompt: str, log, system: str = SYSTEM_PROMPT) -> tuple[str, float]:
     acct, token = os.environ.get("CLOUDFLARE_ACCOUNT_ID"), os.environ.get("CLOUDFLARE_API_TOKEN")
     if not acct or not token:
         raise RuntimeError("Cloudflare account ID or API token not set")
     r = session.post(
         f"https://api.cloudflare.com/client/v4/accounts/{acct}/ai/run/{AI_MODEL}",
         headers={"Authorization": f"Bearer {token}"},
-        json={"messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
+        json={"messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
               "max_tokens": 140, "temperature": 0.2},
         timeout=60)
     body = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
@@ -301,12 +301,26 @@ def _ai_call(session, prompt: str, log) -> tuple[str, float]:
         raise RuntimeError(errs[:200])
     res = body.get("result") or {}
     usage = res.get("usage") or {}
-    tin = usage.get("prompt_tokens") or len(SYSTEM_PROMPT + prompt) / 4
+    tin = usage.get("prompt_tokens") or len(system + prompt) / 4
     tout = usage.get("completion_tokens") or len(res.get("response", "")) / 4
     return (res.get("response") or "").strip(), tin / 1e6 * NEURONS_PER_M_IN + tout / 1e6 * NEURONS_PER_M_OUT
 
 
-def summarize(state, data, session, log) -> dict:
+def earlier_records(it: dict, tracker: dict, limit: int = 4) -> list[str]:
+    """The Wire's own memory: other meetings where this item's addresses came up."""
+    out = []
+    for a in it.get("agenda") or []:
+        addr = a.get("addr")
+        for h in (tracker.get(addr) or []):
+            if h.get("link") == it.get("link"):
+                continue
+            line = f"{h['date']}: {h['body']} — {h.get('text', '')[:160]}"
+            if line not in out:
+                out.append(line)
+    return out[:limit]
+
+
+def summarize(state, data, session, log, room: dict | None = None) -> dict:
     ai = state.setdefault("ai", {})
     today = datetime.now(timezone.utc).date().isoformat()
     if ai.get("day") != today:
@@ -320,7 +334,9 @@ def summarize(state, data, session, log) -> dict:
     jobs = [("story", s["id"], diverse(s, by_id)) for s in data["stories"][:15]]
     day_ago = now - timedelta(hours=24)
     jobs += [("item", it["id"], [it["id"]]) for it in data["items"]
-             if it["desk"] in ("BEACON", "GOV", "LAW") and ms(it) >= day_ago and (texts.get(it["id"]) or {}).get("text")][:10]
+             if it["desk"] in ("BEACON", "GOV", "LAW") and ms(it) >= day_ago and not it.get("no_ai")
+             and ((texts.get(it["id"]) or {}).get("text") or it.get("agenda"))][:12]
+    tracker = data.get("tracker") or {}
 
     live = {j[1] for j in jobs}
     for k in [k for k in cache if k not in live]:
@@ -338,14 +354,23 @@ def summarize(state, data, session, log) -> dict:
         for i, m in enumerate(members, 1):
             it = by_id[m]
             body = (texts.get(m) or {}).get("text", "")[:1800]
+            if not body and it.get("agenda"):
+                body = "Agenda items:\n" + "\n".join("- " + a["text"][:200] for a in it["agenda"][:25])
             block = f"Report {i} ({it['source']}): {it['title']}\n{it.get('summary', '')}\n{body}".strip()
+            if kind == "item":
+                prior = earlier_records(it, tracker)
+                if prior:
+                    block += "\nEarlier on The Wire (meetings where these addresses came up):\n" + "\n".join("- " + p for p in prior)
             parts.append(block)
             corpus.append(block)
         prompt = "\n\n".join(parts)
+        from editorial import chairs_for, rules_text
+        house = rules_text(room or {}, chairs_for(room or {}, [by_id[m] for m in members]))
+        system = SYSTEM_PROMPT + ("\n\n" + house if house else "")
         if len(prompt) < 120:
             continue          # too little source text to summarize honestly
         try:
-            text, neurons = _ai_call(session, prompt, log)
+            text, neurons = _ai_call(session, prompt, log, system)
         except Exception as exc:
             stats["error"] = f"{type(exc).__name__}: {exc}"[:240]
             log(f"[ai] {stats['error']}")
@@ -391,7 +416,35 @@ def _parse_json(text: str) -> dict:
         return {}
 
 
-def synthesize(state, data, session, log) -> dict:
+def _cf_run(session, model: str, system: str, prompt: str, max_tokens: int, rates: tuple[float, float]):
+    acct, token = os.environ.get("CLOUDFLARE_ACCOUNT_ID"), os.environ.get("CLOUDFLARE_API_TOKEN")
+    if not acct or not token:
+        raise RuntimeError("Cloudflare account ID or API token not set")
+    r = session.post(f"https://api.cloudflare.com/client/v4/accounts/{acct}/ai/run/{model}",
+                     headers={"Authorization": f"Bearer {token}"},
+                     json={"messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+                           "max_tokens": max_tokens, "temperature": 0.2}, timeout=90)
+    body = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
+    if r.status_code != 200 or not body.get("success"):
+        raise RuntimeError(("; ".join(e.get("message", "") for e in body.get("errors", [])) or f"HTTP {r.status_code}")[:200])
+    res = body.get("result") or {}
+    usage = res.get("usage") or {}
+    out = res.get("response")
+    out_text = json.dumps(out) if isinstance(out, dict) else (out or "")
+    tin = usage.get("prompt_tokens") or len(system + prompt) / 4
+    tout = usage.get("completion_tokens") or len(out_text) / 4
+    return (out if isinstance(out, dict) else _parse_json(out_text)), tin / 1e6 * rates[0] + tout / 1e6 * rates[1]
+
+
+RED_PEN_TOP = 3
+RED_PEN_SYSTEM = (
+    "You are the standards editor. You get news reports and a draft written from them. "
+    "List every sentence of the draft that says anything the reports do not directly state: inference, speculation, "
+    "characterization, motive, significance, or a fact from outside the reports. Copy each such sentence exactly. "
+    "Reply with JSON only: {\"cut\": [\"exact sentence\", ...]} (an empty list if every sentence is supported).")
+
+
+def synthesize(state, data, session, log, room: dict | None = None) -> dict:
     """Write the story pages' text for the top stories with the large model, under budget.
     Every sentence must trace to the cited reports (grounded); untraceable sentences are dropped."""
     ai = state.setdefault("ai", {})
@@ -405,7 +458,9 @@ def synthesize(state, data, session, log) -> dict:
     texts = state.get("texts", {})
     by_id = {it["id"]: it for it in data["items"]}
     now = datetime.now(timezone.utc)
-    stats = {"calls": 0, "kept": 0, "dropped": 0, "error": None}
+    stats = {"calls": 0, "kept": 0, "dropped": 0, "error": None, "cut": 0, "chairs": Counter()}
+    from editorial import chairs_for, rules_text
+    tracker = data.get("tracker") or {}
     top = [s for s in data["stories"] if s["desk"] != "SPORTS"][:SYNTH_TOP]
     live = {s["id"] for s in data["stories"][:40]}
     for k in [k for k in cache if k not in live]:
@@ -426,42 +481,47 @@ def synthesize(state, data, session, log) -> dict:
             it = by_id[m]
             body = (texts.get(m) or {}).get("text", "")[:1500]
             new = " · NEW" if ms(it) >= recent_cut else ""
-            blocks.append(f"Report {i} · {it['source']} · {ms(it).strftime('%b %d %H:%M UTC')}{new}\n{it['title']}\n{it.get('summary', '')}\n{body}".strip())
+            block = f"Report {i} · {it['source']} · {ms(it).strftime('%b %d %H:%M UTC')}{new}\n{it['title']}\n{it.get('summary', '')}\n{body}".strip()
+            prior = earlier_records(it, tracker)
+            if prior:
+                block += "\nEarlier on The Wire:\n" + "\n".join("- " + p for p in prior)
+            blocks.append(block)
         corpus = "\n\n".join(blocks)
+        chairs = chairs_for(room or {}, [by_id[m] for m in s["members"]])
+        stats["chairs"].update(chairs)
+        system = SYNTH_SYSTEM + ("\n\n" + rules_text(room or {}, chairs) if room else "")
         watch = sorted({t for m in s["members"] for t in by_id[m].get("watch_terms", [])})
         reader = ("Reader: lives in Beacon, NY; this story matched his watchlist: " + ", ".join(watch) + ".\n\n") if watch else ""
         prompt = reader + corpus
-        acct, token = os.environ.get("CLOUDFLARE_ACCOUNT_ID"), os.environ.get("CLOUDFLARE_API_TOKEN")
-        if not acct or not token:
-            stats["error"] = "Cloudflare account ID or API token not set"
-            break
         try:
-            r = session.post(f"https://api.cloudflare.com/client/v4/accounts/{acct}/ai/run/{SYNTH_MODEL}",
-                             headers={"Authorization": f"Bearer {token}"},
-                             json={"messages": [{"role": "system", "content": SYNTH_SYSTEM}, {"role": "user", "content": prompt}],
-                                   "max_tokens": 420, "temperature": 0.2}, timeout=90)
-            body = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
-            if r.status_code != 200 or not body.get("success"):
-                raise RuntimeError(("; ".join(e.get("message", "") for e in body.get("errors", [])) or f"HTTP {r.status_code}")[:200])
+            j, neurons = _cf_run(session, SYNTH_MODEL, system, prompt, 420, (SYNTH_IN, SYNTH_OUT))
         except Exception as exc:
             stats["error"] = f"{type(exc).__name__}: {exc}"[:240]
             log(f"[synth] {stats['error']}")
             break
-        res = body.get("result") or {}
-        usage = res.get("usage") or {}
-        out = res.get("response")
-        out_text = json.dumps(out) if isinstance(out, dict) else (out or "")
-        tin = usage.get("prompt_tokens") or len(SYNTH_SYSTEM + prompt) / 4
-        tout = usage.get("completion_tokens") or len(out_text) / 4
-        neurons = tin / 1e6 * SYNTH_IN + tout / 1e6 * SYNTH_OUT
         ai["neurons"] += neurons
         ai["synth_neurons"] = ai.get("synth_neurons", 0) + neurons
         stats["calls"] += 1
-        j = out if isinstance(out, dict) else _parse_json(out_text)
         allowed = corpus + " Beacon New York"
         kept = {k: grounded(str(j.get(k) or ""), allowed) for k in ("card", "what", "latest", "why")}
         if not watch:
             kept["why"] = ""
+        # Red pen: a second read of the top stories by the standards editor; flagged
+        # sentences are cut. Skipped (not fatal) if the budget or the model says no.
+        if s in top[:RED_PEN_TOP] and any(kept.values()) and ai.get("synth_neurons", 0) < SYNTH_DAILY_NEURONS:
+            draft = " ".join(kept[k] for k in ("card", "what", "latest", "why") if kept[k])
+            try:
+                rp, n2 = _cf_run(session, SYNTH_MODEL, RED_PEN_SYSTEM, corpus + "\n\nDRAFT:\n" + draft, 300, (SYNTH_IN, SYNTH_OUT))
+                ai["neurons"] += n2
+                ai["synth_neurons"] = ai.get("synth_neurons", 0) + n2
+                cuts = [c.strip() for c in (rp.get("cut") or []) if isinstance(c, str) and len(c.strip()) > 12]
+                for k in kept:
+                    for c in cuts:
+                        if c in kept[k]:
+                            kept[k] = re.sub(r"\s+", " ", kept[k].replace(c, "")).strip()
+                            stats["cut"] += 1
+            except Exception as exc:
+                log(f"[redpen] {type(exc).__name__}: {str(exc)[:120]}")
         if kept["card"] or kept["what"]:
             stats["kept"] += 1
         else:
@@ -470,6 +530,56 @@ def synthesize(state, data, session, log) -> dict:
                           "latest_at": max((by_id[m]["t"] for m in members), default=None),
                           "n": len(members), "dropped": sum(1 for k in ("card", "what", "latest", "why") if (j.get(k) or "") and not kept[k])}
     return stats
+
+
+EDITOR_EVERY_MIN = 60
+EDITOR_TOP = 8
+EDITOR_SYSTEM = (
+    "You are the editor of a one-reader news site for a reader in Beacon, New York. For each numbered story, write one "
+    "short line (under 20 words) on why it is on the front page now, using only facts in that story's text: what changed, "
+    "how big, who is affected. No hype, no opinion. Reply with JSON only: {\"notes\": [{\"n\": 1, \"why\": \"...\"}]}.")
+
+
+def editor_notes(state, data, session, log, room: dict | None = None) -> None:
+    """Once an hour: one line per front-page story on why it leads (shown as analysis)."""
+    from editorial import rules_text
+    ai = state.setdefault("ai", {})
+    ed = ai.setdefault("editor", {})
+    now = datetime.now(timezone.utc)
+    top = [s for s in data["stories"] if s["desk"] != "SPORTS" and (s.get("card") or s.get("summary"))][:EDITOR_TOP]
+    if not top:
+        return
+    if ed.get("at") and now - datetime.fromisoformat(ed["at"]) < timedelta(minutes=EDITOR_EVERY_MIN):
+        pass
+    elif ai.get("neurons", 0) < AI_DAILY_NEURONS:
+        blocks = [f"[{i}] {s['sources']} outlets, {s.get('reports', s['sources'])} reports{', developing' if s.get('developing') else ''}\n"
+                  f"{(data_by_id(data).get(s['lead']) or {}).get('title', '')}\n{s.get('what') or s.get('card') or s.get('summary')}"
+                  for i, s in enumerate(top, 1)]
+        system = EDITOR_SYSTEM + ("\n\n" + rules_text(room, [], ("editor",)) if room else "")
+        try:
+            j, n = _cf_run(session, SYNTH_MODEL, system, "\n\n".join(blocks), 400, (SYNTH_IN, SYNTH_OUT))
+            ai["neurons"] += n
+            notes = {}
+            for x in j.get("notes") or []:
+                try:
+                    st = top[int(x.get("n")) - 1]
+                except (ValueError, TypeError, IndexError):
+                    continue
+                corpus = " ".join([str(st.get(k) or "") for k in ("what", "card", "summary")] + [blocks[top.index(st)]])
+                why = grounded(str(x.get("why") or ""), corpus)
+                if why:
+                    notes[st["id"]] = why
+            ed.update({"at": now.isoformat(), "notes": notes})
+        except Exception as exc:
+            log(f"[editor] {type(exc).__name__}: {str(exc)[:120]}")
+    for s in data["stories"]:
+        note = (ed.get("notes") or {}).get(s["id"])
+        if note:
+            s["lead_note"] = note
+
+
+def data_by_id(data):
+    return {it["id"]: it for it in data["items"]}
 
 
 COUNT_RE = re.compile(
@@ -529,6 +639,8 @@ def timeline(s, by_id) -> list[dict]:
 # ---------------------------------------------------------------- one entry point for build.py
 
 def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
+    from editorial import load as load_room
+    room = load_room()
     now = datetime.now(timezone.utc)
     stories = group(data["items"], now)
     rank(stories, now)
@@ -552,8 +664,8 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
         st["text_error"] = tstats["errors"][0] if tstats["errors"] else "all fetches failed"
     elif tstats["ok"]:
         st["text_error"], st["text_ok"] = None, stamp
-    sstats = synthesize(state, data, session, log)
-    astats = summarize(state, data, session, log)
+    sstats = synthesize(state, data, session, log, room)
+    astats = summarize(state, data, session, log, room)
     if sstats["error"] and not astats["error"] and "not set" not in sstats["error"]:
         astats["error"] = "story pages: " + sstats["error"]
     if astats["error"]:
@@ -582,6 +694,10 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
         tl = timeline(s, by_id)
         if tl:
             s["timeline"] = tl
+    try:
+        editor_notes(state, data, session, log, room)
+    except Exception as exc:
+        log(f"[editor] {type(exc).__name__}: {exc}")
     for it in data["items"]:
         rec = summaries.get(it["id"])
         if rec and rec["summary"] and rec["sources"] == [it["id"]]:
@@ -590,7 +706,8 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
     log(f"[v5] stories={len(stories)} texts kept={tstats['kept']} new={tstats['ok']} robots-skip={tstats['robots']} "
         f"quotes on {nq} items · ai calls={astats['calls']} kept={astats['kept']} dropped={astats['dropped']} "
         f"neurons today≈{state['ai']['neurons']:.0f} · story pages written={sstats['calls']} kept={sstats['kept']} "
-        f"dropped={sstats['dropped']}{' error=' + sstats['error'] if sstats['error'] else ''}")
+        f"dropped={sstats['dropped']} red-pen cuts={sstats['cut']} chairs={dict(sstats['chairs'])}"
+        f"{' error=' + sstats['error'] if sstats['error'] else ''}")
     # Health rows: these steps fail visibly, like any source.
     data["sources"] += [
         {"id": "article_text", "name": "Open article text (for summaries and quotes)", "short": "Article text",
