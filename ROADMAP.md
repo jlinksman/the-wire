@@ -48,6 +48,9 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - [x] The Cloudflare Worker that times the build also runs the 3-minute alert check; its state shows in source health.
 - Rules live in sources.yaml under `push_alerts`.
 
+## People (built 2026-10-18)
+- `people.yaml`: 93 reporters, writers, podcasters and forecasters (Joe's list plus a researched, balanced set), each with feeds, byline names, or a headline search; opinion voices carry a perspective tag. Their work shows in "From people you follow" on Today (rotated across perspectives), a Following category in Brief me, and a Range of views section on story pages. Unreachable for now (V8 home fetcher candidates): *.substack.com writers (Substack blocks cloud servers), Hudson Valley Weather (bot check), UnHerd, The Economist's acast feed.
+
 ## Efficiency pass (built 2026-10-17)
 - The page asks "anything new?" (ETag) and gets an empty 304 between builds; quiet items outside stories aren't shipped (about a third smaller); same-outlet duplicate headlines fold; stories with a large-model write-up skip the small-model summary; brief.json and alerts.json are written to KV only when changed (or every two hours); world and quiet feeds poll every 30 minutes from midnight to 6 AM; source health shows problems first in plain words, full list grouped by desk.
 

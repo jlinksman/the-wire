@@ -21,7 +21,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 
 import feedparser
 import requests
@@ -97,6 +97,53 @@ def log(msg: str) -> None:
 
 # ---------------------------------------------------------------- config
 
+PEOPLE = ROOT / "people.yaml"
+BYLINES: list = []          # (person id, pattern), set in main()
+PERSON_MAX_ITEMS = 8        # newest entries per person feed (podcast feeds carry years of episodes)
+PERSON_MAX_AGE_DAYS = 21
+
+
+def load_people_cfg() -> list[dict]:
+    try:
+        return [p for p in (yaml.safe_load(PEOPLE.read_text()) or {}).get("people", []) if p.get("enabled", True)]
+    except FileNotFoundError:
+        return []
+
+
+def load_people() -> list[dict]:
+    """One source per person feed or search, in sources.yaml's shape (people.yaml)."""
+    out = []
+    for p in load_people_cfg():
+        chans = [dict(f) for f in p.get("feeds") or []]
+        if p.get("search"):
+            chans.append({"type": "search", "url": "https://www.bing.com/news/search?" + urlencode({"q": p["search"], "format": "rss"})})
+        for i, f in enumerate(chans):
+            kind = f["type"]
+            out.append({
+                "id": f"p_{p['id']}_{i}", "name": f"{p['name']} · {KIND_LABEL.get(kind, kind)}", "short": p["name"],
+                "type": "api" if kind == "nws_afd" else "rss", "feed_kind": kind, "url": f["url"], "status": "OK",
+                "enabled": True, "desk": p.get("desk", "WORLD"), "person": p["id"], "person_feed": True,
+                "poll": 180 if kind == "search" else 60, "max_items": PERSON_MAX_ITEMS, "max_age_days": PERSON_MAX_AGE_DAYS,
+                "only_byline": bool(p.get("only_byline")), "byline": p.get("byline") or [],
+                # A search of the person's own site shows under their name; a name search shows the publisher.
+                **({"site_feed": True} if kind == "search" and p["search"].startswith("site:") else {}),
+                **({"no_ai": True} if p.get("no_ai") else {}),
+                # The NWS API is a public government API offered for exactly this (as with the alerts feed).
+                **({"robots": "subscription"} if kind == "nws_afd" else {}),
+                "scope": p.get("scope") or {"BEACON": "local", "GOV": "national", "LAW": "national", "SPORTS": "sports"}.get(p.get("desk"), "mixed"),
+                "_section": "people",
+            })
+    return out
+
+
+def people_bylines() -> list[tuple[str, re.Pattern]]:
+    return [(p["id"], re.compile(r"\b(?:" + "|".join(re.escape(b) for b in p["byline"]) + r")\b", re.IGNORECASE))
+            for p in load_people_cfg() if p.get("byline")]
+
+
+KIND_LABEL = {"podcast": "podcast", "rss": "writing", "bluesky": "Bluesky posts", "search": "headlines via search", "nws_afd": "forecast discussion"}
+
+
 def load_config():
     cfg = yaml.safe_load(CONFIG.read_text())
     sources = []
@@ -148,6 +195,7 @@ def load_config():
             else:
                 pat = r"\b" + re.escape(term) + r"\b"
             watch.append((group, re.compile(pat, flags), skip))
+    sources += load_people()
     return sources, video, watch, teams
 
 
@@ -266,9 +314,17 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
     items = []
     for e in feed.entries:
         link = e.get("link")
+        if not link:
+            # Podcast episodes without a page link: the publisher's own audio file.
+            enc = [x.get("href") for x in e.get("enclosures", []) if x.get("href")]
+            link = enc[0] if enc else None
         title = clean_text(e.get("title"), 400)
+        if not title and src.get("feed_kind") == "bluesky":
+            title = clean_text(e.get("summary") or e.get("description"), 160)   # posts have no title
         if not link or not title:
             continue
+        author = e.get("author") or ", ".join(a.get("name", "") for a in e.get("authors", []) if isinstance(a, dict))
+        author = re.sub(r"^\s*by\s+", "", clean_text(author, 200), flags=re.IGNORECASE)
         outlet = None
         if is_bing:
             # Bing News search feed: the publisher's own URL is in the url= parameter, and
@@ -291,6 +347,7 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
             "summary": "" if is_gnews else clean_text(e.get("summary")),
             "published": iso(published),
             **({"outlet": outlet} if outlet and not src.get("site_feed") else {}),
+            **({"author": author} if author else {}),
         })
     return items
 
@@ -580,8 +637,26 @@ def parse_senate_floor(src: dict, content: bytes) -> list[dict]:
     return items
 
 
+def parse_nws_afd(src: dict, content: bytes) -> list[dict]:
+    """NWS Area Forecast Discussion (forecasters' own reasoning), latest issue only."""
+    data = json.loads(content)
+    graph = data.get("@graph") or []
+    if not graph:
+        return []
+    p = graph[0]
+    office = (p.get("issuingOffice") or "ALY")[-3:]
+    return [{
+        "title": "Forecast discussion from the NWS Albany forecasters",
+        "link": f"https://forecast.weather.gov/product.php?site={office}&issuedby={office}&product=AFD&format=txt&version=1&glossary=1",
+        "summary": "The forecasters' own explanation of the forecast, updated several times a day.",
+        "published": p.get("issuanceTime"),
+    }]
+
+
 def pick_parser(src: dict):
     url = src["url"]
+    if src.get("feed_kind") == "nws_afd":
+        return parse_nws_afd
     if "wp-json/wp/v2/media" in url:
         return parse_wp_media
     if "wp-json/wp/v2/posts" in url:
@@ -778,6 +853,10 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
         # Alerts are only as current as the latest response: drop ones that ended.
         for k in [k for k, v in store.items() if v["source_id"] == src["id"]]:
             del store[k]
+    if src.get("only_byline"):
+        # A site-wide feed followed for one writer: keep only that writer's pieces.
+        pat = re.compile("|".join(re.escape(b) for b in src.get("byline") or ["$^"]), re.IGNORECASE)
+        items = [it for it in items if pat.search(it.get("author", ""))]
     if src.get("max_age_days"):
         # Search feeds sort by relevance, not date: keep only recent items.
         floor_t = now_utc() - timedelta(days=src["max_age_days"])
@@ -814,6 +893,16 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
         if src.get("require_watch") and not groups:
             continue  # this source only shows watchlist matches
         existing = store.get(key)
+        people = set((existing or {}).get("people", []))
+        if src.get("person"):
+            people.add(src["person"])
+        for pid, pat in BYLINES:
+            if it.get("author") and pat.search(it["author"]):
+                people.add(pid)
+        if existing and src.get("person_feed") and existing["source_id"] != src["id"]:
+            # Already in the store from an outlet's own feed: just tag the person.
+            existing["people"] = sorted(people)
+            continue
         store[key] = {
             "id": key,
             "source_id": src["id"],
@@ -828,7 +917,10 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             "first_seen": existing["first_seen"] if existing else stamp,
             "watch": sorted(groups),
             "watch_terms": terms[:3],
-            "kind": it.get("kind") or item_kind(src, it),
+            "kind": it.get("kind") or ("PODCAST" if src.get("feed_kind") == "podcast" else "POST" if src.get("feed_kind") == "bluesky" else None) or item_kind(src, it),
+            **({"author": it["author"]} if it.get("author") else {}),
+            **({"people": sorted(people)} if people else {}),
+            **({"person_feed": True} if src.get("person_feed") else {}),
             **({"blotter": it["blotter"]} if it.get("blotter") else {}),
             "event_at": meeting_time(it),
             **({"alert": it["alert"]} if it.get("alert") else {}),
@@ -991,6 +1083,8 @@ def mark_changed(state: dict) -> None:
 def main() -> int:
     started = time.time()
     sources, video, watch, team_cfg = load_config()
+    global BYLINES
+    BYLINES = people_bylines()
     state = load_state()
     state.setdefault("robots", {})
     session = requests.Session()
@@ -1047,6 +1141,9 @@ def main() -> int:
     data["tracker"] = data_tracker
     data["gov_panel"] = gov_panel(data["items"])
     data["front_page_url"] = yaml.safe_load(CONFIG.read_text()).get("front_page_url")
+    # The people directory (people.yaml) for the page: names, roles, perspective, reachability.
+    data["people"] = [{k: p[k] for k in ("id", "name", "role", "desk", "perspective", "unreachable") if p.get(k)}
+                      for p in load_people_cfg()]
     # Scope (local, state, national, world), city beats, and the quiet flag for each item.
     events.tag(data, {s["id"]: s for s in sources}, (yaml.safe_load(CONFIG.read_text()).get("briefing") or {}).get("beats"))
     # V5: story grouping, open-text quotes, machine summaries. A failure here is
@@ -1072,7 +1169,7 @@ def main() -> int:
     # needed for grouping and the briefing, so the phone doesn't download them.
     in_story = {m for s in data.get("stories", []) for m in s["members"]}
     before = len(data["items"])
-    data["items"] = [it for it in data["items"] if not it.get("quiet") or it["id"] in in_story]
+    data["items"] = [it for it in data["items"] if not it.get("quiet") or it["id"] in in_story or it.get("people")]
     log(f"[slim] shipped {len(data['items'])} of {before} items (quiet items outside stories stay in the build)")
     (DIST / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     (DIST / "version.txt").write_text(data["generated_at"])

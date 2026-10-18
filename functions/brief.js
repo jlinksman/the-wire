@@ -125,7 +125,7 @@ export async function onRequestGet({ request, env }) {
   return res;
 }
 
-const BEAT_PHRASE = { local: "in Beacon and the Hudson Valley", state: "in New York State", national: "in national news", world: "around the world" };
+const BEAT_PHRASE = { local: "in Beacon and the Hudson Valley", state: "in New York State", national: "in national news", world: "around the world", following: "from the people you follow" };
 
 function itemBlock(it) {
   const age = Math.max(1, Math.round((Date.now() - Date.parse(it.t)) / 60e3));
@@ -133,6 +133,7 @@ function itemBlock(it) {
     `[${it.n}] ${it.section} · ${age < 60 ? age + " minutes" : Math.round(age / 60) + " hours"} ago · ${it.outlets > 1 ? it.outlets + " outlets" : it.source}${it.reports ? ", " + it.reports + " reports" : ""}${it.developing ? " · developing" : ""}${it.why ? " · " + it.why : ""}`,
     `Headline: ${it.title}`,
   ];
+  if (it.by) lines.push(`By: ${it.by}${it.podcast ? " (podcast episode: say a new episode is out and what it covers)" : " (opinion or analysis: attribute it to them)"}`);
   if (it.summary) lines.push(`Details: ${it.summary}`);
   if (it.quote) lines.push(`Quote: "${it.quote.text}" (${it.quote.by})`);
   return lines.join("\n");
@@ -155,7 +156,7 @@ const norm = (s) => String(s).toLowerCase().replace(/[’‘]/g, "'").replace(/[
 
 // A sentence stays only if its numbers, names and quotes all appear in the items it cites.
 function grounded(text, src) {
-  const corpus = norm(src.map((it) => [it.section, it.title, it.summary, it.source, it.why, it.quote ? it.quote.text + " " + it.quote.by : ""].join(" ")).join(" "));
+  const corpus = norm(src.map((it) => [it.section, it.title, it.summary, it.source, it.why, it.by, it.quote ? it.quote.text + " " + it.quote.by : ""].join(" ")).join(" "));
   for (const num of norm(text).match(/\d[\d.]*/g) || []) {
     if (!corpus.includes(num.replace(/\.$/, ""))) return false;
   }

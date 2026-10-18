@@ -29,7 +29,16 @@ const STALE_MIN = 45;
 const FRESH_MIN = 30;
 const PAGE = 30;
 const LANG_NAME = { fr: "French", he: "Hebrew" };
-const KIND_MARK = { VIDEO: "Video", DOC: "Document", QUOTE: "Quote", BLOTTER: "Police blotter" };
+const PERSPECTIVE = { left: "Left", "center-left": "Center-left", center: "Center", heterodox: "Independent", cross: "Left and right",
+  "center-right": "Center-right", right: "Right", libertarian: "Libertarian", international: "International" };
+const BUCKET = { left: "left", "center-left": "left", center: "center", heterodox: "center", cross: "center", "center-right": "right", right: "right", libertarian: "libertarian", international: "international" };
+function personName(id) { const p = (data.people || []).find((x) => x.id === id); return p ? p.name : id; }
+function byline(it) {
+  // "Jeff Simms · Highlands Current"; a person's own feed already shows their name as the source.
+  const names = (it.people || []).map(personName).filter((n) => n !== it.source);
+  return names.length ? names.join(", ") + " · " + it.source : it.source;
+}
+const KIND_MARK = { VIDEO: "Video", DOC: "Document", QUOTE: "Quote", BLOTTER: "Police blotter", PODCAST: "Podcast", POST: "Post" };
 const SIZES = [["system", "iPhone"], ["15", "S"], ["17", "M"], ["19", "L"], ["21", "XL"]];
 const THEMES = [["auto", "Match iPhone"], ["dark", "Dark"], ["light", "Light"]];
 
@@ -39,7 +48,7 @@ const store = {
   set(k, v) { try { window.localStorage.setItem(k, String(v)); } catch (e) { /* private mode */ } },
   json(k, d) { try { return JSON.parse(store.get(k)) ?? d; } catch (e) { return d; } },
 };
-const prefs = Object.assign({ size: "system", theme: "auto", speak: true, rate: 1, clocks: true, newOnly: false, mutedSources: [], mutedWords: "", pins: [], liveRegion: null }, store.json(KEY.prefs, {}));
+const prefs = Object.assign({ size: "system", theme: "auto", speak: true, rate: 1, clocks: true, newOnly: false, mutedSources: [], mutedWords: "", pins: [], liveRegion: null, mutedPeople: [] }, store.json(KEY.prefs, {}));
 const savePrefs = () => store.set(KEY.prefs, JSON.stringify(prefs));
 let saved = store.json(KEY.saved, []);           // [{id, title, link, source, ms}]
 const saveSaved = () => store.set(KEY.saved, JSON.stringify(saved.slice(0, 100)));
@@ -121,6 +130,7 @@ function mutedWordList() {
 }
 function isMuted(it) {
   if (prefs.mutedSources.includes(it.source_id)) return true;
+  if (it.people && it.people.length && it.people.every((p) => (prefs.mutedPeople || []).includes(p)) && it.person_feed) return true;
   const words = mutedWordList();
   if (!words.length) return false;
   const t = (it.title + " " + (it.summary || "")).toLowerCase();
@@ -326,6 +336,12 @@ function todayView() {
     out.push(...stories.map(storyCard));
   }
 
+  const following = followingItems(6);
+  if (following.length) {
+    out.push(sectionHead("From people you follow", null, () => openPeople(), "People"));
+    out.push(el("ol", { class: "list" }, ...following.map((it) => row(it, { desk: true }))));
+  }
+
   const hour = data.items.filter((it) => it.fast && it.ms >= Date.now() - 3600000 && !it.alert && !folded.has(it.id) && !isMuted(it) && (!it.quiet || storyOf.has(it.id))).slice(0, 5);
   if (hour.length) {
     out.push(sectionHead("Last hour"));
@@ -476,7 +492,7 @@ function row(it, opt = {}) {
   const tags = (it.watch_terms && it.watch_terms.length ? it.watch_terms : it.watch || []).slice(0, 2);
   const meta = el("span", { class: "meta" },
     el("span", { class: "t" + (isFresh(it.ms) && !isSeen(it) ? " fresh" : ""), text: ago(it.ms) }),
-    el("span", { class: "src", text: it.source }),
+    el("span", { class: "src", text: byline(it) }),
     it.translated ? el("span", { class: "kind", text: "Translated from " + (LANG_NAME[it.lang] || it.lang) }) : null,
     opt.desk ? el("span", { class: "dk", style: "--c: var(--" + deskOf(it).toLowerCase() + ")", text: DESK_NAME[deskOf(it)] }) : null,
     it.kind ? el("span", { class: "kind", text: KIND_MARK[it.kind] || it.kind }) : null,
@@ -674,6 +690,12 @@ function openStory(st, it) {
       el("p", { class: "fine", text: "Outlets' numbers, word for word. They may cover different periods or update through the day." })) : null,
     st.timeline && st.timeline.length ? sec("Timeline",
       el("ol", { class: "tl" }, ...st.timeline.map((t) => el("li", {}, el("span", { class: "tlt", text: when(t.t) }), el("span", { class: "tlb" }, link(t.link, t.title), el("span", { class: "asrc", text: " · " + t.source })))))) : null,
+    st.views && st.views.length ? sec("Range of views",
+      el("ul", { class: "views" }, ...st.views.map((v) => byId.get(v.id)).filter(Boolean).filter((it) => !isMuted(it)).map((it) => el("li", {},
+        el("span", { class: "vlab", text: (PERSPECTIVE[it.perspective] || "") + " · " + byline(it) + (it.kind === "PODCAST" ? " · podcast" : "") }),
+        link(it.link, it.title),
+        it.summary ? el("span", { class: "vsum", text: it.summary.slice(0, 220) + (it.summary.length > 220 ? "…" : "") }) : null))),
+      el("p", { class: "fine", text: "Opinion and analysis from people you follow, spread across perspectives. Their words, linked; not The Wire's." })) : null,
     quoteList(storyQuotes(st)),
     st.why ? el("div", { class: "why" }, el("span", { class: "mlabel", text: "Why it matters to you · analysis" }), el("p", { text: st.why })) : null,
     el("div", { class: "sactions" },
@@ -1035,7 +1057,7 @@ function openSettings() {
       onchange: (e) => { prefs[keyName] = e.target.checked; savePrefs(); render(); } }));
   const words = el("input", { type: "text", id: "pref-words", class: "tin", value: prefs.mutedWords, placeholder: "e.g. NCIS, Grand Theft Auto, Kardashian",
     onchange: (e) => { prefs.mutedWords = e.target.value; savePrefs(); render(); } });
-  const srcs = (data ? data.sources : []).filter((s) => !["SYSTEM"].includes(s.desk));
+  const srcs = (data ? data.sources : []).filter((s) => !["SYSTEM"].includes(s.desk) && !s.id.startsWith("p_"));
   const srcList = el("div", { class: "srclist" }, ...srcs.map((s) => el("label", { class: "trow" },
     el("span", {}, s.name, el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
     el("input", { type: "checkbox", id: "src-" + s.id, checked: prefs.mutedSources.includes(s.id) ? null : true,
@@ -1069,6 +1091,8 @@ function openSettings() {
     el("h3", { class: "sh3", text: "Mute words" }),
     words,
     el("p", { class: "fine", text: "Comma-separated. Items whose headline or description contains one are hidden everywhere." }),
+    el("h3", { class: "sh3", text: "People" }),
+    el("button", { class: "sbtn wide", text: "People you follow (" + ((data && data.people) || []).length + ") ›", onclick: openPeople }),
     el("h3", { class: "sh3", text: "Sources shown" }),
     srcList,
     el("button", { class: "sbtn wide", text: "Source health ›", onclick: openHealth }),
@@ -1160,6 +1184,63 @@ setInterval(() => {
   const c = $("clocks");
   if (c) c.replaceWith(clocks());
 }, 30000);
+
+// --------------------------------------------------------------- people you follow
+// Newest work from followed people since the last visit (or two days), rotated across
+// perspectives so one prolific voice or side can't fill the section. Posts are left out.
+function followingItems(limit) {
+  const since = prevVisit && Date.now() - prevVisit < 48 * 3600e3 ? Math.min(prevVisit, Date.now() - 12 * 3600e3) : Date.now() - 48 * 3600e3;
+  const pool = data.items.filter((it) => it.people && it.people.length && it.kind !== "POST" && it.ms >= since && !isMuted(it)
+    && !it.people.every((p) => (prefs.mutedPeople || []).includes(p)));
+  const groups = {};
+  for (const it of pool) {
+    const b = it.perspective ? BUCKET[it.perspective] || "center" : "reporting";
+    (groups[b] = groups[b] || []).push(it);
+  }
+  const seenPerson = new Set();
+  const out = [];
+  const keys = ["reporting", "left", "center", "right", "libertarian", "international"].filter((k) => groups[k]);
+  while (out.length < limit && keys.some((k) => groups[k].length)) {
+    for (const k of keys) {
+      while (groups[k].length) {
+        const it = groups[k].shift();
+        const who = it.people[0];
+        if (seenPerson.has(who)) continue;
+        seenPerson.add(who); out.push(it); break;
+      }
+      if (out.length >= limit) break;
+    }
+  }
+  return out.sort((a, b) => b.ms - a.ms);
+}
+
+function openPeople() {
+  const people = (data && data.people) || [];
+  const latest = {};
+  for (const it of data.items) for (const p of it.people || []) if (!latest[p] || it.ms > latest[p].ms) latest[p] = it;
+  const order = ["BEACON", "GOV", "LAW", "WORLD", "SPORTS"];
+  const groups = order.map((d) => [d, people.filter((p) => p.desk === d)]).filter(([, l]) => l.length);
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "People you follow" }),
+    el("p", { class: "sdesc", text: people.length + " people. Edit the list in people.yaml; uncheck someone here to hide them on this device." }),
+    ...groups.map(([d, list]) => el("section", { class: "ssec" },
+      el("h3", { class: "sh3", text: DESK_NAME[d] }),
+      ...list.map((p) => {
+        const last = latest[p.id];
+        return el("label", { class: "trow person" },
+          el("span", { class: "pinfo" },
+            el("span", { class: "pn", text: p.name + (p.perspective ? " · " + PERSPECTIVE[p.perspective] : "") }),
+            el("span", { class: "pr", text: p.role || "" }),
+            el("span", { class: "pl", text: p.unreachable ? "Not reachable from the cloud yet: " + p.unreachable : last ? "Latest " + ago(last.ms) + " ago: " + last.title.slice(0, 70) : "Nothing new this week" })),
+          el("input", { type: "checkbox", checked: p.unreachable || (prefs.mutedPeople || []).includes(p.id) ? null : true, disabled: p.unreachable ? true : null,
+            onchange: (e) => {
+              prefs.mutedPeople = (prefs.mutedPeople || []).filter((x) => x !== p.id);
+              if (!e.target.checked) prefs.mutedPeople.push(p.id);
+              savePrefs(); render();
+            } }));
+      }))),
+  ], "People you follow");
+}
 
 // --------------------------------------------------------------- pull down to refresh
 // The home-screen app has no browser pull-to-refresh, so the page provides its own:

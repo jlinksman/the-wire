@@ -11,16 +11,18 @@
 #                    Reporters, forecasters and explainers have none.
 #   byline           names to match in the author field of feeds The Wire already reads
 #   feeds            their own feeds: {type: rss | podcast | bluesky, url}
-#   search           a Bing News query for paywalled writers with no free feed (headline and
+#   search           a Bing News query (also used where a site refuses cloud servers, e.g. *.substack.com)
+#                    — for paywalled writers with no free feed (headline and
 #                    link only; Bing doesn't confirm the byline, so these are marked "via search")
+#   unreachable      why their own channel can't be read from the cloud yet (candidate for the V8 home fetcher)
 #   paywall: true    headline, description and link only; never article text
 #   no_ai: true      their work never reaches a model (same rule as WSJ)
 # Every opinion piece is attributed to its author on the page and in any summary.
 
 people:
   # ------------------------------------------------------------ Joe's list
-  - {id: citarella, name: Joshua Citarella, role: "Doomscroll podcast; Substack", desk: GOV, perspective: heterodox,
-     feeds: [{type: podcast, url: "https://www.patreon.com/public-rss/2799152?show=866475"}, {type: rss, url: "https://joshuacitarella.substack.com/feed"}]}
+  - {id: citarella, name: Joshua Citarella, role: "Doomscroll podcast; Substack", desk: GOV, perspective: heterodox, unreachable: "his Substack blocks cloud servers",
+     feeds: [{type: podcast, url: "https://www.patreon.com/public-rss/2799152?show=866475"}]}
   - {id: bari_weiss, name: Bari Weiss, role: "The Free Press; Honestly", desk: GOV, perspective: heterodox,
      feeds: [{type: podcast, url: "https://feeds.megaphone.fm/RSV2347142881"}, {type: rss, url: "https://www.thefp.com/feed"}]}
   - {id: bill_maher, name: Bill Maher, role: "Real Time; Club Random", desk: GOV, perspective: center-left,
@@ -32,13 +34,13 @@ people:
   - {id: preet, name: Preet Bharara, role: "Stay Tuned with Preet", desk: LAW, perspective: center-left,
      feeds: [{type: podcast, url: "https://feeds.megaphone.fm/VMP5489734702"}]}
   - {id: galloway, name: Scott Galloway, role: "No Mercy / No Malice; Prof G; Pivot", desk: WORLD, perspective: center-left,
-     feeds: [{type: rss, url: "https://www.profgalloway.com/feed/"}, {type: podcast, url: "https://feeds.megaphone.fm/WWO6655869236"}, {type: podcast, url: "https://feeds.megaphone.fm/pivot"}]}
+     unreachable: "profgalloway.com's feed is stale", feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WWO6655869236"}, {type: podcast, url: "https://feeds.megaphone.fm/pivot"}]}
   - {id: swisher, name: Kara Swisher, role: "On with Kara Swisher; Pivot", desk: WORLD, perspective: center-left,
      feeds: [{type: podcast, url: "https://feeds.megaphone.fm/VMP1684715893"}]}
   - {id: ryssdal, name: Kai Ryssdal, role: "Marketplace", desk: WORLD,
      feeds: [{type: podcast, url: "https://feeds.publicradio.org/public_feeds/marketplace"}]}
-  - {id: hv_weather, name: Hudson Valley Weather, role: "Hyper-local forecasts (founded by Alex Marra)", desk: BEACON,
-     feeds: [{type: rss, url: "https://hudsonvalleyweather.com/feed/"}]}
+  # Its own feed answers cloud servers with a bot check (HTTP 202, 2026-10-18), so headlines come via Bing.
+  - {id: hv_weather, name: Hudson Valley Weather, role: "Hyper-local forecasts (founded by Alex Marra)", desk: BEACON, unreachable: "its site answers cloud servers with a bot check"}
   - {id: nws_albany, name: NWS Albany forecasters, role: "National Weather Service forecast discussion", desk: BEACON,
      feeds: [{type: nws_afd, url: "https://api.weather.gov/products/types/AFD/locations/ALY"}]}
 
@@ -55,12 +57,10 @@ people:
      feeds: [{type: podcast, url: "https://feeds.megaphone.fm/DISPME4897766830"}]}
   - {id: ezra_klein, name: Ezra Klein, role: "The Ezra Klein Show (NYT)", desk: GOV, perspective: center-left,
      feeds: [{type: podcast, url: "https://feeds.simplecast.com/82FI35Px"}]}
-  - {id: hcr, name: Heather Cox Richardson, role: "Letters from an American", desk: GOV, perspective: left,
-     feeds: [{type: rss, url: "https://heathercoxrichardson.substack.com/feed"}]}
+  - {id: hcr, name: Heather Cox Richardson, role: "Letters from an American", desk: GOV, perspective: left, search: "site:heathercoxrichardson.substack.com"}
   - {id: pesca, name: Mike Pesca, role: "The Gist", desk: GOV, perspective: center,
      feeds: [{type: podcast, url: "https://feeds.simplecast.com/PVS_9LQC"}]}
-  - {id: jetelina, name: Katelyn Jetelina, role: "Your Local Epidemiologist", desk: WORLD,
-     feeds: [{type: rss, url: "https://yourlocalepidemiologist.substack.com/feed"}]}
+  - {id: jetelina, name: Katelyn Jetelina, role: "Your Local Epidemiologist", desk: WORLD, unreachable: "Substack blocks cloud servers"}
 
   # ------------------------------------------------------------ Beacon and the Hudson Valley
   - {id: jeff_simms, name: Jeff Simms, role: "Beacon editor, The Highlands Current", desk: BEACON, byline: [Jeff Simms]}
@@ -113,12 +113,10 @@ people:
      feeds: [{type: podcast, url: "https://feeds.acast.com/public/shows/shift-key"}]}
 
   # ------------------------------------------------------------ bankruptcy, AML, real estate
-  - {id: petition, name: PETITION, role: "Restructuring newsletter", desk: LAW,
-     feeds: [{type: rss, url: "https://petition.substack.com/feed"}]}
+  - {id: petition, name: PETITION, role: "Restructuring newsletter", desk: LAW, unreachable: "Substack blocks cloud servers"}
   - {id: credit_slips, name: Credit Slips, role: "Bankruptcy and consumer-finance academics", desk: LAW,
      feeds: [{type: rss, url: "https://www.creditslips.org/feed"}]}
-  - {id: jason_mikula, name: Jason Mikula, role: "Fintech Business Weekly (BSA/AML)", desk: LAW,
-     feeds: [{type: rss, url: "https://fintechbusinessweekly.substack.com/feed"}]}
+  - {id: jason_mikula, name: Jason Mikula, role: "Fintech Business Weekly (BSA/AML)", desk: LAW, unreachable: "Substack blocks cloud servers"}
   - {id: icij, name: ICIJ, role: "International Consortium of Investigative Journalists", desk: WORLD,
      feeds: [{type: rss, url: "https://www.icij.org/feed/"}]}
   - {id: oliver_bullough, name: Oliver Bullough, role: "Money laundering and kleptocracy (Moneyland)", desk: WORLD, byline: [Oliver Bullough],
@@ -149,8 +147,7 @@ people:
      feeds: [{type: rss, url: "https://www.natesilver.net/feed"}]}
   - {id: g_elliott_morris, name: G. Elliott Morris, role: "Strength In Numbers", desk: GOV,
      feeds: [{type: rss, url: "https://www.gelliottmorris.com/feed"}]}
-  - {id: ruffini, name: Patrick Ruffini, role: "Echelon Insights; The Intersection", desk: GOV, perspective: center-right,
-     feeds: [{type: rss, url: "https://patrickruffini.substack.com/feed"}]}
+  - {id: ruffini, name: Patrick Ruffini, role: "Echelon Insights; The Intersection", desk: GOV, perspective: center-right, unreachable: "Substack blocks cloud servers"}
   - {id: daily_punch, name: Punchbowl News, role: "The Daily Punch (Jake Sherman and team)", desk: GOV,
      feeds: [{type: podcast, url: "https://feeds.megaphone.fm/daily-punch"}]}
   - {id: burgess_everett, name: Burgess Everett, role: "Congress, Semafor", desk: GOV, byline: [Burgess Everett]}
@@ -171,26 +168,23 @@ people:
      feeds: [{type: podcast, url: "https://audioboom.com/channels/5114286.rss"}]}
   - {id: rich_lowry, name: Rich Lowry, role: "National Review", desk: GOV, perspective: right,
      feeds: [{type: rss, url: "https://www.nationalreview.com/author/rich-lowry/feed/"}]}
-  - {id: ahmari, name: Sohrab Ahmari, role: "UnHerd", desk: GOV, perspective: right,
-     feeds: [{type: rss, url: "https://unherd.com/author/sohrab-ahmari/feed/"}]}
+  - {id: ahmari, name: Sohrab Ahmari, role: "UnHerd", desk: GOV, perspective: right, unreachable: "UnHerd has no author feed"}
   - {id: gillespie, name: Nick Gillespie, role: "Reason", desk: GOV, perspective: libertarian,
      feeds: [{type: podcast, url: "https://reason.com/podcast/feed/"}]}
 
   # ------------------------------------------------------------ world
-  - {id: phillips_obrien, name: Phillips O'Brien, role: "St Andrews; Substack (Ukraine war)", desk: WORLD,
-     feeds: [{type: rss, url: "https://phillipspobrien.substack.com/feed"}]}
+  - {id: phillips_obrien, name: Phillips O'Brien, role: "St Andrews; Substack (Ukraine war)", desk: WORLD, unreachable: "Substack blocks cloud servers"}
   - {id: war_on_the_rocks, name: War on the Rocks, role: "Defense podcast (with Michael Kofman)", desk: WORLD,
      feeds: [{type: podcast, url: "https://rss.libsyn.com/shows/70702/destinations/298196.xml"}]}
   - {id: applebaum, name: Anne Applebaum, role: "The Atlantic", desk: WORLD, perspective: center, paywall: true,
      feeds: [{type: rss, url: "https://www.theatlantic.com/feed/author/anne-applebaum/"}]}
-  - {id: the_intelligence, name: The Intelligence, role: "The Economist daily podcast", desk: WORLD,
-     feeds: [{type: podcast, url: "https://access.acast.com/rss/d556eb54-6160-4c85-95f4-47d9f5216c49"}]}
+  - {id: the_intelligence, name: The Intelligence, role: "The Economist daily podcast", desk: WORLD, unreachable: "acast's robots.txt disallows its feed address"}
   - {id: amos_harel, name: Amos Harel, role: "Haaretz military analyst", desk: WORLD, perspective: center-left, byline: [Amos Harel]}
   - {id: anshel_pfeffer, name: Anshel Pfeffer, role: "Haaretz; The Economist", desk: WORLD, perspective: center, byline: [Anshel Pfeffer]}
   - {id: yaakov_katz, name: Yaakov Katz, role: "Jerusalem Post columnist; JPPI", desk: WORLD, perspective: center-right, search: "\"Yaakov Katz\" site:jpost.com"}
   - {id: toi_briefing, name: Times of Israel Daily Briefing, role: "Podcast", desk: WORLD,
      feeds: [{type: podcast, url: "https://www.omnycontent.com/d/playlist/a2539154-43b6-4c4f-b951-aca300136a80/f8a9521a-98d3-421a-a708-aca600dd355b/e96b6c46-116b-4376-aa28-aca600deea22/podcast.rss"}]}
-  - {id: marwan_bishara, name: Marwan Bishara, role: "Al Jazeera senior political analyst", desk: WORLD, perspective: international, search: "\"Marwan Bishara\" site:aljazeera.com"}
+  - {id: marwan_bishara, name: Marwan Bishara, role: "Al Jazeera senior political analyst", desk: WORLD, perspective: international, unreachable: "Al Jazeera's feed has no bylines"}
   - {id: clea_caulcutt, name: Clea Caulcutt, role: "Politico Europe, Paris", desk: WORLD, byline: [Clea Caulcutt]}
 
   # ------------------------------------------------------------ tech and media
@@ -204,11 +198,9 @@ people:
   - {id: mollie_walker, name: Mollie Walker, role: "Rangers, NY Post; Up in the Blue Seats", desk: SPORTS,
      feeds: [{type: podcast, url: "https://feeds.megaphone.fm/NYPH6669958067"}]}
   - {id: mercogliano, name: Vincent Z. Mercogliano, role: "Rangers, The Athletic", desk: SPORTS, paywall: true, search: "Mercogliano Rangers"}
-  - {id: alasdair_gold, name: Alasdair Gold, role: "Spurs, football.london", desk: SPORTS,
-     feeds: [{type: rss, url: "https://spurswithalasdairgold.substack.com/feed"}]}
+  - {id: alasdair_gold, name: Alasdair Gold, role: "Spurs, football.london", desk: SPORTS, unreachable: "Substack blocks cloud servers"}
   - {id: men_in_blazers, name: Men in Blazers, role: "USMNT and world soccer", desk: SPORTS,
      feeds: [{type: podcast, url: "https://rss.art19.com/men-in-blazers"}]}
   - {id: meg_linehan, name: Meg Linehan, role: "Full Time (The Athletic), NWSL and Gotham", desk: SPORTS,
      feeds: [{type: podcast, url: "https://feeds.acast.com/public/shows/6818801871c041c8cc75b143"}]}
-  - {id: hudson_river_blue, name: Hudson River Blue, role: "NYCFC site and podcast", desk: SPORTS,
-     feeds: [{type: rss, url: "https://www.hudsonriverblue.com/rss/current.xml"}]}
+  - {id: hudson_river_blue, name: Hudson River Blue, role: "NYCFC site and podcast", desk: SPORTS, unreachable: "site refuses cloud servers; may have become New York Soccer Journal"}

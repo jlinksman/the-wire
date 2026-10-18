@@ -54,7 +54,9 @@ def ms(it: dict) -> datetime:
 
 
 def eligible(it: dict) -> bool:
-    return not it.get("alert") and it.get("kind") != "BLOTTER"
+    # Person feeds (columns, podcasts, posts) never count as outlets in a story; opinion
+    # pieces join a story as a "view" instead (views()).
+    return not it.get("alert") and it.get("kind") not in ("BLOTTER", "POST", "PODCAST") and not it.get("person_feed")
 
 
 def group(items: list[dict], now: datetime | None = None) -> list[dict]:
@@ -121,6 +123,69 @@ def group(items: list[dict], now: datetime | None = None) -> list[dict]:
         })
     out.sort(key=lambda s: (s["sources"], s["last"]), reverse=True)
     return out
+
+
+# ---------------------------------------------------------------- range of views
+
+VIEW_BUCKET = {"left": "left", "center-left": "left", "center": "center", "heterodox": "center", "cross": "center",
+               "center-right": "right", "right": "right", "libertarian": "libertarian", "international": "international"}
+VIEW_WINDOW_H = 72
+VIEW_MIN_SHARED = 3
+VIEW_MIN_SCORE = 0.15
+VIEWS_PER_STORY = 4
+
+
+def attach_views(data: dict, stories: list[dict], now: datetime) -> int:
+    """Match followed opinion voices (people.yaml perspective) to the stories they're about,
+    by distinctive shared words, and pick up to four per story spread across perspectives:
+    never two from one side while another side has something to say."""
+    cut = now - timedelta(hours=VIEW_WINDOW_H)
+    recent = [it for it in data["items"] if ms(it) >= cut]
+    cands = [it for it in recent if it.get("perspective") and it.get("kind") != "POST"]
+    top = [s for s in stories if s["desk"] != "SPORTS"][:30]
+    if not cands or not top:
+        return 0
+    by_id = {it["id"]: it for it in data["items"]}
+    text = lambda it, n: words(it["title"] + " " + (it.get("summary") or "")[:n])
+    df = Counter(w for it in recent for w in text(it, 200))
+    n = max(len(recent), 1)
+    idf = {w: math.log((n + 1) / (c + 0.5)) for w, c in df.items()}
+    swords = {s["id"]: set().union(*(text(by_id[m], 200) for m in s["members"] if m in by_id)) for s in top}
+    found: dict[str, list] = {}
+    # A story's vocabulary: words used by at least two of its reports (or all, for small
+    # stories), so a 50-report event doesn't match everything.
+    for s in top:
+        cnt = Counter(x for m in s["members"] if m in by_id for x in text(by_id[m], 200))
+        k = 2 if len(s["members"]) >= 4 else 1
+        swords[s["id"]] = {x for x, c in cnt.items() if c >= k}
+    wt = lambda ws: sum(idf.get(x, 1.0) for x in ws)
+    for it in cands:
+        w = text(it, 300)
+        best = None
+        for s in top:
+            shared = w & swords[s["id"]]
+            if len(shared) < VIEW_MIN_SHARED:
+                continue
+            score = wt(shared) / math.sqrt((wt(w) or 1.0) * (wt(swords[s["id"]]) or 1.0))
+            if score >= VIEW_MIN_SCORE and (best is None or score > best[0]):
+                best = (score, s)
+        if best:
+            found.setdefault(best[1]["id"], []).append((best[0], it))
+    attached = 0
+    for s in top:
+        cand = sorted(found.get(s["id"], []), key=lambda x: -x[0])
+        buckets: dict[str, list] = {}
+        for sc, it in cand:
+            buckets.setdefault(VIEW_BUCKET.get(it["perspective"], "center"), []).append(it)
+        picks = []
+        while len(picks) < VIEWS_PER_STORY and any(buckets.values()):
+            for b in list(buckets):
+                if buckets[b] and len(picks) < VIEWS_PER_STORY:
+                    picks.append(buckets[b].pop(0))
+        if picks:
+            s["views"] = [{"id": it["id"], "perspective": it["perspective"]} for it in picks]
+            attached += len(picks)
+    return attached
 
 
 # ---------------------------------------------------------------- ranking
@@ -658,6 +723,7 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
     stories = group(data["items"], now)
     rank(stories, now)
     data["stories"] = stories
+    nviews = attach_views(data, stories, now)
     stamp = now.isoformat().replace("+00:00", "Z")
 
     tstats = fetch_texts(state, data, src_by_id, session, robots_allows, timeout, log)
@@ -716,6 +782,7 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
         if rec and rec["summary"] and rec["sources"] == [it["id"]]:
             it["machine_summary"] = rec["summary"]
 
+    log(f"[views] {nviews} opinion pieces matched to stories")
     log(f"[v5] stories={len(stories)} texts kept={tstats['kept']} new={tstats['ok']} robots-skip={tstats['robots']} "
         f"quotes on {nq} items · ai calls={astats['calls']} kept={astats['kept']} dropped={astats['dropped']} "
         f"neurons today≈{state['ai']['neurons']:.0f} · story pages written={sstats['calls']} kept={sstats['kept']} "

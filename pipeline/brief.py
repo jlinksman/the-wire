@@ -37,13 +37,14 @@ def build(data: dict, cfg: dict, dist, log, texts: dict | None = None) -> None:
     folded = {m for s in data.get("stories", []) for m in s["members"] if m != s["lead"]}
 
     picked, extra = [], []
+    pname = {p["id"]: p["name"] for p in data.get("people", [])}
     statep = re.compile(cfg["state_pattern"], re.IGNORECASE) if cfg.get("state_pattern") else None
 
     def local_hit_any(it):
         return bool(local and local.search(f"{it['title']} {it.get('summary', '')}"))
 
     for it in data["items"]:
-        if it["id"] in folded or it.get("kind") == "BLOTTER" or it.get("no_ai"):
+        if it["id"] in folded or it.get("kind") in ("BLOTTER", "POST") or it.get("no_ai"):
             continue
         t = _t(it["t"])
         if now - t > timedelta(hours=WINDOW_H) or noise.search(it["title"]):
@@ -88,6 +89,8 @@ def build(data: dict, cfg: dict, dist, log, texts: dict | None = None) -> None:
                            for q in (items.get(m) or {}).get("quotes", [])), None),
             "link": it["link"], "score": round(score, 3),
             "scope": it.get("scope", "national"), "beats": beats,
+            **({"by": ", ".join(pname.get(p, p) for p in it["people"]), "perspective": it.get("perspective")} if it.get("people") else {}),
+            **({"podcast": True} if it.get("kind") == "PODCAST" else {}),
             **({"developing": True} if (st or {}).get("developing") else {}),
             **({"reports": st["reports"]} if st and st.get("reports", 0) > outlets else {}),
         })
@@ -103,7 +106,7 @@ def build(data: dict, cfg: dict, dist, log, texts: dict | None = None) -> None:
     # Extras: the best few single-outlet items per category, for category briefings only.
     extra.sort(key=lambda x: x["score"], reverse=True)
     per, extras = cfg.get("beat_extra", 14), []
-    labels = ["local", "state", "national", "world"] + list((cfg.get("beats") or {}).keys())
+    labels = ["local", "state", "national", "world"] + list((cfg.get("beats") or {}).keys()) + ["following"]
     count = {k: sum(1 for x in picked if x["scope"] == k or k in x["beats"]) for k in labels}
     for x in extra:
         keys = [k for k in [x["scope"], *x["beats"]] if k in count]
@@ -146,6 +149,7 @@ def build(data: dict, cfg: dict, dist, log, texts: dict | None = None) -> None:
         "items": picked + extras, "sports": sports, "ahead": ahead,
         "beats": [{"id": "all", "label": "All"}, {"id": "local", "label": "Local"}, {"id": "state", "label": "State"},
                   {"id": "national", "label": "National"}, {"id": "world", "label": "World"}]
-                 + [{"id": k, "label": v.get("label", k.title())} for k, v in (cfg.get("beats") or {}).items()],
+                 + [{"id": k, "label": v.get("label", k.title())} for k, v in (cfg.get("beats") or {}).items()]
+                 + [{"id": "following", "label": "Following"}],
     }, separators=(",", ":")))
     log(f"[brief] {len(picked)} signal items, {len(extras)} category extras, {count}, {len(sports)} sports lines, {len(ahead)} ahead")
