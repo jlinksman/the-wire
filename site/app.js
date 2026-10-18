@@ -630,6 +630,7 @@ function openStory(st, it) {
     st.what || st.card || st.summary ? el("div", { class: "machine" },
       el("span", { class: "mlabel", text: "What happened · machine-written from " + st.sources + " outlets" + (st.written_at ? " · " + when(st.written_at) : "") }),
       el("p", { text: st.what || st.card || st.summary })) : null,
+    st.lead_note ? el("p", { class: "leadnote" }, el("span", { class: "mlabel", text: "Why it's on the front page · analysis" }), el("span", { text: " " + st.lead_note })) : null,
     st.latest ? el("div", { class: "latest" }, el("span", { class: "mlabel", text: "Latest" + (st.latest_at ? " · " + when(st.latest_at) : "") }), el("p", { text: st.latest })) : null,
     fresh.length ? sec(fresh.length + (fresh.length === 1 ? " new report" : " new reports") + " since you last looked",
       el("ul", { class: "also" }, ...fresh.slice(0, 6).map((m) => el("li", {}, el("span", { class: "asrc", text: ago(m.ms) + " · " + m.source }), link(m.link, m.title))))) : null,
