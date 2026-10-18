@@ -1,0 +1,214 @@
+# people.yaml — individual reporters, writers, podcasters and forecasters The Wire follows
+# (alongside the outlets in sources.yaml). Joe's picks plus a researched, balanced set
+# (2026-10-18). Edit freely: add a person, change a feed, or set enabled: false.
+#
+# Fields
+#   name, role       who they are (role is shown on the page)
+#   desk             BEACON | GOV | LAW | WORLD | SPORTS — where their work belongs
+#   perspective      for opinion voices only: left | center-left | center | heterodox | cross |
+#                    center-right | right | libertarian | international. Used to keep the
+#                    "Range of views" and "From people you follow" balanced across sides.
+#                    Reporters, forecasters and explainers have none.
+#   byline           names to match in the author field of feeds The Wire already reads
+#   feeds            their own feeds: {type: rss | podcast | bluesky, url}
+#   search           a Bing News query for paywalled writers with no free feed (headline and
+#                    link only; Bing doesn't confirm the byline, so these are marked "via search")
+#   paywall: true    headline, description and link only; never article text
+#   no_ai: true      their work never reaches a model (same rule as WSJ)
+# Every opinion piece is attributed to its author on the page and in any summary.
+
+people:
+  # ------------------------------------------------------------ Joe's list
+  - {id: citarella, name: Joshua Citarella, role: "Doomscroll podcast; Substack", desk: GOV, perspective: heterodox,
+     feeds: [{type: podcast, url: "https://www.patreon.com/public-rss/2799152?show=866475"}, {type: rss, url: "https://joshuacitarella.substack.com/feed"}]}
+  - {id: bari_weiss, name: Bari Weiss, role: "The Free Press; Honestly", desk: GOV, perspective: heterodox,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/RSV2347142881"}, {type: rss, url: "https://www.thefp.com/feed"}]}
+  - {id: bill_maher, name: Bill Maher, role: "Real Time; Club Random", desk: GOV, perspective: center-left,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WMHY1886903044"}, {type: podcast, url: "https://rss.pdrl.fm/f10906/feeds.megaphone.fm/MCI6910680963"}]}
+  - {id: anderson_cooper, name: Anderson Cooper, role: "CNN; All There Is", desk: WORLD,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WMHY6497875466"}]}
+  - {id: sanjay_gupta, name: Sanjay Gupta, role: "CNN chief medical correspondent; Chasing Life", desk: WORLD,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WMHY6124370245"}]}
+  - {id: preet, name: Preet Bharara, role: "Stay Tuned with Preet", desk: LAW, perspective: center-left,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/VMP5489734702"}]}
+  - {id: galloway, name: Scott Galloway, role: "No Mercy / No Malice; Prof G; Pivot", desk: WORLD, perspective: center-left,
+     feeds: [{type: rss, url: "https://www.profgalloway.com/feed/"}, {type: podcast, url: "https://feeds.megaphone.fm/WWO6655869236"}, {type: podcast, url: "https://feeds.megaphone.fm/pivot"}]}
+  - {id: swisher, name: Kara Swisher, role: "On with Kara Swisher; Pivot", desk: WORLD, perspective: center-left,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/VMP1684715893"}]}
+  - {id: ryssdal, name: Kai Ryssdal, role: "Marketplace", desk: WORLD,
+     feeds: [{type: podcast, url: "https://feeds.publicradio.org/public_feeds/marketplace"}]}
+  - {id: hv_weather, name: Hudson Valley Weather, role: "Hyper-local forecasts (founded by Alex Marra)", desk: BEACON,
+     feeds: [{type: rss, url: "https://hudsonvalleyweather.com/feed/"}]}
+  - {id: nws_albany, name: NWS Albany forecasters, role: "National Weather Service forecast discussion", desk: BEACON,
+     feeds: [{type: nws_afd, url: "https://api.weather.gov/products/types/AFD/locations/ALY"}]}
+
+  # ------------------------------------------------------------ balance picks
+  - {id: advisory_opinions, name: Sarah Isgur and David French, role: "Advisory Opinions (The Dispatch)", desk: LAW, perspective: center-right,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/DISPME4573820108"}]}
+  - {id: strict_scrutiny, name: "Leah Litman, Melissa Murray and Kate Shaw", role: "Strict Scrutiny", desk: LAW, perspective: left,
+     feeds: [{type: podcast, url: "https://audioboom.com/channels/5166629.rss"}]}
+  - {id: all_in, name: All-In hosts, role: "All-In podcast (Chamath, Jason, Sacks, Friedberg)", desk: WORLD, perspective: right,
+     feeds: [{type: podcast, url: "https://rss.libsyn.com/shows/254861/destinations/1928300.xml"}]}
+  - {id: douthat, name: Ross Douthat, role: "CBS 60 Minutes (from July 2026); Interesting Times", desk: GOV, perspective: right,
+     feeds: [{type: podcast, url: "https://feeds.simplecast.com/bS1LZG8m"}]}
+  - {id: goldberg, name: Jonah Goldberg, role: "The Dispatch; The Remnant", desk: GOV, perspective: center-right, byline: [Jonah Goldberg],
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/DISPME4897766830"}]}
+  - {id: ezra_klein, name: Ezra Klein, role: "The Ezra Klein Show (NYT)", desk: GOV, perspective: center-left,
+     feeds: [{type: podcast, url: "https://feeds.simplecast.com/82FI35Px"}]}
+  - {id: hcr, name: Heather Cox Richardson, role: "Letters from an American", desk: GOV, perspective: left,
+     feeds: [{type: rss, url: "https://heathercoxrichardson.substack.com/feed"}]}
+  - {id: pesca, name: Mike Pesca, role: "The Gist", desk: GOV, perspective: center,
+     feeds: [{type: podcast, url: "https://feeds.simplecast.com/PVS_9LQC"}]}
+  - {id: jetelina, name: Katelyn Jetelina, role: "Your Local Epidemiologist", desk: WORLD,
+     feeds: [{type: rss, url: "https://yourlocalepidemiologist.substack.com/feed"}]}
+
+  # ------------------------------------------------------------ Beacon and the Hudson Valley
+  - {id: jeff_simms, name: Jeff Simms, role: "Beacon editor, The Highlands Current", desk: BEACON, byline: [Jeff Simms]}
+  - {id: brian_cronin, name: Brian PJ Cronin, role: "Environment, The Highlands Current", desk: BEACON, byline: [Brian PJ Cronin]}
+  - {id: leonard_sparks, name: Leonard Sparks, role: "Senior editor, The Highlands Current", desk: BEACON, byline: [Leonard Sparks]}
+  - {id: katie_hellmuth, name: Katie Hellmuth, role: "A Little Beacon Blog", desk: BEACON,
+     feeds: [{type: rss, url: "https://www.alittlebeaconblog.com/blog?format=rss"}]}
+  - {id: elias_guerra, name: Elias Guerra, role: "WAMC Hudson Valley bureau chief", desk: BEACON, byline: [Elias Guerra],
+     feeds: [{type: rss, url: "https://www.wamc.org/hudson-valley-news.rss"}]}
+  - {id: scenic_hudson, name: Scenic Hudson, role: "Land and river conservation group (advocacy)", desk: BEACON,
+     feeds: [{type: rss, url: "https://www.scenichudson.org/feed/"}]}
+
+  # ------------------------------------------------------------ Albany
+  - {id: ny_playbook, name: Politico New York Playbook, role: "Nick Reisman, Chris Sommerfeldt, Madison Fernandez", desk: GOV,
+     feeds: [{type: rss, url: "https://rss.politico.com/new-york-playbook.xml"}]}
+  - {id: chris_bragg, name: Chris Bragg, role: "Albany bureau chief, NY Focus", desk: GOV, byline: [Chris Bragg]}
+  - {id: nick_garber, name: Nick Garber, role: "Politics, NY Focus", desk: GOV, byline: [Nick Garber]}
+  - {id: sam_mellins, name: Sam Mellins, role: "Senior reporter, NY Focus", desk: GOV, byline: [Sam Mellins]}
+  - {id: colin_kinniburgh, name: Colin Kinniburgh, role: "Climate and energy, NY Focus", desk: GOV, byline: [Colin Kinniburgh]}
+  - {id: dan_clark, name: Dan Clark, role: "Times Union Capitol bureau; Capitol Confidential", desk: GOV, paywall: true,
+     feeds: [{type: bluesky, url: "https://bsky.app/profile/danclarkreports.bsky.social/rss"}], search: "\"Dan Clark\" site:timesunion.com"}
+  - {id: jon_campbell, name: Jon Campbell, role: "Albany and Hochul, WNYC/Gothamist", desk: GOV,
+     feeds: [{type: bluesky, url: "https://bsky.app/profile/joncampbellny.bsky.social/rss"}]}
+  - {id: capitol_pressroom, name: David Lombardo, role: "The Capitol Pressroom (WCNY)", desk: GOV,
+     feeds: [{type: podcast, url: "https://feeds.soundcloud.com/users/soundcloud:users:286203065/sounds.rss"}]}
+
+  # ------------------------------------------------------------ courts and law
+  - {id: amy_howe, name: Amy Howe, role: "SCOTUSblog", desk: LAW, byline: [Amy Howe],
+     feeds: [{type: rss, url: "https://www.scotusblog.com/author/amy-howe/feed/"}]}
+  - {id: vladeck, name: Steve Vladeck, role: "One First (Georgetown Law)", desk: LAW, perspective: center-left,
+     feeds: [{type: rss, url: "https://www.stevevladeck.com/feed"}]}
+  - {id: divided_argument, name: Will Baude and Dan Epps, role: "Divided Argument", desk: LAW, perspective: center,
+     feeds: [{type: podcast, url: "https://feeds.beamly.com/GxB3ykF8pz0UMRya/feed.xml"}]}
+  - {id: geidner, name: Chris Geidner, role: "Law Dork", desk: LAW, perspective: left,
+     feeds: [{type: rss, url: "https://www.lawdork.com/feed"}]}
+  - {id: volokh_people, name: Eugene Volokh, role: "Volokh Conspiracy (Reason)", desk: LAW, perspective: libertarian, byline: [Eugene Volokh, Josh Blackman]}
+  - {id: joe_patrice, name: Joe Patrice, role: "Above the Law; Thinking Like a Lawyer", desk: LAW, byline: [Joe Patrice],
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/LTN9584319601"}]}
+
+  # ------------------------------------------------------------ environment
+  - {id: tom_perkins, name: Tom Perkins, role: "PFAS and toxics, The Guardian", desk: LAW, byline: [Tom Perkins],
+     feeds: [{type: rss, url: "https://www.theguardian.com/profile/tom-perkins/rss"}]}
+  - {id: dan_farber, name: Dan Farber, role: "Legal Planet (Berkeley Law)", desk: LAW, byline: [Dan Farber],
+     feeds: [{type: rss, url: "https://legal-planet.org/feed/"}], only_byline: true}
+  - {id: marianne_lavelle, name: Marianne Lavelle, role: "EPA and politics, Inside Climate News", desk: LAW, byline: [Marianne Lavelle],
+     feeds: [{type: rss, url: "https://insideclimatenews.org/feed/"}], only_byline: true}
+  - {id: sabin_center, name: Sabin Center Climate Law Blog, role: "Columbia Law, climate litigation", desk: LAW,
+     feeds: [{type: rss, url: "https://blogs.law.columbia.edu/climatechange/feed/"}]}
+  - {id: shift_key, name: Robinson Meyer, role: "Shift Key (Heatmap)", desk: LAW,
+     feeds: [{type: podcast, url: "https://feeds.acast.com/public/shows/shift-key"}]}
+
+  # ------------------------------------------------------------ bankruptcy, AML, real estate
+  - {id: petition, name: PETITION, role: "Restructuring newsletter", desk: LAW,
+     feeds: [{type: rss, url: "https://petition.substack.com/feed"}]}
+  - {id: credit_slips, name: Credit Slips, role: "Bankruptcy and consumer-finance academics", desk: LAW,
+     feeds: [{type: rss, url: "https://www.creditslips.org/feed"}]}
+  - {id: jason_mikula, name: Jason Mikula, role: "Fintech Business Weekly (BSA/AML)", desk: LAW,
+     feeds: [{type: rss, url: "https://fintechbusinessweekly.substack.com/feed"}]}
+  - {id: icij, name: ICIJ, role: "International Consortium of Investigative Journalists", desk: WORLD,
+     feeds: [{type: rss, url: "https://www.icij.org/feed/"}]}
+  - {id: oliver_bullough, name: Oliver Bullough, role: "Money laundering and kleptocracy (Moneyland)", desk: WORLD, byline: [Oliver Bullough],
+     feeds: [{type: rss, url: "https://www.theguardian.com/profile/oliverbullough/rss"}]}
+  - {id: commercial_observer, name: Commercial Observer, role: "NYC commercial real estate", desk: LAW,
+     feeds: [{type: rss, url: "https://commercialobserver.com/feed/"}]}
+  - {id: bisnow_ny, name: Bisnow New York, role: "NYC commercial real estate", desk: LAW,
+     feeds: [{type: rss, url: "https://www.bisnow.com/rss/new-york"}]}
+
+  # ------------------------------------------------------------ economy and markets
+  - {id: odd_lots, name: Joe Weisenthal and Tracy Alloway, role: "Odd Lots (Bloomberg)", desk: WORLD,
+     feeds: [{type: podcast, url: "https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/8a94442e-5a74-4fa2-8b8d-ae27003a8d6b/982f5071-765c-403d-969d-ae27003a8d83/podcast.rss"}]}
+  - {id: planet_money, name: Planet Money, role: "NPR", desk: WORLD,
+     feeds: [{type: podcast, url: "https://feeds.npr.org/510289/podcast.xml"}]}
+  - {id: matt_levine, name: Matt Levine, role: "Money Stuff (Bloomberg)", desk: WORLD,
+     feeds: [{type: podcast, url: "https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/ee4336cb-155f-4488-90e0-b1400134e40e/77e6a3a7-290d-4a82-8164-b14001353ef2/podcast.rss"}]}
+  - {id: noah_smith, name: Noah Smith, role: "Noahpinion", desk: WORLD, perspective: center-left,
+     feeds: [{type: rss, url: "https://www.noahpinion.blog/feed"}]}
+  - {id: tyler_cowen, name: Tyler Cowen, role: "Marginal Revolution", desk: WORLD, perspective: libertarian,
+     feeds: [{type: rss, url: "https://marginalrevolution.com/feed"}]}
+  - {id: lincicome, name: Scott Lincicome, role: "Dispatch Markets (Cato)", desk: WORLD, perspective: libertarian, byline: [Scott Lincicome],
+     feeds: [{type: rss, url: "https://thedispatch.com/feed/"}], only_byline: true}
+  - {id: politano, name: Joseph Politano, role: "Apricitas Economics", desk: WORLD,
+     feeds: [{type: rss, url: "https://www.apricitas.io/feed"}]}
+
+  # ------------------------------------------------------------ politics and data
+  - {id: nate_silver, name: Nate Silver, role: "Silver Bulletin", desk: GOV, perspective: center,
+     feeds: [{type: rss, url: "https://www.natesilver.net/feed"}]}
+  - {id: g_elliott_morris, name: G. Elliott Morris, role: "Strength In Numbers", desk: GOV,
+     feeds: [{type: rss, url: "https://www.gelliottmorris.com/feed"}]}
+  - {id: ruffini, name: Patrick Ruffini, role: "Echelon Insights; The Intersection", desk: GOV, perspective: center-right,
+     feeds: [{type: rss, url: "https://patrickruffini.substack.com/feed"}]}
+  - {id: daily_punch, name: Punchbowl News, role: "The Daily Punch (Jake Sherman and team)", desk: GOV,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/daily-punch"}]}
+  - {id: burgess_everett, name: Burgess Everett, role: "Congress, Semafor", desk: GOV, byline: [Burgess Everett]}
+  - {id: nate_cohn, name: Nate Cohn, role: "NYT chief political analyst", desk: GOV, paywall: true, search: "\"Nate Cohn\" site:nytimes.com"}
+
+  # ------------------------------------------------------------ opinion across the spectrum
+  - {id: mehdi_hasan, name: Mehdi Hasan, role: "Zeteo", desk: GOV, perspective: left,
+     feeds: [{type: rss, url: "https://zeteo.com/feed"}]}
+  - {id: breaking_points, name: Krystal Ball and Saagar Enjeti, role: "Breaking Points", desk: GOV, perspective: cross,
+     feeds: [{type: podcast, url: "https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/e7fd5ae7-7621-4e41-9b85-b0ab0164b634/4c1a5135-4197-47c9-b19b-b0ab0164b667/podcast.rss"}]}
+  - {id: yglesias, name: Matt Yglesias, role: "Slow Boring", desk: GOV, perspective: center-left,
+     feeds: [{type: rss, url: "https://www.slowboring.com/feed"}]}
+  - {id: josh_barro, name: Josh Barro, role: "Very Serious", desk: GOV, perspective: center-left,
+     feeds: [{type: rss, url: "https://www.joshbarro.com/feed"}]}
+  - {id: mounk, name: Yascha Mounk, role: "Persuasion; The Good Fight", desk: GOV, perspective: heterodox,
+     feeds: [{type: rss, url: "https://www.persuasion.community/feed"}]}
+  - {id: tim_miller, name: Tim Miller, role: "The Bulwark", desk: GOV, perspective: center-right,
+     feeds: [{type: podcast, url: "https://audioboom.com/channels/5114286.rss"}]}
+  - {id: rich_lowry, name: Rich Lowry, role: "National Review", desk: GOV, perspective: right,
+     feeds: [{type: rss, url: "https://www.nationalreview.com/author/rich-lowry/feed/"}]}
+  - {id: ahmari, name: Sohrab Ahmari, role: "UnHerd", desk: GOV, perspective: right,
+     feeds: [{type: rss, url: "https://unherd.com/author/sohrab-ahmari/feed/"}]}
+  - {id: gillespie, name: Nick Gillespie, role: "Reason", desk: GOV, perspective: libertarian,
+     feeds: [{type: podcast, url: "https://reason.com/podcast/feed/"}]}
+
+  # ------------------------------------------------------------ world
+  - {id: phillips_obrien, name: Phillips O'Brien, role: "St Andrews; Substack (Ukraine war)", desk: WORLD,
+     feeds: [{type: rss, url: "https://phillipspobrien.substack.com/feed"}]}
+  - {id: war_on_the_rocks, name: War on the Rocks, role: "Defense podcast (with Michael Kofman)", desk: WORLD,
+     feeds: [{type: podcast, url: "https://rss.libsyn.com/shows/70702/destinations/298196.xml"}]}
+  - {id: applebaum, name: Anne Applebaum, role: "The Atlantic", desk: WORLD, perspective: center, paywall: true,
+     feeds: [{type: rss, url: "https://www.theatlantic.com/feed/author/anne-applebaum/"}]}
+  - {id: the_intelligence, name: The Intelligence, role: "The Economist daily podcast", desk: WORLD,
+     feeds: [{type: podcast, url: "https://access.acast.com/rss/d556eb54-6160-4c85-95f4-47d9f5216c49"}]}
+  - {id: amos_harel, name: Amos Harel, role: "Haaretz military analyst", desk: WORLD, perspective: center-left, byline: [Amos Harel]}
+  - {id: anshel_pfeffer, name: Anshel Pfeffer, role: "Haaretz; The Economist", desk: WORLD, perspective: center, byline: [Anshel Pfeffer]}
+  - {id: yaakov_katz, name: Yaakov Katz, role: "Jerusalem Post columnist; JPPI", desk: WORLD, perspective: center-right, search: "\"Yaakov Katz\" site:jpost.com"}
+  - {id: toi_briefing, name: Times of Israel Daily Briefing, role: "Podcast", desk: WORLD,
+     feeds: [{type: podcast, url: "https://www.omnycontent.com/d/playlist/a2539154-43b6-4c4f-b951-aca300136a80/f8a9521a-98d3-421a-a708-aca600dd355b/e96b6c46-116b-4376-aa28-aca600deea22/podcast.rss"}]}
+  - {id: marwan_bishara, name: Marwan Bishara, role: "Al Jazeera senior political analyst", desk: WORLD, perspective: international, search: "\"Marwan Bishara\" site:aljazeera.com"}
+  - {id: clea_caulcutt, name: Clea Caulcutt, role: "Politico Europe, Paris", desk: WORLD, byline: [Clea Caulcutt]}
+
+  # ------------------------------------------------------------ tech and media
+  - {id: ben_thompson, name: Ben Thompson, role: "Stratechery", desk: WORLD,
+     feeds: [{type: rss, url: "https://stratechery.com/feed/"}]}
+  - {id: casey_newton, name: Casey Newton, role: "Platformer; Hard Fork", desk: WORLD,
+     feeds: [{type: rss, url: "https://www.platformer.news/feed"}, {type: podcast, url: "https://feeds.simplecast.com/6HKOhNgS"}]}
+  - {id: max_tani, name: Max Tani, role: "Media, Semafor", desk: WORLD, byline: [Max Tani]}
+
+  # ------------------------------------------------------------ sports
+  - {id: mollie_walker, name: Mollie Walker, role: "Rangers, NY Post; Up in the Blue Seats", desk: SPORTS,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/NYPH6669958067"}]}
+  - {id: mercogliano, name: Vincent Z. Mercogliano, role: "Rangers, The Athletic", desk: SPORTS, paywall: true, search: "Mercogliano Rangers"}
+  - {id: alasdair_gold, name: Alasdair Gold, role: "Spurs, football.london", desk: SPORTS,
+     feeds: [{type: rss, url: "https://spurswithalasdairgold.substack.com/feed"}]}
+  - {id: men_in_blazers, name: Men in Blazers, role: "USMNT and world soccer", desk: SPORTS,
+     feeds: [{type: podcast, url: "https://rss.art19.com/men-in-blazers"}]}
+  - {id: meg_linehan, name: Meg Linehan, role: "Full Time (The Athletic), NWSL and Gotham", desk: SPORTS,
+     feeds: [{type: podcast, url: "https://feeds.acast.com/public/shows/6818801871c041c8cc75b143"}]}
+  - {id: hudson_river_blue, name: Hudson River Blue, role: "NYCFC site and podcast", desk: SPORTS,
+     feeds: [{type: rss, url: "https://www.hudsonriverblue.com/rss/current.xml"}]}

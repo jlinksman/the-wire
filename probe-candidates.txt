@@ -1,14 +1,83 @@
-# label | url   (round 4: French and Hebrew feeds for the city desks; tested from GitHub's servers)
-Le Parisien (all) | https://feeds.leparisien.fr/leparisien/rss
-Le Parisien Paris | https://feeds.leparisien.fr/leparisien/rss/paris-75
-Le Monde (French) | https://www.lemonde.fr/rss/une.xml
-franceinfo titres | https://www.francetvinfo.fr/titres.rss
-Actu Paris | https://actu.fr/ile-de-france/paris_75056/rss.xml
-20 Minutes Paris | https://www.20minutes.fr/feeds/rss-paris.xml
-Ynet (Hebrew) | https://www.ynet.co.il/Integration/StoryRss2.xml
-Walla | https://rss.walla.co.il/feed/1?type=main
-Globes | https://www.globes.co.il/webservice/rss/rssfeeder.asmx/FeederNode?iID=2
-Haaretz (Hebrew) | https://www.haaretz.co.il/srv/htz---all-articles
-Ynetnews (English) | https://www.ynetnews.com/Integration/StoryRss2.xml
-Bing News · Paris (French) | https://www.bing.com/news/search?q=Paris+mairie&format=rss&setlang=fr&cc=FR
-Bing News · Tel Aviv (Hebrew) | https://www.bing.com/news/search?q=%D7%AA%D7%9C+%D7%90%D7%91%D7%99%D7%91&format=rss&setlang=he&cc=IL
+# label | url   (people feeds, 2026-10-18)
+Joshua Citarella [podcast] | https://www.patreon.com/public-rss/2799152?show=866475
+Joshua Citarella [rss] | https://joshuacitarella.substack.com/feed
+Bari Weiss [podcast] | https://feeds.megaphone.fm/RSV2347142881
+Bari Weiss [rss] | https://www.thefp.com/feed
+Bill Maher [podcast] | https://feeds.megaphone.fm/WMHY1886903044
+Bill Maher [podcast] | https://rss.pdrl.fm/f10906/feeds.megaphone.fm/MCI6910680963
+Anderson Cooper [podcast] | https://feeds.megaphone.fm/WMHY6497875466
+Sanjay Gupta [podcast] | https://feeds.megaphone.fm/WMHY6124370245
+Preet Bharara [podcast] | https://feeds.megaphone.fm/VMP5489734702
+Scott Galloway [rss] | https://www.profgalloway.com/feed/
+Scott Galloway [podcast] | https://feeds.megaphone.fm/WWO6655869236
+Scott Galloway [podcast] | https://feeds.megaphone.fm/pivot
+Kara Swisher [podcast] | https://feeds.megaphone.fm/VMP1684715893
+Kai Ryssdal [podcast] | https://feeds.publicradio.org/public_feeds/marketplace
+Hudson Valley Weather [rss] | https://hudsonvalleyweather.com/feed/
+NWS Albany forecasters [nws_afd] | https://api.weather.gov/products/types/AFD/locations/ALY
+Sarah Isgur and David French [podcast] | https://feeds.megaphone.fm/DISPME4573820108
+Leah Litman, Melissa Murray an [podcast] | https://audioboom.com/channels/5166629.rss
+All-In hosts [podcast] | https://rss.libsyn.com/shows/254861/destinations/1928300.xml
+Ross Douthat [podcast] | https://feeds.simplecast.com/bS1LZG8m
+Jonah Goldberg [podcast] | https://feeds.megaphone.fm/DISPME4897766830
+Ezra Klein [podcast] | https://feeds.simplecast.com/82FI35Px
+Heather Cox Richardson [rss] | https://heathercoxrichardson.substack.com/feed
+Mike Pesca [podcast] | https://feeds.simplecast.com/PVS_9LQC
+Katelyn Jetelina [rss] | https://yourlocalepidemiologist.substack.com/feed
+Katie Hellmuth [rss] | https://www.alittlebeaconblog.com/blog?format=rss
+Elias Guerra [rss] | https://www.wamc.org/hudson-valley-news.rss
+Scenic Hudson [rss] | https://www.scenichudson.org/feed/
+Politico New York Playbook [rss] | https://rss.politico.com/new-york-playbook.xml
+Dan Clark [bluesky] | https://bsky.app/profile/danclarkreports.bsky.social/rss
+Jon Campbell [bluesky] | https://bsky.app/profile/joncampbellny.bsky.social/rss
+David Lombardo [podcast] | https://feeds.soundcloud.com/users/soundcloud:users:286203065/sounds.rss
+Amy Howe [rss] | https://www.scotusblog.com/author/amy-howe/feed/
+Steve Vladeck [rss] | https://www.stevevladeck.com/feed
+Will Baude and Dan Epps [podcast] | https://feeds.beamly.com/GxB3ykF8pz0UMRya/feed.xml
+Chris Geidner [rss] | https://www.lawdork.com/feed
+Joe Patrice [podcast] | https://feeds.megaphone.fm/LTN9584319601
+Tom Perkins [rss] | https://www.theguardian.com/profile/tom-perkins/rss
+Dan Farber [rss] | https://legal-planet.org/feed/
+Marianne Lavelle [rss] | https://insideclimatenews.org/feed/
+Sabin Center Climate Law Blog [rss] | https://blogs.law.columbia.edu/climatechange/feed/
+Robinson Meyer [podcast] | https://feeds.acast.com/public/shows/shift-key
+PETITION [rss] | https://petition.substack.com/feed
+Credit Slips [rss] | https://www.creditslips.org/feed
+Jason Mikula [rss] | https://fintechbusinessweekly.substack.com/feed
+ICIJ [rss] | https://www.icij.org/feed/
+Oliver Bullough [rss] | https://www.theguardian.com/profile/oliverbullough/rss
+Commercial Observer [rss] | https://commercialobserver.com/feed/
+Bisnow New York [rss] | https://www.bisnow.com/rss/new-york
+Joe Weisenthal and Tracy Allow [podcast] | https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/8a94442e-5a74-4fa2-8b8d-ae27003a8d6b/982f5071-765c-403d-969d-ae27003a8d83/podcast.rss
+Planet Money [podcast] | https://feeds.npr.org/510289/podcast.xml
+Matt Levine [podcast] | https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/ee4336cb-155f-4488-90e0-b1400134e40e/77e6a3a7-290d-4a82-8164-b14001353ef2/podcast.rss
+Noah Smith [rss] | https://www.noahpinion.blog/feed
+Tyler Cowen [rss] | https://marginalrevolution.com/feed
+Scott Lincicome [rss] | https://thedispatch.com/feed/
+Joseph Politano [rss] | https://www.apricitas.io/feed
+Nate Silver [rss] | https://www.natesilver.net/feed
+G. Elliott Morris [rss] | https://www.gelliottmorris.com/feed
+Patrick Ruffini [rss] | https://patrickruffini.substack.com/feed
+Punchbowl News [podcast] | https://feeds.megaphone.fm/daily-punch
+Mehdi Hasan [rss] | https://zeteo.com/feed
+Krystal Ball and Saagar Enjeti [podcast] | https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/e7fd5ae7-7621-4e41-9b85-b0ab0164b634/4c1a5135-4197-47c9-b19b-b0ab0164b667/podcast.rss
+Matt Yglesias [rss] | https://www.slowboring.com/feed
+Josh Barro [rss] | https://www.joshbarro.com/feed
+Yascha Mounk [rss] | https://www.persuasion.community/feed
+Tim Miller [podcast] | https://audioboom.com/channels/5114286.rss
+Rich Lowry [rss] | https://www.nationalreview.com/author/rich-lowry/feed/
+Sohrab Ahmari [rss] | https://unherd.com/author/sohrab-ahmari/feed/
+Nick Gillespie [podcast] | https://reason.com/podcast/feed/
+Phillips O'Brien [rss] | https://phillipspobrien.substack.com/feed
+War on the Rocks [podcast] | https://rss.libsyn.com/shows/70702/destinations/298196.xml
+Anne Applebaum [rss] | https://www.theatlantic.com/feed/author/anne-applebaum/
+The Intelligence [podcast] | https://access.acast.com/rss/d556eb54-6160-4c85-95f4-47d9f5216c49
+Times of Israel Daily Briefing [podcast] | https://www.omnycontent.com/d/playlist/a2539154-43b6-4c4f-b951-aca300136a80/f8a9521a-98d3-421a-a708-aca600dd355b/e96b6c46-116b-4376-aa28-aca600deea22/podcast.rss
+Ben Thompson [rss] | https://stratechery.com/feed/
+Casey Newton [rss] | https://www.platformer.news/feed
+Casey Newton [podcast] | https://feeds.simplecast.com/6HKOhNgS
+Mollie Walker [podcast] | https://feeds.megaphone.fm/NYPH6669958067
+Alasdair Gold [rss] | https://spurswithalasdairgold.substack.com/feed
+Men in Blazers [podcast] | https://rss.art19.com/men-in-blazers
+Meg Linehan [podcast] | https://feeds.acast.com/public/shows/6818801871c041c8cc75b143
+Hudson River Blue [rss] | https://www.hudsonriverblue.com/rss/current.xml
