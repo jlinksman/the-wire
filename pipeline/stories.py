@@ -331,7 +331,10 @@ def summarize(state, data, session, log, room: dict | None = None) -> dict:
     now = datetime.now(timezone.utc)
     stats = {"calls": 0, "kept": 0, "dropped": 0, "error": None}
 
-    jobs = [("story", s["id"], diverse(s, by_id)) for s in data["stories"][:15]]
+    # Stories with a large-model write-up don't also get a small-model summary.
+    synth = ai.get("synth", {})
+    jobs = [("story", s["id"], diverse(s, by_id)) for s in data["stories"][:15]
+            if not ((synth.get(s["id"]) or {}).get("card") or (synth.get(s["id"]) or {}).get("what"))]
     day_ago = now - timedelta(hours=24)
     jobs += [("item", it["id"], [it["id"]]) for it in data["items"]
              if it["desk"] in ("BEACON", "GOV", "LAW") and ms(it) >= day_ago and not it.get("no_ai")

@@ -128,6 +128,7 @@ function isMuted(it) {
 
 // --------------------------------------------------------------- data
 const DATA_CACHE = "wire-data";
+let dataTag = null;   // build stamp of the data on screen (ETag)
 
 function accept(json) {
   data = json;
@@ -140,7 +141,7 @@ async function loadCached() {
   try {
     const c = await caches.open(DATA_CACHE);
     const r = await c.match("data.json");
-    if (r && !data) accept(await r.json());
+    if (r && !data) { dataTag = r.headers.get("etag"); accept(await r.json()); }
   } catch (e) { /* no Cache API: the network load follows */ }
 }
 
@@ -150,9 +151,14 @@ async function load(force) {
   const btn = $("refresh-btn");
   btn.classList.add("spin");
   try {
-    const r = await fetch("data.json?ts=" + Date.now(), { cache: "no-store", credentials: "same-origin", redirect: "manual" });
+    // Ask "anything new?" first: between builds the answer is an empty 304, so most opens
+    // load nothing and the page is ready at once.
+    const headers = data && dataTag ? { "If-None-Match": dataTag } : {};
+    const r = await fetch("data.json", { cache: "no-store", credentials: "same-origin", redirect: "manual", headers });
     if (r.type === "opaqueredirect" || r.status === 401 || r.status === 403) throw new Error("signed out");
+    if (r.status === 304) { renderTop(); return; }
     if (!r.ok) throw new Error("HTTP " + r.status);
+    dataTag = r.headers.get("etag");
     const json = await r.clone().json();
     try { (await caches.open(DATA_CACHE)).put("data.json", r); } catch (e) { /* ignore */ }
     if (!data || force || window.scrollY < 200) {
@@ -924,9 +930,24 @@ function failingSources() {
   });
 }
 
-function healthTable() {
+// Errors in plain words; the raw message stays in the tooltip-free detail for debugging.
+function plainError(e) {
+  if (!e) return "";
+  const m = String(e);
+  if (/HTTP 403/.test(m)) return "Blocked by the site (403). Retrying later.";
+  if (/HTTP 429/.test(m)) return "Asked to slow down (429). Waiting, then retrying.";
+  if (/HTTP 404/.test(m)) return "Page moved or gone (404).";
+  if (/HTTP 5\d\d/.test(m)) return "The site is having trouble (" + (m.match(/HTTP (5\d\d)/) || [])[1] + "). Retrying.";
+  if (/robots/i.test(m)) return "The site's robots.txt doesn't allow it; skipped.";
+  if (/web page instead of a feed/.test(m)) return "Got a web page instead of the feed (blocked or moved).";
+  if (/timed? ?out|Timeout/i.test(m)) return "Timed out. Retrying.";
+  if (/token not set|Authentication/i.test(m)) return "Cloudflare credentials missing or lacking permission.";
+  return m.replace(/^\w+Error:\s*/, "");
+}
+
+function healthTable(list, withTeams) {
   const bad = new Set(failingSources().map((s) => s.id));
-  const rows = data.sources.slice().sort((a, b) => bad.has(b.id) - bad.has(a.id)).map((s) => {
+  const rows = (list || data.sources).slice().sort((a, b) => bad.has(b.id) - bad.has(a.id)).map((s) => {
     const ok = s.last_success ? Date.parse(s.last_success) : null;
     const failing = bad.has(s.id);
     return el("tr", {},
@@ -934,9 +955,9 @@ function healthTable() {
       el("td", {}, el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
       el("td", { class: "num", text: String(s.items) }),
       el("td", { text: ok ? ago(ok) : "never", title: ok ? exact(ok) : "" }),
-      el("td", { class: failing ? "err" : "ok", text: s.last_error || (failing ? "stale" : "ok") }));
+      el("td", { class: failing ? "err" : "ok", text: plainError(s.last_error) || (failing ? "Late: no update in " + (ok ? ago(ok) : "a while") : "ok") }));
   });
-  for (const t of (data.teams || []).filter((t) => t.error)) {
+  for (const t of withTeams || !list ? (data.teams || []).filter((t) => t.error) : []) {
     rows.unshift(el("tr", {}, el("td", { text: t.name + " schedule" }), el("td", { text: "Sports" }), el("td", { text: "–" }), el("td", { text: "–" }), el("td", { class: "err", text: t.error })));
   }
   return el("div", { class: "tablewrap" }, el("table", { class: "health" },
@@ -944,12 +965,31 @@ function healthTable() {
     el("tbody", {}, ...rows)));
 }
 
+// Problems first, in plain words; the full list, grouped by desk, sits behind a tap.
 function openHealth() {
-  const bad = failingSources().length;
+  const badList = failingSources();
+  const bad = badList.length;
+  const teamErr = (data.teams || []).filter((t) => t.error);
+  const okCount = data.sources.length - bad;
+  const byDesk = {};
+  for (const s of data.sources) (byDesk[s.desk] = byDesk[s.desk] || []).push(s);
+  const order = ["BEACON", "GOV", "LAW", "WORLD", "SPORTS", "SYSTEM"];
+  const full = el("div", { class: "hgroups", hidden: true }, ...Object.keys(byDesk).sort((a, b) => order.indexOf(a) - order.indexOf(b)).map((d) => {
+    const list = byDesk[d];
+    const down = list.filter((s) => badList.includes(s)).length;
+    return el("details", { class: "hgroup" },
+      el("summary", {}, el("span", { class: "dk", style: "--c: var(--" + d.toLowerCase() + ")", text: DESK_NAME[d] || (d === "SYSTEM" ? "System" : d) }),
+        el("span", { class: "hcount", text: list.length + " sources" + (down ? " · " + down + " down" : " · all ok") })),
+      healthTable(list));
+  }));
+  const toggle = el("button", { class: "sbtn", text: "Show all " + data.sources.length + " sources" });
+  toggle.onclick = () => { full.hidden = !full.hidden; toggle.textContent = full.hidden ? "Show all " + data.sources.length + " sources" : "Hide the full list"; };
   openSheet([
     el("h2", { id: "sheet-title", class: "stitle", text: "Sources" }),
-    el("p", { class: "sdesc", text: data.sources.length + " sources · " + (bad ? bad + " down" : "all ok") + " · feed as of " + exact(Date.parse(data.generated_at)) }),
-    healthTable(),
+    el("p", { class: "sdesc", text: (bad ? bad + " down · " : "All working · ") + okCount + " ok · feed as of " + exact(Date.parse(data.generated_at)) }),
+    bad || teamErr.length ? healthTable(badList, true) : el("p", { class: "fine", text: "Every source updated on schedule." }),
+    el("div", { class: "sactions" }, toggle),
+    full,
   ], "Sources");
 }
 $("status-btn").addEventListener("click", () => { if (data) openHealth(); });

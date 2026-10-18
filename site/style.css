@@ -431,3 +431,9 @@ html.stage-lock .stage { display: none; }
 .tlt { color: var(--text3); font-variant-numeric: tabular-nums; font-size: 0.86rem; padding-top: 2px; }
 .tlb a { color: var(--text); text-decoration: none; }
 .leadnote { margin: 10px 0 0; font-size: 0.92rem; color: var(--text2); }
+
+/* Source health: problems first, full list grouped by desk */
+.hgroup { border-top: 1px solid var(--hair); padding: 8px 0; }
+.hgroup summary { display: flex; justify-content: space-between; align-items: center; min-height: 40px; cursor: pointer; list-style: none; }
+.hgroup summary::-webkit-details-marker { display: none; }
+.hcount { color: var(--text3); font-size: 0.88rem; }

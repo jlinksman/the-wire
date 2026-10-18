@@ -200,8 +200,13 @@ def is_due(src: dict, st: dict) -> bool:
     last = parse_iso(st.get("last_attempt"))
     if not last:
         return True
+    poll = src["poll"]
+    # Overnight (midnight to 6 AM New York), national and world feeds and quiet sources slow
+    # to every 30 minutes. Beacon, weather alerts and government stay on schedule.
+    if 0 <= datetime.now(NY).hour < 6 and (src.get("desk") == "WORLD" or src.get("quiet")):
+        poll = max(poll, 30)
     # Two minutes of slack so a 15-minute source isn't skipped by a slightly early run.
-    return now_utc() - last >= timedelta(minutes=src["poll"]) - timedelta(minutes=2)
+    return now_utc() - last >= timedelta(minutes=poll) - timedelta(minutes=2)
 
 
 # ---------------------------------------------------------------- parsing
@@ -882,6 +887,15 @@ def write_dist(state: dict, sources: list[dict], video: list[dict], teams: list[
     # Quiet items have their own cap, so they can never push Beacon or court items out.
     items = sorted([it for it in ordered if it["source_id"] not in quiet_ids][:MAX_ITEMS]
                    + [it for it in ordered if it["source_id"] in quiet_ids][:MAX_QUIET_ITEMS], key=sort_time, reverse=True)
+    # One outlet posting the same headline twice (two feeds, or a repost) shows once.
+    seen_heads, deduped = set(), []
+    for it in items:
+        key = (it["source"], re.sub(r"\W+", " ", it["title"]).strip().lower())
+        if key in seen_heads and not it.get("alert"):
+            continue
+        seen_heads.add(key)
+        deduped.append(it)
+    items = deduped
     for it in items:
         it["t"] = iso(sort_time(it))
     counts: dict[str, int] = {}
@@ -942,6 +956,35 @@ def attach_agendas(state: dict, track: dict, watch) -> None:
 
 def src_robots(s: dict) -> str:
     return "subscription" if s.get("robots") == "subscription" else "honored"
+
+
+def mark_changed(state: dict) -> None:
+    """Write dist/publish.txt: which KV keys changed since the last publish (ignoring their
+    timestamps), so quiet hours don't spend Cloudflare writes on identical content. Every
+    key is republished at least every two hours regardless."""
+    pub = state.setdefault("published", {})
+    lines = []
+    for name in ("brief.json", "alerts.json"):
+        f = DIST / name
+        if not f.exists():
+            continue
+        try:
+            body = json.loads(f.read_text())
+            body.pop("generated_at", None)
+            body.pop("as_of", None)
+            for it in body.get("items", []):
+                it.pop("score", None)     # recency decay changes every run; content doesn't
+            digest = hashlib.sha1(json.dumps(body, sort_keys=True).encode()).hexdigest()
+        except ValueError:
+            digest = hashlib.sha1(f.read_bytes()).hexdigest()
+        rec = pub.get(name) or {}
+        old = parse_iso(rec.get("at"))
+        changed = rec.get("hash") != digest or not old or now_utc() - old > timedelta(hours=2)
+        if changed:
+            pub[name] = {"hash": digest, "at": iso(now_utc())}
+        lines.append(f"{name}={'1' if changed else '0'}")
+    (DIST / "publish.txt").write_text("\n".join(lines) + "\n")
+    log("[publish] " + " ".join(lines))
 
 
 def main() -> int:
@@ -1009,7 +1052,15 @@ def main() -> int:
         brief.build(data, yaml.safe_load(CONFIG.read_text()).get("briefing") or {}, DIST, log, state.get("texts"))
     except Exception as exc:
         log(f"[brief] failed: {type(exc).__name__}: {exc}")
+    # Quiet items that aren't part of any story never appear on the page; they were only
+    # needed for grouping and the briefing, so the phone doesn't download them.
+    in_story = {m for s in data.get("stories", []) for m in s["members"]}
+    before = len(data["items"])
+    data["items"] = [it for it in data["items"] if not it.get("quiet") or it["id"] in in_story]
+    log(f"[slim] shipped {len(data['items'])} of {before} items (quiet items outside stories stay in the build)")
     (DIST / "data.json").write_text(json.dumps(data, separators=(",", ":")))
+    (DIST / "version.txt").write_text(data["generated_at"])
+    mark_changed(state)
     save_state(state)
     failing = sum(1 for h in data["sources"] if h["last_error"])
     log(f"built {len(data['items'])} items from {len(sources)} sources "

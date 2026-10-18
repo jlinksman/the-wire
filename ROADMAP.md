@@ -48,6 +48,9 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - [x] The Cloudflare Worker that times the build also runs the 3-minute alert check; its state shows in source health.
 - Rules live in sources.yaml under `push_alerts`.
 
+## Efficiency pass (built 2026-10-17)
+- The page asks "anything new?" (ETag) and gets an empty 304 between builds; quiet items outside stories aren't shipped (about a third smaller); same-outlet duplicate headlines fold; stories with a large-model write-up skip the small-model summary; brief.json and alerts.json are written to KV only when changed (or every two hours); world and quiet feeds poll every 30 minutes from midnight to 6 AM; source health shows problems first in plain words, full list grouped by desk.
+
 ## V7 — World expansion
 - **Built 2026-10-17 (source round 2):** 30 more outlets as quiet, corroborating sources (they count toward grouping, ranking and the briefing but don't add lone rows to the desks); event-level grouping (same foreign place + same kind of event within 30 hours) with volume and a "Developing" flag in ranking; Brief me by category (All, Local, State, National, World, Paris, Israel).
 - **Built 2026-10-17 (round 3):** Bing News search feeds (Google News RSS is disallowed by its robots.txt): WSJ, AP, Reuters, Politico (Congress and New York), Times Union, Spectrum News, Poughkeepsie Journal, Times Herald-Record and Times of Israel as quiet sources; topic watches on the Law desk for PFAS in New York, NYS DEC, Indian Point, Hudson River PCBs, NY bankruptcy filings, NYC commercial real estate, FinCEN and beneficial ownership.
