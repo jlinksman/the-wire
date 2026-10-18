@@ -472,7 +472,7 @@ function storyCard(s) {
       el("span", { class: "lbl" }, s.developing ? el("span", { class: "dev", text: "Developing" }) : null,
         s.sources + " sources" + (s.reports > s.sources ? " · " + s.reports + " reports" : "") + " · ", el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
       el("span", { class: "headline", text: lead.title }),
-      s.summary ? el("span", { class: "msum" }, el("span", { class: "mlabel", text: "Machine summary" }), s.summary) : null,
+      s.card || s.summary ? el("span", { class: "msum" }, el("span", { class: "mlabel", text: "Machine summary" }), s.card || s.summary) : null,
       q ? el("span", { class: "qline" }, "“" + q.text + "”", el("span", { class: "qby", text: q.by + " · " + q.item.source })) : null,
       el("span", { class: "meta" }, el("span", { class: "t" + (isFresh(Date.parse(s.last)) && !isSeen(lead) ? " fresh" : ""), text: "Updated " + ago(Date.parse(s.last)) + (ago(Date.parse(s.last)) === "now" ? "" : " ago") }))));
 }
@@ -603,8 +603,57 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("shee
   });
 })();
 
+// A story page: the synthesis first, then what changed, the figures as each outlet reported
+// them, a timeline, quotes and every source. Reporting is machine-written from the
+// outlets; anything labeled analysis is separate.
+function openStory(st, it) {
+  const lead = byId.get(st.lead) || it;
+  const isSaved = saved.some((x) => x.id === lead.id);
+  const saveBtn = el("button", { class: "sbtn", text: isSaved ? "★ Saved" : "☆ Save" });
+  saveBtn.onclick = () => {
+    if (saved.some((x) => x.id === lead.id)) saved = saved.filter((x) => x.id !== lead.id);
+    else saved.unshift({ id: lead.id, title: lead.title, link: lead.link, source: lead.source, ms: lead.ms });
+    saveSaved();
+    saveBtn.textContent = saved.some((x) => x.id === lead.id) ? "★ Saved" : "☆ Save";
+  };
+  const members = st.members.map((m) => byId.get(m)).filter(Boolean);
+  const fresh = prevVisit ? members.filter((m) => m.ms > prevVisit && m.id !== lead.id) : [];
+  const sec = (title, ...kids) => el("section", { class: "ssec" }, el("h3", { class: "sh3", text: title }), ...kids);
+  const when = (iso) => { const ms = Date.parse(iso); return isToday(ms) ? fmtTime.format(new Date(ms)) : exact(ms); };
+  const nodes = [
+    el("div", { class: "smeta" },
+      st.developing ? el("span", { class: "dev", text: "Developing" }) : null,
+      el("span", { class: "dk", style: "--c: var(--" + st.desk.toLowerCase() + ")", text: DESK_NAME[st.desk] || st.desk }),
+      el("span", { text: st.sources + " outlets" + (st.reports > st.sources ? " · " + st.reports + " reports" : "") }),
+      el("span", { text: "Updated " + ago(Date.parse(st.last)) + (ago(Date.parse(st.last)) === "now" ? "" : " ago") })),
+    el("h2", { id: "sheet-title", class: "stitle", text: lead.title }),
+    st.what || st.card || st.summary ? el("div", { class: "machine" },
+      el("span", { class: "mlabel", text: "What happened · machine-written from " + st.sources + " outlets" + (st.written_at ? " · " + when(st.written_at) : "") }),
+      el("p", { text: st.what || st.card || st.summary })) : null,
+    st.latest ? el("div", { class: "latest" }, el("span", { class: "mlabel", text: "Latest" + (st.latest_at ? " · " + when(st.latest_at) : "") }), el("p", { text: st.latest })) : null,
+    fresh.length ? sec(fresh.length + (fresh.length === 1 ? " new report" : " new reports") + " since you last looked",
+      el("ul", { class: "also" }, ...fresh.slice(0, 6).map((m) => el("li", {}, el("span", { class: "asrc", text: ago(m.ms) + " · " + m.source }), link(m.link, m.title))))) : null,
+    st.figures && st.figures.length ? sec("Figures as reported",
+      ...st.figures.map((f) => el("div", { class: "fig" }, el("span", { class: "figw", text: f.what }),
+        el("ul", { class: "figl" }, ...f.reports.map((r) => el("li", {}, el("span", { class: "fign", text: r.text }), " ",
+          el("span", { class: "asrc", text: r.source + " · " + when(r.t) }), " ", link(r.link, "↗")))))),
+      el("p", { class: "fine", text: "Outlets' numbers, word for word. They may cover different periods or update through the day." })) : null,
+    st.timeline && st.timeline.length ? sec("Timeline",
+      el("ol", { class: "tl" }, ...st.timeline.map((t) => el("li", {}, el("span", { class: "tlt", text: when(t.t) }), el("span", { class: "tlb" }, link(t.link, t.title), el("span", { class: "asrc", text: " · " + t.source })))))) : null,
+    quoteList(storyQuotes(st)),
+    st.why ? el("div", { class: "why" }, el("span", { class: "mlabel", text: "Why it matters to you · analysis" }), el("p", { text: st.why })) : null,
+    el("div", { class: "sactions" },
+      link(lead.link, "Open " + lead.source + " ↗", "sbtn primary"),
+      navigator.share ? el("button", { class: "sbtn", text: "Share", onclick: () => navigator.share({ title: lead.title, url: lead.link }).catch(() => {}) }) : null,
+      saveBtn),
+    sec("All coverage · " + st.sources + " outlets", alsoList(st, lead.id)),
+  ];
+  openSheet(nodes.filter(Boolean), lead.title);
+}
+
 function openItem(it) {
   const st = storyOf.get(it.id) || (data.stories || []).find((s) => s.members.includes(it.id) && storyOf.get(s.lead) === s);
+  if (st) return openStory(st, it);
   const isSaved = saved.some((x) => x.id === it.id);
   const qs = st ? storyQuotes(st) : (it.quotes || []).map((q) => ({ ...q, item: it }));
   const saveBtn = el("button", { class: "sbtn", text: isSaved ? "★ Saved" : "☆ Save" });
