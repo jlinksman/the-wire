@@ -106,7 +106,9 @@ def group(items: list[dict], now: datetime | None = None) -> list[dict]:
         recent = sum(1 for m in c if ms(m) >= now - timedelta(hours=6))
         out.append({
             "id": c[0]["id"],
-            "lead": max(c, key=lambda m: (not m.get("no_ai"), not m.get("translated"), ms(m), not m.get("quiet")))["id"],   # newest headline leads; id stays the first report
+            # Lead: the newest plain headline (English, not a live blog, not WSJ).
+            "lead": max(c, key=lambda m: (not m.get("no_ai"), not m.get("translated"),
+                                          not re.match(r"\W*(live|watch)\b", m["title"], re.IGNORECASE), ms(m), not m.get("quiet")))["id"],   # newest headline leads; id stays the first report
             "members": [m["id"] for m in sorted(c, key=ms, reverse=True)],
             "sources": len(outlets),
             "reports": len(c),
@@ -465,7 +467,11 @@ def synthesize(state, data, session, log, room: dict | None = None) -> dict:
     from editorial import chairs_for, rules_text
     tracker = data.get("tracker") or {}
     top = [s for s in data["stories"] if s["desk"] != "SPORTS"][:SYNTH_TOP]
-    live = {s["id"] for s in data["stories"][:40]}
+    # Each desk tab leads with its own written stories, so the top two Beacon, Gov and Law
+    # stories get the full write-up too, even when world news fills the overall top 12.
+    for desk in ("BEACON", "GOV", "LAW"):
+        top += [s for s in data["stories"] if s["desk"] == desk and s not in top][:2]
+    live = {s["id"] for s in data["stories"][:40]} | {s["id"] for s in top}
     for k in [k for k in cache if k not in live]:
         del cache[k]
     for s in top:

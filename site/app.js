@@ -308,7 +308,7 @@ function todayView() {
   if (ahead) out.push(ahead);
   if (data.front_page_url) {
     out.push(el("a", { class: "edition", href: data.front_page_url, target: "_blank", rel: "noopener" },
-      el("span", { class: "ed-k", text: new Date().getHours() < 15 ? "Morning Edition" : "The Edition" }),
+      el("span", { class: "ed-k", text: new Date().getHours() < 15 ? "Morning Edition" : new Date().getHours() >= 18 ? "Evening Edition" : "The Edition" }),
       el("span", { class: "ed-t", text: "Your written front page for " + new Intl.DateTimeFormat(undefined, { weekday: "long" }).format(new Date()) }),
       el("span", { class: "ed-a", text: "›" })));
   }
@@ -419,10 +419,25 @@ function deskView(t, desk) {
   const key = t + ":" + desk;
   shown[key] = shown[key] || PAGE;
   // Quiet (corroborating) sources show only as part of a story, never as lone rows.
-  const all = data.items.filter((it) => deskOf(it) === desk && !folded.has(it.id) && !it.alert && !isMuted(it) && (!it.quiet || storyOf.has(it.id)));
+  // Story-first: the tab opens with its own written stories (multi-outlet stories, then
+  // single local items with a machine summary), and the headline list follows.
+  const cutoff = Date.now() - 48 * 3600e3;
+  const leadStories = desk === "SPORTS" ? [] : (data.stories || [])
+    .filter((s) => storyOf.get(s.lead) === s && byId.get(s.lead) && deskOf(byId.get(s.lead)) === desk && Date.parse(s.last) >= cutoff && !isMuted(byId.get(s.lead)))
+    .filter((s) => s.what || s.card || s.summary).slice(0, 3);
+  const leadItems = ["BEACON", "GOV", "LAW"].includes(desk) ? data.items
+    .filter((it) => deskOf(it) === desk && it.machine_summary && !storyOf.has(it.id) && !folded.has(it.id) && it.ms >= cutoff && !isMuted(it))
+    .slice(0, Math.max(0, 3 - leadStories.length)) : [];
+  const featured = new Set([...leadStories.map((s) => s.lead), ...leadItems.map((it) => it.id)]);
+  const all = data.items.filter((it) => deskOf(it) === desk && !folded.has(it.id) && !it.alert && !isMuted(it) && (!it.quiet || storyOf.has(it.id)) && !featured.has(it.id));
   const fresh = prevVisit ? all.filter((it) => !isSeen(it)).length : 0;
   const list = prefs.newOnly && fresh ? all.filter((it) => !isSeen(it)) : all;
   const out = [];
+  if (featured.size) {
+    out.push(sectionHead("Top stories"));
+    out.push(...leadStories.map(storyCard), ...leadItems.map(itemCard));
+    out.push(sectionHead("Everything else"));
+  }
   if (prevVisit) {
     const since = isToday(prevVisit) ? fmtTime.format(new Date(prevVisit)) : exact(prevVisit);
     out.push(el("div", { class: "newline" },
@@ -470,6 +485,16 @@ function row(it, opt = {}) {
     ...tags.map((tg) => el("span", { class: "tag", text: String(tg) })));
   return el("li", { class: "row" + (watch ? " watch" : "") + (isSeen(it) ? " seen" : "") },
     el("button", { class: "head", onclick: () => openItem(it) }, headline, meta));
+}
+
+// A single item written up (a council agenda, county minutes, a DEC rule): same card as a story.
+function itemCard(it) {
+  return el("article", { class: "story" + (isSeen(it) ? " seen" : "") },
+    el("button", { class: "head", onclick: () => openItem(it) },
+      el("span", { class: "lbl" }, it.source + " · ", el("span", { class: "dk", style: "--c: var(--" + deskOf(it).toLowerCase() + ")", text: DESK_NAME[deskOf(it)] })),
+      el("span", { class: "headline", text: it.title }),
+      el("span", { class: "msum" }, el("span", { class: "mlabel", text: "Machine summary" }), it.machine_summary),
+      el("span", { class: "meta" }, el("span", { class: "t" + (isFresh(it.ms) && !isSeen(it) ? " fresh" : ""), text: ago(it.ms) + (ago(it.ms) === "now" ? "" : " ago") }))));
 }
 
 function storyCard(s) {

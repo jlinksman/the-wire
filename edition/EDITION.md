@@ -20,6 +20,8 @@ The edition is a front page for one reader: Joe, in Beacon, NY. He owns an envir
 - **Lede:** two or three sentences on the shape of the day. It is analysis and is labeled as such on the page.
 - **Ahead:** meetings, hearings, floor sessions and games today, from the digest’s TODAY section and the cited items (the next few days).
 - Plain, direct sentences. Never begin a sentence with "And". No hype words.
+- **House rules:** read `editorial.yaml` and follow the always-on chairs (Standards, Copy) and the Editor role, plus the beat chair for each story's desk or city (Beacon City Hall, Hudson Valley, Land use, Documents, Courts, Environment, Money, World, Paris, Israel, Sports, and any active guest). The chairs are backstage: never name them on the page.
+- **Morning vs. evening:** the Morning edition covers the last 24 hours and what's ahead today. The Evening edition covers what happened today since the morning (the last 12 hours), what's still developing, and what's ahead tonight and tomorrow morning.
 
 ## edition.json schema
 ```json
