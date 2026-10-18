@@ -16,7 +16,12 @@ NY = ZoneInfo("America/New_York")
 hours = float(sys.argv[1]) if len(sys.argv) > 1 else 24
 data = json.load(open("dist/data.json"))
 texts = json.load(open(".state/state.json")).get("texts", {})
+# Items from no_ai sources (WSJ: its terms bar any AI use of its content, headlines
+# included) never reach the edition writer.
+data["items"] = [it for it in data["items"] if not it.get("no_ai")]
 items = {it["id"]: it for it in data["items"]}
+for s in data.get("stories", []):
+    s["members"] = [m for m in s["members"] if m in items]
 now = datetime.now(timezone.utc)
 cut = now - timedelta(hours=hours)
 

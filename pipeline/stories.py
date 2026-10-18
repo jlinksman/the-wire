@@ -106,7 +106,7 @@ def group(items: list[dict], now: datetime | None = None) -> list[dict]:
         recent = sum(1 for m in c if ms(m) >= now - timedelta(hours=6))
         out.append({
             "id": c[0]["id"],
-            "lead": max(c, key=lambda m: (ms(m), not m.get("quiet")))["id"],   # newest headline leads; id stays the first report
+            "lead": max(c, key=lambda m: (not m.get("no_ai"), ms(m), not m.get("quiet")))["id"],   # newest headline leads; id stays the first report
             "members": [m["id"] for m in sorted(c, key=ms, reverse=True)],
             "sources": len(outlets),
             "reports": len(c),
@@ -130,6 +130,8 @@ def diverse(s: dict, by_id: dict, n: int = 4) -> list[str]:
     """Up to n members, one per outlet first (newest first), for summaries and text fetches."""
     seen, first, rest = set(), [], []
     for m in s["members"]:
+        if (by_id.get(m) or {}).get("no_ai"):
+            continue      # never sent to a model (WSJ terms)
         src = (by_id.get(m) or {}).get("source")
         (rest if src in seen else first).append(m)
         seen.add(src)
