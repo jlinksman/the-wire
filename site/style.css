@@ -547,3 +547,16 @@ details.rest[open] summary .chev { transform: rotate(180deg); display: inline-bl
 .suggest li .asrc { grid-column: 1 / -1; }
 .suggest .sgrow { grid-column: 2; grid-row: 2; }
 .sbtn.signal.on { border-color: var(--text2); }
+
+/* Day so far as parts; hand-built threads; browser */
+.dayparts { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
+.daypart { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; width: 100%; text-align: left; color: var(--text); padding: 4px 0; }
+.daypart .dlabel { font: 600 0.72rem var(--mono); color: var(--text2); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; padding-top: 3px; }
+.daypart .dtext { font: 1rem/1.45 var(--serif); }
+.sbtn.compact { min-height: 36px; padding: 0 12px; font-size: 0.85rem; }
+.addbox { margin-top: 10px; display: grid; gap: 6px; }
+.addrow { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; }
+.addrow .asrc { grid-column: 1 / -1; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.chip { min-height: 32px; padding: 0 12px; border-radius: 16px; background: var(--raised); color: var(--text2); font: 600 0.82rem var(--sans); }
+.chip.on { background: var(--text); color: var(--bg); }

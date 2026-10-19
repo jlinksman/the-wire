@@ -59,6 +59,9 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - **More / less like this.** Stored with the follows (`/follow` action "signal"); the build lifts a thread Joe wants more of (×1.5), sinks one he wants less of (×0.4), and nudges stories that read like either.
 - **You might follow.** Up to three unfollowed live threads close to what he follows and likes, local and law first, on Today.
 - **Revival.** A dormant thread comes back when a new cluster on its desk clearly matches it (similarity ≥ 0.5) and is labeled "Back after a quiet spell" for two days.
+- **Explore and build threads** (2026-10-19, after Joe's first read): "Browse all" lists every live thread by desk and name; "Add to a thread" on any report attaches it to an existing thread or starts a new hand-built one (optionally with watch terms); a thread page has "Add a report" search. Attachments live with the follows (`/follow` attach/detach) and the build logs them as "Added by you".
+- **The day so far** is now at most four labeled parts, one story each, tappable into the thread, instead of one paragraph that jumped between topics.
+- Standing threads reworked around Optima's lines (PBS and tanks, spills, brownfields and Phase I ESAs, prevailing wage) plus bankruptcy, FinCEN, Second Department land use, and student loans (SAVE's end and repayment reform). PFAS stays a topic watch, not a standing thread.
 - Held back: nothing. Learning signals were planned for after two weeks of use; built now at Joe's request.
 
 ## People (built 2026-10-18)

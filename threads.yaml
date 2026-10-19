@@ -1,26 +1,37 @@
-# Standing threads: areas of law The Wire tracks whether or not they are followed
-# (BRIEF.md, stage 3). Each accrues decisions, rules and notices as developments and
-# never goes dormant or forgotten. They appear under "Areas of law" on the Law tab.
+# Standing threads: subjects The Wire tracks whether or not they are followed (BRIEF.md,
+# stage 3). Each accrues decisions, rules, notices and reports as developments and never goes
+# dormant or forgotten. LAW-desk ones appear under "Areas of law" on the Law tab; all of them
+# appear in the thread browser and under Threads you follow once followed.
 #
 # pattern: comma-separated terms matched whole-word against a report's headline and the
 # first 300 characters of its description; a trailing * matches endings (brownfield*).
 # Keep patterns specific: a standing thread that matches everything tracks nothing.
+#
+# Optima's business lines (2026-10-19): petroleum bulk storage compliance, UST/AST installation
+# and removal, spill response, environmental remediation, Phase I ESAs, public-works jobs under
+# prevailing wage. PFAS is not central to the business: it stays a topic watch in sources.yaml
+# (bing_topic_pfas), not a standing thread.
 standing:
   - id: law_navigation_spill
     title: "Navigation Law Article 12 and the Oil Spill Fund"
     kind: law
     desk: LAW
-    pattern: "Navigation Law, Oil Spill Fund, Article 12, petroleum bulk storage, Part 613, 6 NYCRR 613, spill fund, strict liability discharge"
-  - id: law_pfas_ny
-    title: "PFAS regulation in New York"
+    pattern: "Navigation Law, Oil Spill Fund, Article 12, spill fund, strict liability discharge, oil spill, petroleum spill, fuel spill, spill response, spill cleanup"
+  - id: law_pbs_tanks
+    title: "Petroleum bulk storage and tank rules"
     kind: law
     desk: LAW
-    pattern: "PFAS, PFOA, PFOS, forever chemical*, perfluoro*, polyfluoro*"
+    pattern: "petroleum bulk storage, Part 613, 6 NYCRR 613, underground storage tank*, aboveground storage tank*, UST, AST, tank removal, tank closure, 40 CFR 280, bulk storage"
   - id: law_brownfields
     title: "Brownfields and site remediation"
     kind: law
     desk: LAW
-    pattern: "brownfield*, Brownfield Cleanup Program, remedial action, remediation site, Superfund, CERCLA, RCRA, consent decree, record of decision"
+    pattern: "brownfield*, Brownfield Cleanup Program, remedial action, remediation site, Superfund, CERCLA, RCRA, consent decree, record of decision, Phase I ESA, environmental site assessment"
+  - id: law_prevailing_wage
+    title: "Prevailing wage and public-works contracting in New York"
+    kind: law
+    desk: LAW
+    pattern: "prevailing wage*, Labor Law 220, certified payroll, MPWR, public works contract*, Davis-Bacon, NYSDOL Bureau of Public Work"
   - id: law_bankruptcy
     title: "Bankruptcy and restructuring"
     kind: law
@@ -36,3 +47,8 @@ standing:
     kind: law
     desk: LAW
     pattern: "zoning board, planning board, site plan, variance, SEQRA, Article 78, rezon*, special use permit, subdivision approval, area variance, use variance"
+  - id: gov_student_loans
+    title: "Student loans: the end of SAVE, forgiveness and repayment reform"
+    kind: process
+    desk: GOV
+    pattern: "student loan*, SAVE plan, Repayment Assistance Plan, income-driven repayment, income-based repayment, PSLF, Public Service Loan Forgiveness, loan forgiveness, borrower defense, Department of Education borrowers, student debt"
