@@ -37,6 +37,8 @@ def build(data: dict, cfg: dict, dist, log, texts: dict | None = None) -> None:
     folded = {m for s in data.get("stories", []) for m in s["members"] if m != s["lead"]}
 
     picked, extra = [], []
+    # Threads Joe follows: their reports are signal, and the briefing says why.
+    followed_of = {m: t["title"] for t in data.get("threads", []) if t.get("followed") for m in t.get("members", [])}
     pname = {p["id"]: p["name"] for p in data.get("people", [])}
     statep = re.compile(cfg["state_pattern"], re.IGNORECASE) if cfg.get("state_pattern") else None
 
@@ -56,6 +58,8 @@ def build(data: dict, cfg: dict, dist, log, texts: dict | None = None) -> None:
             why.append("weather alert")
         if it.get("watch_terms"):
             why.append("matches your watchlist: " + ", ".join(it["watch_terms"]))
+        if it["id"] in followed_of:
+            why.append("part of a thread you follow: " + followed_of[it["id"]])
         official = it["source_id"] in primary
         local_hit = it["desk"] == "BEACON" and local and local.search(f"{it['title']} {it.get('summary', '')}")
         core = bool(it.get("alert") or why or official or local_hit or outlets >= 2) and not it.get("regional")

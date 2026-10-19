@@ -323,6 +323,8 @@ function todayView() {
       el("span", { class: "ed-a", text: "›" })));
   }
 
+  out.push(...threadsSection());
+
   const cutoff = Date.now() - 48 * 3600000;
   const beacon = data.items.filter((it) => deskOf(it) === "BEACON" && !it.alert && it.kind !== "BLOTTER" && it.ms >= cutoff && !isMuted(it)).slice(0, 3);
   if (beacon.length) {
@@ -523,7 +525,8 @@ function storyCard(s) {
       el("span", { class: "headline", text: lead.title }),
       s.card || s.summary ? el("span", { class: "msum" }, el("span", { class: "mlabel", text: "Machine summary" }), s.card || s.summary) : null,
       q ? el("span", { class: "qline" }, "“" + q.text + "”", el("span", { class: "qby", text: q.by + " · " + q.item.source })) : null,
-      el("span", { class: "meta" }, el("span", { class: "t" + (isFresh(Date.parse(s.last)) && !isSeen(lead) ? " fresh" : ""), text: "Updated " + ago(Date.parse(s.last)) + (ago(Date.parse(s.last)) === "now" ? "" : " ago") }))));
+      el("span", { class: "meta" }, el("span", { class: "t" + (isFresh(Date.parse(s.last)) && !isSeen(lead) ? " fresh" : ""), text: "Updated " + ago(Date.parse(s.last)) + (ago(Date.parse(s.last)) === "now" ? "" : " ago") }))),
+    s.thread ? el("div", { class: "cardacts" }, followButton(s, true)) : null);
 }
 
 // --------------------------------------------------------------- Brief me (written on demand, read aloud)
@@ -683,6 +686,8 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("shee
 // them, a timeline, quotes and every source. Reporting is machine-written from the
 // outlets; anything labeled analysis is separate.
 function openStory(st, it) {
+  const th = threadOf(st);
+  if (th) return openThread(th, it);
   const lead = byId.get(st.lead) || it;
   const isSaved = saved.some((x) => x.id === lead.id);
   const saveBtn = el("button", { class: "sbtn", text: isSaved ? "★ Saved" : "☆ Save" });
@@ -1211,6 +1216,162 @@ setInterval(() => {
   const c = $("clocks");
   if (c) c.replaceWith(clocks());
 }, 30000);
+
+// --------------------------------------------------------------- threads and follows (BRIEF.md stage 1)
+// Follows live on Cloudflare (functions/follow.js) so they work on every device and reach
+// the build. data.follows is the build's copy; this page keeps a live one after any change.
+let follows = null;
+function followsNow() { return follows || (data && data.follows) || { threads: [], topics: [] }; }
+function isFollowed(tid) { return followsNow().threads.some((x) => x.id === tid) || followsNow().topics.some((x) => x.id === tid); }
+async function setFollow(body) {
+  try {
+    const r = await fetch("follow", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    follows = await r.json();
+    render();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+function threadOf(st) { return st && st.thread ? (data.threads || []).find((t) => t.id === st.thread) : null; }
+function followButton(st, compact) {
+  const tid = st && st.thread;
+  if (!tid) return null;
+  const on = isFollowed(tid);
+  const b = el("button", { class: "sbtn follow" + (on ? " on" : ""), text: on ? "✓ Following" : "+ Follow" });
+  b.onclick = async (e) => {
+    e.stopPropagation();
+    b.textContent = "…";
+    const th = threadOf(st);
+    const ok = await setFollow(on ? { action: "unfollow", type: "thread", id: tid } : { action: "follow", type: "thread", id: tid, title: (th && th.title) || (byId.get(st.lead) || {}).title || "" });
+    if (!ok) b.textContent = "Couldn't save";
+  };
+  return b;
+}
+function devLabel(reason) {
+  return { document: "Document", confirmed: "Confirmed by a second outlet", spread: "Spread", figures: "Figures changed", update: "Update" }[reason] || "Update";
+}
+
+// A thread card for Today: title, what's new since the last visit, counts.
+function threadCard(t) {
+  const since = prevVisit && Date.now() - prevVisit < 48 * 3600e3 ? prevVisit : Date.now() - 24 * 3600e3;
+  const newDevs = (t.developments || []).filter((d) => Date.parse(d.t) > since);
+  const lastDev = newDevs.length ? newDevs[newDevs.length - 1] : null;
+  const latest = t.latest || (lastDev ? (lastDev.text === t.title
+    ? (newDevs.length === 1 ? devLabel(lastDev.reason) : newDevs.length + " developments") + (t.outlets > 1 ? "; now " + t.outlets + " outlets" : "") + " (" + lastDev.source + (lastDev.also && lastDev.also.length ? ", " + lastDev.also.slice(0, 3).join(", ") : "") + ")"
+    : devLabel(lastDev.reason) + " · " + lastDev.source + ": " + lastDev.text) : null);
+  const nextDoc = (t.docs || []).map((d) => byId.get(d.id)).filter((it) => it && it.event_at && Date.parse(it.event_at) > Date.now()).sort((a, b) => Date.parse(a.event_at) - Date.parse(b.event_at))[0];
+  const st = (data.stories || []).find((s) => s.thread === t.id);
+  return el("button", { class: "thread" + (t.developing ? " live" : ""), onclick: () => openThread(t) },
+    el("span", { class: "lbl" }, t.developing ? el("span", { class: "dev", text: "Developing" }) : null,
+      el("span", { text: (t.developing ? " · " : "") + (t.kind || "thread") + " · " }), el("span", { class: "dk", style: "--c: var(--" + t.desk.toLowerCase() + ")", text: DESK_NAME[t.desk] || t.desk })),
+    el("span", { class: "headline", text: t.title }),
+    newDevs.length ? el("span", { class: "tnew" }, el("b", { text: "New since " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) + ": " }), latest) :
+      nextDoc ? el("span", { class: "tnew" }, el("b", { text: "Next: " }), nextDoc.title + " · " + exact(Date.parse(nextDoc.event_at))) :
+      el("span", { class: "tnew quiet", text: "Nothing new since you last looked. Last development " + ago(Date.parse(t.last)) + " ago." }),
+    el("span", { class: "meta" }, el("span", { text: (t.developments || []).length + (t.developments && t.developments.length === 1 ? " development" : " developments") }),
+      t.outlets > 1 ? el("span", { text: t.outlets + " outlets" }) : null, el("span", { text: t.n_reports + " reports" })));
+}
+
+function threadsSection() {
+  const mine = (data.threads || []).filter((t) => isFollowed(t.id));
+  const addBtn = el("button", { class: "sa", text: "Follow a topic", onclick: openTopicForm });
+  const out = [sectionHead("Threads you follow", null, openTopicForm, mine.length ? "Follow a topic" : "Follow a topic")];
+  if (!mine.length) {
+    out.push(el("p", { class: "sdesc", text: "Follow any story with the Follow button, or name a topic to watch over time. Followed threads collect every report, development and document here." }));
+    return out;
+  }
+  out.push(el("div", { class: "threads" }, ...mine.slice(0, 8).map(threadCard)));
+  return out;
+}
+
+function openTopicForm() {
+  const title = el("input", { type: "text", id: "topic-title", class: "tin", placeholder: "e.g. 152-158 Fishkill Avenue" });
+  const pattern = el("input", { type: "text", id: "topic-pattern", class: "tin", placeholder: "Words to watch for, comma-separated (default: the title). A trailing * matches endings: rezon*" });
+  const desk = el("select", { id: "topic-desk", class: "tin" }, ...["BEACON", "GOV", "LAW", "WORLD", "SPORTS"].map((d) => el("option", { value: d, text: DESK_NAME[d] })));
+  const kind = el("select", { id: "topic-kind", class: "tin" }, ...[["subject", "Subject"], ["process", "Process (an application, bill or case)"], ["entity", "Entity (a place, company or team)"], ["law", "Area of law"], ["event", "Event"]].map(([v, l]) => el("option", { value: v, text: l })));
+  const status = el("p", { class: "fine" });
+  const save = el("button", { class: "sbtn primary wide", text: "Follow this topic" });
+  save.onclick = async () => {
+    if (!title.value.trim()) { status.textContent = "Give the topic a name."; return; }
+    save.textContent = "Saving…";
+    const ok = await setFollow({ action: "follow", type: "topic", title: title.value.trim(), pattern: pattern.value.trim() || title.value.trim(), desk: desk.value, kind: kind.value });
+    status.textContent = ok ? "Followed. The next build (within 15 minutes) attaches matching reports." : "Couldn't save. Are you signed in?";
+    save.textContent = "Follow this topic";
+  };
+  const mine = followsNow().topics;
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "Follow a topic" }),
+    el("p", { class: "sdesc", text: "A topic is a thread you name. Every report whose headline or description matches joins it, from any source, for as long as you follow it." }),
+    el("label", { class: "flab", text: "Topic" }), title,
+    el("label", { class: "flab", text: "Watch for" }), pattern,
+    el("label", { class: "flab", text: "Desk" }), desk,
+    el("label", { class: "flab", text: "Kind" }), kind,
+    el("div", { class: "sactions" }, save), status,
+    mine.length ? el("h3", { class: "sh3", text: "Topics you follow" }) : null,
+    mine.length ? el("ul", { class: "also" }, ...mine.map((tp) => el("li", {}, el("span", { class: "asrc", text: tp.kind + " · " + (DESK_NAME[tp.desk] || tp.desk) + " · watching: " + (tp.pattern || tp.title) }),
+      el("span", { text: tp.title + " " }), el("button", { class: "unsave", text: "Unfollow", onclick: async (e) => { e.currentTarget.textContent = "…"; await setFollow({ action: "unfollow", type: "topic", id: tp.id }); openTopicForm(); } })))) : null,
+  ].filter(Boolean), "Follow a topic");
+}
+
+// The thread page: where it stands, developments, documents, figures, quotes, views, coverage.
+function openThread(t, viaItem) {
+  const st = (data.stories || []).find((s) => s.thread === t.id) || null;
+  const members = (t.members || []).map((m) => byId.get(m)).filter(Boolean).sort((a, b) => b.ms - a.ms);
+  const lead = (st && byId.get(st.lead)) || members[0] || viaItem;
+  const when = (iso) => { const ms = Date.parse(iso); return isToday(ms) ? fmtTime.format(new Date(ms)) : exact(ms); };
+  const sec = (title, ...kids) => el("section", { class: "ssec" }, el("h3", { class: "sh3", text: title }), ...kids);
+  const since = prevVisit && Date.now() - prevVisit < 48 * 3600e3 ? prevVisit : Date.now() - 24 * 3600e3;
+  const devs = (t.developments || []).slice().reverse();
+  const newCount = devs.filter((d) => Date.parse(d.t) > since).length;
+  const docs = (t.docs || []).slice().reverse();
+  const quotes = [];
+  for (const m of members) for (const q of m.quotes || []) if (quotes.length < 3 && !quotes.some((o) => o.by === q.by)) quotes.push({ ...q, item: m });
+  const follow = followButton(st || { thread: t.id, lead: lead && lead.id }, false);
+  const briefBtn = el("button", { class: "sbtn", text: "Brief me on this", onclick: () => { prefs.briefBeat = "all"; openBrief(); } });
+  const nodes = [
+    el("div", { class: "smeta" },
+      t.developing ? el("span", { class: "dev", text: "Developing" }) : null,
+      el("span", { text: (t.kind || "thread")[0].toUpperCase() + (t.kind || "thread").slice(1) }),
+      el("span", { class: "dk", style: "--c: var(--" + t.desk.toLowerCase() + ")", text: DESK_NAME[t.desk] || t.desk }),
+      el("span", { text: "Opened " + exact(Date.parse(t.opened)) })),
+    el("h2", { id: "sheet-title", class: "stitle", text: t.title }),
+    el("p", { class: "fine" }, (t.outlets > 1 ? t.outlets + " outlets · " : "") + t.n_reports + " reports · " + devs.length + " developments" + (newCount ? " · " : ""),
+      newCount ? el("span", { class: "since", text: newCount + " new since you last looked" }) : null),
+    el("div", { class: "sactions" }, follow, briefBtn),
+    t.what || t.card || t.summary ? el("div", { class: "machine" },
+      el("span", { class: "mlabel", text: "Where it stands · machine-written" + (t.outlets > 1 ? " from " + t.outlets + " outlets" : "") + (t.written_at ? " · " + when(t.written_at) : "") }),
+      el("p", { text: t.what || t.card || t.summary })) : (lead && lead.machine_summary ? el("div", { class: "machine" }, el("span", { class: "mlabel", text: "Where it stands · machine summary" }), el("p", { text: lead.machine_summary })) : null),
+    t.latest ? el("div", { class: "latest" }, el("span", { class: "mlabel", text: "Latest" + (t.latest_at ? " · " + when(t.latest_at) : "") }), el("p", { text: t.latest })) : null,
+    devs.length ? sec("Developments",
+      el("ol", { class: "tl" }, ...devs.slice(0, 12).map((d) => el("li", { class: Date.parse(d.t) > since ? "new" : "" },
+        el("span", { class: "tlt", text: when(d.t) }),
+        el("span", { class: "tlb" }, link(d.link, d.text), el("span", { class: "asrc", text: " · " + d.source + (d.also && d.also.length ? ", " + d.also.join(", ") : "") + " · " + devLabel(d.reason) })))))) : null,
+    docs.length ? sec("The documents",
+      el("ul", { class: "docs" }, ...docs.slice(0, 6).map((d) => { const it = byId.get(d.id); return el("li", {},
+        el("span", { class: "asrc", text: when(d.t) + " · " + d.source + (it && it.event_at ? " · " + exact(Date.parse(it.event_at)) : "") }),
+        it ? el("button", { class: "doclink", text: d.title, onclick: () => openItem(it) }) : link(d.link, d.title)); }))) : null,
+    t.figures && t.figures.length ? sec("Figures as reported",
+      ...t.figures.map((f) => el("div", { class: "fig" }, el("span", { class: "figw", text: f.what }),
+        el("ul", { class: "figl" }, ...f.reports.map((r) => el("li", {}, el("span", { class: "fign", text: r.text }), " ",
+          el("span", { class: "asrc", text: r.source + " · " + when(r.t) }), " ", link(r.link, "↗")))))),
+      el("p", { class: "fine", text: "Outlets' numbers, word for word. They may cover different periods or update through the day." })) : null,
+    quotes.length ? sec("In their words", quoteList(quotes)) : null,
+    t.views && t.views.length ? sec("Range of views",
+      el("ul", { class: "views" }, ...t.views.map((v) => byId.get(v.id)).filter(Boolean).filter((it) => !isMuted(it)).map((it) => el("li", {},
+        el("span", { class: "vlab", text: (PERSPECTIVE[it.perspective] || "") + " · " + byline(it) + (it.kind === "PODCAST" ? " · podcast" : "") }),
+        link(it.link, it.title),
+        it.summary ? el("span", { class: "vsum", text: it.summary.slice(0, 220) + (it.summary.length > 220 ? "…" : "") }) : null)))) :
+      sec("Range of views", el("p", { class: "fine", text: "None yet from the people you follow. Views appear here, labeled by perspective, when they write about this." })),
+    t.why ? el("div", { class: "why" }, el("span", { class: "mlabel", text: "Why it matters to you · analysis" }), el("p", { text: t.why })) : null,
+    sec("All coverage · " + members.length + " reports", el("ul", { class: "also" }, ...members.slice(0, 40).map((it) =>
+      el("li", {}, el("span", { class: "asrc", text: ago(it.ms) + " · " + byline(it) + (it.translated ? " · translated" : "") }), link(it.link, it.title))))),
+    t.named ? el("p", { class: "fine", text: "A topic you named. Watching for: " + (t.pattern || t.title) }) : null,
+    el("div", { class: "endline", text: "End of thread" }),
+  ];
+  openSheet(nodes.filter(Boolean), t.title);
+}
 
 // --------------------------------------------------------------- people you follow
 // Newest work from followed people since the last visit (or two days), rotated across

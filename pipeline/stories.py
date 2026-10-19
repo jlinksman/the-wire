@@ -401,7 +401,7 @@ def summarize(state, data, session, log, room: dict | None = None) -> dict:
     # Stories with a large-model write-up don't also get a small-model summary.
     synth = ai.get("synth", {})
     jobs = [("story", s["id"], diverse(s, by_id)) for s in data["stories"][:15]
-            if not ((synth.get(s["id"]) or {}).get("card") or (synth.get(s["id"]) or {}).get("what"))]
+            if not ((synth.get(skey(s)) or {}).get("card") or (synth.get(skey(s)) or {}).get("what"))]
     day_ago = now - timedelta(hours=24)
     jobs += [("item", it["id"], [it["id"]]) for it in data["items"]
              if it["desk"] in ("BEACON", "GOV", "LAW") and ms(it) >= day_ago and not it.get("no_ai")
@@ -506,6 +506,11 @@ def _cf_run(session, model: str, system: str, prompt: str, max_tokens: int, rate
     return (out if isinstance(out, dict) else _parse_json(out_text)), tin / 1e6 * rates[0] + tout / 1e6 * rates[1]
 
 
+def skey(s: dict) -> str:
+    """Writing is cached by thread when the story has one, so it survives re-clustering."""
+    return s.get("thread") or s["id"]
+
+
 RED_PEN_TOP = 3
 RED_PEN_SYSTEM = (
     "You are the standards editor. You get news reports and a draft written from them. "
@@ -531,21 +536,31 @@ def synthesize(state, data, session, log, room: dict | None = None) -> dict:
     stats = {"calls": 0, "kept": 0, "dropped": 0, "error": None, "cut": 0, "chairs": Counter()}
     from editorial import chairs_for, rules_text
     tracker = data.get("tracker") or {}
-    top = [s for s in data["stories"] if s["desk"] != "SPORTS"][:SYNTH_TOP]
+    # Followed threads get first claim on the writing budget, then the ranked top.
+    top = [s for s in data["stories"] if s.get("followed") and s["desk"] != "SPORTS"][:8]
+    # Followed named topics have no cluster of their own: write them from their members.
+    with_story = {s.get("thread") for s in data["stories"]}
+    for t in data.get("threads", []):
+        if t.get("followed") and t["id"] not in with_story and t.get("members"):
+            mem = [m for m in t["members"] if m in by_id][-10:]
+            if mem:
+                top.append({"id": t["id"], "thread": t["id"], "members": list(reversed(mem)), "desk": t["desk"],
+                            "sources": len({by_id[m]["source"] for m in mem}), "developing": False, "last": t["last"], "named": True})
+    top += [s for s in data["stories"] if s["desk"] != "SPORTS" and s not in top][:SYNTH_TOP]
     # Each desk tab leads with its own written stories, so the top two Beacon, Gov and Law
     # stories get the full write-up too, even when world news fills the overall top 12.
     for desk in ("BEACON", "GOV", "LAW"):
         top += [s for s in data["stories"] if s["desk"] == desk and s not in top][:2]
-    live = {s["id"] for s in data["stories"][:40]} | {s["id"] for s in top}
+    live = {skey(s) for s in data["stories"][:40]} | {skey(s) for s in top}
     for k in [k for k in cache if k not in live]:
         del cache[k]
     for s in top:
         members = diverse(s, by_id, 6)
-        if len(members) < 2:
+        if len(members) < 2 and not s.get("named"):
             continue
         sig = hashlib.sha1(json.dumps(sorted(m for m in s["members"] if not by_id[m].get("no_ai"))).encode()).hexdigest()[:12]
         rules_sig = hashlib.sha1(json.dumps(room or {}, sort_keys=True, default=str).encode()).hexdigest()[:8]
-        rec = cache.get(s["id"])
+        rec = cache.get(skey(s))
         if rec and rec.get("rules") != rules_sig:
             rec = None        # the room's rules changed: rewrite under the new rules
         if rec and (rec["sig"] == sig or now - datetime.fromisoformat(rec["at"]) < timedelta(minutes=SYNTH_REFRESH_MIN[bool(s.get("developing"))])):
@@ -603,7 +618,7 @@ def synthesize(state, data, session, log, room: dict | None = None) -> dict:
             stats["kept"] += 1
         else:
             stats["dropped"] += 1
-        cache[s["id"]] = {"sig": sig, "rules": rules_sig, "at": now.isoformat(), **kept,
+        cache[skey(s)] = {"sig": sig, "rules": rules_sig, "at": now.isoformat(), **kept,
                           "latest_at": max((by_id[m]["t"] for m in members), default=None),
                           "n": len(members), "dropped": sum(1 for k in ("card", "what", "latest", "why") if (j.get(k) or "") and not kept[k])}
     return stats
@@ -716,8 +731,9 @@ def timeline(s, by_id) -> list[dict]:
 
 # ---------------------------------------------------------------- one entry point for build.py
 
-def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
+def run(state, data, src_by_id, session, robots_allows, timeout, log, follows: dict | None = None) -> None:
     from editorial import load as load_room
+    import threads as threads_mod
     room = load_room()
     now = datetime.now(timezone.utc)
     stories = group(data["items"], now)
@@ -738,6 +754,24 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
                 it["quotes"] = q
                 nq += 1
 
+    by_id = {it["id"]: it for it in data["items"]}
+    for s in stories:
+        figs = figures(s, by_id, texts)
+        if figs:
+            s["figures"] = figs
+        tl = timeline(s, by_id)
+        if tl:
+            s["timeline"] = tl
+    # Threads: persistent identity, developments, documents, follows (BRIEF.md stage 1).
+    try:
+        threads_mod.update(state, data, follows or {}, now, log)
+    except Exception as exc:
+        log(f"[threads] failed: {type(exc).__name__}: {exc}")
+        data.setdefault("threads", [])
+    followed_threads = {t["id"] for t in data.get("threads", []) if t.get("followed")}
+    for s in stories:
+        s["followed"] = s.get("thread") in followed_threads
+
     st = state.setdefault("v5", {})
     if tstats["attempts"] and not tstats["ok"]:
         st["text_error"] = tstats["errors"][0] if tstats["errors"] else "all fetches failed"
@@ -754,12 +788,11 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
 
     summaries = state["ai"]["summaries"]
     synth = state["ai"].get("synth", {})
-    by_id = {it["id"]: it for it in data["items"]}
     for s in stories:
         rec = summaries.get(s["id"])
         if rec and rec["summary"]:
             s["summary"] = rec["summary"]
-        sy = synth.get(s["id"])
+        sy = synth.get(skey(s))
         if sy:
             for k in ("card", "what", "latest", "why"):
                 if sy.get(k):
@@ -767,12 +800,22 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log) -> None:
             s["written_at"] = sy["at"]
             if sy.get("latest"):
                 s["latest_at"] = sy.get("latest_at")
-        figs = figures(s, by_id, texts)
-        if figs:
-            s["figures"] = figs
-        tl = timeline(s, by_id)
-        if tl:
-            s["timeline"] = tl
+    # Threads carry their current story's writing, figures, timeline and views.
+    story_by_thread = {s["thread"]: s for s in stories if s.get("thread")}
+    for t in data.get("threads", []):
+        s = story_by_thread.get(t["id"])
+        if s:
+            for k in ("what", "card", "summary", "latest", "latest_at", "why", "written_at", "figures", "timeline", "views", "sources", "reports", "lead"):
+                if s.get(k) is not None:
+                    t[k] = s[k]
+        else:
+            sy = synth.get(t["id"])
+            if sy:
+                for k in ("card", "what", "latest", "why"):
+                    if sy.get(k):
+                        t[k] = sy[k]
+                t["written_at"] = sy["at"]
+                t["latest_at"] = sy.get("latest_at")
     try:
         editor_notes(state, data, session, log, room)
     except Exception as exc:

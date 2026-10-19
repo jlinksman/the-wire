@@ -48,6 +48,10 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - [x] The Cloudflare Worker that times the build also runs the 3-minute alert check; its state shows in source health.
 - Rules live in sources.yaml under `push_alerts`.
 
+## Stage 1 — Threads (built 2026-10-19; BRIEF.md second brief)
+- `pipeline/threads.py`: persistent threads in the build state with stable ids, matched to each build's clusters by shared reports then headline similarity; developments logged only on material change (a document, a second outlet, +3 outlets, a changed figure, or a fresh batch after 4 quiet hours); primary documents attached; dormant after 14 quiet days. Named topic threads from follows. `functions/follow.js` keeps follows in KV; `build.yml` fetches them before each build; followed threads get first claim on the writing budget and count as briefing signal.
+- Next: stage 2, Your Wire (composed Today page, units on every tab).
+
 ## People (built 2026-10-18)
 - `people.yaml`: 93 reporters, writers, podcasters and forecasters (Joe's list plus a researched, balanced set), each with feeds, byline names, or a headline search; opinion voices carry a perspective tag. Their work shows in "From people you follow" on Today (rotated across perspectives), a Following category in Brief me, and a Range of views section on story pages. Unreachable for now (V8 home fetcher candidates): *.substack.com writers (Substack blocks cloud servers), Hudson Valley Weather (bot check), UnHerd, The Economist's acast feed.
 

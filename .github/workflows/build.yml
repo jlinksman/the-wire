@@ -50,6 +50,13 @@ jobs:
           key: wire-state-${{ github.run_id }}
           restore-keys: wire-state-
 
+      - name: Fetch follows from Workers KV
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
+        run: |
+          npx --yes wrangler@4 kv key get follows.json --namespace-id "$WIRE_KV_ID" --remote > follows.json 2>/dev/null \
+            || echo '{"threads":[],"topics":[]}' > follows.json
+          python3 -c "import json;d=json.load(open('follows.json'));print(len(d.get('threads',[])),'followed threads,',len(d.get('topics',[])),'topics')" \
+            || echo '{"threads":[],"topics":[]}' > follows.json
       - name: Build
         run: python pipeline/build.py
 
