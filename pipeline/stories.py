@@ -80,19 +80,29 @@ def group(items: list[dict], now: datetime | None = None) -> list[dict]:
         wa, wb = weight(sa), weight(sb)
         return weight(shared) / math.sqrt(wa * wb) if wa and wb else 0.0
 
+    from events import places as place_names
+    pl = {it["id"]: place_names(it["title"]) for it in pool}
     clusters: list[list[dict]] = []
+    cplace: list[Counter] = []                # places named across each cluster's headlines
     for it in sorted(pool, key=ms):           # oldest first: the first report leads
         best, best_s = None, 0.0
-        for c in clusters:
+        for ci, c in enumerate(clusters):
             if (it["desk"] == "SPORTS") != (c[0]["desk"] == "SPORTS"):
                 continue      # sports never merges with news
+            # A report that names a place must share it with the cluster's main place
+            # (a Sydney protest doesn't join French protests on "protester violence").
+            main = {p for p, k in cplace[ci].items() if k * 2 >= len(c)}
+            if pl[it["id"]] and main and not (pl[it["id"]] & main):
+                continue
             s = max(sim(it["id"], m["id"]) for m in c)
             if s > best_s and sim(it["id"], c[0]["id"]) >= SIM_LEAD_MIN:
                 best, best_s = c, s
         if best is not None and best_s >= SIM_MIN:
             best.append(it)
+            cplace[clusters.index(best)].update(pl[it["id"]])
         else:
             clusters.append([it])
+            cplace.append(Counter(pl[it["id"]]))
 
     # Second pass: fragments of one big event (same foreign place, same kind of event).
     from events import merge_events
@@ -671,6 +681,53 @@ def editor_notes(state, data, session, log, room: dict | None = None) -> None:
             s["lead_note"] = note
 
 
+DAY_EVERY_MIN = 60
+DAY_SYSTEM = (
+    "You write 'the day so far' for one reader in Beacon, New York: three or four plain sentences on the shape of the day, "
+    "from the numbered stories only. Open with the biggest development. Put Beacon and New York before the world when they have real news. "
+    "Say what changed, not what a story is about. Use only facts in the stories; no opinion, no outside knowledge, no hype. "
+    "Reply with JSON only: {\"text\": \"...\"}.")
+
+
+def day_so_far(state, data, session, log, room=None) -> None:
+    """Once an hour: the day in three or four sentences, from the top stories and followed threads."""
+    from editorial import rules_text
+    ai = state.setdefault("ai", {})
+    rec = ai.setdefault("day", {})
+    now = datetime.now(timezone.utc)
+    by_id = data_by_id(data)
+    threads = {t["id"]: t for t in data.get("threads", [])}
+    picks = [s for s in data["stories"] if s.get("followed")][:4]
+    picks += [s for s in data["stories"] if s["desk"] in ("BEACON", "GOV", "LAW") and s not in picks and (s.get("card") or s.get("summary"))][:3]
+    picks += [s for s in data["stories"] if s not in picks and s["desk"] != "SPORTS" and (s.get("card") or s.get("summary"))][:8]
+    picks = picks[:9]
+    if not picks:
+        return
+    fresh = rec.get("at") and now - datetime.fromisoformat(rec["at"]) < timedelta(minutes=DAY_EVERY_MIN)
+    if not fresh and ai.get("neurons", 0) < AI_DAILY_NEURONS:
+        blocks = []
+        for i, s in enumerate(picks, 1):
+            t = threads.get(s.get("thread")) or {}
+            lead = by_id.get(s["lead"]) or {}
+            blocks.append(f"[{i}] {s['desk']} · {s['sources']} outlets{' · you follow this' if s.get('followed') else ''}\n{lead.get('title', '')}\n"
+                          f"{s.get('what') or s.get('card') or s.get('summary') or ''}\n{('Latest: ' + s['latest']) if s.get('latest') else ''}".strip())
+        corpus = "\n\n".join(blocks)
+        system = DAY_SYSTEM + ("\n\n" + rules_text(room, [], ("editor",)) if room else "")
+        try:
+            j, n = _cf_run(session, SYNTH_MODEL, system, corpus, 260, (SYNTH_IN, SYNTH_OUT))
+            ai["neurons"] += n
+            text = grounded(str(j.get("text") or ""), corpus + " Beacon New York Dutchess Albany")
+            if text:
+                rec.update({"at": now.isoformat(), "text": text, "refs": [s["id"] for s in picks]})
+                log(f"[day] written: {len(text.split())} words")
+            else:
+                log("[day] dropped: nothing traceable")
+        except Exception as exc:
+            log(f"[day] {type(exc).__name__}: {str(exc)[:120]}")
+    if rec.get("text"):
+        data["day_so_far"] = {"text": rec["text"], "at": rec["at"], "refs": rec.get("refs", [])}
+
+
 def data_by_id(data):
     return {it["id"]: it for it in data["items"]}
 
@@ -820,6 +877,10 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log, follows: d
         editor_notes(state, data, session, log, room)
     except Exception as exc:
         log(f"[editor] {type(exc).__name__}: {exc}")
+    try:
+        day_so_far(state, data, session, log, room)
+    except Exception as exc:
+        log(f"[day] {type(exc).__name__}: {exc}")
     for it in data["items"]:
         rec = summaries.get(it["id"])
         if rec and rec["summary"] and rec["sources"] == [it["id"]]:
