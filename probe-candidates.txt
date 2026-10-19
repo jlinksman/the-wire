@@ -1,15 +1,8 @@
-# label | url   (coverage gaps, round 2, 2026-10-19)
+# label | url   (coverage gaps, round 3, 2026-10-19)
 Governor NY news page | https://www.governor.ny.gov/news
 NY Attorney General press page | https://ag.ny.gov/press-releases
-NYS Comptroller press page | https://www.osc.ny.gov/press/releases
+NYS Comptroller home | https://www.osc.ny.gov/
 Dutchess County Executive press page | https://www.dutchessny.gov/Government/County-Executive/Press-Releases.htm
 Dutchess County news page | https://www.dutchessny.gov/News/
-EPA Region 2 news page | https://www.epa.gov/newsreleases/search?f%5B0%5D=region%3A2
-Kyiv Independent [rss2] | https://kyivindependent.com/rss/
-Kyiv Independent [rss3] | https://kyivindependent.com/feed/
 Kyiv Independent home | https://kyivindependent.com/
 NHK World English home | https://www3.nhk.or.jp/nhkworld/en/news/
-NYSDEC press page | https://dec.ny.gov/news/press-releases
-NYS DOL news page | https://dol.ny.gov/news
-Coast Guard Sector New York news page | https://www.news.uscg.mil/News-by-Region/Atlantic-Area/1st-District-Northeast/
-USCG 1st District DVIDS [rss] | https://www.dvidshub.net/rss/unit/CG1
