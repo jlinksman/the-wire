@@ -180,13 +180,32 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
         t["outlets"] = max(t["outlets"], outlets_now)
         t["figsig"] = [list(x) for x in figsig][:60]
 
+    # Reports Joe added to a followed thread by hand ("Add to a thread" on the page).
+    added = 0
+    for entry in (follows or {}).get("threads", []):
+        items = [by_id[i] for i in entry.get("items", []) if i in by_id]
+        if not items:
+            continue
+        t = threads.get(entry["id"])
+        if not t:
+            # The thread it belonged to is gone (forgotten) or was never one: rebuild it around his reports.
+            t = {"id": entry["id"], "kind": "subject", "desk": items[0]["desk"], "opened": entry.get("since") or stamp, "last": entry.get("since") or stamp,
+                 "members": [], "titles": [], "developments": [], "docs": [], "status": "active", "outlets": 0, "figsig": [], "named": False,
+                 "title": entry.get("title") or items[0]["title"]}
+            threads[entry["id"]] = t
+        added += _add_by_hand(t, items)
+    if added:
+        log(f"[threads] {added} reports added by hand")
+
     # Named topic threads Joe follows, and the standing area-of-law threads from threads.yaml:
-    # attach matching reports, whatever cluster they're in.
+    # attach matching reports, whatever cluster they're in. A topic with no watch terms is a
+    # hand-built thread: only the reports Joe adds belong to it.
     standing_ids = {x["id"] for x in (standing or [])}
+    followed_topic_ids = {tp["id"] for tp in (follows or {}).get("topics", [])}
     for topic in list((follows or {}).get("topics", [])) + [dict(x, standing=True) for x in (standing or [])]:
         tid = topic["id"]
-        pat = topic_pattern(topic)
-        if not pat:
+        pat = topic_pattern(topic) if (topic.get("pattern") or topic.get("standing")) else None
+        if not pat and not topic.get("items"):
             continue
         t = threads.get(tid) or {"id": tid, "kind": topic.get("kind") or "subject", "desk": topic.get("desk") or "GOV", "opened": topic.get("since") or stamp,
                                 "last": topic.get("since") or stamp, "members": [], "titles": [], "developments": [], "docs": [], "status": "active",
@@ -196,9 +215,14 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
         t["standing"] = bool(topic.get("standing"))
         t["kind"] = topic.get("kind") or t.get("kind") or "subject"
         t["title"] = topic["title"]
-        t["pattern"] = topic.get("pattern") or topic["title"]
-        new = [it for it in data["items"] if it["id"] not in set(t["members"]) and pat.search(it["title"] + " " + (it.get("summary") or "")[:300])
-               and ms(it) >= datetime.fromisoformat(t["opened"].replace("Z", "+00:00")) - timedelta(days=7)]
+        if pat:
+            t["pattern"] = topic.get("pattern") or topic["title"]
+        else:
+            t.pop("pattern", None)
+            t["manual"] = True
+        _add_by_hand(t, [by_id[i] for i in topic.get("items", []) if i in by_id])
+        new = [it for it in data["items"] if pat and it["id"] not in set(t["members"]) and pat.search(it["title"] + " " + (it.get("summary") or "")[:300])
+               and ms(it) >= datetime.fromisoformat(t["opened"].replace("Z", "+00:00")) - timedelta(days=30 if topic.get("standing") else 7)]
         for it in sorted(new, key=ms):
             t["members"].append(it["id"])
             if is_document(it) and not any(d["id"] == it["id"] for d in t["docs"]):
@@ -217,12 +241,14 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
         age_h = (now - datetime.fromisoformat(t["last"].replace("Z", "+00:00"))).total_seconds() / 3600
         if tid in standing_ids:
             t["status"] = "active"
+        elif t.get("standing") and tid not in followed_topic_ids:
+            del threads[tid]               # removed from threads.yaml and not a topic Joe follows: gone
+        elif t.get("standing"):
+            t["standing"] = False          # removed from threads.yaml but followed: an ordinary topic now
         elif age_h > FORGET_AFTER_H and not t.get("named"):
             del threads[tid]
         elif age_h > DORMANT_AFTER_H:
             t["status"] = "dormant"
-        elif t.get("standing") and tid not in standing_ids:
-            t["standing"] = False          # removed from threads.yaml: behaves like any thread again
 
     followed = {f["id"] for f in (follows or {}).get("threads", [])} | {tp["id"] for tp in (follows or {}).get("topics", [])}
     for tid, t in threads.items():
@@ -241,7 +267,7 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
         mem = [m for m in t["members"] if m in live]
         if not mem and not t.get("named"):
             continue
-        rec = {k: t[k] for k in ("id", "kind", "desk", "title", "opened", "last", "status", "followed", "named", "standing", "developing", "outlets", "signal", "revived_at") if k in t}
+        rec = {k: t[k] for k in ("id", "kind", "desk", "title", "opened", "last", "status", "followed", "named", "standing", "manual", "developing", "outlets", "signal", "revived_at", "added") if k in t}
         rec |= {"members": mem[-200:], "developments": t["developments"][-MAX_DEVELOPMENTS:], "docs": t["docs"],
                 "n_reports": len(t["members"]), **({"pattern": t["pattern"]} if t.get("pattern") else {})}
         if rec.get("revived_at") and (now - datetime.fromisoformat(rec["revived_at"].replace("Z", "+00:00"))) > timedelta(hours=48):
@@ -253,6 +279,28 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
     log(f"[threads] {len(out)} active ({sum(1 for t in out if t['followed'])} followed, {sum(1 for t in out if t.get('standing'))} standing), "
         f"matched {matched}, opened {opened}, revived {revivals}, developments logged {devs}, "
         f"dormant {sum(1 for t in threads.values() if t['status'] == 'dormant')}, suggested {len(data['suggest'])}")
+
+
+def _add_by_hand(t: dict, items: list[dict]) -> int:
+    """Put Joe's hand-picked reports on a thread, logging each as a development."""
+    n = 0
+    have = set(t["members"])
+    for it in sorted(items, key=ms):
+        if it["id"] in have:
+            continue
+        t["members"].append(it["id"])
+        have.add(it["id"])
+        t.setdefault("added", []).append(it["id"])
+        t["added"] = t["added"][-100:]
+        if is_document(it) and not any(d["id"] == it["id"] for d in t["docs"]):
+            t["docs"].append({"id": it["id"], "t": it["t"], "title": it["title"], "source": it["source"], "link": it["link"]})
+        t["developments"].append({"t": it["t"], "text": it["title"], "source": it["source"], "link": it["link"], "id": it["id"],
+                                  "reason": "added", "outlets": 1, "also": []})
+        t["developments"] = sorted(t["developments"], key=lambda d: d["t"])[-MAX_DEVELOPMENTS:]
+        t["last"] = max(t["last"], it["t"])
+        t["status"] = "active"
+        n += 1
+    return n
 
 
 def topic_pattern(topic: dict) -> re.Pattern | None:

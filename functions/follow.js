@@ -4,6 +4,8 @@
 // GET  /follow                      -> {threads:[{id,title,since}], topics:[{id,title,pattern,kind,desk,since}]}
 // POST /follow {action:"follow"|"unfollow", type:"thread"|"topic", id, title, kind?, desk?, pattern?}
 // POST /follow {action:"signal", id, value:"more"|"less"|"clear", title?, desk?, kind?}   (stage 4: more/less like this)
+// POST /follow {action:"attach"|"detach", type, id?, item, title?, kind?, desk?, pattern?}  add a report to a thread
+//   (following it if needed; a topic with no id is created from the title: "start a thread with this")
 const KEY = "follows.json";
 const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 
@@ -31,6 +33,31 @@ export async function onRequestPost({ request, env }) {
   const type = body.type === "topic" ? "topics" : "threads";
   const list = cur[type] || [];
   const now = new Date().toISOString();
+  if (body.action === "attach" || body.action === "detach") {
+    const item = String(body.item || "").slice(0, 40);
+    if (!item) return new Response(JSON.stringify({ error: "an item is required" }), { status: 400, headers });
+    const title = String(body.title || "").trim().slice(0, 140);
+    const id = body.type === "topic" && !body.id
+      ? "topic_" + title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40)
+      : String(body.id || "");
+    if (!id) return new Response(JSON.stringify({ error: "a thread id or a title is required" }), { status: 400, headers });
+    let entry = list.find((x) => x.id === id);
+    if (!entry) {
+      if (!title) return new Response(JSON.stringify({ error: "a title is required" }), { status: 400, headers });
+      entry = { id, title, since: now };
+      if (body.type === "topic") {
+        entry.pattern = String(body.pattern || "").slice(0, 300);     // may be empty: a hand-built thread
+        entry.kind = ["event", "process", "subject", "entity", "law"].includes(body.kind) ? body.kind : "subject";
+        entry.desk = ["BEACON", "GOV", "LAW", "WORLD", "SPORTS"].includes(body.desk) ? body.desk : "GOV";
+      }
+      list.push(entry);
+    }
+    const items = (entry.items || []).filter((x) => x !== item);
+    entry.items = (body.action === "attach" ? [...items, item] : items).slice(-100);
+    cur[type] = list.slice(-60);
+    await env.WIRE.put(KEY, JSON.stringify(cur));
+    return new Response(JSON.stringify(cur), { headers });
+  }
   if (body.action === "unfollow") {
     cur[type] = list.filter((x) => x.id !== body.id);
   } else {

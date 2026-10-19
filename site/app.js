@@ -315,7 +315,14 @@ function todayView() {
   out.push(el("div", { class: "ywsub" }, new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric" }).format(new Date()),
     since ? el("span", { class: "since", text: " · since you last looked at " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) }) : null));
   if (data.day_so_far && data.day_so_far.text) {
-    out.push(el("div", { class: "daysofar" }, el("span", { class: "mlabel", text: "The day so far · machine-written · " + fmtTime.format(new Date(Date.parse(data.day_so_far.at))) }), el("p", { text: data.day_so_far.text })));
+    const parts = data.day_so_far.parts || [];
+    out.push(el("div", { class: "daysofar" }, el("span", { class: "mlabel", text: "The day so far · machine-written · " + fmtTime.format(new Date(Date.parse(data.day_so_far.at))) }),
+      parts.length ? el("ol", { class: "dayparts" }, ...parts.map((pt) => {
+        const th = pt.thread && (data.threads || []).find((t) => t.id === pt.thread);
+        const st = (data.stories || []).find((x) => x.id === pt.story);
+        return el("li", {}, el("button", { class: "daypart", onclick: () => th ? openThread(th) : st ? openStory(st) : null },
+          el("span", { class: "dlabel", text: pt.label }), el("span", { class: "dtext", text: pt.text })));
+      })) : el("p", { text: data.day_so_far.text })));
   }
   out.push(el("button", { class: "briefcard", onclick: openBrief },
     el("span", { class: "bc-ico", "aria-hidden": "true", text: "▶" }),
@@ -470,7 +477,7 @@ function deskView(t, desk) {
   const fresh = prevVisit ? all.filter((it) => !isSeen(it)).length : 0;
   const list = prefs.newOnly && fresh ? all.filter((it) => !isSeen(it)) : all;
   const out = [];
-  if (desk === "LAW") out.push(...areasOfLaw());
+  if (desk === "LAW" || desk === "GOV") out.push(...areasOfLaw(desk));
   if (featured.size) {
     out.push(sectionHead("Top stories"));
     out.push(...leadStories.map((st) => unit(st)).filter(Boolean), ...leadItems.map(itemCard));
@@ -825,7 +832,8 @@ function openItem(it) {
     el("div", { class: "sactions" },
       link(it.link, "Open " + it.source + " ↗", "sbtn primary"),
       navigator.share ? el("button", { class: "sbtn", text: "Share", onclick: () => navigator.share({ title: it.title, url: it.link }).catch(() => {}) }) : null,
-      saveBtn),
+      saveBtn,
+      el("button", { class: "sbtn", text: "Add to a thread", onclick: () => openAttachSheet(it) })),
     st ? el("div", { class: "salso" }, el("h3", { class: "sh3", text: "Also covering this · " + (st.sources - 1) + (st.sources === 2 ? " outlet" : " outlets") }), alsoList(st, it.id)) : null,
   ];
   openSheet(nodes.filter(Boolean), it.title);
@@ -1305,7 +1313,7 @@ function followButton(st, compact) {
   return b;
 }
 function devLabel(reason) {
-  return { document: "Document", confirmed: "Confirmed by a second outlet", spread: "Spread", figures: "Figures changed", update: "Update", revived: "Back after a quiet spell" }[reason] || "Update";
+  return { document: "Document", confirmed: "Confirmed by a second outlet", spread: "Spread", figures: "Figures changed", update: "Update", revived: "Back after a quiet spell", added: "Added by you" }[reason] || "Update";
 }
 
 // A thread card for Today: title, what's new since the last visit, counts.
@@ -1332,7 +1340,9 @@ function threadCard(t) {
 function threadsSection() {
   const mine = (data.threads || []).filter((t) => isFollowed(t.id));
   const addBtn = el("button", { class: "sa", text: "Follow a topic", onclick: openTopicForm });
-  const out = [sectionHead("Threads you follow", null, openTopicForm, mine.length ? "Follow a topic" : "Follow a topic")];
+  const head = sectionHead("Threads you follow", null, openTopicForm, "Follow a topic");
+  head.insertBefore(el("button", { class: "sa", onclick: () => openThreadsBrowser(), text: "Browse all" }), head.lastChild);
+  const out = [head];
   if (!mine.length) {
     out.push(el("p", { class: "sdesc", text: "Follow any story with the Follow button, or name a topic to watch over time. Followed threads collect every report, development and document here." }));
     return out;
@@ -1389,7 +1399,7 @@ function openThread(t, viaItem) {
     el("div", { class: "smeta" },
       t.developing ? el("span", { class: "dev", text: "Developing" }) : null,
       t.revived_at ? el("span", { class: "dev back", text: "Back after a quiet spell" }) : null,
-      t.standing ? el("span", { class: "dev standing", text: "Area of law" }) : el("span", { text: (t.kind || "thread")[0].toUpperCase() + (t.kind || "thread").slice(1) }),
+      t.standing ? el("span", { class: "dev standing", text: t.desk === "LAW" ? "Area of law" : "Standing thread" }) : el("span", { text: (t.kind || "thread")[0].toUpperCase() + (t.kind || "thread").slice(1) }),
       el("span", { class: "dk", style: "--c: var(--" + t.desk.toLowerCase() + ")", text: DESK_NAME[t.desk] || t.desk }),
       el("span", { text: "Opened " + exact(Date.parse(t.opened)) })),
     el("h2", { id: "sheet-title", class: "stitle", text: t.title }),
@@ -1424,8 +1434,10 @@ function openThread(t, viaItem) {
       sec("Range of views", el("p", { class: "fine", text: "None yet from the people you follow. Views appear here, labeled by perspective, when they write about this." })),
     t.why ? el("div", { class: "why" }, el("span", { class: "mlabel", text: "Why it matters to you · analysis" }), el("p", { text: t.why })) : null,
     sec("All coverage · " + members.length + " reports", el("ul", { class: "also" }, ...members.slice(0, 40).map((it) =>
-      el("li", {}, el("span", { class: "asrc", text: ago(it.ms) + " · " + byline(it) + (it.translated ? " · translated" : "") }), link(it.link, it.title))))),
+      el("li", {}, el("span", { class: "asrc", text: ago(it.ms) + " · " + byline(it) + (it.translated ? " · translated" : "") + ((t.added || []).includes(it.id) ? " · added by you" : "") }), link(it.link, it.title)))),
+      addReportBox(t)),
     t.standing ? el("p", { class: "fine", text: "A standing area of law (threads.yaml). Decisions, rules and notices accrue here. Watching for: " + (t.pattern || t.title) }) :
+      t.manual ? el("p", { class: "fine", text: "A thread you built by hand. Only reports you add belong to it; add watch terms from Follow a topic to let it grow on its own." }) :
       t.named ? el("p", { class: "fine", text: "A topic you named. Watching for: " + (t.pattern || t.title) }) : null,
     el("div", { class: "endline", text: "End of thread" }),
   ];
@@ -1433,6 +1445,7 @@ function openThread(t, viaItem) {
 }
 
 // More / less like this (stage 4): a signal stored with the follows; the build re-ranks by it.
+function kindLabel(t) { return t.standing ? (t.desk === "LAW" ? "area of law" : "standing thread") : t.manual ? "hand-built" : t.kind || "thread"; }
 function signalOf(tid) { const sg = (followsNow().signals || []).find((x) => x.id === tid); return sg ? sg.value : null; }
 function signalButtons(t) {
   const cur = signalOf(t.id);
@@ -1483,6 +1496,101 @@ function askBox(t) {
   return el("div", { class: "askbox" }, el("div", { class: "askrow" }, input, btn), out);
 }
 
+// Add a report to a thread, or start a new thread with it. Attachments live with the follows;
+// the next build puts the report on the thread and logs it as "Added by you".
+function attachTo(target, it) {
+  if (target.standing || (target.id || "").startsWith("topic_") || target.named) {
+    return setFollow({ action: "attach", type: "topic", id: target.id, item: it.id, title: target.title, desk: target.desk, kind: target.kind, pattern: target.pattern || "" });
+  }
+  return setFollow({ action: "attach", type: "thread", id: target.id, item: it.id, title: target.title });
+}
+function threadRow(t, it, after) {
+  const b = el("button", { class: "sbtn follow compact", text: "Add" });
+  b.onclick = async () => { b.textContent = "…"; const ok = await attachTo(t, it); b.textContent = ok ? "✓ Added" : "Couldn't save"; if (ok && after) after(); };
+  return el("li", {}, el("span", { class: "asrc", text: kindLabel(t) + " · " + (DESK_NAME[t.desk] || t.desk) + " · " + t.n_reports + " reports" + (isFollowed(t.id) ? " · following" : "") }),
+    el("button", { class: "doclink", text: t.title, onclick: () => openThread(t) }), el("span", { class: "sgrow" }, b));
+}
+function openAttachSheet(it) {
+  const q = el("input", { type: "text", class: "tin", placeholder: "Find a thread by name" });
+  const list = el("ul", { class: "suggest" });
+  const all = (data.threads || []).slice().sort((a, b) => (isFollowed(b.id) - isFollowed(a.id)) || Date.parse(b.last) - Date.parse(a.last));
+  const draw = () => {
+    const words = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const hits = all.filter((t) => !(t.members || []).includes(it.id) && words.every((w) => t.title.toLowerCase().includes(w))).slice(0, 12);
+    list.replaceChildren(...hits.map((t) => threadRow(t, it)));
+    if (!hits.length) list.append(el("li", { class: "fine", text: "No thread by that name. Start one below." }));
+  };
+  q.oninput = draw; draw();
+  const title = el("input", { type: "text", class: "tin", value: it.title.slice(0, 120) });
+  const pattern = el("input", { type: "text", class: "tin", placeholder: "Optional: words to watch for, comma-separated, so it grows on its own" });
+  const desk = el("select", { class: "tin" }, ...["BEACON", "GOV", "LAW", "WORLD", "SPORTS"].map((d) => el("option", { value: d, text: DESK_NAME[d], selected: d === it.desk || undefined })));
+  const kind = el("select", { class: "tin" }, ...[["subject", "Subject"], ["process", "Process (an application, bill or case)"], ["entity", "Entity (a place, company or team)"], ["law", "Area of law"], ["event", "Event"]].map(([v, l]) => el("option", { value: v, text: l })));
+  const status = el("p", { class: "fine" });
+  const start = el("button", { class: "sbtn primary wide", text: "Start a thread with this" });
+  start.onclick = async () => {
+    if (!title.value.trim()) { status.textContent = "Give the thread a name."; return; }
+    start.textContent = "Saving…";
+    const ok = await setFollow({ action: "attach", type: "topic", item: it.id, title: title.value.trim(), pattern: pattern.value.trim(), desk: desk.value, kind: kind.value });
+    status.textContent = ok ? "Started. The next build (within 15 minutes) opens the thread with this report in it; it appears under Threads you follow." : "Couldn't save. Are you signed in?";
+    start.textContent = "Start a thread with this";
+  };
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "Add to a thread" }),
+    el("p", { class: "sdesc", text: it.title }),
+    el("label", { class: "flab", text: "An existing thread" }), q, list,
+    el("h3", { class: "sh3", text: "Or start a new one" }),
+    el("label", { class: "flab", text: "Name" }), title,
+    el("label", { class: "flab", text: "Watch for" }), pattern,
+    el("label", { class: "flab", text: "Desk" }), desk,
+    el("label", { class: "flab", text: "Kind" }), kind,
+    el("div", { class: "sactions" }, start), status,
+  ], "Add to a thread");
+}
+
+// On a thread page: search the feed and add a report to this thread.
+function addReportBox(t) {
+  const q = el("input", { type: "text", class: "tin", placeholder: "Add a report: search headlines" });
+  const list = el("ul", { class: "also" });
+  const have = new Set(t.members || []);
+  q.oninput = () => {
+    const words = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (words.length < 1 || q.value.trim().length < 3) { list.replaceChildren(); return; }
+    const hits = data.items.filter((it) => !have.has(it.id) && words.every((w) => it.title.toLowerCase().includes(w))).slice(0, 10);
+    list.replaceChildren(...hits.map((it) => {
+      const b = el("button", { class: "sbtn follow compact", text: "Add" });
+      b.onclick = async () => { b.textContent = "…"; const ok = await attachTo(t, it); b.textContent = ok ? "✓ Added" : "Couldn't save"; };
+      return el("li", { class: "addrow" }, el("span", { class: "asrc", text: ago(it.ms) + " · " + byline(it) }), el("span", { text: it.title }), b);
+    }));
+    if (!hits.length) list.append(el("li", { class: "fine", text: "Nothing in the feed matches." }));
+  };
+  return el("div", { class: "addbox" }, q, list, el("p", { class: "fine", text: "Added reports join the thread on the next build and are marked as yours." }));
+}
+
+// Browse every live thread: by desk, by name.
+function openThreadsBrowser(deskFilter) {
+  let desk = deskFilter || "ALL";
+  const q = el("input", { type: "text", class: "tin", placeholder: "Search threads" });
+  const chips = el("div", { class: "chips" });
+  const list = el("ul", { class: "suggest" });
+  const all = (data.threads || []).slice().sort((a, b) => Date.parse(b.last) - Date.parse(a.last));
+  const draw = () => {
+    chips.replaceChildren(...["ALL", "BEACON", "GOV", "LAW", "WORLD", "SPORTS"].map((d) => el("button", { class: "chip" + (desk === d ? " on" : ""), text: d === "ALL" ? "All" : DESK_NAME[d], onclick: () => { desk = d; draw(); } })));
+    const words = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const hits = all.filter((t) => (desk === "ALL" || t.desk === desk) && words.every((w) => t.title.toLowerCase().includes(w)));
+    list.replaceChildren(...hits.slice(0, 60).map((t) => el("li", {},
+      el("span", { class: "asrc", text: kindLabel(t) + " · " + (DESK_NAME[t.desk] || t.desk) + " · " + (t.outlets > 1 ? t.outlets + " outlets · " : "") + t.n_reports + " reports · " + ago(Date.parse(t.last)) + " ago" }),
+      el("button", { class: "doclink", text: t.title, onclick: () => openThread(t) }),
+      el("span", { class: "sgrow" }, followButton({ thread: t.id }, true)))));
+    if (!hits.length) list.append(el("li", { class: "fine", text: "No threads match." }));
+  };
+  q.oninput = draw; draw();
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "All threads" }),
+    el("p", { class: "sdesc", text: all.length + " live threads. Follow one to keep it, or open it and add your own reports." }),
+    q, chips, list,
+  ], "All threads");
+}
+
 // Threads you might follow (stage 4): the build's suggestions, with a reason.
 function suggestSection() {
   const ids = data.suggest || [];
@@ -1496,11 +1604,11 @@ function suggestSection() {
 }
 
 // Areas of law (stage 3): the standing threads from threads.yaml, on the Law tab.
-function areasOfLaw() {
-  const areas = (data.threads || []).filter((t) => t.standing);
+function areasOfLaw(desk) {
+  const areas = (data.threads || []).filter((t) => t.standing && t.desk === desk);
   if (!areas.length) return [];
   const since = prevVisit && Date.now() - prevVisit < 48 * 3600e3 ? prevVisit : Date.now() - 24 * 3600e3;
-  return [sectionHead("Areas of law", "decisions, rules and notices as they accrue"),
+  return [desk === "LAW" ? sectionHead("Areas of law", "decisions, rules and notices as they accrue") : sectionHead("Standing threads", "subjects tracked over time"),
     el("ul", { class: "areas" }, ...areas.map((t) => {
       const devs = t.developments || [];
       const last = devs[devs.length - 1];

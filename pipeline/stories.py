@@ -687,10 +687,13 @@ def editor_notes(state, data, session, log, room: dict | None = None) -> None:
 
 DAY_EVERY_MIN = 60
 DAY_SYSTEM = (
-    "You write 'the day so far' for one reader in Beacon, New York: three or four plain sentences on the shape of the day, "
-    "from the numbered stories only. Open with the biggest development. Put Beacon and New York before the world when they have real news. "
-    "Say what changed, not what a story is about. Use only facts in the stories; no opinion, no outside knowledge, no hype. "
-    "Reply with JSON only: {\"text\": \"...\"}.")
+    "You write 'the day so far' for one reader in Beacon, New York, from the numbered stories only. "
+    "Not a paragraph that jumps between topics: a short list of at most four parts, each on ONE story or thread, so the reader can take them one at a time. "
+    "Part 1 is the day's main development. The others are the stories that matter next: Beacon and New York before the world when they have real news, "
+    "a thread the reader follows before one he doesn't. One or two plain sentences each; say what changed, not what the story is about. "
+    "Use only facts in the stories; no opinion, no outside knowledge, no hype. "
+    "Each part names its story number in ref and carries a label of one to three words (the place or subject, e.g. 'France', 'Beacon', 'Court of Appeals'). "
+    "Reply with JSON only: {\"parts\": [{\"label\": \"...\", \"text\": \"...\", \"ref\": 1}]}.")
 
 
 def day_so_far(state, data, session, log, room=None) -> None:
@@ -704,7 +707,7 @@ def day_so_far(state, data, session, log, room=None) -> None:
     picks = [s for s in data["stories"] if s.get("followed")][:4]
     picks += [s for s in data["stories"] if s["desk"] in ("BEACON", "GOV", "LAW") and s not in picks and (s.get("card") or s.get("summary"))][:3]
     picks += [s for s in data["stories"] if s not in picks and s["desk"] != "SPORTS" and (s.get("card") or s.get("summary"))][:8]
-    picks = picks[:9]
+    picks = picks[:7]
     if not picks:
         return
     fresh = rec.get("at") and now - datetime.fromisoformat(rec["at"]) < timedelta(minutes=DAY_EVERY_MIN)
@@ -718,18 +721,26 @@ def day_so_far(state, data, session, log, room=None) -> None:
         corpus = "\n\n".join(blocks)
         system = DAY_SYSTEM + ("\n\n" + rules_text(room, [], ("editor",)) if room else "")
         try:
-            j, n = _cf_run(session, SYNTH_MODEL, system, corpus, 260, (SYNTH_IN, SYNTH_OUT))
+            j, n = _cf_run(session, SYNTH_MODEL, system, corpus, 420, (SYNTH_IN, SYNTH_OUT))
             ai["neurons"] += n
-            text = grounded(str(j.get("text") or ""), corpus + " Beacon New York Dutchess Albany")
-            if text:
-                rec.update({"at": now.isoformat(), "text": text, "refs": [s["id"] for s in picks]})
-                log(f"[day] written: {len(text.split())} words")
+            parts = []
+            for part in (j.get("parts") or [])[:4]:
+                text = grounded(str(part.get("text") or ""), corpus + " Beacon New York Dutchess Albany")
+                try:
+                    ref = picks[int(part.get("ref")) - 1]
+                except (TypeError, ValueError, IndexError):
+                    ref = None
+                if text and ref:
+                    parts.append({"label": str(part.get("label") or ref["desk"].title())[:40], "text": text, "story": ref["id"], "thread": ref.get("thread")})
+            if parts:
+                rec.update({"at": now.isoformat(), "parts": parts, "text": " ".join(p["text"] for p in parts), "refs": [p["story"] for p in parts]})
+                log(f"[day] written: {len(parts)} parts, {len(rec['text'].split())} words")
             else:
                 log("[day] dropped: nothing traceable")
         except Exception as exc:
             log(f"[day] {type(exc).__name__}: {str(exc)[:120]}")
     if rec.get("text"):
-        data["day_so_far"] = {"text": rec["text"], "at": rec["at"], "refs": rec.get("refs", [])}
+        data["day_so_far"] = {"text": rec["text"], "at": rec["at"], "refs": rec.get("refs", []), "parts": rec.get("parts", [])}
 
 
 def data_by_id(data):
