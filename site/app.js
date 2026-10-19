@@ -309,13 +309,52 @@ function todayView() {
       el("span", { class: "dot bad" }), bad.length + (bad.length > 1 ? " sources aren't updating" : " source isn't updating"), el("span", { class: "chev", text: "›" })));
   }
   const since = prevVisit && Date.now() - prevVisit < 30 * 3600e3 ? prevVisit : null;
+
+  // 1. The day so far, and the briefing
+  out.push(el("h1", { class: "yw", text: "Your Wire" }));
+  out.push(el("div", { class: "ywsub" }, new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric" }).format(new Date()),
+    since ? el("span", { class: "since", text: " · since you last looked at " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) }) : null));
+  if (data.day_so_far && data.day_so_far.text) {
+    out.push(el("div", { class: "daysofar" }, el("span", { class: "mlabel", text: "The day so far · machine-written · " + fmtTime.format(new Date(Date.parse(data.day_so_far.at))) }), el("p", { text: data.day_so_far.text })));
+  }
   out.push(el("button", { class: "briefcard", onclick: openBrief },
     el("span", { class: "bc-ico", "aria-hidden": "true", text: "▶" }),
     el("span", { class: "bc-txt" },
       el("span", { class: "bc-t", text: "Brief me" }),
       el("span", { class: "bc-s", text: (since ? "What's new since " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) : "What matters today") + " · newscast or narrative" }))));
+
+  // 2. Threads you follow
+  out.push(...threadsSection());
+
+  // 3. Top stories as units: Beacon first, then the ranked front page
+  const cutoff = Date.now() - 48 * 3600000;
+  const featured = new Set();
+  const units = [];
+  const beaconStories = (data.stories || []).filter((s) => storyOf.get(s.lead) === s && byId.get(s.lead) && deskOf(byId.get(s.lead)) === "BEACON" && Date.parse(s.last) >= cutoff && !isMuted(byId.get(s.lead)));
+  const beaconItems = data.items.filter((it) => deskOf(it) === "BEACON" && !it.alert && it.kind !== "BLOTTER" && it.ms >= cutoff && !isMuted(it) && !storyOf.has(it.id) && !folded.has(it.id)
+    && (it.machine_summary || it.agenda || (it.event_at && Date.parse(it.event_at) > Date.now() - 3600e3)));
+  for (const s of beaconStories.slice(0, 1)) { units.push(unit(s)); featured.add(s.lead); }
+  for (const it of beaconItems.slice(0, 2 - units.length)) { units.push(itemCard(it)); featured.add(it.id); }
+  const front = (data.stories || []).filter((s) => storyOf.get(s.lead) === s && !featured.has(s.lead) && !isMuted(byId.get(s.lead)) && byId.get(s.lead).desk !== "SPORTS");
+  for (const s of front.slice(0, 5)) { units.push(unit(s)); featured.add(s.lead); }
+  if (units.length) {
+    out.push(sectionHead("Top stories"));
+    out.push(...units.filter(Boolean));
+  }
+
+  // 4. People, ahead, scores, edition
+  const following = followingItems(5);
+  if (following.length) {
+    out.push(sectionHead("From people you follow", null, () => openPeople(), "People"));
+    out.push(el("ol", { class: "list" }, ...following.map((it) => row(it, { desk: true }))));
+  }
   const ahead = aheadBlock();
   if (ahead) out.push(ahead);
+  const teams = (data.teams || []).filter((t) => t.live || (t.last && Date.now() - Date.parse(t.last.at) < 3 * 86400000));
+  if (teams.length) {
+    out.push(sectionHead("Scores", null, () => { seg.world = "SPORTS"; store.set(KEY.seg, JSON.stringify(seg)); go("world"); }, "Sports"));
+    out.push(el("div", { class: "scores" }, ...teams.map(teamLine)));
+  }
   if (data.front_page_url) {
     out.push(el("a", { class: "edition", href: data.front_page_url, target: "_blank", rel: "noopener" },
       el("span", { class: "ed-k", text: new Date().getHours() < 15 ? "Morning Edition" : new Date().getHours() >= 18 ? "Evening Edition" : "The Edition" }),
@@ -323,42 +362,21 @@ function todayView() {
       el("span", { class: "ed-a", text: "›" })));
   }
 
-  out.push(...threadsSection());
-
-  const cutoff = Date.now() - 48 * 3600000;
-  const beacon = data.items.filter((it) => deskOf(it) === "BEACON" && !it.alert && it.kind !== "BLOTTER" && it.ms >= cutoff && !isMuted(it)).slice(0, 3);
-  if (beacon.length) {
-    out.push(sectionHead("Beacon", null, () => { seg.beacon = "BEACON"; store.set(KEY.seg, JSON.stringify(seg)); go("beacon"); }, "See all"));
-    out.push(el("ol", { class: "list" }, ...beacon.map((it) => row(it, { desk: false }))));
-  }
-
-  const stories = (data.stories || []).filter((s) => storyOf.get(s.lead) === s && !isMuted(byId.get(s.lead))).slice(0, 6);
-  if (stories.length) {
-    out.push(sectionHead("Front page"));
-    out.push(...stories.map(storyCard));
-  }
-
-  const following = followingItems(6);
-  if (following.length) {
-    out.push(sectionHead("From people you follow", null, () => openPeople(), "People"));
-    out.push(el("ol", { class: "list" }, ...following.map((it) => row(it, { desk: true }))));
-  }
-
-  const hour = data.items.filter((it) => it.fast && it.ms >= Date.now() - 3600000 && !it.alert && !folded.has(it.id) && !isMuted(it) && (!it.quiet || storyOf.has(it.id))).slice(0, 5);
-  if (hour.length) {
-    out.push(sectionHead("Last hour"));
-    out.push(el("ol", { class: "list" }, ...hour.map((it) => row(it, { desk: true }))));
-  }
-
-  const teams = (data.teams || []).filter((t) => t.live || (t.last && Date.now() - Date.parse(t.last.at) < 3 * 86400000));
-  if (teams.length) {
-    out.push(sectionHead("Scores", null, () => { seg.world = "SPORTS"; store.set(KEY.seg, JSON.stringify(seg)); go("world"); }, "Sports"));
-    out.push(el("div", { class: "scores" }, ...teams.map(teamLine)));
+  // 5. Everything else, folded: the rest of Beacon, the last hour, the rest of the front page
+  const rest = [];
+  const seenIds = new Set(featured);
+  for (const it of data.items.filter((it) => deskOf(it) === "BEACON" && !it.alert && it.kind !== "BLOTTER" && it.ms >= cutoff && !isMuted(it) && !featured.has(it.id) && !folded.has(it.id)).slice(0, 6)) { rest.push(it); seenIds.add(it.id); }
+  for (const s of front.slice(5, 14)) { const it = byId.get(s.lead); if (it && !seenIds.has(it.id)) { rest.push(it); seenIds.add(it.id); } }
+  for (const it of data.items.filter((it) => it.fast && it.ms >= Date.now() - 3600000 && !it.alert && !folded.has(it.id) && !isMuted(it) && (!it.quiet || storyOf.has(it.id)) && !seenIds.has(it.id)).slice(0, 6)) { rest.push(it); seenIds.add(it.id); }
+  if (rest.length) {
+    const det = el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Everything else · " + rest.length + " headlines" }), el("span", { class: "chev", text: "▾" })),
+      el("ol", { class: "list" }, ...rest.map((it) => row(it, { desk: true }))));
+    out.push(det);
   }
 
   out.push(el("div", { class: "caughtup" },
-    el("div", { class: "cu-k", text: "You're caught up" }),
-    el("div", { class: "cu-t", text: "Feed as of " + exact(Date.parse(data.generated_at)) + ". More on each desk:" }),
+    el("div", { class: "cu-k", text: "That's The Wire" }),
+    el("div", { class: "cu-t", text: "You're current as of " + exact(Date.parse(data.generated_at)) + ". More on each desk:" }),
     el("div", { class: "cu-links" }, ...[["beacon", "Beacon"], ["gov", "Gov"], ["gov:LAW", "Law"], ["world", "World"], ["world:SPORTS", "Sports"]].map(([k, label]) =>
       el("button", { class: "pill", text: label, onclick: () => {
         const [t, s] = k.split(":");
@@ -453,7 +471,7 @@ function deskView(t, desk) {
   const out = [];
   if (featured.size) {
     out.push(sectionHead("Top stories"));
-    out.push(...leadStories.map(storyCard), ...leadItems.map(itemCard));
+    out.push(...leadStories.map((st) => unit(st)).filter(Boolean), ...leadItems.map(itemCard));
     out.push(sectionHead("Everything else"));
   }
   if (prevVisit) {
@@ -505,28 +523,63 @@ function row(it, opt = {}) {
     el("button", { class: "head", onclick: () => openItem(it) }, headline, meta));
 }
 
-// A single item written up (a council agenda, county minutes, a DEC rule): same card as a story.
-function itemCard(it) {
-  return el("article", { class: "story" + (isSeen(it) ? " seen" : "") },
-    el("button", { class: "head", onclick: () => openItem(it) },
-      el("span", { class: "lbl" }, it.source + " · ", el("span", { class: "dk", style: "--c: var(--" + deskOf(it).toLowerCase() + ")", text: DESK_NAME[deskOf(it)] })),
-      el("span", { class: "headline", text: it.title }),
-      el("span", { class: "msum" }, el("span", { class: "mlabel", text: "Machine summary" }), it.machine_summary),
-      el("span", { class: "meta" }, el("span", { class: "t" + (isFresh(it.ms) && !isSeen(it) ? " fresh" : ""), text: ago(it.ms) + (ago(it.ms) === "now" ? "" : " ago") }))));
+// The unit (BRIEF.md): one story told in place. Label, headline, a paragraph, a quote with
+// its source, the latest development, why it's here, and Follow. Readable without a tap;
+// the tap opens the thread.
+function whyHere(s, lead) {
+  if (s.lead_note) return s.lead_note;
+  const bits = [];
+  if (s.followed) bits.push("you follow this thread");
+  if (deskOf(lead) === "BEACON") bits.push("Beacon");
+  if (lead.watch_terms && lead.watch_terms.length) bits.push("matches your watchlist: " + lead.watch_terms.join(", "));
+  if (s.developing) bits.push(s.sources + " outlets, " + (s.reports || s.sources) + " reports in a day");
+  else if (s.sources > 1) bits.push(s.sources + " outlets");
+  return bits.join(" · ");
 }
 
-function storyCard(s) {
+function unit(s, opt = {}) {
   const lead = byId.get(s.lead);
+  if (!lead) return null;
+  const th = threadOf(s);
   const q = storyQuotes(s)[0];
-  return el("article", { class: "story" + (isSeen(lead) ? " seen" : "") },
-    el("button", { class: "head", onclick: () => openItem(lead) },
-      el("span", { class: "lbl" }, s.developing ? el("span", { class: "dev", text: "Developing" }) : null,
-        s.sources + " sources" + (s.reports > s.sources ? " · " + s.reports + " reports" : "") + " · ", el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
-      el("span", { class: "headline", text: lead.title }),
-      s.card || s.summary ? el("span", { class: "msum" }, el("span", { class: "mlabel", text: "Machine summary" }), s.card || s.summary) : null,
-      q ? el("span", { class: "qline" }, "“" + q.text + "”", el("span", { class: "qby", text: q.by + " · " + q.item.source })) : null,
-      el("span", { class: "meta" }, el("span", { class: "t" + (isFresh(Date.parse(s.last)) && !isSeen(lead) ? " fresh" : ""), text: "Updated " + ago(Date.parse(s.last)) + (ago(Date.parse(s.last)) === "now" ? "" : " ago") }))),
-    s.thread ? el("div", { class: "cardacts" }, followButton(s, true)) : null);
+  const body = s.what || s.card || s.summary;
+  const outlets = [...new Set(s.members.map((m) => byId.get(m)).filter(Boolean).map((m) => m.source))];
+  const open = () => openItem(lead);
+  return el("article", { class: "unit" + (isSeen(lead) ? " seen" : "") },
+    el("div", { class: "lbl" },
+      s.developing ? el("span", { class: "dev", text: "Developing" }) : null,
+      el("span", { class: "dk", style: "--c: var(--" + deskOf(lead).toLowerCase() + ")", text: DESK_NAME[deskOf(lead)] }),
+      th ? el("span", { text: th.kind }) : null,
+      s.sources > 1 ? el("span", { text: s.sources + " outlets" + (s.reports > s.sources ? " · " + s.reports + " reports" : "") }) : el("span", { text: lead.source }),
+      el("span", { class: "t" + (isFresh(Date.parse(s.last)) && !isSeen(lead) ? " fresh" : ""), text: ago(Date.parse(s.last)) + (ago(Date.parse(s.last)) === "now" ? "" : " ago") })),
+    el("h3", {}, el("button", { class: "uhead", onclick: open, text: lead.title })),
+    body ? el("p", { class: "ubody", text: body }) : (lead.summary ? el("p", { class: "ubody desc", text: lead.summary }) : null),
+    q ? el("blockquote", { class: "uq" }, el("p", { text: "“" + q.text + "”" }), el("cite", {}, q.by + " · ", link(q.item.link, q.item.source))) : null,
+    s.latest && body !== s.latest ? el("div", { class: "latest" }, el("span", { class: "mlabel", text: "Latest" + (s.latest_at ? " · " + (isToday(Date.parse(s.latest_at)) ? fmtTime.format(new Date(Date.parse(s.latest_at))) : exact(Date.parse(s.latest_at))) : "") }), el("p", { text: s.latest })) : null,
+    whyHere(s, lead) ? el("div", { class: "why" }, el("b", { text: "Why it's here: " }), whyHere(s, lead)) : null,
+    el("div", { class: "uacts" },
+      s.thread ? followButton(s, true) : null,
+      el("button", { class: "sbtn", text: th ? "Open thread" : "Open story", onclick: open }),
+      el("span", { class: "srcs", text: outlets.slice(0, 5).join(" · ") + (outlets.length > 5 ? " · +" + (outlets.length - 5) : "") })));
+}
+
+// A single report written up (a council agenda, county minutes, a DEC rule) in the same shape.
+function itemCard(it) {
+  const body = it.machine_summary || it.summary;
+  const q = (it.quotes || [])[0];
+  const docN = it.agenda ? it.agenda.length + " agenda items" : null;
+  return el("article", { class: "unit" + (isSeen(it) ? " seen" : "") },
+    el("div", { class: "lbl" },
+      el("span", { class: "dk", style: "--c: var(--" + deskOf(it).toLowerCase() + ")", text: DESK_NAME[deskOf(it)] }),
+      el("span", { text: byline(it) }),
+      it.event_at ? el("span", { text: exact(Date.parse(it.event_at)) }) : el("span", { class: "t" + (isFresh(it.ms) && !isSeen(it) ? " fresh" : ""), text: ago(it.ms) + (ago(it.ms) === "now" ? "" : " ago") })),
+    el("h3", {}, el("button", { class: "uhead", onclick: () => openItem(it), text: it.title })),
+    body ? el("p", { class: "ubody" + (it.machine_summary ? "" : " desc"), text: body }) : null,
+    q ? el("blockquote", { class: "uq" }, el("p", { text: "“" + q.text + "”" }), el("cite", {}, q.by + " · ", link(it.link, it.source))) : null,
+    it.agenda && it.agenda.length ? el("div", { class: "udoc" }, el("span", { class: "mlabel", text: "The document · " + docN }),
+      el("ol", {}, ...it.agenda.filter((a) => a.flags && a.flags.length).slice(0, 4).map((a) => el("li", {}, a.text.slice(0, 120), ...a.flags.map((f) => el("span", { class: "aflag", text: f })))))) : null,
+    el("div", { class: "why" }, el("b", { text: "Why it's here: " }), deskOf(it) === "BEACON" ? "Beacon" + (it.kind === "DOC" || it.agenda ? " · the document" : "") : DESK_NAME[deskOf(it)] + (it.watch_terms && it.watch_terms.length ? " · matches your watchlist: " + it.watch_terms.join(", ") : "")),
+    el("div", { class: "uacts" }, el("button", { class: "sbtn", text: it.agenda ? "Open the agenda" : "Open", onclick: () => openItem(it) })));
 }
 
 // --------------------------------------------------------------- Brief me (written on demand, read aloud)

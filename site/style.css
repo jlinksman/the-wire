@@ -492,3 +492,32 @@ html { overscroll-behavior-y: contain; }
 .doclink { text-align: left; font: 1rem/1.35 var(--serif); color: var(--text); text-decoration: underline; text-decoration-color: var(--law, var(--text3)); text-underline-offset: 3px; }
 .flab { display: block; font-size: 0.82rem; color: var(--text3); margin: 12px 0 4px; }
 select.tin { appearance: auto; }
+
+/* Stage 2: Your Wire and units */
+h1.yw { font: 600 1.9rem/1.15 var(--serif); letter-spacing: -.015em; margin: 14px 0 2px; }
+.ywsub { font-size: 0.86rem; color: var(--text3); margin-bottom: 12px; }
+.daysofar { margin: 0 0 12px; padding: 14px 16px; border-radius: 16px; background: var(--surface); }
+.daysofar .mlabel { display: block; }
+.daysofar p { margin: 6px 0 0; font: 1.08rem/1.5 var(--serif); color: var(--text); }
+.unit { padding: 18px 0 16px; border-bottom: 1px solid var(--hair); display: grid; gap: 9px; }
+.unit:last-of-type { border-bottom: 0; }
+.unit .lbl { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 0.8rem; color: var(--text3); align-items: baseline; }
+.unit h3 { margin: 0; }
+.uhead { text-align: left; font: 600 1.3rem/1.25 var(--serif); letter-spacing: -.01em; color: var(--text); text-wrap: balance; }
+.ubody { margin: 0; font: 1.02rem/1.5 var(--serif); max-width: 66ch; }
+.ubody.desc { color: var(--text2); }
+.uq { margin: 0; padding-left: 14px; border-left: 2px solid var(--raised); }
+.uq p { margin: 0; font: italic 1.02rem/1.45 var(--serif); }
+.uq cite { display: block; font-style: normal; font-size: 0.8rem; color: var(--text3); margin-top: 4px; }
+.uq cite a { color: var(--text2); }
+.unit .why { margin: 0; padding: 0; background: none; border: 0; font-size: 0.82rem; color: var(--text3); }
+.unit .why b { color: var(--text2); font-weight: 500; }
+.uacts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.uacts .srcs { font-size: 0.8rem; color: var(--text3); }
+.udoc { padding: 10px 12px; border-radius: 10px; background: var(--surface); border-left: 3px solid var(--law); }
+.udoc .mlabel { color: var(--law); }
+.udoc ol { margin: 6px 0 0; padding-left: 18px; font-size: 0.9rem; line-height: 1.45; }
+details.rest { margin-top: 20px; border-top: 1px solid var(--hair); }
+details.rest summary { list-style: none; cursor: pointer; padding: 14px 0; font-weight: 600; color: var(--text2); display: flex; justify-content: space-between; }
+details.rest summary::-webkit-details-marker { display: none; }
+details.rest[open] summary .chev { transform: rotate(180deg); display: inline-block; }

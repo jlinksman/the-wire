@@ -196,34 +196,33 @@ def merge_events(clusters: list[list[dict]], ms) -> list[list[dict]]:
         ks = {k for k, v in kc.items() if v * 2 >= n}
         return main, set(pc), ks
 
-    news = [c for c in clusters if c[0]["desk"] != "SPORTS"]
+    news = sorted([c for c in clusters if c[0]["desk"] != "SPORTS"], key=len, reverse=True)
     other = [c for c in clusters if c[0]["desk"] == "SPORTS"]
-    prof = [profile(c) for c in news]
-    parent = list(range(len(news)))
-
-    def find(i):
-        while parent[i] != i:
-            parent[i] = parent[parent[i]]
-            i = parent[i]
-        return i
-
-    span = [(min(ms(m) for m in c), max(ms(m) for m in c)) for c in news]
-    for i in range(len(news)):
-        mi, ai, ki = prof[i]
-        if not ki or not ai:
-            continue
-        for j in range(i + 1, len(news)):
-            mj, aj, kj = prof[j]
-            if not (ki & kj):
-                continue
-            # Each side's main place must be named by the other (one may list several countries).
-            if not ((mi & aj) and (mj & ai) or (mi & mj)):
-                continue
-            lo, hi = min(span[i][0], span[j][0]), max(span[i][1], span[j][1])
-            if (hi - lo).total_seconds() > EVENT_WINDOW_H * 3600:
-                continue
-            parent[find(j)] = find(i)
-    groups: dict[int, list[dict]] = {}
-    for i, c in enumerate(news):
-        groups.setdefault(find(i), []).extend(c)
-    return [sorted(g, key=ms) for g in groups.values()] + other
+    # Greedy, largest first, against each group's whole profile: a cluster joins a group only
+    # when it shares a main place and a kind with the group as it stands. No chaining, so a
+    # Sydney protest about an Israeli visit can't reach French protests through a Haaretz
+    # headline that mentions both.
+    groups: list[list[dict]] = []
+    gprof: list[tuple] = []
+    gspan: list[tuple] = []
+    for c in news:
+        mi, ai, ki = profile(c)
+        lo_c, hi_c = min(ms(m) for m in c), max(ms(m) for m in c)
+        target = None
+        if ki and mi:
+            for gi, g in enumerate(groups):
+                mg, ag, kg = gprof[gi]
+                if not (ki & kg) or not (mi & mg):
+                    continue
+                lo, hi = min(gspan[gi][0], lo_c), max(gspan[gi][1], hi_c)
+                if (hi - lo).total_seconds() > EVENT_WINDOW_H * 3600:
+                    continue
+                target = gi
+                break
+        if target is None:
+            groups.append(list(c)); gprof.append((mi, ai, ki)); gspan.append((lo_c, hi_c))
+        else:
+            groups[target].extend(c)
+            gprof[target] = profile(groups[target])
+            gspan[target] = (min(gspan[target][0], lo_c), max(gspan[target][1], hi_c))
+    return [sorted(g, key=ms) for g in groups] + other

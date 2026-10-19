@@ -82,18 +82,19 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
     cutoff_match = now - timedelta(hours=MATCH_WINDOW_H)
     opened = matched = devs = 0
 
-    for s in stories:
+    claimed: set[str] = set()      # one thread per cluster per build; the biggest cluster wins
+    for s in sorted(stories, key=lambda x: len(x["members"]), reverse=True):
         members = [by_id[m] for m in s["members"] if m in by_id]
         if not members:
             continue
         # 1) a living thread already holding one of these reports
-        hits = Counter(member_thread[m["id"]] for m in members if m["id"] in member_thread)
+        hits = Counter(member_thread[m["id"]] for m in members if m["id"] in member_thread and member_thread[m["id"]] not in claimed)
         tid = hits.most_common(1)[0][0] if hits else None
         # 2) else, a recent thread with a similar headline vocabulary
         if tid is None:
             tw = words(" ".join(m["title"] for m in members[:6]))
             best = max(((similar(tw, k), k) for k, t in threads.items()
-                        if t["status"] == "active" and datetime.fromisoformat(t["last"].replace("Z", "+00:00")) >= cutoff_match
+                        if t["status"] == "active" and k not in claimed and datetime.fromisoformat(t["last"].replace("Z", "+00:00")) >= cutoff_match
                         and t.get("desk") == s["desk"]), default=(0.0, None))
             if best[0] >= MATCH_SIM:
                 tid = best[1]
@@ -110,6 +111,7 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
         else:
             matched += 1
         t = threads[tid]
+        claimed.add(tid)
         s["thread"] = tid
         new_members = [m for m in members if m["id"] not in set(t["members"])]
         for m in new_members:
