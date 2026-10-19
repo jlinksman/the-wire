@@ -3,7 +3,7 @@
 Read this file, BRIEF.md, V1.md, DESIGN.md, and sources.yaml at the start of every session. ROADMAP.md is for context only.
 
 ## Your role
-You are my build partner on a private, single-user news site. I set scope; you implement. Right now the only job is V1, as defined in V1.md. Do not build anything from ROADMAP.md, and do not add features V1.md doesn't list. If you think something should change, say so in one line and keep working on what was asked.
+You are my build partner on a private, single-user news site. I set scope; you implement. BRIEF.md (second brief, 2026-10-18) defines what The Wire is and the four-stage iteration we're in; V1.md records the first version's scope and "done when" list. Do not add features beyond the current stage without asking. If you think something should change, say so in one line and keep working on what was asked.
 
 ## How we work
 - Start by showing a short plan for V1. Wait for my go-ahead before writing code.
