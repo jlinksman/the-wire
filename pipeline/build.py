@@ -590,6 +590,41 @@ def parse_links(src: dict, content: bytes) -> list[dict]:
     return items[: src.get("max_items", 40)]
 
 
+def parse_dec_spills(src: dict, content: bytes) -> list[dict]:
+    """NYSDEC spill incidents (data.ny.gov, dataset u44d-k5fk): one record per reported spill in
+    the counties the query asks for. The record itself is the primary source; the link opens it.
+    Quantity is as reported to DEC and often zero or blank at first report."""
+    items = []
+    for x in json.loads(content):
+        num = x.get("spill_number")
+        if not num:
+            continue
+        material = (x.get("material_name") or "unknown material").strip()
+        qty = x.get("quantity")
+        try:
+            qty_s = f"{float(qty):g} {x.get('units') or 'gal'}" if qty and float(qty) > 0 else "quantity not reported"
+        except ValueError:
+            qty_s = "quantity not reported"
+        place = ", ".join(p for p in [(x.get("locality") or "").title(), x.get("county")] if p)
+        received = x.get("received_date") or x.get("spill_date")
+        try:
+            when = datetime.strptime(received[:10], "%Y-%m-%d").replace(hour=12, tzinfo=NY) if received else None
+        except ValueError:
+            when = None
+        facts = [f"Spill #{num}", (x.get("program_facility_name") or "").title() or None, (x.get("street_1") or "").title() or None,
+                 x.get("source") and f"Source: {x['source']}", x.get("contributing_factor") and f"Cause: {x['contributing_factor']}",
+                 x.get("recovered") not in (None, "", "0.00", "0") and f"Recovered: {x['recovered']} {x.get('units') or ''}".strip(),
+                 x.get("close_date") and "Closed " + x["close_date"][:10], x.get("dec_region") and f"DEC Region {x['dec_region']}"]
+        items.append({
+            "title": f"DEC spill report: {material}, {qty_s}, {place}",
+            "link": f"https://data.ny.gov/resource/u44d-k5fk.json?spill_number={num}",
+            "summary": " · ".join(str(f) for f in facts if f),
+            "published": iso(when) if when else None,
+            "kind": "RECORD",
+        })
+    return items
+
+
 def parse_cl_search(src: dict, content: bytes) -> list[dict]:
     items = []
     for x in json.loads(content).get("results", []):
@@ -677,6 +712,8 @@ def pick_parser(src: dict):
         return parse_cl_search
     if "federalregister.gov/api" in url:
         return parse_federal_register
+    if "data.ny.gov/resource/u44d-k5fk" in url:
+        return parse_dec_spills
     if "floor_activity" in url:
         return parse_senate_floor
     if src.get("type") == "links":
@@ -955,7 +992,7 @@ def prune(state: dict, sources: list[dict] | None = None) -> None:
     for k, v in store.items():
         newest.setdefault(v["source_id"], []).append((sort_time(v), k))
     protected = set()
-    quiet = {s["id"] for s in sources or [] if s.get("quiet")}
+    quiet = {s["id"] for s in sources or [] if s.get("quiet") and not s.get("keep_days")}   # keep_days wins over the quiet cutoff
     quiet_cut = now_utc() - timedelta(hours=QUIET_KEEP_HOURS)
     for k in [k for k, v in store.items() if v["source_id"] in quiet and sort_time(v) < quiet_cut]:
         del store[k]
@@ -1204,7 +1241,7 @@ def main() -> int:
         log(f"[evidence] failed: {type(exc).__name__}: {exc}")
     # Quiet items that aren't part of any story never appear on the page; they were only
     # needed for grouping and the briefing, so the phone doesn't download them.
-    in_story = {m for s in data.get("stories", []) for m in s["members"]}
+    in_story = {m for s in data.get("stories", []) for m in s["members"]} | {m for t in data.get("threads", []) for m in t.get("members", [])}
     before = len(data["items"])
     data["items"] = [it for it in data["items"] if not it.get("quiet") or it["id"] in in_story or it.get("people")]
     # Thread docs carry the document excerpt; items don't ship it (the stored records keep it).

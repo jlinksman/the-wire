@@ -39,7 +39,7 @@ function byline(it) {
   const names = (it.people || []).map(personName).filter((n) => n !== it.source);
   return names.length ? names.join(", ") + " · " + it.source : it.source;
 }
-const KIND_MARK = { VIDEO: "Video", DOC: "Document", QUOTE: "Quote", BLOTTER: "Police blotter", PODCAST: "Podcast", POST: "Post" };
+const KIND_MARK = { VIDEO: "Video", DOC: "Document", QUOTE: "Quote", BLOTTER: "Police blotter", PODCAST: "Podcast", POST: "Post", RECORD: "Record" };
 const SIZES = [["system", "iPhone"], ["15", "S"], ["17", "M"], ["19", "L"], ["21", "XL"]];
 const THEMES = [["auto", "Match iPhone"], ["dark", "Dark"], ["light", "Light"]];
 
