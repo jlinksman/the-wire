@@ -4,6 +4,7 @@ Usage: python pipeline/probe.py probe-candidates.txt
 One polite request per feed: robots.txt checked first, honest User-Agent, no retries.
 Prints status, item count and age of the newest item. Nothing is stored.
 """
+import re
 import sys
 import time
 from datetime import datetime, timezone
