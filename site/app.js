@@ -325,6 +325,7 @@ function todayView() {
 
   // 2. Threads you follow
   out.push(...threadsSection());
+  out.push(...suggestSection());
 
   // 3. Top stories as units: Beacon first, then the ranked front page
   const cutoff = Date.now() - 48 * 3600000;
@@ -469,6 +470,7 @@ function deskView(t, desk) {
   const fresh = prevVisit ? all.filter((it) => !isSeen(it)).length : 0;
   const list = prefs.newOnly && fresh ? all.filter((it) => !isSeen(it)) : all;
   const out = [];
+  if (desk === "LAW") out.push(...areasOfLaw());
   if (featured.size) {
     out.push(sectionHead("Top stories"));
     out.push(...leadStories.map((st) => unit(st)).filter(Boolean), ...leadItems.map(itemCard));
@@ -1303,7 +1305,7 @@ function followButton(st, compact) {
   return b;
 }
 function devLabel(reason) {
-  return { document: "Document", confirmed: "Confirmed by a second outlet", spread: "Spread", figures: "Figures changed", update: "Update" }[reason] || "Update";
+  return { document: "Document", confirmed: "Confirmed by a second outlet", spread: "Spread", figures: "Figures changed", update: "Update", revived: "Back after a quiet spell" }[reason] || "Update";
 }
 
 // A thread card for Today: title, what's new since the last visit, counts.
@@ -1386,13 +1388,15 @@ function openThread(t, viaItem) {
   const nodes = [
     el("div", { class: "smeta" },
       t.developing ? el("span", { class: "dev", text: "Developing" }) : null,
-      el("span", { text: (t.kind || "thread")[0].toUpperCase() + (t.kind || "thread").slice(1) }),
+      t.revived_at ? el("span", { class: "dev back", text: "Back after a quiet spell" }) : null,
+      t.standing ? el("span", { class: "dev standing", text: "Area of law" }) : el("span", { text: (t.kind || "thread")[0].toUpperCase() + (t.kind || "thread").slice(1) }),
       el("span", { class: "dk", style: "--c: var(--" + t.desk.toLowerCase() + ")", text: DESK_NAME[t.desk] || t.desk }),
       el("span", { text: "Opened " + exact(Date.parse(t.opened)) })),
     el("h2", { id: "sheet-title", class: "stitle", text: t.title }),
     el("p", { class: "fine" }, (t.outlets > 1 ? t.outlets + " outlets · " : "") + t.n_reports + " reports · " + devs.length + " developments" + (newCount ? " · " : ""),
       newCount ? el("span", { class: "since", text: newCount + " new since you last looked" }) : null),
-    el("div", { class: "sactions" }, follow, briefBtn),
+    el("div", { class: "sactions" }, follow, briefBtn, ...signalButtons(t)),
+    askBox(t),
     t.what || t.card || t.summary ? el("div", { class: "machine" },
       el("span", { class: "mlabel", text: "Where it stands · machine-written" + (t.outlets > 1 ? " from " + t.outlets + " outlets" : "") + (t.written_at ? " · " + when(t.written_at) : "") }),
       el("p", { text: t.what || t.card || t.summary })) : (lead && lead.machine_summary ? el("div", { class: "machine" }, el("span", { class: "mlabel", text: "Where it stands · machine summary" }), el("p", { text: lead.machine_summary })) : null),
@@ -1404,7 +1408,8 @@ function openThread(t, viaItem) {
     docs.length ? sec("The documents",
       el("ul", { class: "docs" }, ...docs.slice(0, 6).map((d) => { const it = byId.get(d.id); return el("li", {},
         el("span", { class: "asrc", text: when(d.t) + " · " + d.source + (it && it.event_at ? " · " + exact(Date.parse(it.event_at)) : "") }),
-        it ? el("button", { class: "doclink", text: d.title, onclick: () => openItem(it) }) : link(d.link, d.title)); }))) : null,
+        it ? el("button", { class: "doclink", text: d.title, onclick: () => openItem(it) }) : link(d.link, d.title),
+        d.excerpt ? el("blockquote", { class: "excerpt" }, el("span", { class: "mlabel", text: "Opening, verbatim" }), el("p", { text: d.excerpt }), link(d.link, "Read the document ↗")) : null); }))) : null,
     t.figures && t.figures.length ? sec("Figures as reported",
       ...t.figures.map((f) => el("div", { class: "fig" }, el("span", { class: "figw", text: f.what }),
         el("ul", { class: "figl" }, ...f.reports.map((r) => el("li", {}, el("span", { class: "fign", text: r.text }), " ",
@@ -1420,10 +1425,92 @@ function openThread(t, viaItem) {
     t.why ? el("div", { class: "why" }, el("span", { class: "mlabel", text: "Why it matters to you · analysis" }), el("p", { text: t.why })) : null,
     sec("All coverage · " + members.length + " reports", el("ul", { class: "also" }, ...members.slice(0, 40).map((it) =>
       el("li", {}, el("span", { class: "asrc", text: ago(it.ms) + " · " + byline(it) + (it.translated ? " · translated" : "") }), link(it.link, it.title))))),
-    t.named ? el("p", { class: "fine", text: "A topic you named. Watching for: " + (t.pattern || t.title) }) : null,
+    t.standing ? el("p", { class: "fine", text: "A standing area of law (threads.yaml). Decisions, rules and notices accrue here. Watching for: " + (t.pattern || t.title) }) :
+      t.named ? el("p", { class: "fine", text: "A topic you named. Watching for: " + (t.pattern || t.title) }) : null,
     el("div", { class: "endline", text: "End of thread" }),
   ];
   openSheet(nodes.filter(Boolean), t.title);
+}
+
+// More / less like this (stage 4): a signal stored with the follows; the build re-ranks by it.
+function signalOf(tid) { const sg = (followsNow().signals || []).find((x) => x.id === tid); return sg ? sg.value : null; }
+function signalButtons(t) {
+  const cur = signalOf(t.id);
+  return [["more", "More like this"], ["less", "Less like this"]].map(([v, label]) => {
+    const b = el("button", { class: "sbtn signal" + (cur === v ? " on" : ""), text: (cur === v ? "✓ " : "") + label });
+    b.onclick = async () => {
+      b.textContent = "…";
+      const ok = await setFollow({ action: "signal", id: t.id, value: cur === v ? "clear" : v, title: t.title, desk: t.desk, kind: t.kind });
+      if (ok) openThread((data.threads || []).find((x) => x.id === t.id) || t);
+      else b.textContent = "Couldn't save";
+    };
+    return b;
+  });
+}
+
+// Ask this thread a question (stage 3): answered only from the thread's sources, with citations.
+function askBox(t) {
+  const input = el("input", { type: "text", class: "tin ask", placeholder: "Ask this thread: what did the court hold? who said what? what changed?", enterkeyhint: "send" });
+  const btn = el("button", { class: "sbtn primary", text: "Ask" });
+  const out = el("div", { class: "answer" });
+  const run = async () => {
+    const q = input.value.trim();
+    if (q.length < 3) return;
+    btn.textContent = "Reading the sources…"; btn.disabled = true;
+    out.replaceChildren();
+    try {
+      const r = await fetch("ask", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ thread: t.id, question: q }) });
+      const j = await r.json();
+      if (!r.ok) { out.append(el("p", { class: "fine", text: j.error || "Couldn't ask (HTTP " + r.status + ")." })); return; }
+      const byN = Object.fromEntries((j.sources || []).map((src) => [src.n, src]));
+      if (j.answer && j.answer.length) {
+        out.append(el("span", { class: "mlabel", text: "Answer · written from " + (j.sources || []).length + " of this thread's " + j.n_sources + " sources · every number and quote checked" }));
+        for (const a of j.answer) {
+          const p = el("p", { text: a.text + " " });
+          for (const n of a.refs) { const src = byN[n]; if (src) p.append(el("a", { class: "cite", href: src.link, target: "_blank", rel: "noopener", text: "[" + n + "]", title: src.source + ": " + src.title })); }
+          out.append(p);
+        }
+      }
+      if (j.notice) out.append(el("p", { class: "fine", text: j.notice }));
+      if (j.sources && j.sources.length) out.append(el("ol", { class: "cites" }, ...j.sources.map((src) => el("li", { value: src.n },
+        el("span", { class: "asrc", text: (src.kind === "document" ? "Document · " : "") + src.source + " · " + ago(Date.parse(src.t)) + " · " }), link(src.link, src.title)))));
+    } catch (e) {
+      out.append(el("p", { class: "fine", text: "Couldn't reach the site. Are you online and signed in?" }));
+    } finally { btn.textContent = "Ask"; btn.disabled = false; }
+  };
+  btn.onclick = run;
+  input.onkeydown = (e) => { if (e.key === "Enter") run(); };
+  return el("div", { class: "askbox" }, el("div", { class: "askrow" }, input, btn), out);
+}
+
+// Threads you might follow (stage 4): the build's suggestions, with a reason.
+function suggestSection() {
+  const ids = data.suggest || [];
+  const threads = ids.map((id) => (data.threads || []).find((t) => t.id === id)).filter((t) => t && !isFollowed(t.id));
+  if (!threads.length) return [];
+  return [sectionHead("You might follow", "from what you follow and ask for more of"),
+    el("ul", { class: "suggest" }, ...threads.map((t) => el("li", {},
+      el("span", { class: "asrc", text: (t.kind || "thread") + " · " + (DESK_NAME[t.desk] || t.desk) + " · " + (t.outlets > 1 ? t.outlets + " outlets · " : "") + (t.developments || []).length + " developments" }),
+      el("button", { class: "doclink", text: t.title, onclick: () => openThread(t) }),
+      el("span", { class: "sgrow" }, followButton({ thread: t.id }, true)))))];
+}
+
+// Areas of law (stage 3): the standing threads from threads.yaml, on the Law tab.
+function areasOfLaw() {
+  const areas = (data.threads || []).filter((t) => t.standing);
+  if (!areas.length) return [];
+  const since = prevVisit && Date.now() - prevVisit < 48 * 3600e3 ? prevVisit : Date.now() - 24 * 3600e3;
+  return [sectionHead("Areas of law", "decisions, rules and notices as they accrue"),
+    el("ul", { class: "areas" }, ...areas.map((t) => {
+      const devs = t.developments || [];
+      const last = devs[devs.length - 1];
+      const fresh = devs.filter((d) => Date.parse(d.t) > since).length;
+      return el("li", {}, el("button", { class: "area", onclick: () => openThread(t) },
+        el("span", { class: "headline", text: t.title }),
+        el("span", { class: "meta" }, el("span", { text: t.n_reports + " reports" }), el("span", { text: (t.docs || []).length + " documents" }),
+          fresh ? el("span", { class: "since", text: fresh + " new" }) : null),
+        last ? el("span", { class: "tnew" }, el("b", { text: ago(Date.parse(last.t)) + " ago: " }), last.text + " · " + last.source) : el("span", { class: "tnew quiet", text: "Nothing matched yet." })));
+    }))];
 }
 
 // --------------------------------------------------------------- people you follow

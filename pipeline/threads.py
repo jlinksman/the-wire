@@ -27,6 +27,7 @@ DORMANT_AFTER_H = 14 * 24          # no new reports for two weeks -> dormant (ke
 FORGET_AFTER_H = 60 * 24           # dormant two months -> dropped from state
 MATCH_SIM = 0.35                   # headline similarity to join a living thread without a shared report
 MATCH_WINDOW_H = 7 * 24
+REVIVE_SIM = 0.5                   # a dormant thread revives only on a clearly similar new cluster
 DEV_GAP_H = 4                      # a new batch of reports counts as a development after this long
 MAX_DEVELOPMENTS = 40
 DOC_SOURCES_RE = re.compile(r"agendaviewer|courtlistener\.com/opinion|federalregister\.gov|dos\.ny\.gov|dec\.ny\.gov|docs\.house\.gov|senate\.gov|dutchessny\.gov", re.IGNORECASE)
@@ -62,10 +63,13 @@ def _figure_signature(story: dict) -> set[tuple]:
     return {(f["what"], r["source"], r["n"]) for f in story.get("figures", []) for r in f.get("reports", [])}
 
 
-def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
+def update(state: dict, data: dict, follows: dict, now: datetime, log, standing: list | None = None) -> None:
     """Match clusters to threads, open new ones, log developments. Writes data['threads']
-    and a thread id onto each story; the full thread records stay in state['threads']."""
+    and a thread id onto each story; the full thread records stay in state['threads'].
+    `standing` are the area-of-law threads from threads.yaml: named threads that exist
+    whether or not they are followed and never go dormant."""
     threads: dict = state.setdefault("threads", {})
+    signals = {sg["id"]: sg["value"] for sg in (follows or {}).get("signals", []) if sg.get("id") and sg.get("value") in ("more", "less")}
     by_id = {it["id"]: it for it in data["items"]}
     stories = data.get("stories", [])
     member_thread = {m: tid for tid, t in threads.items() for m in t["members"]}
@@ -80,7 +84,7 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
 
     stamp = now.isoformat().replace("+00:00", "Z")
     cutoff_match = now - timedelta(hours=MATCH_WINDOW_H)
-    opened = matched = devs = 0
+    opened = matched = devs = revivals = 0
 
     claimed: set[str] = set()      # one thread per cluster per build; the biggest cluster wins
     for s in sorted(stories, key=lambda x: len(x["members"]), reverse=True):
@@ -98,6 +102,13 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
                         and t.get("desk") == s["desk"]), default=(0.0, None))
             if best[0] >= MATCH_SIM:
                 tid = best[1]
+            else:
+                # Revival (stage 4): a dormant thread comes back when a new cluster on its desk
+                # reads clearly like it. The bar is higher than for a living thread.
+                old = max(((similar(tw, k), k) for k, t in threads.items()
+                           if t["status"] == "dormant" and k not in claimed and not t.get("named") and t.get("desk") == s["desk"]), default=(0.0, None))
+                if old[0] >= REVIVE_SIM:
+                    tid = old[1]
         # 3) else, open a thread when the story has weight: 2+ outlets, a document, or a watch hit
         if tid is None:
             weight = s["sources"] >= 2 or any(is_document(m) for m in members) or any(m.get("watch") for m in members)
@@ -113,6 +124,10 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
         t = threads[tid]
         claimed.add(tid)
         s["thread"] = tid
+        revived = t["status"] == "dormant"
+        if revived:
+            t["revived_at"] = stamp
+            revivals += 1
         new_members = [m for m in members if m["id"] not in set(t["members"])]
         for m in new_members:
             t["members"].append(m["id"])
@@ -140,7 +155,9 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
         last_dev = t["developments"][-1]["t"] if t["developments"] else None
         quiet = not last_dev or (now - datetime.fromisoformat(last_dev.replace("Z", "+00:00"))) >= timedelta(hours=DEV_GAP_H)
         reason = None
-        if new_docs:
+        if revived and new_members:
+            reason = "revived"
+        elif new_docs:
             reason = "document"
         elif t["outlets"] < 2 <= outlets_now:
             reason = "confirmed"
@@ -163,8 +180,10 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
         t["outlets"] = max(t["outlets"], outlets_now)
         t["figsig"] = [list(x) for x in figsig][:60]
 
-    # Named topic threads Joe follows: attach matching reports, whatever cluster they're in.
-    for topic in (follows or {}).get("topics", []):
+    # Named topic threads Joe follows, and the standing area-of-law threads from threads.yaml:
+    # attach matching reports, whatever cluster they're in.
+    standing_ids = {x["id"] for x in (standing or [])}
+    for topic in list((follows or {}).get("topics", [])) + [dict(x, standing=True) for x in (standing or [])]:
         tid = topic["id"]
         pat = topic_pattern(topic)
         if not pat:
@@ -174,6 +193,8 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
                                 "outlets": 0, "figsig": [], "named": True}
         threads[tid] = t
         t["named"] = True
+        t["standing"] = bool(topic.get("standing"))
+        t["kind"] = topic.get("kind") or t.get("kind") or "subject"
         t["title"] = topic["title"]
         t["pattern"] = topic.get("pattern") or topic["title"]
         new = [it for it in data["items"] if it["id"] not in set(t["members"]) and pat.search(it["title"] + " " + (it.get("summary") or "")[:300])
@@ -194,14 +215,22 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
     # Dormancy and forgetting
     for tid, t in list(threads.items()):
         age_h = (now - datetime.fromisoformat(t["last"].replace("Z", "+00:00"))).total_seconds() / 3600
-        if age_h > FORGET_AFTER_H and not t.get("named"):
+        if tid in standing_ids:
+            t["status"] = "active"
+        elif age_h > FORGET_AFTER_H and not t.get("named"):
             del threads[tid]
         elif age_h > DORMANT_AFTER_H:
             t["status"] = "dormant"
+        elif t.get("standing") and tid not in standing_ids:
+            t["standing"] = False          # removed from threads.yaml: behaves like any thread again
 
     followed = {f["id"] for f in (follows or {}).get("threads", [])} | {tp["id"] for tp in (follows or {}).get("topics", [])}
     for tid, t in threads.items():
         t["followed"] = tid in followed
+        if tid in signals:
+            t["signal"] = signals[tid]
+        else:
+            t.pop("signal", None)
 
     # Ship: active threads with their live members (the page needs ids it has), newest first.
     live = {it["id"] for it in data["items"]}
@@ -212,13 +241,18 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log) -> None:
         mem = [m for m in t["members"] if m in live]
         if not mem and not t.get("named"):
             continue
-        out.append({k: t[k] for k in ("id", "kind", "desk", "title", "opened", "last", "status", "followed", "named", "developing", "outlets") if k in t}
-                   | {"members": mem[-200:], "developments": t["developments"][-MAX_DEVELOPMENTS:], "docs": t["docs"],
-                      "n_reports": len(t["members"]), **({"pattern": t["pattern"]} if t.get("pattern") else {})})
+        rec = {k: t[k] for k in ("id", "kind", "desk", "title", "opened", "last", "status", "followed", "named", "standing", "developing", "outlets", "signal", "revived_at") if k in t}
+        rec |= {"members": mem[-200:], "developments": t["developments"][-MAX_DEVELOPMENTS:], "docs": t["docs"],
+                "n_reports": len(t["members"]), **({"pattern": t["pattern"]} if t.get("pattern") else {})}
+        if rec.get("revived_at") and (now - datetime.fromisoformat(rec["revived_at"].replace("Z", "+00:00"))) > timedelta(hours=48):
+            rec.pop("revived_at")      # the "back after a quiet spell" label lasts two days
+        out.append(rec)
     out.sort(key=lambda t: (t.get("followed", False), t["last"]), reverse=True)
     data["threads"] = out
-    log(f"[threads] {len(out)} active ({sum(1 for t in out if t['followed'])} followed), matched {matched}, opened {opened}, "
-        f"developments logged {devs}, dormant {sum(1 for t in threads.values() if t['status'] == 'dormant')}")
+    data["suggest"] = suggest(out, follows or {}, now)
+    log(f"[threads] {len(out)} active ({sum(1 for t in out if t['followed'])} followed, {sum(1 for t in out if t.get('standing'))} standing), "
+        f"matched {matched}, opened {opened}, revived {revivals}, developments logged {devs}, "
+        f"dormant {sum(1 for t in threads.values() if t['status'] == 'dormant')}, suggested {len(data['suggest'])}")
 
 
 def topic_pattern(topic: dict) -> re.Pattern | None:
@@ -228,3 +262,121 @@ def topic_pattern(topic: dict) -> re.Pattern | None:
         return None
     parts = [re.escape(w[:-1]) + r"\w*" if w.endswith("*") else re.escape(w) for w in terms]
     return re.compile(r"(?<!\w)(?:" + "|".join(parts) + r")(?!\w)", re.IGNORECASE)
+
+
+# ---------------------------------------------------------------- learning (stage 4)
+
+SUGGEST_DESK = {"BEACON": 2.0, "LAW": 1.6, "GOV": 1.2, "WORLD": 1.0, "SPORTS": 0.6}
+
+
+def _sim(a: set[str], b: set[str]) -> float:
+    if not a or not b:
+        return 0.0
+    return len(a & b) / math.sqrt(len(a) * len(b))
+
+
+def taste(follows: dict) -> tuple[set[str], set[str]]:
+    """Vocabulary of what Joe followed or asked for more of, and of what he asked for less of."""
+    liked = set()
+    for f in follows.get("threads", []) + follows.get("topics", []):
+        liked |= words(f.get("title", ""))
+    disliked = set()
+    for sg in follows.get("signals", []):
+        if sg.get("value") == "more":
+            liked |= words(sg.get("title", ""))
+        elif sg.get("value") == "less":
+            disliked |= words(sg.get("title", ""))
+    return liked, disliked - liked
+
+
+def suggest(shipped: list[dict], follows: dict, now: datetime, limit: int = 3) -> list[str]:
+    """Threads Joe might follow: unfollowed, with some life in them, close to what he follows
+    and likes, local and law first, nothing he asked for less of."""
+    liked, disliked = taste(follows)
+    less = {sg["id"] for sg in follows.get("signals", []) if sg.get("value") == "less"}
+    scored = []
+    for t in shipped:
+        if t.get("followed") or t.get("named") or t["id"] in less:
+            continue
+        alive = (t.get("outlets", 0) >= 2 or len(t.get("developments", [])) >= 2)
+        if not alive:
+            continue
+        tw = words(t.get("title", ""))
+        age_h = (now - datetime.fromisoformat(t["last"].replace("Z", "+00:00"))).total_seconds() / 3600
+        score = SUGGEST_DESK.get(t["desk"], 1.0) * (1 + 2 * _sim(tw, liked) - 2 * _sim(tw, disliked)) * math.exp(-age_h / 48)
+        score *= 1 + 0.1 * min(len(t.get("developments", [])), 6)
+        scored.append((score, t["id"]))
+    scored.sort(reverse=True)
+    return [tid for _, tid in scored[:limit]]
+
+
+def apply_signals(stories: list[dict], shipped: list[dict], follows: dict) -> int:
+    """Re-rank stories by Joe's signals: a thread he wants more of rises, one he wants less of
+    sinks, and stories that read like either move a little the same way. Returns how many moved."""
+    if not follows:
+        return 0
+    liked, disliked = taste(follows)
+    sig = {t["id"]: t.get("signal") for t in shipped if t.get("signal")}
+    if not sig and not liked and not disliked:
+        return 0
+    moved = 0
+    for s in stories:
+        f = 1.0
+        if sig.get(s.get("thread")) == "more":
+            f *= 1.5
+        elif sig.get(s.get("thread")) == "less":
+            f *= 0.4
+        else:
+            tw = words(s.get("title", ""))
+            f *= 1 + 0.4 * _sim(tw, liked) - 0.5 * _sim(tw, disliked)
+        if abs(f - 1.0) > 0.01:
+            s["score"] = round(s["score"] * f, 3)
+            moved += 1
+    stories.sort(key=lambda s: s["score"], reverse=True)
+    return moved
+
+
+# ---------------------------------------------------------------- document excerpts (stage 3)
+
+EXCERPT_CHARS = 700
+PUBLIC_DOC_RE = re.compile(r"courtlistener\.com/opinion|federalregister\.gov/documents|dec\.ny\.gov|dos\.ny\.gov|agendaviewer|docs\.house\.gov|congress\.gov|senate\.gov|nysenate\.gov|supremecourt\.gov|ca2\.uscourts\.gov|nycourts\.gov", re.IGNORECASE)
+
+
+def is_public_document(link: str) -> bool:
+    """Government works and court opinions: public documents whose text may be shown verbatim.
+    News articles never qualify, whatever their license."""
+    return bool(PUBLIC_DOC_RE.search(link or ""))
+
+
+def excerpt_of(text: str) -> str:
+    """The opening of a document, cleaned, cut at a sentence end near EXCERPT_CHARS."""
+    t = re.sub(r"\s+", " ", text or "").strip()
+    t = re.sub(r"^(?:(?:skip to (?:main )?content|share|print|download pdf|back to top)\W*)+", "", t, flags=re.IGNORECASE)
+    if len(t) <= EXCERPT_CHARS:
+        return t
+    cut = t[:EXCERPT_CHARS]
+    end = max(cut.rfind(". "), cut.rfind("; "), cut.rfind(".\u201d"))
+    return (cut[:end + 1] if end > EXCERPT_CHARS // 2 else cut) + " …"
+
+
+def attach_doc_excerpts(state: dict, data: dict) -> int:
+    """Put a verbatim opening excerpt on each public document attached to a thread, from the
+    document's fetched text or, failing that, the opening the feed itself carries (CourtListener
+    feeds open with the opinion's first lines). Stored on the thread record and shipped."""
+    texts = state.get("texts", {})
+    threads = state.get("threads", {})
+    by_id = {it["id"]: it for it in data["items"]}
+    n = 0
+    for t in threads.values():
+        for d in t.get("docs", []):
+            if d.get("excerpt") or not is_public_document(d.get("link", "")):
+                continue
+            body = (texts.get(d["id"]) or {}).get("text") or (by_id.get(d["id"]) or {}).get("doc_text") or ""
+            if body and len(body) > 120:
+                d["excerpt"] = excerpt_of(body)
+                n += 1
+    for t in data.get("threads", []):
+        full = threads.get(t["id"])
+        if full:
+            t["docs"] = full.get("docs", [])
+    return n

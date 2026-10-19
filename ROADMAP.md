@@ -52,6 +52,15 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - `pipeline/threads.py`: persistent threads in the build state with stable ids, matched to each build's clusters by shared reports then headline similarity; developments logged only on material change (a document, a second outlet, +3 outlets, a changed figure, or a fresh batch after 4 quiet hours); primary documents attached; dormant after 14 quiet days. Named topic threads from follows. `functions/follow.js` keeps follows in KV; `build.yml` fetches them before each build; followed threads get first claim on the writing budget and count as briefing signal.
 - Next: stage 2, Your Wire (composed Today page, units on every tab).
 
+## Stages 3 and 4 — Depth and learning (built 2026-10-19)
+- **Ask a thread.** `functions/ask.js` answers a question about a thread from `evidence.json` only (written by the build to KV: each thread's numbered sources with headline, description, verified quotes and, for the model's eyes only, an opening excerpt of open article text). Every sentence cites [n]; numbers and quotations are checked against the cited sources and names against the thread's sources; an answer that fails isn't shown. 70B model, 8B fallback, 15-minute cache.
+- **Areas of law.** `threads.yaml` lists standing threads (Navigation Law and the Oil Spill Fund, PFAS, brownfields, bankruptcy, FinCEN and beneficial ownership, land use in the Second Department). They accrue decisions, rules and notices as developments, never go dormant, and show under "Areas of law" on the Law tab.
+- **Document excerpts.** Court opinions and rules (`public_doc: true` sources) show their opening verbatim on the thread page, from the feed's own text (CourtListener's HTML sits behind a bot check; its feeds carry the opinion's first lines).
+- **More / less like this.** Stored with the follows (`/follow` action "signal"); the build lifts a thread Joe wants more of (×1.5), sinks one he wants less of (×0.4), and nudges stories that read like either.
+- **You might follow.** Up to three unfollowed live threads close to what he follows and likes, local and law first, on Today.
+- **Revival.** A dormant thread comes back when a new cluster on its desk clearly matches it (similarity ≥ 0.5) and is labeled "Back after a quiet spell" for two days.
+- Held back: nothing. Learning signals were planned for after two weeks of use; built now at Joe's request.
+
 ## People (built 2026-10-18)
 - `people.yaml`: 93 reporters, writers, podcasters and forecasters (Joe's list plus a researched, balanced set), each with feeds, byline names, or a headline search; opinion voices carry a perspective tag. Their work shows in "From people you follow" on Today (rotated across perspectives), a Following category in Brief me, and a Range of views section on story pages. Unreachable for now (V8 home fetcher candidates): *.substack.com writers (Substack blocks cloud servers), Hudson Valley Weather (bot check), UnHerd, The Economist's acast feed.
 
