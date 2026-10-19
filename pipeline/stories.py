@@ -249,6 +249,10 @@ def fetch_texts(state, data, src_by_id, session, robots_allows, timeout, log) ->
         wanted += [by_id[m] for m in diverse(s, by_id)]
     day_ago = now - timedelta(hours=24)
     wanted += [it for it in data["items"] if it["desk"] in ("BEACON", "GOV", "LAW") and ms(it) >= day_ago][:40]
+    # Documents on followed and standing threads (from the last build's records), for excerpts.
+    for t in state.get("threads", {}).values():
+        if t.get("followed") or t.get("standing"):
+            wanted += [by_id[d["id"]] for d in t.get("docs", []) if d["id"] in by_id and not d.get("excerpt")]
 
     stats = {"attempts": 0, "ok": 0, "robots": 0, "errors": [], "kept": 0}
     blocked_hosts = set()
@@ -788,7 +792,7 @@ def timeline(s, by_id) -> list[dict]:
 
 # ---------------------------------------------------------------- one entry point for build.py
 
-def run(state, data, src_by_id, session, robots_allows, timeout, log, follows: dict | None = None) -> None:
+def run(state, data, src_by_id, session, robots_allows, timeout, log, follows: dict | None = None, standing: list | None = None) -> None:
     from editorial import load as load_room
     import threads as threads_mod
     room = load_room()
@@ -821,13 +825,28 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log, follows: d
             s["timeline"] = tl
     # Threads: persistent identity, developments, documents, follows (BRIEF.md stage 1).
     try:
-        threads_mod.update(state, data, follows or {}, now, log)
+        threads_mod.update(state, data, follows or {}, now, log, standing)
     except Exception as exc:
         log(f"[threads] failed: {type(exc).__name__}: {exc}")
         data.setdefault("threads", [])
+        data.setdefault("suggest", [])
     followed_threads = {t["id"] for t in data.get("threads", []) if t.get("followed")}
     for s in stories:
         s["followed"] = s.get("thread") in followed_threads
+    # Stage 4: more/less signals move the ranking.
+    try:
+        moved = threads_mod.apply_signals(stories, data.get("threads", []), follows or {})
+        if moved:
+            log(f"[signals] {moved} stories re-ranked by more/less signals")
+    except Exception as exc:
+        log(f"[signals] {type(exc).__name__}: {exc}")
+    # Stage 3: verbatim excerpts of public documents on threads.
+    try:
+        nx = threads_mod.attach_doc_excerpts(state, data)
+        if nx:
+            log(f"[docs] {nx} new document excerpts")
+    except Exception as exc:
+        log(f"[docs] {type(exc).__name__}: {exc}")
 
     st = state.setdefault("v5", {})
     if tstats["attempts"] and not tstats["ok"]:

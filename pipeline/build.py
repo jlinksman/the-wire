@@ -260,6 +260,9 @@ def is_due(src: dict, st: dict) -> bool:
 
 # ---------------------------------------------------------------- parsing
 
+DOC_TEXT_CHARS = 1500
+
+
 def clean_text(raw: str | None, limit: int = SUMMARY_CHARS) -> str:
     if not raw:
         return ""
@@ -346,6 +349,9 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
             "link": link,
             "summary": "" if is_gnews else clean_text(e.get("summary")),
             "published": iso(published),
+            # Public documents (court opinions, rules): the feed carries the document's own opening
+            # text, kept longer for the verbatim excerpt on the thread page (stage 3).
+            **({"doc_text": clean_text(e.get("summary"), DOC_TEXT_CHARS)} if src.get("public_doc") else {}),
             **({"outlet": outlet} if outlet and not src.get("site_feed") else {}),
             **({"author": author} if author else {}),
         })
@@ -596,6 +602,7 @@ def parse_cl_search(src: dict, content: bytes) -> list[dict]:
             "title": (x.get("caseName") or "Opinion") + (f" ({court})" if court else ""),
             "link": "https://www.courtlistener.com" + url,
             "summary": clean_text(snippet),
+            **({"doc_text": clean_text(snippet, DOC_TEXT_CHARS)} if src.get("public_doc") else {}),
             "published": iso(datetime.strptime(x["dateFiled"][:10], "%Y-%m-%d").replace(hour=12, tzinfo=NY)) if x.get("dateFiled") else None,
         })
     return items
@@ -610,6 +617,7 @@ def parse_federal_register(src: dict, content: bytes) -> list[dict]:
             "title": f"{kind}: {d.get('title', '')}" if kind else d.get("title", ""),
             "link": d.get("html_url"),
             "summary": clean_text((agencies + ". " if agencies else "") + (d.get("abstract") or "")),
+            **({"doc_text": clean_text(d.get("abstract") or "", DOC_TEXT_CHARS)} if src.get("public_doc") else {}),
             "published": iso(datetime.strptime(d["publication_date"], "%Y-%m-%d").replace(hour=9, tzinfo=NY)) if d.get("publication_date") else None,
         })
     return [i for i in items if i["link"]]
@@ -919,6 +927,7 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             "watch_terms": terms[:3],
             "kind": it.get("kind") or ("PODCAST" if src.get("feed_kind") == "podcast" else "POST" if src.get("feed_kind") == "bluesky" else None) or item_kind(src, it),
             **({"author": it["author"]} if it.get("author") else {}),
+            **({"doc_text": it["doc_text"]} if it.get("doc_text") else {}),
             **({"people": sorted(people)} if people else {}),
             **({"person_feed": True} if src.get("person_feed") else {}),
             **({"blotter": it["blotter"]} if it.get("blotter") else {}),
@@ -1051,13 +1060,25 @@ def src_robots(s: dict) -> str:
     return "subscription" if s.get("robots") == "subscription" else "honored"
 
 
+def load_standing() -> list:
+    """Standing area-of-law threads from threads.yaml (BRIEF.md stage 3)."""
+    f = ROOT / "threads.yaml"
+    if not f.exists():
+        return []
+    try:
+        return [x for x in (yaml.safe_load(f.read_text()) or {}).get("standing", []) if x.get("id") and x.get("title")]
+    except yaml.YAMLError as exc:
+        log(f"[threads] threads.yaml unreadable: {exc}")
+        return []
+
+
 def mark_changed(state: dict) -> None:
     """Write dist/publish.txt: which KV keys changed since the last publish (ignoring their
     timestamps), so quiet hours don't spend Cloudflare writes on identical content. Every
     key is republished at least every two hours regardless."""
     pub = state.setdefault("published", {})
     lines = []
-    for name in ("brief.json", "alerts.json"):
+    for name in ("brief.json", "alerts.json", "evidence.json"):
         f = DIST / name
         if not f.exists():
             continue
@@ -1150,7 +1171,7 @@ def main() -> int:
             follows = json.loads(fpath.read_text()) or {}
         except ValueError as exc:
             log(f"[follows] unreadable: {exc}")
-    data["follows"] = {"threads": follows.get("threads", []), "topics": follows.get("topics", [])}
+    data["follows"] = {"threads": follows.get("threads", []), "topics": follows.get("topics", []), "signals": follows.get("signals", [])}
     # The people directory (people.yaml) for the page: names, roles, perspective, reachability.
     data["people"] = [{k: p[k] for k in ("id", "name", "role", "desk", "perspective", "unreachable") if p.get(k)}
                       for p in load_people_cfg()]
@@ -1159,7 +1180,7 @@ def main() -> int:
     # V5: story grouping, open-text quotes, machine summaries. A failure here is
     # recorded in source health and never stops the feed from publishing.
     try:
-        stories.run(state, data, {s["id"]: s for s in sources}, session, robots_allows, TIMEOUT, log, follows)
+        stories.run(state, data, {s["id"]: s for s in sources}, session, robots_allows, TIMEOUT, log, follows, load_standing())
     except Exception as exc:
         log(f"[v5] failed: {type(exc).__name__}: {exc}")
         data["sources"].append({"id": "v5", "name": "Story grouping and summaries", "short": "Stories", "desk": "SYSTEM",
@@ -1175,11 +1196,19 @@ def main() -> int:
         brief.build(data, yaml.safe_load(CONFIG.read_text()).get("briefing") or {}, DIST, log, state.get("texts"))
     except Exception as exc:
         log(f"[brief] failed: {type(exc).__name__}: {exc}")
+    # Stage 3: the sources a thread question is answered from (functions/ask.js reads it from KV).
+    try:
+        import evidence
+        evidence.build(state, data, {s["id"]: s for s in sources}, DIST, log)
+    except Exception as exc:
+        log(f"[evidence] failed: {type(exc).__name__}: {exc}")
     # Quiet items that aren't part of any story never appear on the page; they were only
     # needed for grouping and the briefing, so the phone doesn't download them.
     in_story = {m for s in data.get("stories", []) for m in s["members"]}
     before = len(data["items"])
     data["items"] = [it for it in data["items"] if not it.get("quiet") or it["id"] in in_story or it.get("people")]
+    # Thread docs carry the document excerpt; items don't ship it (the stored records keep it).
+    data["items"] = [{k: v for k, v in it.items() if k != "doc_text"} for it in data["items"]]
     log(f"[slim] shipped {len(data['items'])} of {before} items (quiet items outside stories stay in the build)")
     (DIST / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     (DIST / "version.txt").write_text(data["generated_at"])

@@ -49,6 +49,13 @@ Research: Apple HIG (tab bars, typography, layout), NN/g (hidden navigation, scr
 - **Text follows the iPhone's Text Size setting** (rem units on the system body font), with S/M/L/XL overrides in Settings. Tap targets 44pt or larger.
 - **Settings (per device):** appearance (match iPhone, dark, light), text size, world clocks, new-only default, saved items, muted words, sources shown, source health.
 
+## Depth and learning (stages 3 and 4, 2026-10-19)
+- **Ask box on every thread page.** One line, one button. The answer is prose with [n] citations that open the source; a label says how many of the thread's sources it drew on and that numbers and quotes were checked. When nothing verifiable comes back, the page says so instead of showing it.
+- **Documents speak first.** A public document on a thread shows its opening verbatim in a quoted block, labeled "Opening, verbatim", with a link to the whole document.
+- **Areas of law** sit at the top of the Law tab as a short list: title, counts, the last thing that arrived.
+- **More like this / Less like this** are buttons beside Follow; a chosen one shows a check. **You might follow** is a short list under the followed threads with a Follow button on each row.
+- **Back after a quiet spell** labels a revived thread.
+
 ## Backlog from the research
 - **Story grouping** (Techmeme): one entry per story, other outlets' coverage indented beneath it with a "+3 sources" count. Planned for V5.
 - **Flash tier** (Drudge, AP's urgency levels): a rare siren for the one story that truly matters, for example five or more outlets on the same event within an hour. Needs grouping first.

@@ -74,9 +74,9 @@ jobs:
           # and get a tiny "not modified" answer between builds.
           npx --yes wrangler@4 kv key put data.json --path dist/data.json --namespace-id "$WIRE_KV_ID" --remote \
             --metadata "{\"v\":\"$(cat dist/version.txt)\"}"
-          # Briefing signal and push-alert candidates: written only when their content changed
+          # Briefing signal, push-alert candidates and thread evidence: written only when their content changed
           # (or every two hours), per dist/publish.txt from the build.
-          for key in brief.json alerts.json; do
+          for key in brief.json alerts.json evidence.json; do
             if [ -f "dist/$key" ] && ! grep -q "^$key=0" dist/publish.txt 2>/dev/null; then
               npx --yes wrangler@4 kv key put "$key" --path "dist/$key" --namespace-id "$WIRE_KV_ID" --remote
             else

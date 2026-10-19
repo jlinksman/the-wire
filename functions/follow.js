@@ -3,6 +3,7 @@
 //
 // GET  /follow                      -> {threads:[{id,title,since}], topics:[{id,title,pattern,kind,desk,since}]}
 // POST /follow {action:"follow"|"unfollow", type:"thread"|"topic", id, title, kind?, desk?, pattern?}
+// POST /follow {action:"signal", id, value:"more"|"less"|"clear", title?, desk?, kind?}   (stage 4: more/less like this)
 const KEY = "follows.json";
 const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 
@@ -17,6 +18,16 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch (e) { return new Response(JSON.stringify({ error: "bad JSON" }), { status: 400, headers }); }
   const cur = (await env.WIRE.get(KEY, "json")) || { threads: [], topics: [] };
+  if (body.action === "signal") {
+    const id = String(body.id || "").slice(0, 40);
+    if (!id) return new Response(JSON.stringify({ error: "an id is required" }), { status: 400, headers });
+    const rest = (cur.signals || []).filter((x) => x.id !== id);
+    cur.signals = body.value === "more" || body.value === "less"
+      ? [...rest, { id, value: body.value, title: String(body.title || "").slice(0, 140), desk: String(body.desk || "").slice(0, 10), kind: String(body.kind || "").slice(0, 10), at: new Date().toISOString() }].slice(-200)
+      : rest;
+    await env.WIRE.put(KEY, JSON.stringify(cur));
+    return new Response(JSON.stringify(cur), { headers });
+  }
   const type = body.type === "topic" ? "topics" : "threads";
   const list = cur[type] || [];
   const now = new Date().toISOString();
