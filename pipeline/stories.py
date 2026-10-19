@@ -693,7 +693,7 @@ def day_so_far(state, data, session, log, room=None) -> None:
     """Once an hour: the day in three or four sentences, from the top stories and followed threads."""
     from editorial import rules_text
     ai = state.setdefault("ai", {})
-    rec = ai.setdefault("day", {})
+    rec = ai.setdefault("day_so_far", {})
     now = datetime.now(timezone.utc)
     by_id = data_by_id(data)
     threads = {t["id"]: t for t in data.get("threads", [])}
