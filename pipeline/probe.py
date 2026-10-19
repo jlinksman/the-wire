@@ -45,6 +45,12 @@ for line in open(sys.argv[1]):
                 newest = dt if newest is None or dt > newest else newest
         age = f"{(datetime.now(timezone.utc) - newest).total_seconds() / 3600:.1f}h" if newest else "-"
         kind = "OK" if r.status_code == 200 and n else ("NOT-A-FEED" if r.status_code == 200 else f"HTTP{r.status_code}")
+        if kind == "NOT-A-FEED":
+            # An HTML page: list the feeds it advertises, so the next probe can try them.
+            alts = re.findall(r'<link[^>]+type="application/(?:rss|atom)\+xml"[^>]*href="([^"]+)"', r.text, re.IGNORECASE)
+            alts += re.findall(r'href="([^"]*(?:/feed/?|/rss[^"]*|\.xml))"', r.text, re.IGNORECASE)[:5]
+            if alts:
+                print(f"           | advertised feeds: {', '.join(dict.fromkeys(alts))[:300]}")
         print(f"{kind:<10} | {label:<34} | items {n:>3} | newest {age:>7} | {url}")
     except Exception as exc:
         print(f"ERROR      | {label:<34} | {type(exc).__name__} | {url}")

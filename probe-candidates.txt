@@ -1,24 +1,15 @@
-# label | url   (coverage gaps, 2026-10-19)
-Governor NY press [rss] | https://www.governor.ny.gov/rss.xml
-Governor NY press [rss2] | https://www.governor.ny.gov/news/rss.xml
-NY Attorney General press [rss] | https://ag.ny.gov/rss.xml
-NY Attorney General press [rss2] | https://ag.ny.gov/press-releases/feed
-NYS Comptroller press [rss] | https://www.osc.ny.gov/rss.xml
-NYS Comptroller press [rss2] | https://www.osc.ny.gov/press/releases/rss.xml
-EPA news releases Region 2 [rss] | https://www.epa.gov/newsreleases/search/rss/region/02
-EPA news releases all [rss] | https://www.epa.gov/newsreleases/search/rss
-USCG Sector New York DVIDS [rss] | https://www.dvidshub.net/rss/unit/USCG-SECTOR-NY
-USCG news [rss] | https://news.uscg.mil/RSS
-Dutchess County news [rss] | https://www.dutchessny.gov/rss.xml
-Dutchess County press [rss2] | https://www.dutchessny.gov/Government/County-Executive/Press-Releases.rss
-Kyiv Independent [rss] | https://kyivindependent.com/feed
-NHK World news [rss] | https://www3.nhk.or.jp/rss/news/cat0.xml
-NHK World English [rss2] | https://www3.nhk.or.jp/nhkworld/en/news/feeds/
-SCMP news [rss] | https://www.scmp.com/rss/91/feed
-Supreme Court opinions CourtListener [rss] | https://www.courtlistener.com/feed/court/scotus/
-Supreme Court orders page | https://www.supremecourt.gov/orders/ordersofthecourt/26
-NYS DOL press [rss] | https://dol.ny.gov/rss.xml
-NYSDEC press releases [rss] | https://dec.ny.gov/rss.xml
-NYSDEC news [rss2] | https://dec.ny.gov/news/press-releases/rss
-Al-Monitor [rss] | https://www.al-monitor.com/rss
-MercoPress Latin America [rss] | https://en.mercopress.com/rss
+# label | url   (coverage gaps, round 2, 2026-10-19)
+Governor NY news page | https://www.governor.ny.gov/news
+NY Attorney General press page | https://ag.ny.gov/press-releases
+NYS Comptroller press page | https://www.osc.ny.gov/press/releases
+Dutchess County Executive press page | https://www.dutchessny.gov/Government/County-Executive/Press-Releases.htm
+Dutchess County news page | https://www.dutchessny.gov/News/
+EPA Region 2 news page | https://www.epa.gov/newsreleases/search?f%5B0%5D=region%3A2
+Kyiv Independent [rss2] | https://kyivindependent.com/rss/
+Kyiv Independent [rss3] | https://kyivindependent.com/feed/
+Kyiv Independent home | https://kyivindependent.com/
+NHK World English home | https://www3.nhk.or.jp/nhkworld/en/news/
+NYSDEC press page | https://dec.ny.gov/news/press-releases
+NYS DOL news page | https://dol.ny.gov/news
+Coast Guard Sector New York news page | https://www.news.uscg.mil/News-by-Region/Atlantic-Area/1st-District-Northeast/
+USCG 1st District DVIDS [rss] | https://www.dvidshub.net/rss/unit/CG1
