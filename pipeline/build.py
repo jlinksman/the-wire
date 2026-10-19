@@ -1141,6 +1141,16 @@ def main() -> int:
     data["tracker"] = data_tracker
     data["gov_panel"] = gov_panel(data["items"])
     data["front_page_url"] = yaml.safe_load(CONFIG.read_text()).get("front_page_url")
+    # Follows (threads and named topics) come from Cloudflare KV, fetched by the workflow
+    # into follows.json before the build; never committed.
+    follows = {}
+    fpath = ROOT / "follows.json"
+    if fpath.exists():
+        try:
+            follows = json.loads(fpath.read_text()) or {}
+        except ValueError as exc:
+            log(f"[follows] unreadable: {exc}")
+    data["follows"] = {"threads": follows.get("threads", []), "topics": follows.get("topics", [])}
     # The people directory (people.yaml) for the page: names, roles, perspective, reachability.
     data["people"] = [{k: p[k] for k in ("id", "name", "role", "desk", "perspective", "unreachable") if p.get(k)}
                       for p in load_people_cfg()]
@@ -1149,7 +1159,7 @@ def main() -> int:
     # V5: story grouping, open-text quotes, machine summaries. A failure here is
     # recorded in source health and never stops the feed from publishing.
     try:
-        stories.run(state, data, {s["id"]: s for s in sources}, session, robots_allows, TIMEOUT, log)
+        stories.run(state, data, {s["id"]: s for s in sources}, session, robots_allows, TIMEOUT, log, follows)
     except Exception as exc:
         log(f"[v5] failed: {type(exc).__name__}: {exc}")
         data["sources"].append({"id": "v5", "name": "Story grouping and summaries", "short": "Stories", "desk": "SYSTEM",
