@@ -75,6 +75,7 @@ export async function onRequestPost({ request, env }) {
     checked.push({ text, refs: all });
   }
   if (!checked.length && model) notice = (notice ? notice + " " : "") + "The model's answer couldn't be verified against the sources, so it isn't shown. Try a narrower question.";
+  else if (dropped) notice = (notice ? notice + " " : "") + `${dropped} sentence${dropped > 1 ? "s" : ""} left out: not verifiable against the cited sources.`;
   const used = [...new Set(checked.flatMap((a) => a.refs))].sort((a, b) => a - b);
   const res = json({
     thread: tid, question, as_of: ev.generated_at, written_at: new Date().toISOString(), model, notice, dropped,
