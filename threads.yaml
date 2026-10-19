@@ -20,6 +20,12 @@ standing:
     kind: law
     desk: LAW
     pattern: "Navigation Law, Oil Spill Fund, Article 12, spill fund, strict liability discharge, oil spill, petroleum spill, fuel spill, spill response, spill cleanup"
+  - id: biz_spills_territory
+    group: business
+    title: "Spills reported to DEC in Optima's counties"
+    kind: subject
+    desk: LAW
+    pattern: "DEC spill report"
   - id: law_pbs_tanks
     group: business
     title: "Petroleum bulk storage and tank rules"
