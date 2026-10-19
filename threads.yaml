@@ -6,6 +6,8 @@
 # pattern: comma-separated terms matched whole-word against a report's headline and the
 # first 300 characters of its description; a trailing * matches endings (brownfield*).
 # Keep patterns specific: a standing thread that matches everything tracks nothing.
+# group: business (Optima's lines), law (Joe's legal background), government (policy he tracks);
+# the Threads tab groups standing threads by it.
 #
 # Optima's business lines (2026-10-19): petroleum bulk storage compliance, UST/AST installation
 # and removal, spill response, environmental remediation, Phase I ESAs, public-works jobs under
@@ -13,41 +15,49 @@
 # (bing_topic_pfas), not a standing thread.
 standing:
   - id: law_navigation_spill
+    group: business
     title: "Navigation Law Article 12 and the Oil Spill Fund"
     kind: law
     desk: LAW
     pattern: "Navigation Law, Oil Spill Fund, Article 12, spill fund, strict liability discharge, oil spill, petroleum spill, fuel spill, spill response, spill cleanup"
   - id: law_pbs_tanks
+    group: business
     title: "Petroleum bulk storage and tank rules"
     kind: law
     desk: LAW
     pattern: "petroleum bulk storage, Part 613, 6 NYCRR 613, underground storage tank*, aboveground storage tank*, UST, AST, tank removal, tank closure, 40 CFR 280, bulk storage"
   - id: law_brownfields
+    group: business
     title: "Brownfields and site remediation"
     kind: law
     desk: LAW
     pattern: "brownfield*, Brownfield Cleanup Program, remedial action, remediation site, Superfund, CERCLA, RCRA, consent decree, record of decision, Phase I ESA, environmental site assessment"
   - id: law_prevailing_wage
+    group: business
     title: "Prevailing wage and public-works contracting in New York"
     kind: law
     desk: LAW
     pattern: "prevailing wage*, Labor Law 220, certified payroll, MPWR, public works contract*, Davis-Bacon, NYSDOL Bureau of Public Work"
   - id: law_bankruptcy
+    group: law
     title: "Bankruptcy and restructuring"
     kind: law
     desk: LAW
     pattern: "Chapter 11, Chapter 7, Chapter 15, bankruptcy court, Bankr., debtor in possession, automatic stay, creditors' committee, restructuring support agreement"
   - id: law_fincen_boi
+    group: law
     title: "FinCEN and beneficial ownership"
     kind: law
     desk: LAW
     pattern: "FinCEN, beneficial ownership, Corporate Transparency Act, Bank Secrecy Act, anti-money laundering, AML, suspicious activity report*"
   - id: law_2d_dept_land_use
+    group: law
     title: "Land use and zoning in the Second Department"
     kind: law
     desk: LAW
     pattern: "zoning board, planning board, site plan, variance, SEQRA, Article 78, rezon*, special use permit, subdivision approval, area variance, use variance"
   - id: gov_student_loans
+    group: government
     title: "Student loans: the end of SAVE, forgiveness and repayment reform"
     kind: process
     desk: GOV

@@ -5,17 +5,18 @@
 // settings sheet. Preferences, saved items and the last-visit time live in this
 // browser only (per device).
 
+// Five tabs (HIG): Today is the composed page; Threads is the home of topics; News holds the
+// desks as segments; Live is the player; Settings has reading preferences and administration.
 const TABS = [
   { id: "today", label: "Today", icon: "◉" },
-  { id: "beacon", label: "Beacon", icon: "⌂" },
-  { id: "gov", label: "Gov", icon: "§" },
-  { id: "world", label: "World", icon: "◍" },
+  { id: "threads", label: "Threads", icon: "≡" },
+  { id: "news", label: "News", icon: "¶" },
   { id: "live", label: "Live", icon: "▶" },
+  { id: "settings", label: "Settings", icon: "⚙" },
 ];
 const SEGMENTS = {
-  beacon: [["BEACON", "Beacon"], ["REGION", "Region"]],
-  gov: [["GOV", "Government"], ["LAW", "Law & courts"]],
-  world: [["WORLD", "World"], ["SPORTS", "Sports"]],
+  news: [["BEACON", "Beacon"], ["REGION", "Region"], ["GOV", "Gov"], ["LAW", "Law"], ["WORLD", "World"], ["SPORTS", "Sports"]],
+  threads: [["following", "Following"], ["standing", "Standing"], ["suggested", "Suggested"], ["browse", "Browse"]],
 };
 const DESK_NAME = { BEACON: "Beacon", REGION: "Region", GOV: "Gov", LAW: "Law", WORLD: "World", SPORTS: "Sports", SYSTEM: "System" };
 // Region items are Beacon-desk items from regional outlets (sources.yaml `regional: true`).
@@ -56,7 +57,9 @@ const saveSaved = () => store.set(KEY.saved, JSON.stringify(saved.slice(0, 100))
 let data = null;
 let pending = null;                                // fresh data held while you're scrolled down
 let tab = TABS.some((t) => t.id === store.get(KEY.tab)) ? store.get(KEY.tab) : "today";
-const seg = Object.assign({ beacon: "BEACON", gov: "GOV", world: "WORLD" }, store.json(KEY.seg, {}));
+const seg = Object.assign({ news: "BEACON", threads: "following" }, store.json(KEY.seg, {}));
+if (!SEGMENTS.news.some(([d]) => d === seg.news)) seg.news = "BEACON";
+if (!SEGMENTS.threads.some(([d]) => d === seg.threads)) seg.threads = "following";
 let prevVisit = Number(store.get(KEY.visit)) || null;
 let channel = store.get(KEY.channel);
 let playing = false;
@@ -245,9 +248,7 @@ function renderTop() {
 }
 
 function inView(it) {
-  if (tab === "beacon") return deskOf(it) === seg.beacon;
-  if (tab === "gov") return it.desk === seg.gov;
-  if (tab === "world") return it.desk === seg.world;
+  if (tab === "news") return deskOf(it) === seg.news;
   return false;
 }
 
@@ -257,7 +258,7 @@ function newCount(desks) {
 }
 
 function renderTabbar() {
-  const counts = { beacon: newCount(["BEACON", "REGION"]), gov: newCount(["GOV", "LAW"]), world: newCount(["WORLD", "SPORTS"]) };
+  const counts = { news: newCount(["BEACON", "REGION", "GOV", "LAW", "WORLD", "SPORTS"]), threads: newThreadCount() };
   const liveOn = playing;
   $("tabbar").replaceChildren(...TABS.map((t) => el("button", {
     class: "tabbtn", "aria-current": t.id === tab ? "page" : null, "data-tab": t.id,
@@ -267,6 +268,13 @@ function renderTabbar() {
     el("span", { class: "ico" + (t.id === "live" && liveOn ? " on" : ""), "aria-hidden": "true", text: t.icon }),
     el("span", { class: "tl", text: t.label }),
     counts[t.id] ? el("span", { class: "badge", "aria-hidden": "true" }) : null)));
+}
+
+function goDesk(d) { seg.news = d; store.set(KEY.seg, JSON.stringify(seg)); go("news"); window.scrollTo(0, 0); }
+function goThreads(segment) { seg.threads = segment; store.set(KEY.seg, JSON.stringify(seg)); go("threads"); window.scrollTo(0, 0); }
+function newThreadCount() {
+  if (!prevVisit || !data) return 0;
+  return (data.threads || []).filter((t) => t.followed && (t.developments || []).some((d) => Date.parse(d.t) > prevVisit)).length;
 }
 
 // Tapping the tab you're on goes to the top, as in iPhone apps.
@@ -288,10 +296,10 @@ function renderView(id) {
   for (const t of TABS) $("view-" + t.id).hidden = t.id !== id;
   document.body.dataset.tab = id;
   if (id === "today") v.replaceChildren(...todayView());
-  if (id === "beacon") v.replaceChildren(segBar("beacon"), ...deskView("beacon", seg.beacon));
-  if (id === "gov") v.replaceChildren(segBar("gov"), ...(seg.gov === "GOV" ? govPanel() : []), ...deskView("gov", seg.gov));
-  if (id === "world") v.replaceChildren(segBar("world"), ...(seg.world === "SPORTS" ? scoreboard() : []), ...deskView("world", seg.world));
+  if (id === "threads") v.replaceChildren(segBar("threads"), ...threadsView(seg.threads));
+  if (id === "news") v.replaceChildren(segBar("news"), ...(seg.news === "GOV" ? govPanel() : []), ...(seg.news === "SPORTS" ? scoreboard() : []), ...deskView("news", seg.news));
   if (id === "live") v.replaceChildren(...liveView());
+  if (id === "settings") v.replaceChildren(...settingsView());
 }
 
 // --------------------------------------------------------------- today
@@ -331,8 +339,7 @@ function todayView() {
       el("span", { class: "bc-s", text: (since ? "What's new since " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) : "What matters today") + " · newscast or narrative" }))));
 
   // 2. Threads you follow
-  out.push(...threadsSection());
-  out.push(...suggestSection());
+  out.push(...threadsStrip());
 
   // 3. Top stories as units: Beacon first, then the ranked front page
   const cutoff = Date.now() - 48 * 3600000;
@@ -385,13 +392,7 @@ function todayView() {
   out.push(el("div", { class: "caughtup" },
     el("div", { class: "cu-k", text: "That's The Wire" }),
     el("div", { class: "cu-t", text: "You're current as of " + exact(Date.parse(data.generated_at)) + ". More on each desk:" }),
-    el("div", { class: "cu-links" }, ...[["beacon", "Beacon"], ["gov", "Gov"], ["gov:LAW", "Law"], ["world", "World"], ["world:SPORTS", "Sports"]].map(([k, label]) =>
-      el("button", { class: "pill", text: label, onclick: () => {
-        const [t, s] = k.split(":");
-        if (s) { seg[t] = s; store.set(KEY.seg, JSON.stringify(seg)); }
-        else if (SEGMENTS[t]) { seg[t] = SEGMENTS[t][0][0]; store.set(KEY.seg, JSON.stringify(seg)); }
-        go(t);
-      } })))));
+    el("div", { class: "cu-links" }, ...SEGMENTS.news.map(([d, label]) => el("button", { class: "pill", text: label, onclick: () => goDesk(d) })))));
   return out;
 }
 
@@ -1141,62 +1142,8 @@ function openHealth() {
 $("status-btn").addEventListener("click", () => { if (data) openHealth(); });
 
 // --------------------------------------------------------------- settings (sheet)
-function openSettings() {
-  const sizeRow = el("div", { class: "segmini" }, ...SIZES.map(([v, label]) => el("button", {
-    "aria-pressed": String(prefs.size === v),
-    onclick: (e) => { prefs.size = v; savePrefs(); applySize(); [...e.currentTarget.parentNode.children].forEach((b) => b.setAttribute("aria-pressed", String(b === e.currentTarget))); },
-  }, label)));
-  const toggle = (label, keyName) => el("label", { class: "trow" },
-    el("span", { text: label }),
-    el("input", { type: "checkbox", id: "pref-" + keyName, checked: prefs[keyName] ? true : null,
-      onchange: (e) => { prefs[keyName] = e.target.checked; savePrefs(); render(); } }));
-  const words = el("input", { type: "text", id: "pref-words", class: "tin", value: prefs.mutedWords, placeholder: "e.g. NCIS, Grand Theft Auto, Kardashian",
-    onchange: (e) => { prefs.mutedWords = e.target.value; savePrefs(); render(); } });
-  const srcs = (data ? data.sources : []).filter((s) => !["SYSTEM"].includes(s.desk) && !s.id.startsWith("p_"));
-  const srcList = el("div", { class: "srclist" }, ...srcs.map((s) => el("label", { class: "trow" },
-    el("span", {}, s.name, el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
-    el("input", { type: "checkbox", id: "src-" + s.id, checked: prefs.mutedSources.includes(s.id) ? null : true,
-      onchange: (e) => {
-        prefs.mutedSources = prefs.mutedSources.filter((x) => x !== s.id);
-        if (!e.target.checked) prefs.mutedSources.push(s.id);
-        savePrefs(); render();
-      } }))));
-  const savedList = saved.length
-    ? el("ol", { class: "savedlist" }, ...saved.map((x) => el("li", {},
-        link(x.link, x.title),
-        el("span", { class: "asrc", text: x.source + " · " + fmtDate.format(new Date(x.ms)) }),
-        el("button", { class: "unsave", text: "Remove", onclick: (e) => { saved = saved.filter((y) => y.id !== x.id); saveSaved(); e.currentTarget.parentNode.remove(); } }))))
-    : el("p", { class: "sdesc", text: "Nothing saved yet. Use ☆ Save on any item." });
-  openSheet([
-    el("h2", { id: "sheet-title", class: "stitle", text: "Settings" }),
-    el("h3", { class: "sh3", text: "Appearance" }),
-    el("div", { class: "segmini three" }, ...THEMES.map(([v, label]) => el("button", {
-      "aria-pressed": String(prefs.theme === v),
-      onclick: (e) => { prefs.theme = v; savePrefs(); applyTheme(); [...e.currentTarget.parentNode.children].forEach((b) => b.setAttribute("aria-pressed", String(b === e.currentTarget))); },
-    }, label))),
-    el("h3", { class: "sh3", text: "Text size" }),
-    sizeRow,
-    el("p", { class: "fine", text: "“iPhone” follows Settings › Display & Brightness › Text Size." }),
-    el("h3", { class: "sh3", text: "Display" }),
-    toggle("World clocks on Today", "clocks"),
-    toggle("Read briefings aloud right away", "speak"),
-    toggle("Desks open on new items only", "newOnly"),
-    el("h3", { class: "sh3", text: "Saved" }),
-    savedList,
-    el("h3", { class: "sh3", text: "Mute words" }),
-    words,
-    el("p", { class: "fine", text: "Comma-separated. Items whose headline or description contains one are hidden everywhere." }),
-    el("h3", { class: "sh3", text: "People" }),
-    el("button", { class: "sbtn wide", text: "People you follow (" + ((data && data.people) || []).length + ") ›", onclick: openPeople }),
-    el("h3", { class: "sh3", text: "Sources shown" }),
-    srcList,
-    el("button", { class: "sbtn wide", text: "Source health ›", onclick: openHealth }),
-    el("p", { class: "fine", text: "Settings and saved items stay on this device." }),
-    el("p", { class: "fine", text: "Version " + (APP_VERSION.startsWith("__") ? "local" : APP_VERSION) + (deployedAt ? " · deployed " + exact(Date.parse(deployedAt)) : "") + ". The Wire checks for a new version every time you open it." }),
-    el("button", { class: "sbtn wide", text: "Check for updates now", onclick: async (e) => { e.currentTarget.textContent = "Checking…"; const b = e.currentTarget; await checkVersion(); if (!updateReady) b.textContent = "You're on the newest version"; } }),
-  ], "Settings");
-}
-$("settings-btn").addEventListener("click", openSettings);
+function openSettings() { go("settings"); }
+if ($("settings-btn")) $("settings-btn").addEventListener("click", () => go("settings"));
 
 // --------------------------------------------------------------- always the newest version
 // Each deploy stamps a version (the commit) into this page and into version.json. The page
@@ -1337,19 +1284,19 @@ function threadCard(t) {
       t.outlets > 1 ? el("span", { text: t.outlets + " outlets" }) : null, el("span", { text: t.n_reports + " reports" })));
 }
 
-function threadsSection() {
+// Today's strip: followed threads with something new, then the rest, four at most; the Threads tab has everything.
+function threadsStrip() {
   const mine = (data.threads || []).filter((t) => isFollowed(t.id));
-  const addBtn = el("button", { class: "sa", text: "Follow a topic", onclick: openTopicForm });
-  const head = sectionHead("Threads you follow", null, openTopicForm, "Follow a topic");
-  head.insertBefore(el("button", { class: "sa", onclick: () => openThreadsBrowser(), text: "Browse all" }), head.lastChild);
-  const out = [head];
-  if (!mine.length) {
-    out.push(el("p", { class: "sdesc", text: "Follow any story with the Follow button, or name a topic to watch over time. Followed threads collect every report, development and document here." }));
-    return out;
-  }
-  out.push(el("div", { class: "threads" }, ...mine.slice(0, 8).map(threadCard)));
+  const since = prevVisit && Date.now() - prevVisit < 48 * 3600e3 ? prevVisit : Date.now() - 24 * 3600e3;
+  const ranked = mine.slice().sort((a, b) => ((b.developments || []).some((d) => Date.parse(d.t) > since) - (a.developments || []).some((d) => Date.parse(d.t) > since)) || Date.parse(b.last) - Date.parse(a.last));
+  const head = sectionHead("Your threads", mine.length ? mine.length + " followed" : null, () => goThreads(mine.length ? "following" : "browse"), mine.length ? "All threads" : "Find threads");
+  if (!mine.length) return [head, el("p", { class: "sdesc", text: "Follow any story with the Follow button, start a thread from any report, or browse the live threads. Followed threads collect every report, development and document." })];
+  const out = [head, el("div", { class: "threads" }, ...ranked.slice(0, 4).map(threadCard))];
+  const sugg = (data.suggest || []).map((id) => (data.threads || []).find((t) => t.id === id)).filter((t) => t && !isFollowed(t.id));
+  if (sugg.length) out.push(el("p", { class: "fine" }, "You might follow: ", ...sugg.slice(0, 2).flatMap((t, i) => [i ? " · " : "", el("button", { class: "linkbtn", text: t.title, onclick: () => openThread(t) })])));
   return out;
 }
+
 
 function openTopicForm() {
   const title = el("input", { type: "text", id: "topic-title", class: "tin", placeholder: "e.g. 152-158 Fishkill Avenue" });
@@ -1566,30 +1513,6 @@ function addReportBox(t) {
   return el("div", { class: "addbox" }, q, list, el("p", { class: "fine", text: "Added reports join the thread on the next build and are marked as yours." }));
 }
 
-// Browse every live thread: by desk, by name.
-function openThreadsBrowser(deskFilter) {
-  let desk = deskFilter || "ALL";
-  const q = el("input", { type: "text", class: "tin", placeholder: "Search threads" });
-  const chips = el("div", { class: "chips" });
-  const list = el("ul", { class: "suggest" });
-  const all = (data.threads || []).slice().sort((a, b) => Date.parse(b.last) - Date.parse(a.last));
-  const draw = () => {
-    chips.replaceChildren(...["ALL", "BEACON", "GOV", "LAW", "WORLD", "SPORTS"].map((d) => el("button", { class: "chip" + (desk === d ? " on" : ""), text: d === "ALL" ? "All" : DESK_NAME[d], onclick: () => { desk = d; draw(); } })));
-    const words = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const hits = all.filter((t) => (desk === "ALL" || t.desk === desk) && words.every((w) => t.title.toLowerCase().includes(w)));
-    list.replaceChildren(...hits.slice(0, 60).map((t) => el("li", {},
-      el("span", { class: "asrc", text: kindLabel(t) + " · " + (DESK_NAME[t.desk] || t.desk) + " · " + (t.outlets > 1 ? t.outlets + " outlets · " : "") + t.n_reports + " reports · " + ago(Date.parse(t.last)) + " ago" }),
-      el("button", { class: "doclink", text: t.title, onclick: () => openThread(t) }),
-      el("span", { class: "sgrow" }, followButton({ thread: t.id }, true)))));
-    if (!hits.length) list.append(el("li", { class: "fine", text: "No threads match." }));
-  };
-  q.oninput = draw; draw();
-  openSheet([
-    el("h2", { id: "sheet-title", class: "stitle", text: "All threads" }),
-    el("p", { class: "sdesc", text: all.length + " live threads. Follow one to keep it, or open it and add your own reports." }),
-    q, chips, list,
-  ], "All threads");
-}
 
 // Threads you might follow (stage 4): the build's suggestions, with a reason.
 function suggestSection() {
@@ -1619,6 +1542,162 @@ function areasOfLaw(desk) {
           fresh ? el("span", { class: "since", text: fresh + " new" }) : null),
         last ? el("span", { class: "tnew" }, el("b", { text: ago(Date.parse(last.t)) + " ago: " }), last.text + " · " + last.source) : el("span", { class: "tnew quiet", text: "Nothing matched yet." })));
     }))];
+}
+
+// --------------------------------------------------------------- the Threads tab
+const GROUP_LABEL = { business: "Optima's business", law: "Law", government: "Government and policy" };
+function threadsView(segment) {
+  const out = [];
+  const threads = data.threads || [];
+  if (segment === "following") {
+    const mine = threads.filter((t) => isFollowed(t.id));
+    out.push(sectionHead("Following", mine.length ? mine.length + " threads and topics" : null, openTopicForm, "Follow a topic"));
+    if (!mine.length) out.push(el("p", { class: "sdesc", text: "Nothing followed yet. Use Follow on any story, Add to a thread on any report, or browse the live threads." }));
+    else {
+      const since = prevVisit && Date.now() - prevVisit < 48 * 3600e3 ? prevVisit : Date.now() - 24 * 3600e3;
+      const fresh = mine.filter((t) => (t.developments || []).some((d) => Date.parse(d.t) > since));
+      const quiet = mine.filter((t) => !fresh.includes(t));
+      if (fresh.length) out.push(el("h3", { class: "sh3", text: "New since you last looked" }), el("div", { class: "threads" }, ...fresh.map(threadCard)));
+      if (quiet.length) out.push(el("h3", { class: "sh3", text: fresh.length ? "Quiet" : "All" }), el("div", { class: "threads" }, ...quiet.map(threadCard)));
+    }
+  }
+  if (segment === "standing") {
+    out.push(sectionHead("Standing threads", "tracked whether or not you follow them · threads.yaml"));
+    for (const g of ["business", "law", "government"]) {
+      const list = threads.filter((t) => t.standing && (t.group || (t.desk === "LAW" ? "law" : "government")) === g);
+      if (!list.length) continue;
+      out.push(el("h3", { class: "sh3", text: GROUP_LABEL[g] }), standingList(list));
+    }
+  }
+  if (segment === "suggested") {
+    out.push(sectionHead("You might follow", "from what you follow and ask for more of"));
+    const sugg = (data.suggest || []).map((id) => threads.find((t) => t.id === id)).filter((t) => t && !isFollowed(t.id));
+    const more = threads.filter((t) => !isFollowed(t.id) && !t.named && (t.outlets >= 3 || (t.developments || []).length >= 3) && !sugg.includes(t)).slice(0, 12);
+    if (!sugg.length && !more.length) out.push(el("p", { class: "sdesc", text: "Nothing to suggest yet. Suggestions come from the threads you follow and the ones you ask for more of." }));
+    if (sugg.length) out.push(suggestList(sugg));
+    if (more.length) out.push(el("h3", { class: "sh3", text: "Busy threads you don't follow" }), suggestList(more));
+  }
+  if (segment === "browse") out.push(...browseInline());
+  return out;
+}
+function standingList(list) {
+  const since = prevVisit && Date.now() - prevVisit < 48 * 3600e3 ? prevVisit : Date.now() - 24 * 3600e3;
+  return el("ul", { class: "areas" }, ...list.map((t) => {
+    const devs = t.developments || [];
+    const last = devs[devs.length - 1];
+    const fresh = devs.filter((d) => Date.parse(d.t) > since).length;
+    return el("li", {}, el("button", { class: "area", onclick: () => openThread(t) },
+      el("span", { class: "headline", text: t.title }),
+      el("span", { class: "meta" }, el("span", { text: t.n_reports + " reports" }), el("span", { text: (t.docs || []).length + " documents" }),
+        fresh ? el("span", { class: "since", text: fresh + " new" }) : null, isFollowed(t.id) ? el("span", { text: "following" }) : null),
+      last ? el("span", { class: "tnew" }, el("b", { text: ago(Date.parse(last.t)) + " ago: " }), last.text + " · " + last.source) : el("span", { class: "tnew quiet", text: "Nothing matched yet." })));
+  }));
+}
+function suggestList(list) {
+  return el("ul", { class: "suggest" }, ...list.map((t) => el("li", {},
+    el("span", { class: "asrc", text: kindLabel(t) + " · " + (DESK_NAME[t.desk] || t.desk) + " · " + (t.outlets > 1 ? t.outlets + " outlets · " : "") + (t.developments || []).length + " developments · " + ago(Date.parse(t.last)) + " ago" }),
+    el("button", { class: "doclink", text: t.title, onclick: () => openThread(t) }),
+    el("span", { class: "sgrow" }, followButton({ thread: t.id }, true)))));
+}
+let browseDesk = "ALL", browseQ = "";
+function browseInline() {
+  const q = el("input", { type: "text", class: "tin", placeholder: "Search threads", value: browseQ });
+  const chips = el("div", { class: "chips" });
+  const list = el("ul", { class: "suggest" });
+  const all = (data.threads || []).slice().sort((a, b) => Date.parse(b.last) - Date.parse(a.last));
+  const draw = () => {
+    chips.replaceChildren(...["ALL", "BEACON", "GOV", "LAW", "WORLD", "SPORTS"].map((d) => el("button", { class: "chip" + (browseDesk === d ? " on" : ""), text: d === "ALL" ? "All" : DESK_NAME[d], onclick: () => { browseDesk = d; draw(); } })));
+    const words = browseQ.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const hits = all.filter((t) => (browseDesk === "ALL" || t.desk === browseDesk) && words.every((w) => t.title.toLowerCase().includes(w)));
+    list.replaceChildren(...hits.slice(0, 80).map((t) => el("li", {},
+      el("span", { class: "asrc", text: kindLabel(t) + " · " + (DESK_NAME[t.desk] || t.desk) + " · " + (t.outlets > 1 ? t.outlets + " outlets · " : "") + t.n_reports + " reports · " + ago(Date.parse(t.last)) + " ago" }),
+      el("button", { class: "doclink", text: t.title, onclick: () => openThread(t) }),
+      el("span", { class: "sgrow" }, followButton({ thread: t.id }, true)))));
+    if (!hits.length) list.append(el("li", { class: "fine", text: "No threads match." }));
+  };
+  q.oninput = () => { browseQ = q.value; draw(); };
+  draw();
+  return [sectionHead("All threads", all.length + " live", openTopicForm, "Follow a topic"), q, chips, list];
+}
+
+// --------------------------------------------------------------- the Settings tab
+function settingsView() {
+  const sizeRow = el("div", { class: "segmini" }, ...SIZES.map(([v, label]) => el("button", {
+    "aria-pressed": String(prefs.size === v),
+    onclick: (e) => { prefs.size = v; savePrefs(); applySize(); [...e.currentTarget.parentNode.children].forEach((b) => b.setAttribute("aria-pressed", String(b === e.currentTarget))); },
+  }, label)));
+  const toggle = (label, keyName) => el("label", { class: "trow" },
+    el("span", { text: label }),
+    el("input", { type: "checkbox", id: "pref-" + keyName, checked: prefs[keyName] ? true : null,
+      onchange: (e) => { prefs[keyName] = e.target.checked; savePrefs(); render(); } }));
+  const words = el("input", { type: "text", id: "pref-words", class: "tin", value: prefs.mutedWords, placeholder: "e.g. NCIS, Grand Theft Auto, Kardashian",
+    onchange: (e) => { prefs.mutedWords = e.target.value; savePrefs(); render(); } });
+  const srcs = (data ? data.sources : []).filter((s) => !["SYSTEM"].includes(s.desk) && !s.id.startsWith("p_"));
+  const srcList = el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Sources shown · " + (srcs.length - prefs.mutedSources.length) + " of " + srcs.length }), el("span", { class: "chev", text: "▾" })),
+    el("div", { class: "srclist" }, ...srcs.map((s) => el("label", { class: "trow" },
+      el("span", {}, s.name, el("span", { class: "dk", style: "--c: var(--" + s.desk.toLowerCase() + ")", text: DESK_NAME[s.desk] || s.desk })),
+      el("input", { type: "checkbox", id: "src-" + s.id, checked: prefs.mutedSources.includes(s.id) ? null : true,
+        onchange: (e) => { prefs.mutedSources = prefs.mutedSources.filter((x) => x !== s.id); if (!e.target.checked) prefs.mutedSources.push(s.id); savePrefs(); render(); } })))));
+  const savedList = saved.length
+    ? el("ol", { class: "savedlist" }, ...saved.map((x) => el("li", {}, link(x.link, x.title),
+        el("span", { class: "asrc", text: x.source + " · " + fmtDate.format(new Date(x.ms)) }),
+        el("button", { class: "unsave", text: "Remove", onclick: (e) => { saved = saved.filter((y) => y.id !== x.id); saveSaved(); e.currentTarget.parentNode.remove(); } }))))
+    : el("p", { class: "fine", text: "Nothing saved yet. Use ☆ Save on any item." });
+  const bad = failingSources().length;
+  const f = followsNow();
+  const removeBtn = (label, body) => { const b = el("button", { class: "unsave", text: label }); b.onclick = async () => { b.textContent = "…"; const ok = await setFollow(body); if (!ok) b.textContent = "Couldn't save"; }; return b; };
+  const adminList = (rows) => rows.length ? el("ul", { class: "admin" }, ...rows) : el("p", { class: "fine", text: "None." });
+  const threadRows = f.threads.map((x) => { const t = (data.threads || []).find((y) => y.id === x.id); return el("li", {},
+    el("span", { class: "asrc", text: "since " + fmtDate.format(new Date(Date.parse(x.since))) + (t ? " · " + t.n_reports + " reports" : " · not live right now") + ((x.items || []).length ? " · " + x.items.length + " added by you" : "") }),
+    t ? el("button", { class: "doclink", text: x.title || t.title, onclick: () => openThread(t) }) : el("span", { text: x.title }),
+    removeBtn("Unfollow", { action: "unfollow", type: "thread", id: x.id })); });
+  const topicRows = f.topics.map((x) => { const t = (data.threads || []).find((y) => y.id === x.id); return el("li", {},
+    el("span", { class: "asrc", text: (x.kind || "subject") + " · " + (DESK_NAME[x.desk] || x.desk) + (x.pattern ? " · watching: " + x.pattern : " · hand-built") + ((x.items || []).length ? " · " + x.items.length + " added by you" : "") }),
+    t ? el("button", { class: "doclink", text: x.title, onclick: () => openThread(t) }) : el("span", { text: x.title }),
+    removeBtn("Unfollow", { action: "unfollow", type: "topic", id: x.id })); });
+  const signalRows = (f.signals || []).map((x) => { const t = (data.threads || []).find((y) => y.id === x.id); return el("li", {},
+    el("span", { class: "asrc", text: (x.value === "more" ? "More like this" : "Less like this") + " · " + fmtDate.format(new Date(Date.parse(x.at))) }),
+    t ? el("button", { class: "doclink", text: x.title || t.title, onclick: () => openThread(t) }) : el("span", { text: x.title || x.id }),
+    removeBtn("Clear", { action: "signal", id: x.id, value: "clear" })); });
+  const standing = (data.threads || []).filter((t) => t.standing);
+  const mutedPeople = (prefs.mutedPeople || []).map((pid) => (data.people || []).find((p) => p.id === pid)).filter(Boolean);
+  return [
+    el("h1", { class: "yw", text: "Settings" }),
+    el("h2", { class: "sh2", text: "Reading" }),
+    el("h3", { class: "sh3", text: "Appearance" }),
+    el("div", { class: "segmini three" }, ...THEMES.map(([v, label]) => el("button", {
+      "aria-pressed": String(prefs.theme === v),
+      onclick: (e) => { prefs.theme = v; savePrefs(); applyTheme(); [...e.currentTarget.parentNode.children].forEach((b) => b.setAttribute("aria-pressed", String(b === e.currentTarget))); },
+    }, label))),
+    el("h3", { class: "sh3", text: "Text size" }), sizeRow,
+    el("p", { class: "fine", text: "“iPhone” follows Settings › Display & Brightness › Text Size." }),
+    el("h3", { class: "sh3", text: "Display" }),
+    toggle("World clocks on Today", "clocks"), toggle("Read briefings aloud right away", "speak"), toggle("Desks open on new items only", "newOnly"),
+    el("h3", { class: "sh3", text: "Mute words" }), words,
+    el("p", { class: "fine", text: "Comma-separated. Items whose headline or description contains one are hidden everywhere." }),
+    el("h3", { class: "sh3", text: "Saved" }), savedList,
+    el("p", { class: "fine", text: "Reading settings and saved items stay on this device." }),
+
+    el("h2", { class: "sh2", text: "Admin" }),
+    el("p", { class: "fine", text: "Follows, topics and signals are stored on Cloudflare (follows.json) and reach the build; they work on every device." }),
+    el("h3", { class: "sh3", text: "Threads you follow · " + f.threads.length }), adminList(threadRows),
+    el("h3", { class: "sh3", text: "Topics you named · " + f.topics.length }), adminList(topicRows),
+    el("button", { class: "sbtn wide", text: "Follow a topic", onclick: openTopicForm }),
+    el("h3", { class: "sh3", text: "More / less signals · " + (f.signals || []).length }), adminList(signalRows),
+    el("h3", { class: "sh3", text: "Standing threads · " + standing.length }),
+    el("p", { class: "fine", text: "Configured in threads.yaml in the repository; the build reads it every run. Edit the file to add, rename or retire one." }),
+    el("ul", { class: "admin" }, ...standing.map((t) => el("li", {}, el("span", { class: "asrc", text: (GROUP_LABEL[t.group] || DESK_NAME[t.desk] || t.desk) + " · " + t.n_reports + " reports" }), el("button", { class: "doclink", text: t.title, onclick: () => openThread(t) })))),
+    el("h3", { class: "sh3", text: "People" }),
+    el("button", { class: "sbtn wide", text: "People you follow (" + ((data && data.people) || []).length + ") ›", onclick: openPeople }),
+    mutedPeople.length ? el("p", { class: "fine", text: "Muted: " + mutedPeople.map((p) => p.name).join(", ") + ". Unmute from the People list." }) : null,
+    el("h3", { class: "sh3", text: "Sources" }),
+    el("button", { class: "sbtn wide" + (bad ? " warn" : ""), text: bad ? "Source health · " + bad + " not updating ›" : "Source health · all updating ›", onclick: openHealth }),
+    srcList,
+    el("h3", { class: "sh3", text: "Version" }),
+    el("p", { class: "fine", text: "Version " + (APP_VERSION.startsWith("__") ? "local" : APP_VERSION) + (deployedAt ? " · deployed " + exact(Date.parse(deployedAt)) : "") + ". The Wire checks for a new version every time you open it." }),
+    el("button", { class: "sbtn wide", text: "Check for updates now", onclick: async (e) => { e.currentTarget.textContent = "Checking…"; const b = e.currentTarget; await checkVersion(); if (!updateReady) b.textContent = "You're on the newest version"; } }),
+    el("div", { class: "endline", text: "End of settings" }),
+  ].filter(Boolean);
 }
 
 // --------------------------------------------------------------- people you follow

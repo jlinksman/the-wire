@@ -62,6 +62,7 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - **Explore and build threads** (2026-10-19, after Joe's first read): "Browse all" lists every live thread by desk and name; "Add to a thread" on any report attaches it to an existing thread or starts a new hand-built one (optionally with watch terms); a thread page has "Add a report" search. Attachments live with the follows (`/follow` attach/detach) and the build logs them as "Added by you".
 - **The day so far** is now at most four labeled parts, one story each, tappable into the thread, instead of one paragraph that jumped between topics.
 - Standing threads reworked around Optima's lines (PBS and tanks, spills, brownfields and Phase I ESAs, prevailing wage) plus bankruptcy, FinCEN, Second Department land use, and student loans (SAVE's end and repayment reform). PFAS stays a topic watch, not a standing thread.
+- **Reorganized by topic** (2026-10-19): tabs are Today · Threads · News · Live · Settings. Threads tab: Following (new first), Standing (grouped business · law · government, `group:` in threads.yaml), Suggested, Browse. News holds the six desk segments. Settings tab: Reading (device) and Admin (follows, topics, signals with remove; standing threads read-only; people; sources and health; version). Today keeps a four-card strip of followed threads.
 - Held back: nothing. Learning signals were planned for after two weeks of use; built now at Joe's request.
 
 ## People (built 2026-10-18)

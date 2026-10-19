@@ -216,7 +216,7 @@ button.at { color: var(--text); }
 .seg button { min-height: 36px; border-radius: 10px; text-align: center; font-size: 0.88rem; font-weight: 500; color: var(--text2); }
 .seg button[aria-selected="true"] { color: var(--text); background: var(--raised); font-weight: 600; }
 .seg .n { display: none; }
-body[data-tab="gov"] .day, body[data-tab="world"] .day, body[data-tab="beacon"] .day { top: calc(var(--toph) + 44px); }
+body[data-tab="news"] .day, body[data-tab="threads"] .day { top: calc(var(--toph) + 44px); }
 
 .pills { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 14px var(--gutter-r) 8px var(--gutter-l); margin: 0 calc(-1 * var(--gutter-r)) 0 calc(-1 * var(--gutter-l)); }
 .pills::-webkit-scrollbar { display: none; }
@@ -560,3 +560,12 @@ details.rest[open] summary .chev { transform: rotate(180deg); display: inline-bl
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
 .chip { min-height: 32px; padding: 0 12px; border-radius: 16px; background: var(--raised); color: var(--text2); font: 600 0.82rem var(--sans); }
 .chip.on { background: var(--text); color: var(--bg); }
+
+/* Threads and Settings tabs */
+.sh2 { font: 700 1.25rem/1.2 var(--serif); margin: 22px 0 4px; padding-top: 14px; border-top: 1px solid var(--hair); }
+.admin { list-style: none; margin: 0 0 8px; padding: 0; }
+.admin li { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--hair); }
+.admin li .asrc { grid-column: 1 / -1; }
+.linkbtn { color: var(--text); text-decoration: underline; text-underline-offset: 3px; font: inherit; }
+.sbtn.warn { color: var(--live); }
+#view-settings .yw { margin-top: 6px; }

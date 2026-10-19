@@ -213,6 +213,8 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
         threads[tid] = t
         t["named"] = True
         t["standing"] = bool(topic.get("standing"))
+        if topic.get("group"):
+            t["group"] = topic["group"]
         t["kind"] = topic.get("kind") or t.get("kind") or "subject"
         t["title"] = topic["title"]
         if pat:
@@ -267,7 +269,7 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
         mem = [m for m in t["members"] if m in live]
         if not mem and not t.get("named"):
             continue
-        rec = {k: t[k] for k in ("id", "kind", "desk", "title", "opened", "last", "status", "followed", "named", "standing", "manual", "developing", "outlets", "signal", "revived_at", "added") if k in t}
+        rec = {k: t[k] for k in ("id", "kind", "desk", "title", "opened", "last", "status", "followed", "named", "standing", "manual", "group", "developing", "outlets", "signal", "revived_at", "added") if k in t}
         rec |= {"members": mem[-200:], "developments": t["developments"][-MAX_DEVELOPMENTS:], "docs": t["docs"],
                 "n_reports": len(t["members"]), **({"pattern": t["pattern"]} if t.get("pattern") else {})}
         if rec.get("revived_at") and (now - datetime.fromisoformat(rec["revived_at"].replace("Z", "+00:00"))) > timedelta(hours=48):
