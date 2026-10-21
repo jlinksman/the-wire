@@ -188,9 +188,8 @@ people:
      link: "https://www.youtube.com/@eitanthegoalie",
      unreachable: "YouTube's robots.txt closes channel feeds to automated readers; reachable once the YouTube Data API key is set (channel UCuzvwA-URlLuOewpBK11Deg)"}
   - {id: holy_land_speaks, name: Benjamin Birely, role: "Creator · commentary; Holy Land Speaks", desk: WORLD, beats: [israel],
-     link: "https://www.youtube.com/@holylandspeaks",
-     feeds: [{type: rss, url: "https://holylandspeaks.substack.com/feed"}],
-     notes: "Substack (weekly On One Foot election roundup). YouTube channel UCI30-wpShRs1NLdv7VEZh5Q waits for the YouTube Data API key (robots.txt closes channel feeds)."}
+     link: "https://holylandspeaks.substack.com",
+     unreachable: "Substack returns 403 to cloud servers (2026-10-21) and YouTube's robots.txt closes channel feeds; reachable by the email inbox (Substack) or the YouTube Data API key (channel UCI30-wpShRs1NLdv7VEZh5Q)"}
   - {id: toi_briefing, name: Times of Israel Daily Briefing, role: "Podcast", desk: WORLD,
      feeds: [{type: podcast, url: "https://www.omnycontent.com/d/playlist/a2539154-43b6-4c4f-b951-aca300136a80/f8a9521a-98d3-421a-a708-aca600dd355b/e96b6c46-116b-4376-aa28-aca600deea22/podcast.rss"}]}
   - {id: marwan_bishara, name: Marwan Bishara, role: "Al Jazeera senior political analyst", desk: WORLD, perspective: international, unreachable: "Al Jazeera's feed has no bylines"}
