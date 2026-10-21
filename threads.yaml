@@ -6,7 +6,8 @@
 # pattern: comma-separated terms matched whole-word against a report's headline and the
 # first 300 characters of its description; a trailing * matches endings (brownfield*).
 # Keep patterns specific: a standing thread that matches everything tracks nothing.
-# group: business (Optima's lines), law (Joe's legal background), government (policy he tracks);
+# beat: optional; only reports on that beat can join (israel), so "election" doesn't catch the midterms.
+# group: business (Optima's lines), law (Joe's legal background), government (policy he tracks), israel;
 # the Threads tab groups standing threads by it.
 #
 # Optima's business lines (2026-10-19): petroleum bulk storage compliance, UST/AST installation
@@ -68,3 +69,30 @@ standing:
     kind: process
     desk: GOV
     pattern: "student loan*, SAVE plan, Repayment Assistance Plan, income-driven repayment, income-based repayment, PSLF, Public Service Loan Forgiveness, loan forgiveness, borrower defense, Department of Education borrowers, student debt"
+  # Israel (2026-10-21)
+  - id: il_election_2026
+    group: israel
+    beat: israel
+    title: "Israel's election and the coalition that follows"
+    kind: process
+    desk: WORLD
+    pattern: "election*, poll*, Knesset seats, seats, campaign*, ballot*, voters, voting, Central Elections Committee, surplus vote, coalition talks, coalition negotiations, mandate to form, form a government, consultations"
+    dates:
+      - {date: "2026-10-20", label: "Voting abroad (diplomats and emissaries)"}
+      - {date: "2026-10-27", label: "Election day; polls close 10 PM Israel time (4 PM in New York)"}
+      - {date: "2026-11-04", label: "Official results due"}
+      - {label: "The President consults the parties and gives one leader the mandate to form a government"}
+  - id: il_haredi_draft
+    group: israel
+    beat: israel
+    title: "The Haredi draft"
+    kind: subject
+    desk: WORLD
+    pattern: "Haredi draft, ultra-Orthodox draft, Haredi conscription, draft exemption*, yeshiva students, draft law, conscription law, enlistment of Haredim"
+  - id: il_cost_of_living
+    group: israel
+    beat: israel
+    title: "Cost of living in Israel"
+    kind: subject
+    desk: WORLD
+    pattern: "cost of living, housing prices, home prices, rent, rents, inflation, Bank of Israel, interest rate, food prices, electricity prices, wages, minimum wage"

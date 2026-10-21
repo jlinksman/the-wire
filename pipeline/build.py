@@ -47,7 +47,7 @@ STATE_DIR = ROOT / ".state"
 STATE_FILE = STATE_DIR / "state.json"
 
 CONTACT = os.environ.get("WIRE_CONTACT", "")
-USER_AGENT = "TheWire/1.0 (private personal news reader; polite polling" + (f"; {CONTACT}" if CONTACT else "") + ")"
+USER_AGENT = "TheWire/1.0 (private personal news reader; polite polling; +https://github.com/jlinksman/the-wire" + (f"; {CONTACT}" if CONTACT else "") + ")"
 TIMEOUT = 25
 KEEP_DAYS = 7
 # Courts and city offices publish in batches, so every source keeps its newest few
@@ -128,6 +128,7 @@ def load_people() -> list[dict]:
                 # A search of the person's own site shows under their name; a name search shows the publisher.
                 **({"site_feed": True} if kind == "search" and p["search"].startswith("site:") else {}),
                 **({"no_ai": True} if p.get("no_ai") else {}),
+                **({"beats": p["beats"]} if p.get("beats") else {}),
                 # The NWS API is a public government API offered for exactly this (as with the alerts feed).
                 **({"robots": "subscription"} if kind == "nws_afd" else {}),
                 "scope": p.get("scope") or {"BEACON": "local", "GOV": "national", "LAW": "national", "SPORTS": "sports"}.get(p.get("desk"), "mixed"),
@@ -141,7 +142,7 @@ def people_bylines() -> list[tuple[str, re.Pattern]]:
             for p in load_people_cfg() if p.get("byline")]
 
 
-KIND_LABEL = {"podcast": "podcast", "rss": "writing", "bluesky": "Bluesky posts", "search": "headlines via search", "nws_afd": "forecast discussion"}
+KIND_LABEL = {"podcast": "podcast", "youtube": "videos", "rss": "writing", "bluesky": "Bluesky posts", "search": "headlines via search", "nws_afd": "forecast discussion"}
 
 
 def load_config():
@@ -1213,6 +1214,7 @@ def main() -> int:
     data["people"] = [{k: p[k] for k in ("id", "name", "role", "desk", "perspective", "unreachable") if p.get(k)}
                       for p in load_people_cfg()]
     # Scope (local, state, national, world), city beats, and the quiet flag for each item.
+    events.PEOPLE_INFO["beats"] = {p["id"]: p.get("beats") for p in load_people_cfg() if p.get("beats")}
     events.tag(data, {s["id"]: s for s in sources}, (yaml.safe_load(CONFIG.read_text()).get("briefing") or {}).get("beats"))
     # V5: story grouping, open-text quotes, machine summaries. A failure here is
     # recorded in source health and never stops the feed from publishing.
@@ -1224,6 +1226,12 @@ def main() -> int:
                                 "poll": 15, "last_success": None, "last_attempt": iso(now_utc()),
                                 "last_error": f"{type(exc).__name__}: {exc}"[:300], "last_status": None,
                                 "robots": "n/a", "items": 0})
+    # Israel section: the latest seat polls by pollster, ahead of the Oct 27 election.
+    try:
+        import israel_polls
+        data["sources"].append(israel_polls.run(state, data, session, log))
+    except Exception as exc:
+        log(f"[il_polls] failed: {type(exc).__name__}: {exc}")
     # V6: push-alert candidates for the Cloudflare Worker, and its health.
     try:
         alerts.run(data, yaml.safe_load(CONFIG.read_text()).get("push_alerts") or {}, DIST, log)
@@ -1243,7 +1251,10 @@ def main() -> int:
     # needed for grouping and the briefing, so the phone doesn't download them.
     in_story = {m for s in data.get("stories", []) for m in s["members"]} | {m for t in data.get("threads", []) for m in t.get("members", [])}
     before = len(data["items"])
-    data["items"] = [it for it in data["items"] if not it.get("quiet") or it["id"] in in_story or it.get("people")]
+    # Israel and Jewish-world items ship too: the Israel segment lists them under its headings.
+    seg_cut = now_utc() - timedelta(hours=36)
+    data["items"] = [it for it in data["items"] if not it.get("quiet") or it["id"] in in_story or it.get("people")
+                     or (it.get("itopic") and parse_iso(it.get("t")) and parse_iso(it["t"]) >= seg_cut)]
     # Thread docs carry the document excerpt; items don't ship it (the stored records keep it).
     data["items"] = [{k: v for k, v in it.items() if k != "doc_text"} for it in data["items"]]
     log(f"[slim] shipped {len(data['items'])} of {before} items (quiet items outside stories stay in the build)")
