@@ -31,7 +31,7 @@ PLACES = {
     "egypt": "Egypt Egyptian Cairo",
     "ukraine": "Ukraine Ukrainian Ukrainians Kyiv Kiev Kharkiv Odesa Zelensky Zelenskyy",
     "russia": "Russia Russian Russians Moscow Kremlin Putin",
-    "uk": "Britain British UK England Scotland Scottish Wales Welsh London Starmer",
+    "uk": "Britain British UK U.K. England Scotland Scottish Wales Welsh London Starmer",
     "ireland": "Ireland Irish Dublin",
     "germany": "Germany German Germans Berlin Munich Hamburg Merz",
     "italy": "Italy Italian Italians Rome Milan Naples Meloni",
@@ -81,6 +81,11 @@ PLACES = {
     "morocco": "Morocco Moroccan Rabat",
     "madagascar": "Madagascar Malagasy Antananarivo",
     "mali": "Mali Malian Bamako",
+    "tunisia": "Tunisia Tunisian Tunis",
+    "libya": "Libya Libyan Tripoli",
+    "algeria": "Algeria Algerian Algiers",
+    "jordan": "Jordan Jordanian Amman",
+    "qatar": "Qatar Qatari Doha",
 }
 EVENTS = {
     "unrest": r"protest\w*|riot\w*|clashes|clash(?:ed)? with (?:police|security|riot|protesters|demonstrators)|loot\w*|demonstrat\w*|unrest|yellow vests?|tear gas|curfew|uprising|marches|marched|strikers|general strike|mass strike|barricade\w*|police (?:fire|charge)",
@@ -135,12 +140,47 @@ SECTION_SCOPE = {
 
 PEOPLE_INFO: dict = {}
 
+# Israel segment headings (2026-10-21): the first heading whose words appear in the headline
+# (or a source's own `itopic`) wins. Security is checked after the election and before daily life,
+# so a strike on a hospital is security, not health.
+ITOPIC_ORDER = ["election", "security", "society", "culture", "politics"]
+ITOPIC_RE = {
+    "election": re.compile(r"\b(election\w*|polls?\b(?! (?:station|tax))|seats?\b|Knesset seats|campaign\w*|ballot\w*|voters?|voting|vote[sd]?\b|Central Elections Committee|electoral|turnout|surplus[- ]vote|joint (?:list|run)|merger|primar(?:y|ies))", re.IGNORECASE),
+    "security": re.compile(r"\b(IDF|army|soldiers?|troops|Hamas|Hezbollah|Houthis?|Iran\w*|missiles?|rockets?|drones?|air ?strikes?|strikes? on|attack\w*|terror\w*|hostages?|ceasefire|Gaza|West Bank|Lebanon|Syria\w*|sirens?|Home Front Command|shin bet|Mossad|killed|wounded|militants?|raid\w*|interception)", re.IGNORECASE),
+    "society": re.compile(r"\b(Haredi\w*|ultra-?Orthodox|draft|conscription|exemption|yeshiva\w*|cost of living|prices?|inflation|rent\w*|housing|apartments?|mortgage\w*|wages?|salar\w*|strike\b|Histadrut|unemploy\w*|Bank of Israel|interest rate|shekel|budget|tax\w*|schools?|teachers?|students?|universit\w*|education|hospitals?|health|doctors?|nurses?|trains?|light rail|buses|traffic|roads?|transport\w*|weather|heat ?wave|rain|storm|religio\w*|rabbi\w*|Rabbinate|Shabbat|kosher|conversion|marriage|women|LGBTQ?\w*|Pride|Arab (?:community|sector|Israelis?|citizens)|crime|murder\w*|police|immigra\w*|aliyah|olim|Bedouin|Druze|kibbutz\w*|El Al|flights?|airport)", re.IGNORECASE),
+    "culture": re.compile(r"\b(film\w*|movies?|cinema|TV|television|series|Netflix|show\b|actors?|actress\w*|music\w*|singers?|songs?|albums?|concerts?|festival\w*|Eurovision|art\b|artists?|museum\w*|exhibit\w*|books?|novel\w*|authors?|poet\w*|theat(?:er|re)|dance|food|restaurants?|chef\w*|cuisine|wine\w*|recipe\w*|football|soccer|basketball|Maccabi|Hapoel|Beitar|Avdija|Olympic\w*|startup\w*|tech\b|archaeolog\w*|ancient|discover\w*)", re.IGNORECASE),
+    "politics": re.compile(r"\b(politic\w*|part(?:y|ies)|far-right|right-wing|left-wing|Knesset|coalition|opposition|ministers?|ministry|cabinet|government|Netanyahu|Bibi|Likud|Bennett|Lapid|Eisenkot|Gantz|Lieberman|Smotrich|Ben-?Gvir|Deri|Shas|Golan|Supreme Court|High Court|judicial|attorney general|Herzog|president\b|lawmakers?|MKs?\b|bill\b|law\b|protest\w*)", re.IGNORECASE),
+}
+
+
+IL_PLACES = {"israel", "palestine", "lebanon", "iran", "syria", "yemen", "egypt", "iraq", "saudi"}
+JEWISH_RE = re.compile(r"\b(Jew\w*|antisemit\w*|synagogue\w*|rabbi\w*|Holocaust|Chabad|Hillel|diaspora)\b", re.IGNORECASE)
+
+
+def itopic_of(it: dict, src: dict) -> str:
+    """The Israel segment heading for an item: election, security, society, culture, politics or news."""
+    text = it["title"]
+    if "jewish" in (src.get("beats") or []) or ("jewish" in (it.get("beats") or []) and "israel" not in (it.get("beats") or [])):
+        return "jewish"                                 # the Forward and JTA: Jewish world, whatever the subject
+    # An Israeli outlet's story set abroad (a UK school, a US court) is Jewish-world or nothing.
+    pl = places(text)
+    if pl and not pl & IL_PLACES:
+        return "jewish" if JEWISH_RE.search(text) else ""
+    for k in ITOPIC_ORDER:
+        if ITOPIC_RE[k].search(text):
+            # A source's own heading (a culture feed, an election search) wins over everything but security.
+            if src.get("itopic") and k not in ("election", "security"):
+                return src["itopic"]
+            return k
+    return src.get("itopic") or "news"
+
 
 def tag(data: dict, src_by_id: dict, beats_cfg: dict) -> None:
     """Add quiet, scope and beats to each item in data.json (computed every build, so
     config changes apply to stored items too)."""
     beat_re = {k: re.compile(v["pattern"], re.IGNORECASE) for k, v in (beats_cfg or {}).items()}
     PEOPLE_INFO["map"] = {p["id"]: p for p in data.get("people", [])}
+    PEOPLE_INFO.setdefault("beats", {})
     for it in data["items"]:
         src = src_by_id.get(it["source_id"], {})
         if src.get("quiet") or src.get("person_feed"):
@@ -165,8 +205,18 @@ def tag(data: dict, src_by_id: dict, beats_cfg: dict) -> None:
         b += [k for k in src.get("beats") or [] if k not in b]      # a city outlet is always on its beat
         if it.get("people") and it.get("kind") != "POST":
             b.append("following")
+            for pid in it["people"]:                      # a person's own beats (people.yaml)
+                for pb in (PEOPLE_INFO.get("beats", {}).get(pid) or []):
+                    if pb not in b:
+                        b.append(pb)
+        it.pop("beats", None)                 # recomputed every build, so a config change applies to stored items
         if b:
             it["beats"] = b
+        it.pop("itopic", None)
+        if "israel" in b or "jewish" in b:
+            topic = itopic_of(it, src)
+            if topic:
+                it["itopic"] = topic
 
 
 # ---------------------------------------------------------------- event merging

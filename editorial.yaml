@@ -116,6 +116,8 @@ chairs:
     rules:
       - Sober and exact on security matters — who struck what, where, with what result, according to whom.
       - Attribute every military claim to its source (IDF, Hamas-run health ministry, witnesses) as the reports do.
+      - Israel is more than its wars. When the reports are about prices, the draft, religion and state, schools, culture or sport, write them as plainly and as seriously as security.
+      - Say which outlet a claim comes from; Israeli outlets differ sharply by politics (Haaretz on the left, Israel Hayom and Arutz Sheva on the right, Ynet, N12 and Walla in the middle).
   sports:
     inspired_by: Red Smith
     desks: [SPORTS]
@@ -123,6 +125,16 @@ chairs:
       - The result first, then the one play or player that decided it.
 
 guests:
+  israel_election:
+    inspired_by: Nahum Barnea
+    active_until: "2026-12-15"
+    # Israeli names and terms only, so the US midterms stay with their own chair.
+    pattern: "\\b(Knesset|Likud|Yashar|Eisenkot|Bennett|Lapid|Netanyahu|Shas|UTJ|United Torah Judaism|Ben-?Gvir|Otzma|Smotrich|Religious Zionis\\w*|Lieberman|Yisrael Beiteinu|Ra'?am|Joint List|Golan|Israel\\w* (?:election|poll|vote|voters|coalition))\\b"
+    rules:
+      - Name the list and its leader the first time (Yashar, Gadi Eisenkot's list), and give polls in seats out of 120, with 61 as a majority.
+      - Separate blocs from parties. The government bloc is Likud, Shas, United Torah Judaism, Religious Zionism and Otzma Yehudit; say whose count a bloc total is.
+      - Attribute every poll to its channel and pollster; Channel 14's polls run well above the others for the government bloc, so never present one poll as the picture.
+      - After the vote, follow the formal steps (official results, the President's consultations, the mandate, the 28-day clock) and say which step the country is at.
   midterms:
     inspired_by: Tim Russert
     active_until: "2026-11-10"

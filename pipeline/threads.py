@@ -215,6 +215,8 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
         t["standing"] = bool(topic.get("standing"))
         if topic.get("group"):
             t["group"] = topic["group"]
+        if topic.get("dates"):
+            t["dates"] = topic["dates"]
         t["kind"] = topic.get("kind") or t.get("kind") or "subject"
         t["title"] = topic["title"]
         if pat:
@@ -223,7 +225,9 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
             t.pop("pattern", None)
             t["manual"] = True
         _add_by_hand(t, [by_id[i] for i in topic.get("items", []) if i in by_id])
+        beat = topic.get("beat")
         new = [it for it in data["items"] if pat and it["id"] not in set(t["members"]) and pat.search(it["title"] + " " + (it.get("summary") or "")[:300])
+               and (not beat or beat in (it.get("beats") or []))
                and ms(it) >= datetime.fromisoformat(t["opened"].replace("Z", "+00:00")) - timedelta(days=30 if topic.get("standing") else 7)]
         for it in sorted(new, key=ms):
             t["members"].append(it["id"])
@@ -269,7 +273,7 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
         mem = [m for m in t["members"] if m in live]
         if not mem and not t.get("named"):
             continue
-        rec = {k: t[k] for k in ("id", "kind", "desk", "title", "opened", "last", "status", "followed", "named", "standing", "manual", "group", "developing", "outlets", "signal", "revived_at", "added") if k in t}
+        rec = {k: t[k] for k in ("id", "kind", "desk", "title", "opened", "last", "status", "followed", "named", "standing", "manual", "group", "dates", "developing", "outlets", "signal", "revived_at", "added") if k in t}
         rec |= {"members": mem[-200:], "developments": t["developments"][-MAX_DEVELOPMENTS:], "docs": t["docs"],
                 "n_reports": len(t["members"]), **({"pattern": t["pattern"]} if t.get("pattern") else {})}
         if rec.get("revived_at") and (now - datetime.fromisoformat(rec["revived_at"].replace("Z", "+00:00"))) > timedelta(hours=48):

@@ -569,3 +569,24 @@ details.rest[open] summary .chev { transform: rotate(180deg); display: inline-bl
 .linkbtn { color: var(--text); text-decoration: underline; text-underline-offset: 3px; font: inherit; }
 .sbtn.warn { color: var(--live); }
 #view-settings .yw { margin-top: 6px; }
+
+/* News › Israel */
+.seg { overflow-x: auto; scrollbar-width: none; }
+.seg::-webkit-scrollbar { display: none; }
+.seg button { white-space: nowrap; flex: 0 0 auto; }
+.ildates { list-style: none; margin: 4px 0 10px; padding: 0; display: grid; gap: 4px; }
+.ildates li { display: grid; grid-template-columns: 6.5em 1fr; gap: 8px; font-size: 0.92rem; }
+.ildates li.past { color: var(--text3); }
+.ildates .tlt { font: 0.8rem var(--mono); color: var(--text2); padding-top: 2px; }
+.polls { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 8px; }
+.polls li { display: grid; gap: 3px; }
+.ilbar { position: relative; display: flex; height: 22px; border-radius: 6px; overflow: hidden; font: 600 0.75rem/22px var(--mono); }
+.ilbar span { text-align: center; color: #fff; min-width: 1.6em; }
+.pg { background: #3b5b92; } .po { background: #b5733a; } .pa { background: #4f8a6b; }
+.ilbar .p61 { position: absolute; top: -2px; bottom: -2px; left: calc(61 / 120 * 100%); width: 2px; background: var(--text); }
+.plegend { font: 0.78rem var(--mono); color: var(--text2); margin: 2px 0 8px; }
+.plegend span { padding: 1px 6px; border-radius: 4px; color: #fff; }
+.ptable { overflow-x: auto; margin-top: 6px; }
+.ptable table { border-collapse: collapse; font: 0.8rem var(--mono); width: 100%; }
+.ptable th, .ptable td { padding: 4px 6px; border-bottom: 1px solid var(--hair); text-align: right; white-space: nowrap; }
+.ptable th:first-child, .ptable td:first-child { text-align: left; }

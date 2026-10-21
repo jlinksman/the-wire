@@ -15,7 +15,7 @@ const TABS = [
   { id: "settings", label: "Settings", icon: "⚙" },
 ];
 const SEGMENTS = {
-  news: [["BEACON", "Beacon"], ["REGION", "Region"], ["GOV", "Gov"], ["LAW", "Law"], ["WORLD", "World"], ["SPORTS", "Sports"]],
+  news: [["BEACON", "Beacon"], ["REGION", "Region"], ["GOV", "Gov"], ["LAW", "Law"], ["WORLD", "World"], ["ISRAEL", "Israel"], ["SPORTS", "Sports"]],
   threads: [["following", "Following"], ["standing", "Standing"], ["suggested", "Suggested"], ["browse", "Browse"]],
 };
 const DESK_NAME = { BEACON: "Beacon", REGION: "Region", GOV: "Gov", LAW: "Law", WORLD: "World", SPORTS: "Sports", SYSTEM: "System" };
@@ -254,7 +254,8 @@ function inView(it) {
 
 function newCount(desks) {
   if (!prevVisit || !data) return 0;
-  return data.items.filter((it) => desks.includes(deskOf(it)) && !isSeen(it) && !folded.has(it.id) && !isMuted(it)).length;
+  return data.items.filter((it) => (desks.includes(deskOf(it)) || (desks.includes("ISRAEL") && it.itopic && it.itopic !== "jewish"))
+    && (!it.quiet || desks.includes("ISRAEL") || storyOf.has(it.id)) && !isSeen(it) && !folded.has(it.id) && !isMuted(it)).length;
 }
 
 function renderTabbar() {
@@ -297,7 +298,7 @@ function renderView(id) {
   document.body.dataset.tab = id;
   if (id === "today") v.replaceChildren(...todayView());
   if (id === "threads") v.replaceChildren(segBar("threads"), ...threadsView(seg.threads));
-  if (id === "news") v.replaceChildren(segBar("news"), ...(seg.news === "GOV" ? govPanel() : []), ...(seg.news === "SPORTS" ? scoreboard() : []), ...deskView("news", seg.news));
+  if (id === "news") v.replaceChildren(segBar("news"), ...(seg.news === "ISRAEL" ? israelView() : [...(seg.news === "GOV" ? govPanel() : []), ...(seg.news === "SPORTS" ? scoreboard() : []), ...deskView("news", seg.news)]));
   if (id === "live") v.replaceChildren(...liveView());
   if (id === "settings") v.replaceChildren(...settingsView());
 }
@@ -1544,8 +1545,74 @@ function areasOfLaw(desk) {
     }))];
 }
 
+// --------------------------------------------------------------- News › Israel (2026-10-21)
+// The election first (key dates, the latest polls by pollster, the thread), then Israel's
+// standing threads, its top stories as units, and every report under a heading: election,
+// politics, daily life, culture, security, the rest, and a small Jewish-world list.
+const ITOPIC = [["election", "Election"], ["politics", "Politics and government"], ["society", "Society and daily life"], ["culture", "Culture, food and sport"],
+  ["security", "Security"], ["news", "More from Israel"], ["jewish", "Jewish world"]];
+const ilShown = {};
+function israelView() {
+  const out = [el("h1", { class: "yw", text: "Israel" }),
+    el("div", { class: "ywsub", text: "Politics, daily life and culture · Hebrew headlines translated · as of " + fmtTime.format(new Date(Date.parse(data.generated_at))) })];
+  const threads = data.threads || [];
+  const elec = threads.find((t) => t.id === "il_election_2026");
+  out.push(...electionBox(elec));
+  const standing = threads.filter((t) => t.standing && t.group === "israel" && t.id !== "il_election_2026");
+  if (standing.length) out.push(sectionHead("Israel threads", "tracked over time"), el("div", { class: "threads" }, ...standing.map(threadCard)));
+  const cutoff = Date.now() - 48 * 3600e3;
+  const isIl = (it) => it && it.itopic && it.itopic !== "jewish";
+  const tops = (data.stories || []).filter((s) => storyOf.get(s.lead) === s && isIl(byId.get(s.lead)) && Date.parse(s.last) >= cutoff && (s.what || s.card || s.summary)).slice(0, 3);
+  const featured = new Set(tops.map((s) => s.lead));
+  if (tops.length) out.push(sectionHead("Top stories"), ...tops.map((s) => unit(s)).filter(Boolean));
+  const pool = data.items.filter((it) => it.itopic && !featured.has(it.id) && !folded.has(it.id) && !isMuted(it) && it.ms >= cutoff);
+  for (const [k, label] of ITOPIC) {
+    const list = pool.filter((it) => it.itopic === k).sort((a, b) => b.ms - a.ms);
+    if (!list.length) continue;
+    const n = ilShown[k] || (k === "jewish" ? 4 : 6);
+    const fresh = prevVisit ? list.filter((it) => !isSeen(it)).length : 0;
+    out.push(sectionHead(label, list.length + (fresh ? " · " + fresh + " new" : "")));
+    out.push(el("ol", { class: "list" }, ...list.slice(0, n).map((it) => row(it, { desk: false }))));
+    if (list.length > n) out.push(el("button", { class: "more-btn", text: "Show " + Math.min(10, list.length - n) + " more",
+      onclick: () => { const y = window.scrollY; ilShown[k] = n + 10; renderView("news"); window.scrollTo(0, y); } }));
+  }
+  out.push(el("p", { class: "fine", text: "Sources range from Haaretz and +972 on the left, through Ynet, Walla, N12 and the Times of Israel, to the Jerusalem Post, Israel Hayom and Arutz Sheva on the right. Creators Eitan Levine and Holy Land Speaks appear under From people you follow." }));
+  out.push(el("div", { class: "endline", text: "End of Israel" }));
+  return out;
+}
+
+function electionBox(t) {
+  const P = data.il_polls;
+  const out = [];
+  const day = Date.parse("2026-10-27T19:00:00Z");     // polls close 10 PM Israel time
+  const days = Math.ceil((day - Date.now()) / 86400e3);
+  out.push(sectionHead("Election", days > 0 ? "Tuesday, Oct 27 · " + (days === 1 ? "tomorrow" : "in " + days + " days") : days > -9 ? "results due Nov 4" : null,
+    t ? () => openThread(t) : null, t ? "Open the thread" : null));
+  if (t && t.dates) out.push(el("ol", { class: "ildates" }, ...t.dates.map((d) => el("li", { class: d.date && d.date < new Date().toISOString().slice(0, 10) ? "past" : "" },
+    el("span", { class: "tlt", text: d.date ? fmtDate.format(new Date(d.date + "T12:00:00Z")) : "Then" }), el("span", { text: d.label })))));
+  if (P && P.latest && P.latest.length) {
+    out.push(el("p", { class: "fine", text: "Latest poll from each pollster, in seats out of 120; 61 is a majority. The government bloc is Likud, Shas, UTJ, Religious Zionism and Otzma Yehudit." + (P.gov_range ? " Range across pollsters: " + P.gov_range[0] + "–" + P.gov_range[1] + " for the government bloc." : "") }));
+    out.push(el("ul", { class: "polls" }, ...P.latest.map((p) => el("li", {},
+      el("span", { class: "asrc", text: p.publisher + " · " + p.firm + " · " + fmtDate.format(new Date(p.date + "T12:00:00Z")) + (p.sample ? " · n=" + p.sample : "") }),
+      el("div", { class: "ilbar", role: "img", "aria-label": "Government bloc " + p.gov + ", opposition " + p.opp + ", Arab lists " + p.arab },
+        el("span", { class: "pg", style: "flex:" + p.gov }, String(p.gov)), el("span", { class: "po", style: "flex:" + p.opp }, String(p.opp)), el("span", { class: "pa", style: "flex:" + p.arab }, String(p.arab)), el("i", { class: "p61" }))))));
+    out.push(el("p", { class: "plegend" }, el("span", { class: "pg", text: "Government bloc" }), " ", el("span", { class: "po", text: "Opposition" }), " ", el("span", { class: "pa", text: "Arab lists" }), " · the line is 61"));
+    const lists = [...new Set(P.latest.flatMap((p) => Object.keys(p.seats)))].filter((k) => P.latest.some((p) => p.seats[k] > 0))
+      .sort((a, b) => Math.max(...P.latest.map((p) => p.seats[b] || 0)) - Math.max(...P.latest.map((p) => p.seats[a] || 0)));
+    const head = el("tr", {}, el("th", { text: "List" }), ...P.latest.map((p) => el("th", { text: p.publisher.replace(/^HaHadashot 12$/, "N12") })));
+    const body = lists.map((k) => el("tr", {}, el("td", { text: k }), ...P.latest.map((p) => el("td", { text: p.seats[k] == null ? "–" : String(p.seats[k]) }))));
+    const table = el("div", { class: "ptable" }, el("table", {}, el("thead", {}, head), el("tbody", {}, ...body)));
+    const note = el("p", { class: "fine" }, "0 means below the 3.25% threshold; – means not polled. Source: ", link(P.source, "Wikipedia's poll table"),
+      ", which links each poll" + (P.as_of ? "; read " + ago(Date.parse(P.as_of)) + " ago." : "."));
+    out.push(el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Seats by list, each pollster" }), el("span", { class: "chev", text: "▾" })), table, note));
+  } else {
+    out.push(el("p", { class: "fine", text: "Polls appear here after the next build reads them." }));
+  }
+  return out;
+}
+
 // --------------------------------------------------------------- the Threads tab
-const GROUP_LABEL = { business: "Optima's business", law: "Law", government: "Government and policy" };
+const GROUP_LABEL = { business: "Optima's business", law: "Law", government: "Government and policy", israel: "Israel" };
 function threadsView(segment) {
   const out = [];
   const threads = data.threads || [];
@@ -1563,7 +1630,7 @@ function threadsView(segment) {
   }
   if (segment === "standing") {
     out.push(sectionHead("Standing threads", "tracked whether or not you follow them · threads.yaml"));
-    for (const g of ["business", "law", "government"]) {
+    for (const g of ["business", "law", "government", "israel"]) {
       const list = threads.filter((t) => t.standing && (t.group || (t.desk === "LAW" ? "law" : "government")) === g);
       if (!list.length) continue;
       out.push(el("h3", { class: "sh3", text: GROUP_LABEL[g] }), standingList(list));

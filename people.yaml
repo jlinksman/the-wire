@@ -10,7 +10,8 @@
 #                    "Range of views" and "From people you follow" balanced across sides.
 #                    Reporters, forecasters and explainers have none.
 #   byline           names to match in the author field of feeds The Wire already reads
-#   feeds            their own feeds: {type: rss | podcast | bluesky, url}
+#   feeds            their own feeds: {type: rss | podcast | bluesky | youtube, url}
+#   beats            city or subject beats their work always belongs to (israel, jewish, paris)
 #   search           a Bing News query (also used where a site refuses cloud servers, e.g. *.substack.com)
 #                    — for paywalled writers with no free feed (headline and
 #                    link only; Bing doesn't confirm the byline, so these are marked "via search")
@@ -182,6 +183,14 @@ people:
   - {id: amos_harel, name: Amos Harel, role: "Haaretz military analyst", desk: WORLD, perspective: center-left, byline: [Amos Harel]}
   - {id: anshel_pfeffer, name: Anshel Pfeffer, role: "Haaretz; The Economist", desk: WORLD, perspective: center, byline: [Anshel Pfeffer]}
   - {id: yaakov_katz, name: Yaakov Katz, role: "Jerusalem Post columnist; JPPI", desk: WORLD, perspective: center-right, search: "\"Yaakov Katz\" site:jpost.com"}
+  # Joe's on-the-ground Israel creators (he follows them on Instagram, which can't be read; these are their open channels)
+  - {id: eitan_levine, name: Eitan Levine, role: "Creator · commentary; The Jew York Times (Eitan the goalie)", desk: WORLD, beats: [israel, jewish],
+     link: "https://www.youtube.com/@eitanthegoalie",
+     unreachable: "YouTube's robots.txt closes channel feeds to automated readers; reachable once the YouTube Data API key is set (channel UCuzvwA-URlLuOewpBK11Deg)"}
+  - {id: holy_land_speaks, name: Benjamin Birely, role: "Creator · commentary; Holy Land Speaks", desk: WORLD, beats: [israel],
+     link: "https://www.youtube.com/@holylandspeaks",
+     feeds: [{type: rss, url: "https://holylandspeaks.substack.com/feed"}],
+     notes: "Substack (weekly On One Foot election roundup). YouTube channel UCI30-wpShRs1NLdv7VEZh5Q waits for the YouTube Data API key (robots.txt closes channel feeds)."}
   - {id: toi_briefing, name: Times of Israel Daily Briefing, role: "Podcast", desk: WORLD,
      feeds: [{type: podcast, url: "https://www.omnycontent.com/d/playlist/a2539154-43b6-4c4f-b951-aca300136a80/f8a9521a-98d3-421a-a708-aca600dd355b/e96b6c46-116b-4376-aa28-aca600deea22/podcast.rss"}]}
   - {id: marwan_bishara, name: Marwan Bishara, role: "Al Jazeera senior political analyst", desk: WORLD, perspective: international, unreachable: "Al Jazeera's feed has no bylines"}
