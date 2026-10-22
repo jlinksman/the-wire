@@ -1098,6 +1098,36 @@ def src_robots(s: dict) -> str:
     return "subscription" if s.get("robots") == "subscription" else "honored"
 
 
+USER_EXCLUDE_OUTLETS = "kalkine|insider monkey|ainvest|motley fool|benzinga|marketbeat|simply wall"
+
+
+def load_user_searches() -> list[dict]:
+    """News searches Joe added from the page ("Tell The Wire", 2026-10-22): a deliberate,
+    named exception to "every source lives in sources.yaml". They live in follows.json in KV,
+    show in Admin with a remove button and their own health rows, and are never committed.
+    Their ids are hashes and their errors are logged without detail, so the public build log
+    never shows what he searched for."""
+    f = ROOT / "follows.json"
+    if not f.exists():
+        return []
+    try:
+        searches = (json.loads(f.read_text()) or {}).get("searches", [])
+    except ValueError:
+        return []
+    out = []
+    for sr in searches[:30]:
+        q = str(sr.get("query") or "").strip()[:120]
+        if not q or not sr.get("id"):
+            continue
+        desk = sr.get("desk") if sr.get("desk") in ("BEACON", "GOV", "LAW", "WORLD", "SPORTS") else "GOV"
+        out.append({"id": sr["id"], "short": "Your search", "name": "Your search · " + str(sr.get("title") or q)[:80], "enabled": True,
+                    "desk": desk, "scope": {"BEACON": "local", "WORLD": "world", "SPORTS": "sports"}.get(desk, "national"),
+                    "type": "rss", "url": "https://www.bing.com/news/search?" + urlencode({"q": q, "format": "rss"}),
+                    "status": "OK", "poll": 120, "robots": "honored", "max_age_days": 10, "max_items": 10,
+                    "exclude_outlets": USER_EXCLUDE_OUTLETS, "user": True, "_section": "user"})
+    return out
+
+
 def load_standing() -> list:
     """Standing area-of-law threads from threads.yaml (BRIEF.md stage 3)."""
     f = ROOT / "threads.yaml"
@@ -1149,6 +1179,11 @@ def main() -> int:
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
 
+    user_searches = load_user_searches()
+    sources = sources + user_searches
+    if user_searches:
+        log(f"[follows] {len(user_searches)} searches added from the page")
+
     with ThreadPoolExecutor(max_workers=8) as pool:
         results = list(pool.map(lambda s: (s, *fetch_source(s, state, session)), sources))
 
@@ -1158,6 +1193,8 @@ def main() -> int:
             if src.get("agendas"):
                 state["granicus_entries"] = [{"title": i["title"], "link": i["link"]} for i in items]
         err = state["sources"][src["id"]].get("last_error")
+        if err and src.get("user"):
+            err = err.split(":")[0] + " (detail withheld from the public log)"
         log(f"[{outcome:>12}] {src['id']:<26} {len(items) if items is not None else '-':>4}  {err or ''}")
 
     # Forget sources removed from config so health doesn't show ghosts.
@@ -1209,7 +1246,7 @@ def main() -> int:
             follows = json.loads(fpath.read_text()) or {}
         except ValueError as exc:
             log(f"[follows] unreadable: {exc}")
-    data["follows"] = {"threads": follows.get("threads", []), "topics": follows.get("topics", []), "signals": follows.get("signals", [])}
+    data["follows"] = {k: follows.get(k, []) for k in ("threads", "topics", "signals", "searches")} | {"taste": follows.get("taste") or {}}
     # The people directory (people.yaml) for the page: names, roles, perspective, reachability.
     data["people"] = [{k: p[k] for k in ("id", "name", "role", "desk", "perspective", "unreachable") if p.get(k)}
                       for p in load_people_cfg()]
