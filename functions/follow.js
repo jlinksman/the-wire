@@ -4,6 +4,7 @@
 // GET  /follow                      -> {threads:[{id,title,since}], topics:[{id,title,pattern,kind,desk,since}]}
 // POST /follow {action:"follow"|"unfollow", type:"thread"|"topic", id, title, kind?, desk?, pattern?}
 // POST /follow {action:"signal", id, value:"more"|"less"|"clear", title?, desk?, kind?}   (stage 4: more/less like this)
+// POST /follow {action:"unsearch", id} | {action:"untaste", kind:"more"|"less", term}   (Tell The Wire, Admin)
 // POST /follow {action:"attach"|"detach", type, id?, item, title?, kind?, desk?, pattern?}  add a report to a thread
 //   (following it if needed; a topic with no id is created from the title: "start a thread with this")
 const KEY = "follows.json";
@@ -20,6 +21,18 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch (e) { return new Response(JSON.stringify({ error: "bad JSON" }), { status: 400, headers }); }
   const cur = (await env.WIRE.get(KEY, "json")) || { threads: [], topics: [] };
+  if (body.action === "unsearch") {
+    cur.searches = (cur.searches || []).filter((x) => x.id !== body.id);
+    await env.WIRE.put(KEY, JSON.stringify(cur));
+    return new Response(JSON.stringify(cur), { headers });
+  }
+  if (body.action === "untaste") {
+    const k = body.kind === "less" ? "less" : "more";
+    cur.taste = cur.taste || { more: [], less: [] };
+    cur.taste[k] = (cur.taste[k] || []).filter((t) => t !== body.term);
+    await env.WIRE.put(KEY, JSON.stringify(cur));
+    return new Response(JSON.stringify(cur), { headers });
+  }
   if (body.action === "signal") {
     const id = String(body.id || "").slice(0, 40);
     if (!id) return new Response(JSON.stringify({ error: "an id is required" }), { status: 400, headers });

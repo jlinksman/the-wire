@@ -297,7 +297,7 @@ function renderView(id) {
   for (const t of TABS) $("view-" + t.id).hidden = t.id !== id;
   document.body.dataset.tab = id;
   if (id === "today") v.replaceChildren(...todayView());
-  if (id === "threads") v.replaceChildren(segBar("threads"), ...threadsView(seg.threads));
+  if (id === "threads") v.replaceChildren(tellCard(), segBar("threads"), ...threadsView(seg.threads));
   if (id === "news") v.replaceChildren(segBar("news"), ...(seg.news === "ISRAEL" ? israelView() : [...(seg.news === "GOV" ? govPanel() : []), ...(seg.news === "SPORTS" ? scoreboard() : []), ...deskView("news", seg.news)]));
   if (id === "live") v.replaceChildren(...liveView());
   if (id === "settings") v.replaceChildren(...settingsView());
@@ -1611,6 +1611,95 @@ function electionBox(t) {
   return out;
 }
 
+// --------------------------------------------------------------- Tell The Wire (2026-10-22)
+// Joe writes or dictates what matters; the model proposes changes; he ticks and applies.
+// Nothing changes until Apply. functions/tell.js does the work; everything stays in KV.
+const TELL_LINE = {
+  topic: (p) => ["Follow a topic", p.title + " · watching " + p.terms.join(", ") + " · " + (DESK_NAME[p.desk] || p.desk)],
+  search: (p) => ["Add a news search", "“" + p.query + "” · " + (DESK_NAME[p.desk] || p.desk)],
+  follow: (p) => ["Follow the thread", p.title],
+  more: (p) => ["More about", p.terms.join(", ")],
+  less: (p) => ["Less about", p.terms.join(", ")],
+  mute: (p) => ["Hide everywhere", p.words.join(", ")],
+  claude: (p) => ["Note for Claude", p.note],
+};
+function tellCard() {
+  return el("button", { class: "tellcard", onclick: () => openTell() },
+    el("span", { class: "bc-ico", "aria-hidden": "true", text: "✎" }),
+    el("span", { class: "bc-txt" }, el("span", { class: "bc-t", text: "Tell The Wire" }),
+      el("span", { class: "bc-s", text: "Say what matters or what you want to know more about; it proposes changes" })));
+}
+async function openTell(prefill) {
+  const box = el("textarea", { class: "tin tellin", rows: "6", placeholder: "Type or dictate (tap the mic on the keyboard). For example: I want to understand what the Haredi draft fight means for the coalition, less crypto, and keep an eye on the Newburgh waterfront." });
+  if (prefill) box.value = prefill;
+  const go = el("button", { class: "sbtn primary wide", text: "Propose changes" });
+  const result = el("div", { class: "tellres" });
+  const history = el("div", {});
+  go.onclick = async () => {
+    const text = box.value.trim();
+    if (text.length < 8) { result.replaceChildren(el("p", { class: "fine", text: "Say a little more." })); return; }
+    go.textContent = "Reading what you said…"; go.disabled = true;
+    try {
+      const r = await fetch("tell", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ text }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
+      result.replaceChildren(...proposalView(j.entry));
+    } catch (e) {
+      result.replaceChildren(el("p", { class: "fine", text: "Couldn't propose anything: " + e.message }));
+    } finally { go.textContent = "Propose changes"; go.disabled = false; }
+  };
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "Tell The Wire" }),
+    el("p", { class: "sdesc", text: "What matters to you, what you want to know more about, what you're tired of. The Wire proposes changes; nothing changes until you tap Apply." }),
+    box, go, result, history,
+  ], "Tell The Wire");
+  try {
+    const r = await fetch("tell", { credentials: "same-origin" });
+    const j = await r.json();
+    const past = (j.entries || []).slice(0, 6);
+    if (past.length) history.replaceChildren(el("h3", { class: "sh3", text: "What you said before" }),
+      el("ul", { class: "admin" }, ...past.map((e) => el("li", {},
+        el("span", { class: "asrc", text: fmtDate.format(new Date(Date.parse(e.at))) + " · " + e.proposals.filter((p) => p.applied).length + " of " + e.proposals.length + " applied" }),
+        el("button", { class: "doclink", text: e.text.length > 140 ? e.text.slice(0, 140) + "…" : e.text, onclick: () => result.replaceChildren(...proposalView(e)) })))));
+  } catch (e) { /* history is a convenience */ }
+}
+function proposalView(entry) {
+  if (!entry.proposals.length) return [el("p", { class: "fine", text: (entry.summary ? entry.summary + " " : "") + "Nothing concrete to change. Try naming a subject, a place, a person or something you want less of." })];
+  const boxes = [];
+  const list = el("ul", { class: "props" }, ...entry.proposals.map((p, i) => {
+    const [k, v] = (TELL_LINE[p.type] || (() => [p.type, ""]))(p);
+    const cb = el("input", { type: "checkbox", checked: p.applied ? null : true, disabled: p.applied ? true : null });
+    boxes.push(cb);
+    return el("li", { class: p.applied ? "done" : "" }, el("label", {}, cb,
+      el("span", { class: "pk", text: k + (p.applied ? " · applied" : "") }), el("span", { class: "pv", text: v }),
+      p.why ? el("span", { class: "asrc", text: p.why }) : null));
+  }));
+  const status = el("p", { class: "fine" });
+  const apply = el("button", { class: "sbtn primary wide", text: "Apply the ticked changes" });
+  apply.onclick = async () => {
+    const picks = boxes.map((b, i) => (b.checked && !b.disabled ? i : -1)).filter((i) => i >= 0);
+    if (!picks.length) { status.textContent = "Nothing ticked."; return; }
+    apply.textContent = "Applying…"; apply.disabled = true;
+    try {
+      const r = await fetch("tell", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "apply", id: entry.id, picks }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
+      follows = j.follows;
+      if (j.mute && j.mute.length) {
+        const cur = (prefs.mutedWords || "").split(",").map((w) => w.trim()).filter(Boolean);
+        prefs.mutedWords = [...new Set([...cur, ...j.mute])].join(", ");
+        savePrefs();
+      }
+      boxes.forEach((b, i) => { if (picks.includes(i)) { b.checked = false; b.disabled = true; b.closest("li").classList.add("done"); } });
+      status.textContent = "Applied. Topics, searches and more/less take effect on the next build (within 15 minutes); hidden words right away. Notes for Claude wait in Settings › Admin.";
+      render();
+    } catch (e) {
+      status.textContent = "Couldn't apply: " + e.message;
+    } finally { apply.textContent = "Apply the ticked changes"; apply.disabled = false; }
+  };
+  return [entry.summary ? el("p", { class: "tellsum", text: "What I heard: " + entry.summary }) : null, list, apply, status].filter(Boolean);
+}
+
 // --------------------------------------------------------------- the Threads tab
 const GROUP_LABEL = { business: "Optima's business", law: "Law", government: "Government and policy", israel: "Israel" };
 function threadsView(segment) {
@@ -1687,6 +1776,22 @@ function browseInline() {
   return [sectionHead("All threads", all.length + " live", openTopicForm, "Follow a topic"), q, chips, list];
 }
 
+// Notes for Claude: work Tell The Wire couldn't do itself. Copy them into a session.
+function notesForClaude() {
+  const box = el("div", {}, el("p", { class: "fine", text: "Loading…" }));
+  fetch("tell", { credentials: "same-origin" }).then((r) => r.json()).then((j) => {
+    const q = j.queue || [];
+    if (!q.length) { box.replaceChildren(el("p", { class: "fine", text: "None waiting. When Tell The Wire hears something that needs a new outlet, section or rule, it lands here." })); return; }
+    const text = q.map((n) => "- " + n.note + " (" + fmtDate.format(new Date(Date.parse(n.at))) + ")").join("\n");
+    const copy = el("button", { class: "sbtn wide", text: "Copy all " + q.length + " for a Claude session" });
+    copy.onclick = async () => { try { await navigator.clipboard.writeText("Notes from Tell The Wire:\n" + text); copy.textContent = "Copied"; } catch (e) { copy.textContent = "Couldn't copy; select the text above"; } };
+    box.replaceChildren(el("ul", { class: "admin" }, ...q.map((n) => { const b = el("button", { class: "unsave", text: "Done" });
+      b.onclick = async () => { b.textContent = "…"; await fetch("tell", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "done", note: n.id }) }); b.closest("li").remove(); };
+      return el("li", {}, el("span", { class: "asrc", text: fmtDate.format(new Date(Date.parse(n.at))) }), el("span", { text: n.note }), b); })), copy);
+  }).catch(() => box.replaceChildren(el("p", { class: "fine", text: "Couldn't load the notes." })));
+  return box;
+}
+
 // --------------------------------------------------------------- the Settings tab
 function settingsView() {
   const sizeRow = el("div", { class: "segmini" }, ...SIZES.map(([v, label]) => el("button", {
@@ -1751,6 +1856,16 @@ function settingsView() {
     el("h3", { class: "sh3", text: "Topics you named · " + f.topics.length }), adminList(topicRows),
     el("button", { class: "sbtn wide", text: "Follow a topic", onclick: openTopicForm }),
     el("h3", { class: "sh3", text: "More / less signals · " + (f.signals || []).length }), adminList(signalRows),
+    el("h3", { class: "sh3", text: "Searches you added · " + (f.searches || []).length }),
+    el("p", { class: "fine", text: "News searches the build runs as sources (from Tell The Wire). The one exception to sources.yaml: they live with your follows, never in the public repository." }),
+    adminList((f.searches || []).map((x) => { const h = (data.sources || []).find((s0) => s0.id === x.id); return el("li", {},
+      el("span", { class: "asrc", text: (DESK_NAME[x.desk] || x.desk) + " · since " + fmtDate.format(new Date(Date.parse(x.since))) + (h ? " · " + (h.last_error ? "not updating" : h.items + " items") : " · starts on the next build") }),
+      el("span", { text: "“" + x.query + "”" }), removeBtn("Remove", { action: "unsearch", id: x.id })); })),
+    el("h3", { class: "sh3", text: "More and less of · " + (((f.taste || {}).more || []).length + ((f.taste || {}).less || []).length) }),
+    adminList([...((f.taste || {}).more || []).map((t) => ["more", t]), ...((f.taste || {}).less || []).map((t) => ["less", t])].map(([k, t]) =>
+      el("li", {}, el("span", { class: "asrc", text: k === "more" ? "More about" : "Less about" }), el("span", { text: t }), removeBtn("Remove", { action: "untaste", kind: k, term: t })))),
+    el("button", { class: "sbtn wide", text: "Tell The Wire ›", onclick: () => openTell() }),
+    el("h3", { class: "sh3", text: "Notes for Claude" }), notesForClaude(),
     el("h3", { class: "sh3", text: "Standing threads · " + standing.length }),
     el("p", { class: "fine", text: "Configured in threads.yaml in the repository; the build reads it every run. Edit the file to add, rename or retire one." }),
     el("ul", { class: "admin" }, ...standing.map((t) => el("li", {}, el("span", { class: "asrc", text: (GROUP_LABEL[t.group] || DESK_NAME[t.desk] || t.desk) + " · " + t.n_reports + " reports" }), el("button", { class: "doclink", text: t.title, onclick: () => openThread(t) })))),

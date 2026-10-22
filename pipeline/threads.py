@@ -340,6 +340,12 @@ def taste(follows: dict) -> tuple[set[str], set[str]]:
             liked |= words(sg.get("title", ""))
         elif sg.get("value") == "less":
             disliked |= words(sg.get("title", ""))
+    # Plain more/less from "Tell The Wire": subjects, not threads.
+    tst = follows.get("taste") or {}
+    for term in tst.get("more", []):
+        liked |= words(term)
+    for term in tst.get("less", []):
+        disliked |= words(term)
     return liked, disliked - liked
 
 
