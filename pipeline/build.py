@@ -1267,6 +1267,10 @@ def main() -> int:
     try:
         import israel_polls
         data["sources"].append(israel_polls.run(state, data, session, log))
+        import israel_results
+        row = israel_results.run(state, data, session, log)
+        if row:
+            data["sources"].append(row)
     except Exception as exc:
         log(f"[il_polls] failed: {type(exc).__name__}: {exc}")
     # V6: push-alert candidates for the Cloudflare Worker, and its health.
