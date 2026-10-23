@@ -1180,7 +1180,9 @@ def main() -> int:
     session.headers["User-Agent"] = USER_AGENT
 
     user_searches = load_user_searches()
-    sources = sources + user_searches
+    import elections
+    election_sources = elections.sources(elections.load(), datetime.now(NY).date())
+    sources = sources + user_searches + election_sources
     if user_searches:
         log(f"[follows] {len(user_searches)} searches added from the page")
 
@@ -1256,13 +1258,21 @@ def main() -> int:
     # V5: story grouping, open-text quotes, machine summaries. A failure here is
     # recorded in source health and never stops the feed from publishing.
     try:
-        stories.run(state, data, {s["id"]: s for s in sources}, session, robots_allows, TIMEOUT, log, follows, load_standing())
+        ecfg = elections.load()
+        e_active = elections.active(ecfg, datetime.now(NY).date())
+        stories.run(state, data, {s["id"]: s for s in sources}, session, robots_allows, TIMEOUT, log, follows,
+                    load_standing() + (elections.race_threads(e_active) if e_active else []))
     except Exception as exc:
         log(f"[v5] failed: {type(exc).__name__}: {exc}")
         data["sources"].append({"id": "v5", "name": "Story grouping and summaries", "short": "Stories", "desk": "SYSTEM",
                                 "poll": 15, "last_success": None, "last_attempt": iso(now_utc()),
                                 "last_error": f"{type(exc).__name__}: {exc}"[:300], "last_status": None,
                                 "robots": "n/a", "items": 0})
+    # Voter guide: the active election from elections.yaml, and what's next.
+    try:
+        data["sources"].append(elections.run(data, log))
+    except Exception as exc:
+        log(f"[elections] failed: {type(exc).__name__}: {exc}")
     # Israel section: the latest seat polls by pollster, ahead of the Oct 27 election.
     try:
         import israel_polls
