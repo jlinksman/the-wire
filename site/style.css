@@ -614,3 +614,35 @@ details.rest[open] summary .chev { transform: rotate(180deg); display: inline-bl
 .ptable tr.b-gov td:first-child { box-shadow: inset 3px 0 #3b5b92; padding-left: 8px; }
 .ptable tr.b-opp td:first-child { box-shadow: inset 3px 0 #b5733a; padding-left: 8px; }
 .ptable tr.b-arab td:first-child { box-shadow: inset 3px 0 #4f8a6b; padding-left: 8px; }
+
+/* Voter guide */
+.guidecard .bc-ico { background: var(--gov); color: #fff; }
+.ildates li.next { font-weight: 600; }
+.ildates li.next .tlt { color: var(--here); }
+.sh3.big { font-size: 1.15rem; margin-top: 18px; }
+.glevel { font: 600 0.75rem var(--mono); color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin: 14px 0 4px; }
+details.race { border-radius: 12px; background: var(--surface); margin: 6px 0; padding: 0 12px; }
+details.race > summary { list-style: none; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 12px 0; cursor: pointer; }
+details.race > summary::-webkit-details-marker { display: none; }
+details.race .rtitle { font: 1rem/1.3 var(--serif); }
+details.race .rsub { grid-column: 1; font-size: 0.82rem; color: var(--text2); }
+details.race .chev { grid-row: 1 / span 2; grid-column: 2; align-self: center; color: var(--text3); }
+details.race[open] .chev { transform: rotate(180deg); }
+.rjob { font-size: 0.92rem; margin: 6px 0; }
+.cands { display: grid; gap: 10px; margin: 10px 0; }
+.cand { border: 1px solid var(--hair); border-radius: 10px; padding: 10px; }
+.chead { display: flex; gap: 8px; align-items: center; }
+.cname { font: 600 1.02rem var(--serif); flex: 1; }
+.inc { font: 0.72rem var(--mono); color: var(--text2); border: 1px solid var(--hair); border-radius: 6px; padding: 1px 5px; }
+.pick { font: 600 0.78rem var(--sans); padding: 5px 9px; border-radius: 8px; background: var(--raised); color: var(--text2); }
+.pick.on { background: var(--here); color: var(--on-here, #fff); }
+.lines { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.line { font: 0.72rem var(--mono); padding: 1px 6px; border-radius: 6px; background: var(--raised); color: var(--text2); }
+.cbio { font-size: 0.9rem; margin: 6px 0; color: var(--text2); }
+.cpos { margin: 6px 0; padding-left: 1.1em; font-size: 0.9rem; display: grid; gap: 4px; }
+.srcl { font-size: 0.8rem; color: var(--text3); text-decoration: none; }
+.rstat { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip { font: 0.75rem var(--mono); padding: 3px 7px; border-radius: 8px; background: var(--raised); color: var(--text2); }
+.rnews { margin: 8px 0; }
+.pside { margin: 8px 0; }
+.pickrow { display: flex; gap: 8px; margin: 8px 0 12px; }

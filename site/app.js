@@ -22,6 +22,7 @@ const DESK_NAME = { BEACON: "Beacon", REGION: "Region", GOV: "Gov", LAW: "Law", 
 // Region items are Beacon-desk items from regional outlets (sources.yaml `regional: true`).
 const deskOf = (it) => (it.desk === "BEACON" && it.regional ? "REGION" : it.desk);
 const KEY = {
+  picks: "wire.ballotPicks",
   visit: "wire.lastVisit", tab: "wire.tab", seg: "wire.seg", channel: "wire.channel",
   prefs: "wire.prefs", saved: "wire.saved",
 };
@@ -298,7 +299,7 @@ function renderView(id) {
   document.body.dataset.tab = id;
   if (id === "today") v.replaceChildren(...todayView());
   if (id === "threads") v.replaceChildren(tellCard(), segBar("threads"), ...threadsView(seg.threads));
-  if (id === "news") v.replaceChildren(segBar("news"), ...(seg.news === "ISRAEL" ? israelView() : [...(seg.news === "GOV" ? govPanel() : []), ...(seg.news === "SPORTS" ? scoreboard() : []), ...deskView("news", seg.news)]));
+  if (id === "news") v.replaceChildren(segBar("news"), ...(seg.news === "ISRAEL" ? israelView() : [...(seg.news === "GOV" && data.voter_guide ? [guideCard()] : []), ...(seg.news === "GOV" ? govPanel() : []), ...(seg.news === "SPORTS" ? scoreboard() : []), ...deskView("news", seg.news)]));
   if (id === "live") v.replaceChildren(...liveView());
   if (id === "settings") v.replaceChildren(...settingsView());
 }
@@ -333,6 +334,7 @@ function todayView() {
           el("span", { class: "dlabel", text: pt.label }), el("span", { class: "dtext", text: pt.text })));
       })) : el("p", { text: data.day_so_far.text })));
   }
+  if (data.voter_guide) out.push(guideCard());
   out.push(el("button", { class: "briefcard", onclick: openBrief },
     el("span", { class: "bc-ico", "aria-hidden": "true", text: "▶" }),
     el("span", { class: "bc-txt" },
@@ -1638,6 +1640,110 @@ function resultsBlock(R) {
   return [out];
 }
 
+// --------------------------------------------------------------- Voter guide (2026-10-23)
+// From elections.yaml: key dates, every race on a Beacon ballot (what the job is, why it touches
+// Joe, the candidates' own positions with sources, ratings and polls, the race's news thread),
+// and ballot proposals (what Yes and No do, who argues each side). The Wire recommends nothing.
+// "My pick" marks stay on this phone only.
+function nextDate(g) {
+  const today = new Date().toISOString().slice(0, 10);
+  return (g.dates || []).find((d) => d.date >= today);
+}
+function guideCard() {
+  const g = data.voter_guide;
+  const n = nextDate(g);
+  const when = g.days_until > 1 ? "in " + g.days_until + " days" : g.days_until === 1 ? "tomorrow" : g.days_until === 0 ? "today" : "results";
+  return el("button", { class: "tellcard guidecard", onclick: () => openGuide() },
+    el("span", { class: "bc-ico", "aria-hidden": "true", text: "☑" }),
+    el("span", { class: "bc-txt" }, el("span", { class: "bc-t", text: "Voter guide · " + g.title + " · " + fmtDate.format(new Date(g.date + "T12:00:00")) + " · " + when }),
+      el("span", { class: "bc-s", text: (n ? "Next: " + n.label + " · " + fmtDate.format(new Date(n.date + "T12:00:00")) + " · " : "") + (g.races || []).length + " races" + ((g.proposals || []).length ? ", " + g.proposals.length + " proposals" : "") })));
+}
+function openGuide(focus) {
+  const g = data.voter_guide;
+  if (!g) return;
+  const picks = store.json(KEY.picks, {});
+  const today = new Date().toISOString().slice(0, 10);
+  const src = (u, label) => u ? link(u, label || "source ↗", "srcl") : null;
+  const nodes = [
+    el("div", { class: "smeta" }, el("span", { text: g.jurisdiction || "" }), el("span", { text: fmtDate.format(new Date(g.date + "T12:00:00")) })),
+    el("h2", { id: "sheet-title", class: "stitle", text: "Voter guide · " + g.title }),
+    el("p", { class: "sdesc", text: g.about || "" }),
+    el("p", { class: "fine", text: "Positions are the candidates' own words or as reported, each linked to its source. The Wire describes; it doesn't recommend. Your picks stay on this phone." }),
+  ];
+  if ((g.dates || []).length) nodes.push(el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Key dates" }),
+    el("ol", { class: "ildates" }, ...g.dates.map((d) => el("li", { class: d.date < today ? "past" : d === nextDate(g) ? "next" : "" },
+      el("span", { class: "tlt", text: fmtDate.format(new Date(d.date + "T12:00:00")) }),
+      el("span", {}, d.label + (d.note ? " · " + d.note : "") + " ", src(d.source)))))));
+  if ((g.links || []).length) nodes.push(el("p", { class: "fine" }, ...g.links.flatMap((l, i) => [i ? " · " : "", link(l.url, l.label)])));
+  const levels = [["federal", "Federal"], ["state", "New York State"], ["judicial", "Courts"], ["county", "Dutchess County"], ["local", "Beacon"]];
+  nodes.push(el("h3", { class: "sh3 big", text: "Your ballot" }));
+  for (const [lv, label] of levels) {
+    const races = (g.races || []).filter((r) => (r.level || "state") === lv);
+    if (!races.length) continue;
+    nodes.push(el("p", { class: "glevel", text: label }));
+    for (const r of races) nodes.push(raceBlock(r, picks, focus === r.id));
+  }
+  if ((g.proposals || []).length) {
+    nodes.push(el("h3", { class: "sh3 big", text: "Ballot proposals" }));
+    for (const p of g.proposals) nodes.push(proposalBlock(p, picks, focus === p.id));
+  }
+  if ((g.sources || []).length) nodes.push(el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Sources" }),
+    el("ul", { class: "also" }, ...g.sources.map((s0) => el("li", {}, link(s0.url, s0.label))))));
+  nodes.push(el("p", { class: "fine", text: "Written " + (g.updated || "") + " from official sources and established outlets; checked before each election. Tell me in a session if anything is wrong or missing." }));
+  nodes.push(el("div", { class: "endline", text: "End of the guide" }));
+  openSheet(nodes.filter(Boolean), "Voter guide");
+}
+function raceBlock(r, picks, open) {
+  const th = r.thread && (data.threads || []).find((t) => t.id === r.thread);
+  const devs = th ? (th.developments || []).slice(-3).reverse() : [];
+  const pickKey = "race:" + r.id;
+  const cands = (r.candidates || []).map((c) => {
+    const mine = picks[pickKey] === c.name;
+    const pick = el("button", { class: "pick" + (mine ? " on" : ""), text: mine ? "✓ My pick" : "My pick" });
+    pick.onclick = (e) => { e.preventDefault(); const pk = store.json(KEY.picks, {}); pk[pickKey] = mine ? null : c.name; store.set(KEY.picks, JSON.stringify(pk)); openGuide(r.id); };
+    return el("div", { class: "cand" },
+      el("div", { class: "chead" }, el("span", { class: "cname", text: c.name }), c.incumbent ? el("span", { class: "inc", text: "incumbent" }) : null, pick),
+      (c.lines || []).length ? el("div", { class: "lines" }, ...c.lines.map((l) => el("span", { class: "line", text: l }))) : null,
+      c.running_mate ? el("p", { class: "fine", text: "Running mate: " + c.running_mate }) : null,
+      c.bio ? el("p", { class: "cbio", text: c.bio }) : null,
+      (c.positions || []).length ? el("ul", { class: "cpos" }, ...c.positions.map((p) => el("li", {}, p.topic ? el("b", { text: p.topic + ": " }) : null, p.text + " ", p.source ? link(p.source, "↗", "srcl") : null))) : null,
+      c.site ? el("p", { class: "fine" }, link(c.site, "Campaign site ↗")) : null);
+  });
+  const myPick = picks[pickKey];
+  return el("details", { class: "race", open: open ? true : null },
+    el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: r.office }), r.district ? " · " + r.district : ""),
+      el("span", { class: "rsub", text: (r.candidates || []).map((c) => c.name.split(" ").slice(-1)[0]).join(" vs. ") + (myPick ? " · your pick: " + myPick : "") }), el("span", { class: "chev", text: "▾" })),
+    r.job ? el("p", { class: "rjob" }, el("b", { text: "The job: " }), r.job) : null,
+    r.why ? el("p", { class: "rjob" }, el("b", { text: "Why it touches you: " }), r.why) : null,
+    r.note ? el("p", { class: "fine", text: r.note }) : null,
+    el("div", { class: "cands" }, ...cands),
+    (r.ratings || []).length || (r.polls || []).length ? el("div", { class: "rstat" },
+      ...(r.ratings || []).map((x) => el("span", { class: "chip" }, x.who + ": " + x.rating + " ", x.source ? link(x.source, "↗", "srcl") : null)),
+      ...(r.polls || []).map((x) => el("span", { class: "chip" }, x.who + (x.dates ? " (" + x.dates + ")" : "") + ": " + x.result + " ", x.source ? link(x.source, "↗", "srcl") : null))) : null,
+    devs.length ? el("div", { class: "rnews" }, el("span", { class: "mlabel", text: "Latest in this race" }),
+      el("ul", { class: "also" }, ...devs.map((d) => el("li", {}, el("span", { class: "asrc", text: ago(Date.parse(d.t)) + " · " + d.source }), link(d.link, d.text))))) : null,
+    th ? el("button", { class: "sbtn wide", text: "Open the race thread (news, Ask) ›", onclick: () => openThread(th) }) : null);
+}
+function proposalBlock(p, picks, open) {
+  const pickKey = "prop:" + p.id;
+  const mine = picks[pickKey];
+  const choose = (v) => { const b = el("button", { class: "pick" + (mine === v ? " on" : ""), text: (mine === v ? "✓ " : "") + "Leaning " + v });
+    b.onclick = (e) => { e.preventDefault(); const pk = store.json(KEY.picks, {}); pk[pickKey] = mine === v ? null : v; store.set(KEY.picks, JSON.stringify(pk)); openGuide(p.id); }; return b; };
+  const side = (label, list) => (list || []).length ? el("div", { class: "pside" }, el("b", { text: label }),
+    el("ul", { class: "cpos" }, ...list.map((a) => el("li", {}, a.who ? el("b", { text: a.who + ": " }) : null, a.text + " ", a.source ? link(a.source, "↗", "srcl") : null)))) : null;
+  return el("details", { class: "race", open: open ? true : null },
+    el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: (p.number ? "Proposal " + p.number + ": " : "") + p.title })),
+      el("span", { class: "rsub", text: mine ? "you: " + mine : "" }), el("span", { class: "chev", text: "▾" })),
+    p.summary ? el("p", { class: "rjob", text: p.summary }) : null,
+    p.yes ? el("p", { class: "rjob" }, el("b", { text: "A Yes vote: " }), p.yes) : null,
+    p.no ? el("p", { class: "rjob" }, el("b", { text: "A No vote: " }), p.no) : null,
+    p.why ? el("p", { class: "rjob" }, el("b", { text: "Why it touches you: " }), p.why) : null,
+    side("Arguments for", p.for), side("Arguments against", p.against),
+    p.text ? el("details", { class: "rest" }, el("summary", {}, el("span", { text: "The ballot language" }), el("span", { class: "chev", text: "▾" })), el("p", { class: "excerpt" }, p.text)) : null,
+    el("div", { class: "pickrow" }, choose("Yes"), choose("No")),
+    p.source ? el("p", { class: "fine" }, link(p.source, "Official source ↗")) : null);
+}
+
 // --------------------------------------------------------------- Tell The Wire (2026-10-22)
 // Joe writes or dictates what matters; the model proposes changes; he ticks and applies.
 // Nothing changes until Apply. functions/tell.js does the work; everything stays in KV.
@@ -1728,7 +1834,7 @@ function proposalView(entry) {
 }
 
 // --------------------------------------------------------------- the Threads tab
-const GROUP_LABEL = { business: "Optima's business", law: "Law", government: "Government and policy", israel: "Israel" };
+const GROUP_LABEL = { election: "Your ballot", business: "Optima's business", law: "Law", government: "Government and policy", israel: "Israel" };
 function threadsView(segment) {
   const out = [];
   const threads = data.threads || [];
@@ -1746,7 +1852,7 @@ function threadsView(segment) {
   }
   if (segment === "standing") {
     out.push(sectionHead("Standing threads", "tracked whether or not you follow them · threads.yaml"));
-    for (const g of ["business", "law", "government", "israel"]) {
+    for (const g of ["election", "business", "law", "government", "israel"]) {
       const list = threads.filter((t) => t.standing && (t.group || (t.desk === "LAW" ? "law" : "government")) === g);
       if (!list.length) continue;
       out.push(el("h3", { class: "sh3", text: GROUP_LABEL[g] }), standingList(list));
