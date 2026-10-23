@@ -1584,12 +1584,14 @@ function israelView() {
 function electionBox(t) {
   const P = data.il_polls;
   const out = [];
-  const day = Date.parse("2026-10-27T19:00:00Z");     // polls close 10 PM Israel time
+  const day = Date.parse("2026-10-27T20:00:00Z");     // polls close 10 PM Israel time (4 PM New York)
   const days = Math.ceil((day - Date.now()) / 86400e3);
   out.push(sectionHead("Election", days > 0 ? "Tuesday, Oct 27 · " + (days === 1 ? "tomorrow" : "in " + days + " days") : days > -9 ? "results due Nov 4" : null,
     t ? () => openThread(t) : null, t ? "Open the thread" : null));
   if (t && t.dates) out.push(el("ol", { class: "ildates" }, ...t.dates.map((d) => el("li", { class: d.date && d.date < new Date().toISOString().slice(0, 10) ? "past" : "" },
     el("span", { class: "tlt", text: d.date ? fmtDate.format(new Date(d.date + "T12:00:00Z")) : "Then" }), el("span", { text: d.label })))));
+  const R = data.il_results;
+  if (R && R.lists && R.lists.length) out.push(...resultsBlock(R));
   if (P && P.latest && P.latest.length) {
     out.push(el("p", { class: "fine", text: "Latest poll from each pollster, in seats out of 120; 61 is a majority. The government bloc is Likud, Shas, UTJ, Religious Zionism and Otzma Yehudit." + (P.gov_range ? " Range across pollsters: " + P.gov_range[0] + "–" + P.gov_range[1] + " for the government bloc." : "") }));
     out.push(el("ul", { class: "polls" }, ...P.latest.map((p) => el("li", {},
@@ -1605,10 +1607,35 @@ function electionBox(t) {
     const note = el("p", { class: "fine" }, "0 means below the 3.25% threshold; – means not polled. Source: ", link(P.source, "Wikipedia's poll table"),
       ", which links each poll" + (P.as_of ? "; read " + ago(Date.parse(P.as_of)) + " ago." : "."));
     out.push(el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Seats by list, each pollster" }), el("span", { class: "chev", text: "▾" })), table, note));
-  } else {
+  } else if (!R) {
     out.push(el("p", { class: "fine", text: "Polls appear here after the next build reads them." }));
   }
+  if (R && R.lists && R.lists.length) {
+    // Once there's a count, the polls fold away under the results.
+    const i = out.findIndex((n) => n && n.classList && n.classList.contains("rbox"));
+    const polls = out.splice(i + 1);
+    if (polls.length) out.push(el("details", { class: "rest" }, el("summary", {}, el("span", { text: "The final pre-election polls" }), el("span", { class: "chev", text: "▾" })), ...polls));
+  }
   return out;
+}
+
+function resultsBlock(R) {
+  const b = R.blocs || {};
+  const status = R.final ? "Final count" : R.counted_pct != null ? "Counting · about " + R.counted_pct + "% of expected votes counted" : "Counting";
+  const seated = R.lists.filter((x) => x.seats > 0);
+  const out = el("div", { class: "rbox" },
+    el("div", { class: "rhead" }, el("span", { class: "dev", text: R.final ? "Result" : "Live count" }), el("span", { class: "asrc", text: status + " · " + (R.source ? R.source.name : "") + " · " + (ago(Date.parse(R.at)) === "now" ? "just now" : ago(Date.parse(R.at)) + " ago") })),
+    el("div", { class: "ilbar big", role: "img", "aria-label": "Government bloc " + b.gov + ", opposition " + b.opp + ", Arab lists " + b.arab },
+      el("span", { class: "pg", style: "flex:" + (b.gov || 0) }, String(b.gov || 0)), el("span", { class: "po", style: "flex:" + (b.opp || 0) }, String(b.opp || 0)),
+      el("span", { class: "pa", style: "flex:" + (b.arab || 0) }, String(b.arab || 0)), el("i", { class: "p61" })),
+    el("p", { class: "plegend" }, el("span", { class: "pg", text: "Government bloc " + (b.gov || 0) }), " ", el("span", { class: "po", text: "Opposition " + (b.opp || 0) }), " ", el("span", { class: "pa", text: "Arab lists " + (b.arab || 0) }), " · 61 to govern"),
+    el("div", { class: "ptable" }, el("table", {},
+      el("thead", {}, el("tr", {}, el("th", { text: "List" }), el("th", { text: "Seats" }), el("th", { text: "Votes" }), el("th", { text: "%" }))),
+      el("tbody", {}, ...seated.map((x) => el("tr", { class: "b-" + x.bloc }, el("td", { text: x.name }), el("td", { text: String(x.seats) }),
+        el("td", { text: x.votes != null ? x.votes.toLocaleString() : "–" }), el("td", { text: x.pct != null ? x.pct.toFixed(2) : "–" })))))),
+    R.lists.length > seated.length ? el("p", { class: "fine", text: "Under the 3.25% threshold: " + R.lists.filter((x) => !x.seats && (x.pct || 0) >= 0.5).map((x) => x.name + (x.pct != null ? " " + x.pct.toFixed(2) + "%" : "")).join(", ") }) : null,
+    el("p", { class: "fine" }, (R.source && !R.source.official ? "From Wikipedia's results table, which editors copy from the committee's count; the official site wasn't reachable. " : "") + "Seats shift as the count goes on; the official result is due Nov 4. ", R.source ? link(R.source.link, "Source ↗") : null));
+  return [out];
 }
 
 // --------------------------------------------------------------- Tell The Wire (2026-10-22)

@@ -607,3 +607,10 @@ details.rest[open] summary .chev { transform: rotate(180deg); display: inline-bl
 .props li.done { opacity: 0.55; }
 .props .asrc { grid-column: 2; font: 0.8rem/1.3 var(--sans); color: var(--text3); }
 .props .pk, .props .pv { grid-column: 2; }
+
+.rbox { padding: 10px 12px; margin: 8px 0 12px; border-radius: 12px; background: var(--surface); display: grid; gap: 6px; }
+.rhead { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.ilbar.big { height: 30px; font-size: 0.9rem; line-height: 30px; }
+.ptable tr.b-gov td:first-child { box-shadow: inset 3px 0 #3b5b92; padding-left: 8px; }
+.ptable tr.b-opp td:first-child { box-shadow: inset 3px 0 #b5733a; padding-left: 8px; }
+.ptable tr.b-arab td:first-child { box-shadow: inset 3px 0 #4f8a6b; padding-left: 8px; }
