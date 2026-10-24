@@ -673,7 +673,7 @@ table.score td.cn { white-space: normal; min-width: 9em; font-family: var(--sans
 
 /* Questionnaires */
 .quizbox { border: 1px dashed var(--hair); }
-.qprog { display: flex; gap: 10px; align-items: center; font: 0.8rem var(--mono); color: var(--text3); margin-bottom: 10px; }
+.qprog { display: flex; gap: 10px; padding-right: 40px; align-items: center; font: 0.8rem var(--mono); color: var(--text3); margin-bottom: 10px; }
 .qbar { flex: 1; height: 4px; border-radius: 2px; background: var(--raised); overflow: hidden; }
 .qbar i { display: block; height: 100%; background: var(--here); }
 .qtext { font: 600 1.3rem/1.35 var(--serif); margin: 8px 0 18px; }
@@ -682,3 +682,24 @@ table.score td.cn { white-space: normal; min-width: 9em; font-family: var(--sans
 .qopt.on { background: var(--here); color: var(--on-here, #fff); }
 .wrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 8px; }
 .qnav { display: flex; justify-content: space-between; margin-top: 16px; }
+.qopt.tall { min-height: 64px; padding: 10px 14px; text-align: left; font: 600 0.98rem/1.35 var(--sans); }
+.pulsecard { display: flex; align-items: center; gap: 8px; margin: 10px 0; border: 1px dashed var(--hair); border-radius: 14px; padding: 4px 10px 4px 4px; }
+.pulsecard .pc-go { flex: 1; display: flex; align-items: center; gap: 12px; padding: 10px; background: none; color: var(--text); text-align: left; }
+.vmapbox { max-width: 340px; margin: 6px auto 4px; }
+.vmap { width: 100%; height: auto; display: block; }
+.vmap .frame { fill: var(--raised); stroke: var(--hair); }
+.vmap .axis { stroke: var(--hair); stroke-dasharray: 3 3; }
+.vmap .q { fill: var(--text3); font: 8.5px var(--mono); }
+.vmap .ax { fill: var(--text2); font: 600 9px var(--mono); }
+.vmap .me { fill: var(--here); stroke: var(--bg); stroke-width: 2; }
+.vmap .was { fill: var(--text3); opacity: 0.6; }
+.vmap .trail { fill: none; stroke: var(--text3); stroke-dasharray: 2 3; }
+.vbar { margin: 10px 0 14px; }
+.vbl { font-size: 0.95rem; margin-bottom: 4px; }
+.vtrack { display: flex; align-items: center; gap: 8px; font: 0.72rem var(--mono); color: var(--text3); }
+.vpole { width: 5.5em; }
+.vpole.r { text-align: right; }
+.vline { position: relative; flex: 1; height: 4px; border-radius: 2px; background: var(--raised); }
+.vline::after { content: ""; position: absolute; left: 50%; top: -4px; width: 1px; height: 12px; background: var(--hair); }
+.vline i { position: absolute; top: -5px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--here); }
+p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }

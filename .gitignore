@@ -8,3 +8,4 @@ node_modules/
 .wrangler/
 follows.json
 ballot.json
+quiz.json
