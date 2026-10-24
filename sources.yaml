@@ -366,6 +366,36 @@ law:
 # Case-insensitive whole-word or whole-phrase match; a trailing * matches a prefix
 # (indemnif* matches indemnify, indemnification). Nothing is filtered out. Tune freely.
 # A group can also be {terms: [...], skip_desks: [DESK], case_sensitive: true}.
+# ---------------------------------------------------------------- reading (2026-10-23)
+# Books, essays and what people are arguing about, for "Worth reading" on Today and News ›
+# Ideas (pipeline/reading.py). Quiet: these never fill the news desks. kind: books = reviews
+# and book news (which books are being talked about); essays = long-form ideas writing;
+# talk = Memeorandum's page of the political stories drawing the most commentary.
+# fulltext: open text may be read for our own takeaways (never shown or stored in git);
+# paywalled sources (NYT, LRB, The Atlantic) are headline and description only.
+# Probed 2026-10-23 from the cloud: all reachable, robots allow. Not available: New Yorker
+# books feed (400), Washington Post books (502), Tablet and Dissent (403), City Journal and
+# Works in Progress (no feed), Publishers Weekly (robots).
+reading:
+  - {id: rd_book_marks, short: "Book Marks", enabled: true, quiet: true, keep_days: 21, reading: books, desk: WORLD, name: "Book Marks (Lit Hub's review aggregator)", type: rss, url: "https://bookmarks.reviews/feed/", status: OK, poll: 180, fulltext: true}
+  - {id: rd_guardian_books, short: "Guardian Books", enabled: true, quiet: true, keep_days: 21, reading: books, desk: WORLD, name: Guardian Books, type: rss, url: "https://www.theguardian.com/books/rss", status: OK, poll: 120, fulltext: true}
+  - {id: rd_npr_books, short: "NPR Books", enabled: true, quiet: true, keep_days: 21, reading: books, desk: WORLD, name: NPR Books, type: rss, url: "https://feeds.npr.org/1032/rss.xml", status: OK, poll: 120, fulltext: true}
+  - {id: rd_lithub, short: "Lit Hub", enabled: true, quiet: true, keep_days: 21, reading: books, desk: WORLD, name: Literary Hub, type: rss, url: "https://lithub.com/feed/", status: OK, poll: 120, fulltext: true}
+  - {id: rd_latimes_books, short: "LA Times Books", enabled: true, quiet: true, keep_days: 21, reading: books, desk: WORLD, name: LA Times Books, type: rss, url: "https://www.latimes.com/entertainment-arts/books/rss2.0.xml", status: OK, poll: 180, fulltext: true}
+  - {id: rd_nyt_books, short: "NYT Books", enabled: true, quiet: true, keep_days: 21, reading: books, desk: WORLD, name: NYT Books, type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/Books.xml", status: OK, poll: 180, notes: "Paywalled: headline and description only."}
+  - {id: rd_five_books, short: "Five Books", enabled: true, quiet: true, keep_days: 21, reading: books, desk: WORLD, name: Five Books, type: rss, url: "https://fivebooks.com/feed/", status: OK, poll: 360, fulltext: true}
+  - {id: rd_jrb, short: "Jewish Review of Books", enabled: true, quiet: true, keep_days: 21, reading: books, desk: WORLD, name: Jewish Review of Books, type: rss, url: "https://jewishreviewofbooks.com/feed/", status: OK, poll: 360, perspective: center-right}
+  - {id: rd_lrb, short: "LRB", enabled: true, quiet: true, keep_days: 21, reading: books, desk: WORLD, name: London Review of Books, type: rss, url: "https://www.lrb.co.uk/feeds/rss", status: OK, poll: 360, notes: "Mostly paywalled: headline and description only."}
+  - {id: rd_aeon, short: "Aeon", enabled: true, quiet: true, keep_days: 14, reading: essays, perspective: center, desk: WORLD, name: Aeon, type: rss, url: "https://aeon.co/feed.rss", status: OK, poll: 240, fulltext: true}
+  - {id: rd_noema, short: "Noema", enabled: true, quiet: true, keep_days: 14, reading: essays, perspective: center-left, desk: WORLD, name: Noema, type: rss, url: "https://www.noemamag.com/feed/", status: OK, poll: 240, fulltext: true}
+  - {id: rd_atlantic_ideas, short: "The Atlantic", enabled: true, quiet: true, keep_days: 14, reading: essays, perspective: center-left, desk: WORLD, name: The Atlantic (Ideas), type: rss, url: "https://www.theatlantic.com/feed/channel/ideas/", status: OK, poll: 120, notes: "Metered paywall: headline and description only."}
+  - {id: rd_asterisk, short: "Asterisk", enabled: true, quiet: true, keep_days: 21, reading: essays, perspective: center, desk: WORLD, name: Asterisk, type: rss, url: "https://asteriskmag.com/feed", status: OK, poll: 360, fulltext: true}
+  - {id: rd_compact, short: "Compact", enabled: true, quiet: true, keep_days: 14, reading: essays, perspective: heterodox, desk: WORLD, name: Compact, type: rss, url: "https://www.compactmag.com/feed", status: OK, poll: 240}
+  - {id: rd_commentary, short: "Commentary", enabled: true, quiet: true, keep_days: 14, reading: essays, perspective: right, desk: WORLD, name: Commentary, type: rss, url: "https://www.commentary.org/feed/", status: OK, poll: 240}
+  - {id: rd_the_point, short: "The Point", enabled: true, quiet: true, keep_days: 30, reading: essays, perspective: center, desk: WORLD, name: The Point, type: rss, url: "https://thepointmag.com/feed/", status: OK, poll: 720, fulltext: true}
+  - {id: rd_liberties, short: "Liberties", enabled: true, quiet: true, keep_days: 30, reading: essays, perspective: center-left, desk: WORLD, name: Liberties, type: rss, url: "https://libertiesjournal.com/feed/", status: OK, poll: 720}
+  - {id: rd_memeorandum, short: "Memeorandum", enabled: true, quiet: true, keep_days: 2, reading: talk, desk: GOV, name: "Memeorandum (what political writers are discussing)", type: rss, url: "https://www.memeorandum.com/feed.xml", status: OK, poll: 60}
+
 watchlist:
   # Beacon news on the other desks stands out; on the BEACON desk it would match everything.
   beacon_local: {terms: [Beacon, Dutchess, Fishkill, Hudson Highlands], skip_desks: [BEACON], case_sensitive: true}

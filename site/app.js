@@ -15,7 +15,7 @@ const TABS = [
   { id: "settings", label: "Settings", icon: "⚙" },
 ];
 const SEGMENTS = {
-  news: [["BEACON", "Beacon"], ["REGION", "Region"], ["GOV", "Gov"], ["LAW", "Law"], ["WORLD", "World"], ["ISRAEL", "Israel"], ["SPORTS", "Sports"]],
+  news: [["BEACON", "Beacon"], ["REGION", "Region"], ["GOV", "Gov"], ["LAW", "Law"], ["WORLD", "World"], ["ISRAEL", "Israel"], ["IDEAS", "Ideas"], ["SPORTS", "Sports"]],
   threads: [["following", "Following"], ["standing", "Standing"], ["suggested", "Suggested"], ["browse", "Browse"]],
 };
 const DESK_NAME = { BEACON: "Beacon", REGION: "Region", GOV: "Gov", LAW: "Law", WORLD: "World", SPORTS: "Sports", SYSTEM: "System" };
@@ -299,7 +299,7 @@ function renderView(id) {
   document.body.dataset.tab = id;
   if (id === "today") v.replaceChildren(...todayView());
   if (id === "threads") v.replaceChildren(tellCard(), segBar("threads"), ...threadsView(seg.threads));
-  if (id === "news") v.replaceChildren(segBar("news"), ...(seg.news === "ISRAEL" ? israelView() : [...(seg.news === "GOV" && data.voter_guide ? [guideCard()] : []), ...(seg.news === "GOV" ? govPanel() : []), ...(seg.news === "SPORTS" ? scoreboard() : []), ...deskView("news", seg.news)]));
+  if (id === "news") v.replaceChildren(segBar("news"), ...(seg.news === "ISRAEL" ? israelView() : seg.news === "IDEAS" ? ideasView() : [...(seg.news === "GOV" && data.voter_guide ? [guideCard()] : []), ...(seg.news === "GOV" ? govPanel() : []), ...(seg.news === "SPORTS" ? scoreboard() : []), ...deskView("news", seg.news)]));
   if (id === "live") v.replaceChildren(...liveView());
   if (id === "settings") v.replaceChildren(...settingsView());
 }
@@ -370,6 +370,8 @@ function todayView() {
     out.push(sectionHead("From people you follow", null, () => openPeople(), "People"));
     out.push(el("ol", { class: "list" }, ...following.map((it) => row(it, { desk: true }))));
   }
+  const wr = worthReading();
+  if (wr) out.push(...wr);
   const other = otherSide(following);
   if (other) {
     out.push(sectionHead("The other side", other.why));
@@ -2382,6 +2384,63 @@ function questionnairesSection(Q) {
     valuesEntry(Q),
     g && g.quiz ? el("button", { class: "doclink", text: "Election check for " + g.title + " ›", onclick: () => openGuide() }) : null,
   ].filter(Boolean);
+}
+
+// --------------------------------------------------------------- worth reading (2026-10-23)
+// Books being talked about, essays worth the time, and what political writers are arguing
+// about (pipeline/reading.py). Takeaways are our own, from open text: a book's come from its
+// reviews (never the book), an essay's from the essay. Paywalled pieces are headline only.
+const PERSP = { left: "left", "center-left": "center-left", center: "center", heterodox: "heterodox", "center-right": "center-right", right: "right", libertarian: "libertarian" };
+function worthReading() {
+  const R = data.reading;
+  if (!R) return null;
+  const day = Math.floor(Date.now() / 86400e3);
+  const books = R.books || [], essays = (R.essays || []).filter((e) => e.takeaways.length || e.desc);
+  const picks = [];
+  if (books.length) picks.push(["book", books[day % books.length]]);
+  if (essays.length) picks.push(["essay", essays[day % essays.length]]);
+  if (!picks.length) return null;
+  return [sectionHead("Worth reading", "a book and an essay, new each day", () => { seg.news = "IDEAS"; store.set(KEY.seg, JSON.stringify(seg)); go("news"); }, "Ideas"),
+    el("ul", { class: "suggest" }, ...picks.map(([k, x]) => readingRow(k, x)))];
+}
+function readingRow(k, x) {
+  const has = (x.takeaways || []).length;
+  const meta = k === "book" ? "Book" + (x.author ? " · " + x.author : "") + " · " + (x.reviews || []).length + " review" + ((x.reviews || []).length === 1 ? "" : "s")
+    : "Essay · " + x.source + (x.perspective ? " · " + (PERSP[x.perspective] || x.perspective) : "") + (x.t ? " · " + ago(Date.parse(x.t)) + " ago" : "");
+  return el("li", {},
+    el("span", { class: "asrc", text: meta }),
+    el("button", { class: "doclink", text: x.title, onclick: () => openReading(k, x) }),
+    el("span", { class: "rdline", text: x.line || x.hook || x.desc || "" }),
+    el("span", { class: "sgrow" }, el("button", { class: "chip", text: has ? "Key takeaways" : k === "book" ? "Reviews" : "Read it ↗", onclick: () => has || k === "book" ? openReading(k, x) : window.open(x.link, "_blank", "noopener") })));
+}
+function openReading(k, x) {
+  const nodes = [el("span", { class: "mlabel", text: k === "book" ? "Book being talked about" : "Essay · " + x.source }),
+    el("h2", { id: "sheet-title", class: "stitle", text: x.title }),
+    x.author ? el("p", { class: "sdesc", text: (k === "book" ? "by " : "") + x.author }) : null];
+  if (x.line) nodes.push(el("p", { class: "lens", text: x.line }));
+  if ((x.takeaways || []).length) nodes.push(el("h3", { class: "sh3", text: "Key takeaways" }), el("ul", { class: "cpos" }, ...x.takeaways.map((t) => el("li", { text: t }))));
+  if (x.reception) nodes.push(el("h3", { class: "sh3", text: "How it was received" }), el("p", { text: x.reception }));
+  if (!x.line && (x.hook || x.desc)) nodes.push(el("p", { text: x.hook || x.desc }));
+  nodes.push(el("p", { class: "fine", text: k === "book"
+    ? "Machine-written from the reviews below, not from the book. Check a review before quoting it."
+    : (x.takeaways || []).length ? "Machine-written from the essay's own text. The argument is the author's." : "This publication is paywalled or doesn't allow reading, so there's only its own description." }));
+  if (k === "book") nodes.push(el("h3", { class: "sh3", text: "Reviews and coverage" }), el("ul", { class: "admin" }, ...(x.reviews || []).map((r) => el("li", {}, el("span", { class: "asrc", text: r.source }), link(r.link, r.title)))));
+  else nodes.push(el("div", { class: "sactions" }, el("a", { class: "sbtn primary", href: x.link, target: "_blank", rel: "noopener", text: "Read the essay ↗" })));
+  openSheet(nodes.filter(Boolean), x.title);
+}
+function ideasView() {
+  const R = data.reading;
+  const out = [];
+  if (!R) return [el("p", { class: "sdesc", text: "Nothing yet: the reading list builds every few hours." })];
+  out.push(el("p", { class: "fine", text: "As of " + fmtTime.format(new Date(Date.parse(R.at))) + ". Takeaways are machine-written: a book's from its reviews, an essay's from its own text." }));
+  if ((R.books || []).length) out.push(sectionHead("Books people are talking about", "from the last three weeks of reviews"), el("ul", { class: "suggest" }, ...R.books.map((b) => readingRow("book", b))));
+  if ((R.essays || []).length) out.push(sectionHead("Essays", "across publications and perspectives, new each day"), el("ul", { class: "suggest" }, ...R.essays.map((e) => readingRow("essay", e))));
+  if ((R.talk || []).length) out.push(sectionHead("What political writers are arguing about", "via Memeorandum"),
+    el("ol", { class: "list plainlist" }, ...R.talk.map((t) => el("li", {}, link(t.link, t.title), t.by ? el("span", { class: "asrc", text: " · " + t.by }) : null))));
+  if ((R.recent || []).length) out.push(sectionHead("New in books coverage"),
+    el("ol", { class: "list plainlist" }, ...R.recent.map((t) => el("li", {}, link(t.link, t.title), el("span", { class: "asrc", text: " · " + t.source })))));
+  out.push(el("div", { class: "endline", text: "End of Ideas" }));
+  return out;
 }
 
 // --------------------------------------------------------------- Tell The Wire (2026-10-22)

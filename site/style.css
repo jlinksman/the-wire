@@ -705,3 +705,6 @@ table.score td.cn { white-space: normal; min-width: 9em; font-family: var(--sans
 p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
 .cht.onair { color: var(--live); }
 .cht.offair { opacity: 0.6; }
+.rdline { display: block; font-size: 0.92rem; color: var(--text2); margin: 2px 0 6px; }
+.plainlist li { padding: 8px 0; border-bottom: 1px solid var(--hair); font-size: 0.97rem; }
+.plainlist a { color: var(--text); text-decoration: none; }

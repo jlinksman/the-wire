@@ -1305,6 +1305,14 @@ def main() -> int:
                                 "poll": 15, "last_success": None, "last_attempt": iso(now_utc()),
                                 "last_error": f"{type(exc).__name__}: {exc}"[:300], "last_status": None,
                                 "robots": "n/a", "items": 0})
+    # Worth reading: books being talked about, essays, what political writers are discussing.
+    try:
+        import reading
+        rsrc = {s["id"]: s for s in sources if s.get("reading")}
+        pool = [dict(v, t=iso(sort_time(v))) for v in state["items"].values() if v["source_id"] in rsrc]
+        data["sources"].append(reading.run(state, data, pool, rsrc, session, robots_allows, TIMEOUT, log))
+    except Exception as exc:
+        log(f"[reading] failed: {type(exc).__name__}: {exc}")
     # Voter guide: the active election from elections.yaml, and what's next.
     try:
         data["sources"].append(elections.run(data, log))
