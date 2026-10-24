@@ -9,3 +9,5 @@ node_modules/
 follows.json
 ballot.json
 quiz.json
+share/ballot-data.json
+share/wrangler.toml

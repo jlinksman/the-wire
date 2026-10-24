@@ -2432,6 +2432,32 @@ function openLens(sc, past) {
     el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Back to your results", onclick: () => openStand() })),
   ], "Undercurrents");
 }
+// Share the ballot quiz (2026-10-24): a public page, separate from The Wire, where friends and
+// neighbors can take the election check on the same races and see their own matches. Public
+// information only; their answers stay on their phones. Joe's toggle opens or closes it.
+const SHARE_URL = "https://wire-ballot.pages.dev/";
+function shareBox() {
+  const status = el("p", { class: "rjob", text: "Checking…" });
+  const tog = el("input", { type: "checkbox" });
+  const actions = el("div", { class: "sactions" });
+  const draw = (on) => {
+    tog.checked = on;
+    status.textContent = on ? "Open: anyone with the link can take it." : "Closed: the link shows “not open right now.”";
+    actions.replaceChildren(...(on ? [
+      el("button", { class: "sbtn primary", text: "Share the link", onclick: async () => { try { await navigator.share({ title: "Ballot Match", text: "A quick quiz that matches your views to the candidates on our ballot. Your answers stay on your phone.", url: SHARE_URL }); } catch (e) { try { await navigator.clipboard.writeText(SHARE_URL); status.textContent = "Link copied."; } catch (x) { status.textContent = SHARE_URL; } } } }),
+      el("a", { class: "sbtn", href: SHARE_URL, target: "_blank", rel: "noopener", text: "Preview" })] : []));
+  };
+  tog.onchange = async () => {
+    status.textContent = "Saving…";
+    try { const r = await fetch("share", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ on: tog.checked }) }); draw(Boolean((await r.json()).on)); }
+    catch (e) { status.textContent = "Couldn't save. Try again."; tog.checked = !tog.checked; }
+  };
+  fetch("share", { credentials: "same-origin" }).then((r) => r.json()).then((j) => draw(Boolean(j.on))).catch(() => { status.textContent = "Couldn't check."; });
+  return el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Share the ballot quiz" }),
+    el("p", { class: "fine", text: "A separate public page with the election check on the same races, for friends, family and neighbors. It shows only public information: the statements, the explainers, and the candidates' sourced positions. Never your answers, scorecard or anything from The Wire. Their answers stay on their own phones." }),
+    el("label", { class: "trow" }, el("span", { text: "Open to anyone with the link" }), tog), status, actions);
+}
+
 function questionnairesSection(Q) {
   const lp = lastPulse(Q);
   const g = data.voter_guide;
@@ -2448,6 +2474,7 @@ function questionnairesSection(Q) {
       el("p", { class: "rjob", text: (Q.memes || {}).done_at ? "Your meme map is ready." : "Twelve rounds of picture cards from online political subcultures. Pick on instinct; get placed among them." }),
       el("button", { class: "sbtn primary wide", text: (Q.memes || {}).done_at ? "See my meme map" : "Start the meme map", onclick: () => ((Q.memes || {}).done_at ? openMemeMap() : openMemes()) })),
     g && g.quiz ? el("button", { class: "doclink", text: "Election check for " + g.title + " ›", onclick: () => openGuide() }) : null,
+    shareBox(),
   ].filter(Boolean);
 }
 
