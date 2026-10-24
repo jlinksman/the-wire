@@ -111,3 +111,9 @@ Everything here was researched and scoped, then held back so V1 could start simp
 - Paid AI summaries (would break the $0 rule; free routes are in V5).
 - Multi-stream video wall. More city desks.
 - **Local color sources:** A Little Beacon Blog, Chronogram, Hudson Valley One, Hudson Valley Magazine, Patch Fishkill, Spectrum News Hudson Valley, Metro-North service alerts, NYSDEC press releases, Secret Tel Aviv, ISRAEL21c. Still to find: Times Union, Riverkeeper, Dia Beacon events, Dutchess County news, Sortir à Paris.
+
+## Worth reading (built 2026-10-23)
+- `reading:` in sources.yaml (18 quiet sources: Book Marks, Guardian, NPR, Lit Hub, LA Times, NYT, Five Books, Jewish Review of Books and LRB for books; Aeon, Noema, The Atlantic, Asterisk, Compact, Commentary, The Point and Liberties for essays; Memeorandum for what political writers are discussing) and `pipeline/reading.py`.
+- Every 6 hours the large model names the books the last three weeks of coverage is talking about; a title is kept only if it appears in an item it cites. Takeaways for each (what it is or argues, 3–5 points, how reviewers received it) come only from its reviews' open text and say so; a book whose coverage is all paywalled shows its reviews without takeaways. Essays rotate daily across publications and perspectives, with takeaways from the essay's own text where it's open. Budget: 1,500 neurons a day inside the overall cap.
+- On the page: "Worth reading" on Today (one book and one essay a day) and News › Ideas (all books, essays, Memeorandum's top discussions, new books coverage).
+
