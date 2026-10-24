@@ -703,3 +703,5 @@ table.score td.cn { white-space: normal; min-width: 9em; font-family: var(--sans
 .vline::after { content: ""; position: absolute; left: 50%; top: -4px; width: 1px; height: 12px; background: var(--hair); }
 .vline i { position: absolute; top: -5px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--here); }
 p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
+.cht.onair { color: var(--live); }
+.cht.offair { opacity: 0.6; }
