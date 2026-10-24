@@ -733,3 +733,6 @@ p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
 .dialwhy summary { font-size: 0.8rem; color: var(--text3); cursor: pointer; margin-top: 4px; }
 .line.best { outline: 2px solid var(--here); }
 .whichline summary { font: 600 0.88rem var(--sans); color: var(--here); cursor: pointer; margin: 6px 0; }
+.mmap .bloc-gov { fill: #4a78c2; }
+.mmap .bloc-opp { fill: #c28a3a; }
+.mmap .bloc-arab { fill: #3aa37a; }

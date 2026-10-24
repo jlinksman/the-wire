@@ -1606,6 +1606,11 @@ function electionBox(t) {
   const days = Math.ceil((day - Date.now()) / 86400e3);
   out.push(sectionHead("Election", days > 0 ? "Tuesday, Oct 27 · " + (days === 1 ? "tomorrow" : "in " + days + " days") : days > -9 ? "results due Nov 4" : null,
     t ? () => openThread(t) : null, t ? "Open the thread" : null));
+  // The Israel match questionnaire (which lists your views sit closest to).
+  if (data.il_quiz) {
+    const qb = myQuiz ? ilEntry(myQuiz) : (loadQuiz().then(() => { if (myQuiz && tab === "news") render(); }), null);
+    if (qb) out.push(qb);
+  }
   if (t && t.dates) out.push(el("ol", { class: "ildates" }, ...t.dates.map((d) => el("li", { class: d.date && d.date < new Date().toISOString().slice(0, 10) ? "past" : "" },
     el("span", { class: "tlt", text: d.date ? fmtDate.format(new Date(d.date + "T12:00:00Z")) : "Then" }), el("span", { text: d.label })))));
   const R = data.il_results;
@@ -2135,6 +2140,114 @@ function openExplain(id, back) {
   ].filter(Boolean), "What's this about?");
 }
 
+// --------------------------------------------------------------- Israel match (2026-10-24)
+// Joe: "a questionnaire to help determine my political leanings in the Israeli electorate."
+// 24 blind statements on four scales (security, religion and state, the courts, the economy),
+// each list coded only where a sourced position exists (israel_quiz.yaml, shipped as
+// data.il_quiz). Answers are private (quiz.json, kind election, id il_2026); results only on
+// "See my results": lists ranked by agreement, the blocs, a map of security against religion with
+// every list on it, and the other two scales.
+const IL_ID = "il_2026";
+function ilEntry(Q) {
+  const B = data.il_quiz;
+  if (!B) return null;
+  const mine = ((Q && Q.elections) || {})[IL_ID] || {};
+  const n = B.items.length, answered = Object.keys(mine.answers || {}).length;
+  const box = el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: B.title }));
+  if (!mine.done_at) box.append(el("p", { class: "rjob", text: n + " statements, about " + Math.ceil(n / 4) + " minutes. Which of the " + B.lists.length + " lists your views sit closest to; what each statement measures is shown only afterwards." }),
+    el("button", { class: "sbtn primary wide", text: answered ? "Continue (" + answered + " of " + n + ")" : "Start", onclick: () => openIlQuiz() }));
+  else box.append(el("p", { class: "rjob", text: "Done " + fmtDate.format(new Date(Date.parse(mine.done_at))) + "." }),
+    el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openIlMatch() }),
+      el("button", { class: "sbtn", text: "Retake", onclick: async () => { store.set("wire.quizSeed." + IL_ID, ""); await saveQuiz({ kind: "clear", id: IL_ID }); openIlQuiz(); } })));
+  return box;
+}
+async function openIlQuiz() {
+  const Q = await loadQuiz(true);
+  const B = data.il_quiz;
+  runStatements({
+    title: B.title, items: B.items, seedKey: "wire.quizSeed." + IL_ID, prior: ((Q.elections || {})[IL_ID] || {}).answers || {},
+    save: (partial) => saveQuiz({ kind: "election", id: IL_ID, answers: partial }),
+    later: () => { closeSheet(); render(); },
+    done: async () => {
+      await saveQuiz({ kind: "election", id: IL_ID, answers: {}, done: true });
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Done" }),
+        el("p", { class: "sdesc", text: "Saved privately. Your results aren't shown anywhere until you open them." }),
+        el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openIlMatch() }), el("button", { class: "sbtn", text: "Close", onclick: () => { closeSheet(); render(); } }))], "Done");
+    },
+  });
+}
+function ilAxis(B, pick) {
+  // pick(item) -> v or null; returns {axisId: -1..1}
+  const out = {};
+  for (const ax of B.axes) {
+    let num = 0, den = 0;
+    for (const it of B.items.filter((x) => x.axis === ax.id)) { const v = pick(it); if (v == null) continue; num += v * it.dir; den += 2; }
+    out[ax.id] = den >= 4 ? num / den : null;
+  }
+  return out;
+}
+async function openIlMatch() {
+  const Q = await loadQuiz(true);
+  const B = data.il_quiz;
+  const a = ((Q.elections || {})[IL_ID] || {}).answers || {};
+  const text = Object.fromEntries(B.items.map((x) => [x.id, x.text]));
+  const label = (v) => (SCALE.find(([k]) => k === v) || [0, "–"])[1];
+  const ms = B.lists.map((l) => {
+    const st = B.stances[l.id] || {};
+    let num = 0, den = 0, n = 0;
+    const rows = [];
+    for (const [q, x] of Object.entries(st)) {
+      const y = a[q];
+      if (!y || y.skip || y.v == null) continue;
+      const agree = 1 - Math.abs(y.v - x.v) / 4;
+      num += (y.w || 2) * agree; den += y.w || 2; n += 1;
+      rows.push({ q, you: y.v, them: x.v, agree, source: x.source, note: x.note });
+    }
+    return { l, n, pct: den ? Math.round(100 * num / den) : null, rows: rows.sort((p, q) => q.agree - p.agree) };
+  });
+  const scored = ms.filter((m) => m.n >= 3).sort((p, q) => q.pct - p.pct);
+  const me = ilAxis(B, (it) => (a[it.id] && !a[it.id].skip ? a[it.id].v : null));
+  const pos = Object.fromEntries(B.lists.map((l) => [l.id, ilAxis(B, (it) => ((B.stances[l.id] || {})[it.id] || {}).v ?? null)]));
+  const [X, Yax] = B.map;
+  const P = (v) => 20 + (v + 1) * 110, Yp = (v) => 20 + (1 - v) * 110;
+  const dots = B.lists.filter((l) => pos[l.id][X] != null && pos[l.id][Yax] != null).map((l) => {
+    const x = P(pos[l.id][X]), y = Yp(pos[l.id][Yax]);
+    return `<circle class="cur bloc-${l.bloc}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4"/><text class="cl" x="${(x + 6).toFixed(1)}" y="${(y + 3).toFixed(1)}">${l.short || l.name}</text>`;
+  }).join("");
+  const ax = Object.fromEntries(B.axes.map((x) => [x.id, x]));
+  const box = el("div", { class: "vmapbox" });
+  if (me[X] != null && me[Yax] != null) box.innerHTML = `<svg class="vmap mmap" viewBox="0 0 260 260" role="img" aria-label="Your position among the lists">
+    <rect x="20" y="20" width="220" height="220" class="frame"/><line x1="130" y1="20" x2="130" y2="240" class="axis"/><line x1="20" y1="130" x2="240" y2="130" class="axis"/>
+    <text x="130" y="14" class="ax" text-anchor="middle">${ax[Yax].right}</text><text x="130" y="256" class="ax" text-anchor="middle">${ax[Yax].left}</text>
+    <text x="14" y="130" class="ax" text-anchor="middle" transform="rotate(-90 14 130)">${ax[X].left}</text><text x="250" y="130" class="ax" text-anchor="middle" transform="rotate(90 250 130)">${ax[X].right}</text>
+    ${dots}<circle class="me" cx="${P(me[X]).toFixed(1)}" cy="${Yp(me[Yax]).toFixed(1)}" r="7"/></svg>`;
+  const blocs = ["gov", "opp", "arab"].map((b) => { const xs = scored.filter((m) => m.l.bloc === b); return [b, xs.length ? Math.round(xs.reduce((s, m) => s + m.pct, 0) / xs.length) : null]; });
+  const polls = data.il_polls && data.il_polls.latest ? data.il_polls.latest : [];
+  const seatRange = (l) => { const v = polls.map((p) => p.seats[l.poll_name]).filter((x) => x != null); return v.length ? (Math.min(...v) === Math.max(...v) ? Math.min(...v) : Math.min(...v) + "–" + Math.max(...v)) + " seats in the latest polls" : ""; };
+  const listRow = (m) => el("details", { class: "race" },
+    el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: m.l.name }), " · " + m.pct + "% agreement"),
+      el("span", { class: "rsub", text: [m.l.leader, B.bloc_names[m.l.bloc], seatRange(m.l), m.n + " statements in common"].filter(Boolean).join(" · ") }), el("span", { class: "chev", text: "▾" })),
+    m.l.what ? el("p", { class: "rjob", text: m.l.what }) : null,
+    el("ul", { class: "cpos" }, ...m.rows.map((x) => el("li", {}, el("b", { text: x.agree >= 0.75 ? "Agree · " : x.agree <= 0.25 ? "Differ · " : "Partly · " }),
+      "“" + text[x.q] + "” You: " + label(x.you) + ". " + (m.l.short || m.l.name) + ": " + label(x.them) + (x.note ? " (" + x.note + ")" : "") + " ", x.source ? link(x.source, "↗", "srcl") : null))));
+  const nodes = [
+    el("h2", { id: "sheet-title", class: "stitle", text: "Your Israel match" }),
+    el("p", { class: "sdesc", text: "How closely your answers match each list's stated positions, weighted by how much each statement matters to you. Lists are coded only where a source shows their position, and a list needs three statements in common to be ranked. Agreement on stated positions is a guide to where you sit, not a verdict." }),
+    scored.length ? el("h3", { class: "sh3", text: "Closest lists" }) : null,
+    ...scored.map(listRow),
+    el("h3", { class: "sh3", text: "By bloc" }),
+    el("div", { class: "subjrow" }, ...blocs.map(([b, v]) => el("span", { class: "subj" + (v != null && v === Math.max(...blocs.map(([, x]) => x ?? -1)) ? " on" : ""), text: B.bloc_names[b] + (v != null ? " " + v + "%" : " —") }))),
+    el("p", { class: "fine", text: "Average agreement with the ranked lists in each bloc." }),
+    box.innerHTML ? el("h3", { class: "sh3", text: "Where you sit" }) : null, box.innerHTML ? box : null,
+    box.innerHTML ? el("p", { class: "fine", text: "Each list placed from its own coded positions on the same statements; the large dot is you." }) : null,
+    ...B.axes.filter((x) => !B.map.includes(x.id) && me[x.id] != null).map((x) => barRow(x, { s: me[x.id], n: 1 })),
+    el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Every statement and its scale" }), el("span", { class: "chev", text: "▾" })),
+      el("ul", { class: "cpos" }, ...B.items.map((it) => el("li", {}, el("b", { text: ax[it.axis].label + " · agreeing points " + (it.dir > 0 ? ax[it.axis].right : ax[it.axis].left).toLowerCase() + ". " }), "“" + it.text + "” You: " + (a[it.id] ? (a[it.id].skip ? "skipped" : label(a[it.id].v)) : "not answered") + ".")))),
+    el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Close", onclick: closeSheet })),
+  ];
+  openSheet(nodes.filter(Boolean), "Your Israel match");
+}
+
 // --------------------------------------------------------------- the starting questionnaire
 // What Joe wants to follow, by subject (baseline.yaml). Standing preferences: they don't fade.
 // Shuffled, one subject per screen, no hint of the effect until "What it changed".
@@ -2470,6 +2583,7 @@ function questionnairesSection(Q) {
       el("p", { class: "fine", text: "Answer as often as you like: after five, Keep going asks more." }),
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Answer now", onclick: () => openPulse() }), lp ? el("button", { class: "sbtn", text: "What it changed", onclick: () => pulseEffect() }) : null)),
     valuesEntry(Q),
+    ilEntry(Q),
     el("div", { class: "rbox quizbox memeentry" }, el("span", { class: "mlabel", text: "For fun" }),
       el("p", { class: "rjob", text: (Q.memes || {}).done_at ? "Your meme map is ready." : "Twelve rounds of picture cards from online political subcultures. Pick on instinct; get placed among them." }),
       el("button", { class: "sbtn primary wide", text: (Q.memes || {}).done_at ? "See my meme map" : "Start the meme map", onclick: () => ((Q.memes || {}).done_at ? openMemeMap() : openMemes()) })),
