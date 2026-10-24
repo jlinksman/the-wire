@@ -51,30 +51,30 @@ dims:
 questions:
   # ------------------------------------------------ the map (4 per take)
   - {id: p01, dim: map, q: "Pick your ideal Saturday", cards: [
-      {art: "🛖🌲🔥", c: "Off-grid. No signal. Finally free.", x: -0.4, y: -0.9, w: Agrarian, bg: "#2f4a2c"},
+      {img: thoreau, c: "Off-grid. No signal. Finally free.", x: -0.4, y: -0.9, w: Agrarian, see: anprim, bg: "#2f4a2c"},
       {art: "🚀🧬🤖", c: "Me in 2040 after my third brain upgrade", x: 0.1, y: 0.9, w: Cybernetic, ir: 1, bg: "#1d2f55"},
-      {art: "⛪🕯️🍞", c: "Mass, then baking bread like great-grandma", x: 0.25, y: -0.85, w: Traditionalist, bg: "#5a4630"},
+      {img: latin_mass, c: "Mass, then baking bread like great-grandma", x: 0.25, y: -0.85, w: Traditionalist, see: trad, bg: "#5a4630"},
       {art: "📈🏝️🪙", c: "Day trading from a seastead. No taxes, no masters.", x: 0.9, y: 0.5, w: Voluntarist, ir: 1, bg: "#6b5a12"}]}
   - {id: p02, dim: map, q: "Which poster goes on your wall?", cards: [
       {art: "✊🏭", c: "Workers of the world, log off", x: -0.9, y: 0.0, w: Internationalist, ir: 2, bg: "#7a1f1f"},
-      {art: "🌹🏥", c: "Medicare for all. Then we'll talk.", x: -0.5, y: 0.0, w: Social, bg: "#8a2a4a"},
-      {art: "🇺🇸🏭", c: "Made in America or not at all", x: 0.25, y: -0.5, w: Protectionist, bg: "#24345a"},
+      {img: wpa, c: "Medicare for all. Then we'll talk.", x: -0.5, y: 0.0, w: Social, see: bernie, bg: "#8a2a4a"},
+      {img: river_rouge, c: "Made in America or not at all", x: 0.25, y: -0.5, w: Protectionist, bg: "#24345a"},
       {img: gadsden, c: "Don't tread on my crypto wallet", x: 0.85, y: 0.3, w: Libertarian, ir: 2, bg: "#8a7a10", see: gadsden}]}
   - {id: p03, dim: map, q: "Pick a hero", cards: [
-      {img: marx, c: "The bearded 19th-century guy who was right about the factories", x: -0.8, y: 0.1, w: Marxian, bg: "#5c2222"},
-      {img: stirner, c: "The original 'it's all spooks' guy", x: 0.45, y: -0.1, w: Egoist, ir: 1, bg: "#33363a"},
+      {art: "🧔📜", c: "The bearded 19th-century guy who was right about the factories", x: -0.8, y: 0.1, w: Marxian, bg: "#5c2222"},
+      {art: "👻🎩", c: "The original 'it's all spooks' guy", x: 0.45, y: -0.1, w: Egoist, ir: 1, bg: "#33363a"},
       {art: "🌲🚶", c: "The man who walked into the woods and never posted again", x: -0.3, y: -0.9, w: Primitivist, bg: "#2f4a2c"},
-      {art: "🧑‍🔬⚡", c: "Whoever ships the next breakthrough first", x: 0.2, y: 0.9, w: Accelerationist, bg: "#1d3f5f"}]}
+      {img: apollo, c: "Whoever ships the next breakthrough first", x: 0.2, y: 0.9, w: Accelerationist, see: eacc, bg: "#1d3f5f"}]}
   - {id: p04, dim: map, q: "Pick a future city", cards: [
-      {art: "🌆🤖", c: "Fully automated, fully shared", x: -0.7, y: 0.9, w: Luxury-Communist, ir: 1, bg: "#5a1d3d", see: falc},
-      {art: "🏙️🏦", c: "Opt-in charter city, citizenship by subscription", x: 0.75, y: 0.6, w: Network-State, bg: "#2a2a3a"},
-      {art: "🏘️⛪", c: "A small town with a church at the center and nothing over four stories", x: 0.2, y: -0.7, w: Distributist, bg: "#5a4630"},
-      {img: wilderness, c: "The city is gone and the forest came back", x: -0.4, y: -1.0, w: Green, bg: "#2f4a2c"}]}
+      {art: "🌆🤖", c: "Fully automated, fully shared", x: -0.7, y: 0.9, w: Luxury-Communist, ir: 1, bg: "#5a1d3d"},
+      {img: datacenter, c: "Opt-in charter city, citizenship by subscription", x: 0.75, y: 0.6, w: Network-State, bg: "#2a2a3a"},
+      {img: shaker, c: "A small town with a church at the center and nothing over four stories", x: 0.2, y: -0.7, w: Distributist, bg: "#5a4630"},
+      {img: wilderness, c: "The city is gone and the forest came back", x: -0.4, y: -1.0, w: Green, see: anprim, bg: "#2f4a2c"}]}
   - {id: p05, dim: map, q: "What's the real problem?", cards: [
       {art: "💼🏭", c: "Capitalism", x: -0.9, y: 0.0, w: Anti-Capitalist, bg: "#7a1f1f"},
       {art: "🏛️🔒", c: "The state", x: 0.85, y: 0.0, w: Anarcho, bg: "#6b5a12"},
-      {art: "📱⛓️", c: "Technology itself", x: -0.1, y: -1.0, w: Neo-Luddite, bg: "#2f4a2c"},
-      {art: "🕰️🧭", c: "We forgot where we came from", x: 0.25, y: -0.8, w: Paleo, bg: "#5a4630"}]}
+      {img: monk_sea, c: "Technology itself", x: -0.1, y: -1.0, w: Neo-Luddite, bg: "#2f4a2c"},
+      {img: empire_consummation, c: "We forgot where we came from", x: 0.25, y: -0.8, w: Paleo, bg: "#5a4630"}]}
   - {id: p06, dim: map, q: "Pick a reading list", cards: [
       {art: "📕🔍", c: "Communist theory, but only the obscure 1920s splinter groups", x: -0.9, y: 0.1, w: Bordigist, ir: 1, bg: "#7a1f1f"},
       {art: "📗🍄", c: "Thoreau and a field guide to edible plants", x: -0.3, y: -0.9, w: Agrarian, bg: "#2f4a2c"},
@@ -86,8 +86,8 @@ questions:
       {art: "👛🙅", c: "Nowhere. Let people keep it.", x: 0.85, y: 0.0, w: Minarchist, bg: "#6b5a12"},
       {art: "👶🏡", c: "Families: big tax credits for every kid", x: 0.2, y: -0.6, w: Pro-Natalist, bg: "#5a4630"}]}
   - {id: p08, dim: map, q: "Pick the endgame", cards: [
-      {art: "⚙️✊", c: "The workers run everything", x: -0.9, y: 0.2, w: Syndicalist, bg: "#7a1f1f"},
-      {art: "☁️🧠", c: "Everyone uploads. Bodies optional.", x: 0.0, y: 1.0, w: Transhumanist, ir: 1, bg: "#1d2f55"},
+      {img: seattle_strike, c: "The workers run everything", x: -0.9, y: 0.2, w: Syndicalist, bg: "#7a1f1f"},
+      {img: boccioni, c: "Everyone uploads. Bodies optional.", x: 0.0, y: 1.0, w: Transhumanist, ir: 1, bg: "#1d2f55"},
       {art: "🏝️📜", c: "Opt-in cities with competing rulebooks", x: 0.8, y: 0.5, w: Voluntarist, bg: "#2a2a3a"},
       {art: "🌾🏡", c: "Back to the land, small communities", x: -0.2, y: -0.9, w: Agrarian, bg: "#4f6b3a"}]}
   - {id: p09, dim: map, q: "Which object is on your desk?", cards: [
@@ -99,15 +99,15 @@ questions:
       {art: "🏦✂️", c: "Break up the banks. Unions everywhere.", x: -0.7, y: 0.0, w: Populist, bg: "#8a2a4a"},
       {art: "🏭🇺🇸", c: "Bring the factories home", x: 0.25, y: -0.4, w: Protectionist, bg: "#24345a"},
       {art: "🔥🏛️", c: "End the Fed. Sound money.", x: 0.85, y: 0.2, w: Hard-Money, bg: "#6b5a12"},
-      {art: "🤖📦", c: "Let the machines do the work and share the output", x: -0.4, y: 0.9, w: Post-Work, bg: "#1d2f55"}]}
+      {img: torus, c: "Let the machines do the work and share the output", x: -0.4, y: 0.9, w: Post-Work, bg: "#1d2f55"}]}
   - {id: p11, dim: map, q: "Pick a flag for your profile", cards: [
       {img: flag_ancom, c: "No gods, no masters, no landlords", x: -0.7, y: 0.0, w: Anarcho-Communist, bg: "#111"},
       {img: flag_ancap, c: "Taxation is theft", x: 0.9, y: 0.2, w: Anarcho-Capitalist, ir: 1, bg: "#111", see: ancap},
       {img: flag_green, c: "Rewild everything", x: -0.4, y: -0.9, w: Green, bg: "#111"},
-      {art: "🇺🇳📜", c: "The rules-based international order", x: 0.1, y: 0.2, w: Liberal, bg: "#2d5d8a"}]}
+      {img: europarl, c: "The rules-based international order", x: 0.1, y: 0.2, w: Liberal, see: centrist, bg: "#2d5d8a"}]}
   - {id: p12, dim: map, q: "What should technology do?", cards: [
       {art: "🏖️🤖", c: "Free everyone from work", x: -0.6, y: 0.9, w: Post-Work, bg: "#5a1d3d"},
-      {art: "🧬♾️", c: "Make me immortal", x: 0.3, y: 1.0, w: Transhumanist, bg: "#1d2f55"},
+      {img: fusion, c: "Make me immortal", x: 0.3, y: 1.0, w: Transhumanist, bg: "#1d2f55"},
       {art: "🚫📡", c: "Leave us alone", x: -0.1, y: -0.9, w: Neo-Luddite, bg: "#2f4a2c"},
       {art: "💸📈", c: "Make money, obviously", x: 0.8, y: 0.4, w: Market, bg: "#6b5a12"}]}
   # ------------------------------------------------ anti-establishment
@@ -130,7 +130,7 @@ questions:
   - {id: i01, dim: ir, q: "How do you post?", cards: [
       {art: "🤡➡️😐", c: "Ironically, until it quietly becomes sincere", ir: 1, bg: "#4a1d6a"},
       {art: "🫡", c: "I mean every word", ir: 0, bg: "#2d4d6d"},
-      {art: "🙈", c: "I don't post. I lurk.", ir: 0, body: 0.3, bg: "#33363a"},
+      {art: "🙈", c: "I don't post. I lurk.", ir: 0, body: 0.3, see: doomer, bg: "#33363a"},
       {art: "🔥🃏", c: "Only a shitpost can tell the truth", ir: 2, bg: "#2f4a2c"}]}
   - {id: i02, dim: ir, q: "Someone calls your take cringe.", cards: [
       {art: "😤💯", c: "Good. Cringe is honest.", ir: 0, bg: "#2d4d6d"},
@@ -139,7 +139,7 @@ questions:
       {art: "🤔💬", c: "Ask what they'd say instead", ir: 0, anti: -0.3, bg: "#2d5d8a"}]}
   - {id: i03, dim: ir, q: "Your profile picture:", cards: [
       {art: "🙂📸", c: "My actual face", ir: 0, bg: "#2d4d6d"},
-      {img: stirner, c: "An 1840s sketch of a dead philosopher", ir: 1, fun: 2, bg: "#33363a"},
+      {art: "👻🖋️", c: "An 1840s sketch of a dead philosopher", ir: 1, fun: 2, bg: "#33363a"},
       {art: "🍳🖼️", c: "A deep-fried meme", ir: 2, body: -1, bg: "#8a4a10"},
       {img: flag_ancom, c: "A flag. Just a flag.", ir: 1, bg: "#111"}]}
   # ------------------------------------------------ class or culture
@@ -160,7 +160,7 @@ questions:
       {art: "🗿🚧", c: "Statue comes down in the town square", cls: -1, bg: "#6d6a63"}]}
   # ------------------------------------------------ collective subject
   - {id: s01, dim: subj, q: "Finish the sentence: we are…", cards: [
-      {art: "🇺🇸", c: "…a nation", subj: nation, bg: "#24345a"},
+      {img: capitol, c: "…a nation", subj: nation, bg: "#24345a"},
       {art: "👷‍♀️👷", c: "…a class", subj: class, bg: "#7a1f1f"},
       {art: "🧍🧍‍♀️", c: "…free individuals", subj: individual, bg: "#6b5a12"},
       {art: "🏘️", c: "…neighbors", subj: nation, cls: 0.3, bg: "#4f6b3a"}]}
@@ -178,7 +178,7 @@ questions:
   - {id: k01, dim: col, q: "How many times has your flair changed?", cards: [
       {art: "1️⃣", c: "Never", col: -1, bg: "#2d4d6d"},
       {art: "2️⃣", c: "Once or twice", col: -0.3, bg: "#4f6b3a"},
-      {art: "♾️", c: "I've lost count", col: 1, ir: 1, bg: "#4a1d6a", see: compass},
+      {img: compass_purple, c: "I've lost count", col: 1, ir: 1, bg: "#4a1d6a", see: compass},
       {art: "👻", c: "Flair is a spook", col: 0.5, ir: 2, bg: "#33363a"}]}
   - {id: k02, dim: col, q: "A brand-new ideology drops online. You:", cards: [
       {art: "📚🌙", c: "Read all of it by morning", col: 1, fun: 2, bg: "#4a1d6a"},
@@ -188,7 +188,7 @@ questions:
   - {id: k03, dim: col, q: "Your political label is…", cards: [
       {art: "🔤", c: "One word", col: -1, bg: "#2d4d6d"},
       {art: "🔤➖🔤", c: "Two words, hyphenated", col: 0, bg: "#4f6b3a"},
-      {art: "🔤🔤🔤🔤🔤", c: "Five words, two of them start with 'post-'", col: 1, ir: 1, bg: "#4a1d6a"},
+      {art: "🔤🔤🔤🔤🔤", c: "Five words, two of them start with 'post-'", col: 1, ir: 1, see: galaxy, bg: "#4a1d6a"},
       {art: "📅❔", c: "Ask me tomorrow", col: 0.8, bg: "#33363a"}]}
   # ------------------------------------------------ funnel depth
   - {id: f01, dim: fun, q: "You liked a podcast guest. Next:", cards: [
@@ -210,7 +210,7 @@ questions:
   - {id: b01, dim: body, q: "Your morning:", cards: [
       {art: "🏋️☕", c: "Lift, cold plunge, black coffee", body: 1, bg: "#33363a"},
       {art: "🛏️📱", c: "An hour on my phone in bed", body: -1, bg: "#4a1d6a"},
-      {art: "🏃‍♂️👟", c: "Run with the club", body: 1, cls: 0.3, bg: "#4f6b3a"},
+      {art: "🏃‍♂️👟", c: "Run with the club", body: 1, see: touchgrass, cls: 0.3, bg: "#4f6b3a"},
       {art: "🧵🌙", c: "Catch up on the overnight threads", body: -1, fun: 1, bg: "#24345a"}]}
   - {id: b02, dim: body, q: "The left should…", cards: [
       {art: "🥊🏟️", c: "Open boxing gyms and run clubs", body: 1, cls: 0.5, bg: "#7a1f1f"},
@@ -227,14 +227,14 @@ questions:
       {art: "🏭🛑📅", c: "Last coal plant closes as the four-day week becomes law", x: -0.5, y: 0.6, bg: "#5a1d3d"},
       {art: "🏙️1️⃣M", c: "Opt-in charter city passes a million residents", x: 0.8, y: 0.6, bg: "#2a2a3a"},
       {art: "🏡📈", c: "Census: small towns grow for the tenth year as people leave cities", x: 0.1, y: -0.7, bg: "#4f6b3a"},
-      {art: "📱⏩", c: "Nothing changed. The feed just got faster.", x: 0.0, y: 0.3, ir: 2, anti: 1, bg: "#33363a"}]}
+      {img: nighthawks, c: "Nothing changed. The feed just got faster.", x: 0.0, y: 0.3, ir: 2, anti: 1, bg: "#33363a"}]}
   - {id: u02, dim: future, q: "2045: who's in charge?", cards: [
-      {art: "🤝🏭", c: "Unions and co-ops", x: -0.8, y: 0.2, cls: 1, bg: "#7a1f1f"},
+      {img: lawrence_strike, c: "Unions and co-ops", x: -0.8, y: 0.2, cls: 1, bg: "#7a1f1f"},
       {art: "🖥️🏢", c: "The platforms", x: 0.6, y: 0.8, anti: 0.5, bg: "#1d2f55"},
-      {art: "⛪👨‍👩‍👧", c: "Churches and families", x: 0.2, y: -0.9, cls: -1, bg: "#5a4630"},
+      {img: chartres, c: "Churches and families", x: 0.2, y: -0.9, cls: -1, bg: "#5a4630"},
       {art: "🧩🏘️", c: "Nobody: it broke into small self-run communities", x: -0.2, y: -0.6, anti: 1, bg: "#4f6b3a"}]}
   - {id: u03, dim: future, q: "2045: your job?", cards: [
       {art: "🤖📋", c: "Robot supervisor, 20 hours a week", x: -0.4, y: 0.9, bg: "#1d2f55"},
       {art: "🏪🚫📑", c: "My own business, no regulators", x: 0.9, y: 0.2, bg: "#6b5a12"},
-      {art: "🚜🌾", c: "Farming", x: -0.2, y: -0.9, body: 1, bg: "#4f6b3a"},
+      {img: oxbow, c: "Farming", x: -0.2, y: -0.9, body: 1, bg: "#4f6b3a"},
       {art: "🖥️🖥️", c: "Same job, more screens", x: 0.1, y: 0.3, body: -1, bg: "#33363a"}]}

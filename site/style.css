@@ -720,3 +720,14 @@ p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
 .memeentry { border-style: solid; border-color: #b967ff; }
 .mmap .cur { fill: var(--text3); }
 .mmap .cl { fill: var(--text2); font: 700 8px var(--mono); }
+.mcard.pic { padding: 0; overflow: hidden; justify-content: flex-end; position: relative; }
+.mcard.pic .mimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mcard.pic.light .mimg { object-fit: contain; background: #f4f1ea; padding: 8px; }
+.mcard.pic .mcap { position: relative; padding: 28px 10px 10px; background: linear-gradient(transparent, rgba(0,0,0,0.78) 45%); }
+.mcredit { font-size: 0.68rem; color: var(--text3); margin-top: 10px; line-height: 1.35; }
+.mcredit a { color: var(--text3); }
+.elabel { font: 900 1.45rem/1.2 Impact, "Arial Black", var(--sans); text-transform: uppercase; color: #b967ff; margin: 2px 0 4px; }
+.subjrow { display: flex; gap: 8px; }
+.subj { flex: 1; text-align: center; padding: 10px 4px; border-radius: 10px; background: var(--raised); font: 600 0.9rem var(--sans); }
+.subj.on { background: #b967ff; color: #fff; }
+.dialwhy summary { font-size: 0.8rem; color: var(--text3); cursor: pointer; margin-top: 4px; }
