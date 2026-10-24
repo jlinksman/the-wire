@@ -64,10 +64,21 @@ export async function onRequestPost({ request, env }) {
     q.baseline.answers = Object.assign(q.baseline.answers || {}, clean(b.answers));
     q.baseline.updated = now;
     if (b.done) q.baseline.done_at = now;
+  } else if (b.kind === "memes") {
+    // The meme map: {m01: 0..3}. A retake keeps the last take for drift (last 5).
+    q.memes = q.memes || {};
+    if (b.restart && q.memes.done_at) {
+      q.memes.past = [...(q.memes.past || []), { answers: q.memes.answers, done_at: q.memes.done_at }].slice(-5);
+      q.memes.answers = {}; delete q.memes.done_at;
+    }
+    const ok = {};
+    for (const [k, v] of Object.entries(b.answers || {})) if (/^m\d{2}$/.test(k) && [0, 1, 2, 3].includes(v)) ok[k] = v;
+    q.memes.answers = Object.assign(q.memes.answers || {}, ok);
+    if (b.done) q.memes.done_at = now;
   } else if (b.kind === "pulse" && Array.isArray(b.answers)) {
     q.pulse = [...q.pulse, ...b.answers.slice(0, 20).map(pulseOne).filter(Boolean).map((a) => ({ ...a, at: now }))].slice(-200);
   } else if (b.kind === "clear") {
-    if (b.id === "values") q.values = {}; else if (b.id === "baseline") q.baseline = {}; else if (b.id === "pulse") q.pulse = []; else delete q.elections[b.id];
+    if (b.id === "values") q.values = {}; else if (b.id === "memes") q.memes = {}; else if (b.id === "baseline") q.baseline = {}; else if (b.id === "pulse") q.pulse = []; else delete q.elections[b.id];
   } else {
     return json({ error: "unknown questionnaire" }, 400);
   }
