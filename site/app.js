@@ -1862,19 +1862,23 @@ async function quizEntry(g) {
     box.append(el("p", { class: "rjob", text: n + " statements, about " + Math.ceil(n / 4) + " minutes. Answer how you see it; what each one measures is explained only afterwards." }),
       el("button", { class: "sbtn primary wide", text: answered ? "Continue (" + answered + " of " + n + " answered)" : "Start the election check", onclick: () => openQuiz(g) }));
   } else {
+    // Statements reworded after you answered them (elections.yaml `changed`).
+    const stale = g.quiz.items.filter((it) => it.changed && mine.answers[it.id] && Date.parse(mine.updated || mine.done_at) < Date.parse(it.changed + "T04:00:00Z"));
+    if (stale.length) box.append(el("button", { class: "sbtn wide", text: stale.length + " statement" + (stale.length === 1 ? " was" : "s were") + " reworded: re-answer " + (stale.length === 1 ? "it" : "them"), onclick: () => openQuiz(g, stale.map((it) => it.id)) }));
     box.append(el("p", { class: "rjob", text: "Done " + fmtDate.format(new Date(Date.parse(mine.done_at))) + ". Your results compare your answers with the candidates' stated positions." }),
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openMatch(g) }),
         el("button", { class: "sbtn", text: "Retake", onclick: async () => { await saveQuiz({ kind: "clear", id: g.id }); openQuiz(g); } })));
   }
   return box;
 }
-function openQuiz(g) {
+function openQuiz(g, only) {
   const Q = myQuiz || { elections: {} };
   const prior = ((Q.elections || {})[g.id] || {}).answers || {};
   const seed = Number(store.get("wire.quizSeed." + g.id)) || (Date.now() % 100000) + 1;
   store.set("wire.quizSeed." + g.id, seed);
-  const order = shuffled(g.quiz.items, seed);
-  let i = order.findIndex((it) => !prior[it.id]);
+  // `only`: re-answer just these statements (ones reworded after you answered them).
+  const order = shuffled(only ? g.quiz.items.filter((it) => only.includes(it.id)) : g.quiz.items, seed);
+  let i = only ? 0 : order.findIndex((it) => !prior[it.id]);
   if (i < 0) i = 0;
   const answers = Object.assign({}, prior);
   let weight = 2;
