@@ -2347,42 +2347,42 @@ function lensReadings(sc, past) {
   // 1. Class or culture (A New Pipeline).
   const louder = Math.abs(e) >= Math.abs(c) + 0.1 ? "class" : Math.abs(c) >= Math.abs(e) + 0.1 ? "culture" : "even";
   let quad;
-  if (e < -0.15 && c > 0.15) quad = "Government on economics and tradition on culture: a pairing neither party offers. It's close to the voter his 2025 piece is aimed at: economic frustration that could feed right-wing populism or be drawn into a class politics.";
-  else if (e > 0.15 && c < -0.15) quad = "Markets on economics and change on culture: the economic common ground he says the two parties now share, with one party's culture.";
+  if (e < -0.15 && c > 0.15) quad = "Government on economics and tradition on culture: a pairing neither party offers. It's close to the voter the 2025 Pipeline piece is aimed at: economic frustration that could feed right-wing populism or be drawn into a class politics.";
+  else if (e > 0.15 && c < -0.15) quad = "Markets on economics and change on culture: the economic common ground the piece says the two parties now share, with one party's culture.";
   else if (e < -0.15 && c < -0.15) quad = "Government and change: the left's usual pairing.";
   else if (e > 0.15 && c > 0.15) quad = "Markets and tradition: the right's usual pairing.";
   else if (Math.abs(e) >= 0.15) quad = "Toward " + (e > 0 ? "markets" : "government") + " on economics, near the middle on culture.";
   else if (Math.abs(c) >= 0.15) quad = "Toward " + (c > 0 ? "tradition" : "change") + " on culture, near the middle on economics.";
   else quad = "Close to the middle on both.";
   out.push({ head: "Class or culture", src: "pipeline",
-    text: (louder === "class" ? "Your economic answers come through stronger than your cultural ones (" + fmtS(e) + " against " + fmtS(c) + "). In his terms, you're sorted more by class, the line he argues politics should be redrawn along." :
-      louder === "culture" ? "Your cultural answers come through stronger than your economic ones (" + fmtS(c) + " against " + fmtS(e) + "). You're sorted more by culture, the axis he says the parties fight on while largely agreeing on economics." :
+    text: (louder === "class" ? "Your economic answers come through stronger than your cultural ones (" + fmtS(e) + " against " + fmtS(c) + "). In the piece's terms, you're sorted more by class, the line the piece argues politics should be redrawn along." :
+      louder === "culture" ? "Your cultural answers come through stronger than your economic ones (" + fmtS(c) + " against " + fmtS(e) + "). You're sorted more by culture, the axis the piece says the parties fight on while largely agreeing on economics." :
       "Your economic and cultural answers are about equally strong (" + fmtS(e) + " and " + fmtS(c) + "): neither class nor culture sorts you more than the other.") + " " + quad });
-  // 2. Nearest current in his catalog (Politigram 2018, Tag Yourself 2019).
+  // 2. Nearest current in the catalog (Politigram 2018, Tag Yourself 2019).
   let cur;
-  if (gn > 0.4 && gr < -0.3 && e < 0) cur = ["The post-left's degrowth wing", "politigram", "Climate first and preserve over build, on the economic left: the direction of the post-left current his 2018 essay documents, without its anti-civilization end point."];
-  else if (e < -0.4 && tr < -0.2) cur = ["The ultra-left and left-communist currents", "tag", "Firmly for government economically and skeptical of the institutions that run it: the anti-party left he surveyed in 2019."];
-  else if (e < -0.15) cur = ["The Bernie-era socialists", "politigram", "Government on economics, without the turn against institutions: where his 2018 essay starts the left's drift, before some of it moved further out."];
-  else if (e > 0.4 && tr < -0.2 && c < 0.2) cur = ["Anarcho-capitalism", "politigram", "Firmly for markets, skeptical of institutions and not traditional on culture: the ancaps his 2018 essay catalogs, and the start of one of the drift paths it traces."];
-  else if (c > 0.25 && w < -0.15) cur = ["The Zoomer Right", "tag", "Tradition at home and restraint abroad: the young right he described in 2019, set apart from the free-market right by protectionism and wariness of troops overseas." + (ansOf("v04") != null && ansOf("v04") < 0 ? " Your doubts about free trade fit it too." : "")];
-  else if (e > 0.15 && c > 0.15 && w > 0.15) cur = ["The free-market right the Zoomer Right broke from", "tag", "Markets, tradition and engagement abroad: closer to the Tea Party-era right his 2019 survey says the younger right left behind."];
-  else cur = ["Outside his catalog", "politigram", "The currents he documented live at the edges. Your answers sit inside the mainstream range his 2018 essay describes them pushing past."];
-  out.push({ head: "Nearest current: " + cur[0], src: cur[1], text: cur[2] + (cur[0] === "Outside his catalog" ? "" : " His catalog describes online currents, mostly of teenagers in 2018 and 2019; a match here means your answers point the same way on the questions they care about, not that you share their politics.") });
+  if (gn > 0.4 && gr < -0.3 && e < 0) cur = ["The post-left's degrowth wing", "politigram", "Climate first and preserve over build, on the economic left: the direction of the post-left current the 2018 Politigram essay documents, without its anti-civilization end point."];
+  else if (e < -0.4 && tr < -0.2) cur = ["The ultra-left and left-communist currents", "tag", "Firmly for government economically and skeptical of the institutions that run it: the anti-party left the 2019 survey covers."];
+  else if (e < -0.15) cur = ["The Bernie-era socialists", "politigram", "Government on economics, without the turn against institutions: where the 2018 Politigram essay starts the left's drift, before some of it moved further out."];
+  else if (e > 0.4 && tr < -0.2 && c < 0.2) cur = ["Anarcho-capitalism", "politigram", "Firmly for markets, skeptical of institutions and not traditional on culture: the ancaps the 2018 Politigram essay catalogs, and the start of one of the drift paths it traces."];
+  else if (c > 0.25 && w < -0.15) cur = ["The Zoomer Right", "tag", "Tradition at home and restraint abroad: the young right the 2019 survey describes, set apart from the free-market right by protectionism and wariness of troops overseas." + (ansOf("v04") != null && ansOf("v04") < 0 ? " Your doubts about free trade fit it too." : "")];
+  else if (e > 0.15 && c > 0.15 && w > 0.15) cur = ["The free-market right the Zoomer Right broke from", "tag", "Markets, tradition and engagement abroad: closer to the Tea Party-era right the 2019 Tag Yourself survey says the younger right left behind."];
+  else cur = ["Outside the catalog", "politigram", "The currents the research documents live at the edges. Your answers sit inside the mainstream range the 2018 Politigram essay describes them pushing past."];
+  out.push({ head: "Nearest current: " + cur[0], src: cur[1], text: cur[2] + (cur[0] === "Outside the catalog" ? "" : " The catalog describes online currents, mostly of teenagers in 2018 and 2019; a match here means your answers point the same way on the questions they care about, not that you share their politics.") });
   // 3. Institutions.
   out.push({ head: "Inside or outside the window", src: "politigram",
-    text: tr < -0.3 ? "You're skeptical of institutions (" + fmtS(tr) + "). The radical currents in his research, left and right, share that distrust of the mainstream; on this you're closer to them than to it." :
-      tr > 0.3 ? "You largely trust the institutions (" + fmtS(tr) + "). That puts you with the mainstream his subjects define themselves against." :
-      "Your trust in institutions is mixed (" + fmtS(tr) + "): neither the mainstream's confidence nor the distrust his subjects share." });
+    text: tr < -0.3 ? "You're skeptical of institutions (" + fmtS(tr) + "). The radical currents in that research, left and right, share that distrust of the mainstream; on this you're closer to them than to it." :
+      tr > 0.3 ? "You largely trust the institutions (" + fmtS(tr) + "). That puts you with the mainstream the currents it covers define themselves against." :
+      "Your trust in institutions is mixed (" + fmtS(tr) + "): neither the mainstream's confidence nor the distrust the currents it covers share." });
   // 4. Drift.
   const last = past.length ? past[past.length - 1] : null;
   if (last && last.econ.s != null && last.culture.s != null) {
     const de = e - last.econ.s, dc = c - last.culture.s;
     const dist = Math.hypot(de, dc);
     out.push({ head: "Drift", src: "politigram",
-      text: dist < 0.1 ? "Since " + fmtYear.format(new Date(Date.parse(last.at))) + " you've barely moved. His 2018 essay found politics shifting in steps over time; yours is holding." :
-        "Since " + fmtYear.format(new Date(Date.parse(last.at))) + " you've moved " + dist.toFixed(2) + ": " + (Math.abs(de) >= 0.05 ? (de > 0 ? "toward markets" : "toward government") : "") + (Math.abs(de) >= 0.05 && Math.abs(dc) >= 0.05 ? " and " : "") + (Math.abs(dc) >= 0.05 ? (dc > 0 ? "toward tradition" : "toward change") : "") + ". His 2018 essay calls this drift: politics moving in steps over time." });
+      text: dist < 0.1 ? "Since " + fmtYear.format(new Date(Date.parse(last.at))) + " you've barely moved. The 2018 Politigram essay found politics shifting in steps over time; yours is holding." :
+        "Since " + fmtYear.format(new Date(Date.parse(last.at))) + " you've moved " + dist.toFixed(2) + ": " + (Math.abs(de) >= 0.05 ? (de > 0 ? "toward markets" : "toward government") : "") + (Math.abs(de) >= 0.05 && Math.abs(dc) >= 0.05 ? " and " : "") + (Math.abs(dc) >= 0.05 ? (dc > 0 ? "toward tradition" : "toward change") : "") + ". The 2018 Politigram essay calls this drift: politics moving in steps over time." });
   } else {
-    out.push({ head: "Drift", src: "politigram", text: "This is your first take. His 2018 essay tracks how people's politics drift in steps over time; retake this in a year and the lens shows how far yours has moved." });
+    out.push({ head: "Drift", src: "politigram", text: "This is your first take. The 2018 Politigram essay tracks how people's politics drift in steps over time; retake this in a year and the lens shows how far yours has moved." });
   }
   return out;
   function ansOf(id) { const a = ((myQuiz || {}).values || {}).answers || {}; return a[id] && !a[id].skip ? a[id].v : null; }
@@ -2391,10 +2391,10 @@ function openLens(sc, past) {
   const rs = lensReadings(sc, past);
   openSheet([
     el("h2", { id: "sheet-title", class: "stitle", text: "Undercurrents" }),
-    el("p", { class: "sdesc" }, "Your answers read through frameworks for how online politics forms and moves. The frameworks come from the research of ", link(CITARELLA.home, "Joshua Citarella"), ", cited under each reading; the reading is The Wire's."),
+    el("p", { class: "sdesc", text: "Your answers read through frameworks from research on how online politics forms and moves. The readings are The Wire's; the sources are at the bottom." }),
     ...rs.map((r) => el("section", { class: "ssec" }, el("h3", { class: "sh3", text: r.head }), el("p", { class: "lens", text: r.text }),
       el("p", { class: "fine" }, "From ", link(CITARELLA[r.src][1], CITARELLA[r.src][0])))),
-    el("p", { class: "fine" }, "Sources: ", link(CITARELLA.politigram[1], CITARELLA.politigram[0]), " · ", link(CITARELLA.tag[1], CITARELLA.tag[0]), " · ", link(CITARELLA.pipeline[1], CITARELLA.pipeline[0])),
+    el("p", { class: "fine" }, "Sources, by Joshua Citarella: ", link(CITARELLA.politigram[1], CITARELLA.politigram[0]), " · ", link(CITARELLA.tag[1], CITARELLA.tag[0]), " · ", link(CITARELLA.pipeline[1], CITARELLA.pipeline[0])),
     el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Back to your results", onclick: () => openStand() })),
   ], "Undercurrents");
 }
@@ -2410,8 +2410,8 @@ function questionnairesSection(Q) {
       el("p", { class: "fine", text: "Answer as often as you like: after five, Keep going asks more." }),
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Answer now", onclick: () => openPulse() }), lp ? el("button", { class: "sbtn", text: "What it changed", onclick: () => pulseEffect() }) : null)),
     valuesEntry(Q),
-    el("div", { class: "rbox quizbox memeentry" }, el("span", { class: "mlabel", text: "For fun · after Joshua Citarella" }),
-      el("p", { class: "rjob", text: (Q.memes || {}).done_at ? "Your meme map is ready." : "Twelve rounds of picture cards from the online political subcultures he studies. Pick on instinct; get placed among them." }),
+    el("div", { class: "rbox quizbox memeentry" }, el("span", { class: "mlabel", text: "For fun" }),
+      el("p", { class: "rjob", text: (Q.memes || {}).done_at ? "Your meme map is ready." : "Twelve rounds of picture cards from online political subcultures. Pick on instinct; get placed among them." }),
       el("button", { class: "sbtn primary wide", text: (Q.memes || {}).done_at ? "See my meme map" : "Start the meme map", onclick: () => ((Q.memes || {}).done_at ? openMemeMap() : openMemes()) })),
     g && g.quiz ? el("button", { class: "doclink", text: "Election check for " + g.title + " ›", onclick: () => openGuide() }) : null,
   ].filter(Boolean);
@@ -2551,16 +2551,16 @@ const MEME_QS = [
 ];
 // The currents on the map, placed by The Wire; descriptions in our words, from his work.
 const CURRENTS = [
-  { n: "Left-communism and the ultra-left", x: -0.9, y: 0.1, src: "tag", d: "Against parties and unions as well as capital. Communization theory, the main left current in his 2019 survey, holds that the next society grows inside this one rather than being built by a vanguard." },
-  { n: "Bernie-era socialism", x: -0.5, y: 0.0, src: "politigram", d: "Where his 2018 essay starts the left's drift: Bernie-supporting socialists, some of whom moved further out after 2016." },
+  { n: "Left-communism and the ultra-left", x: -0.9, y: 0.1, src: "tag", d: "Against parties and unions as well as capital. Communization theory, the main left current in the 2019 Tag Yourself survey, holds that the next society grows inside this one rather than being built by a vanguard." },
+  { n: "Bernie-era socialism", x: -0.5, y: 0.0, src: "politigram", d: "Where the 2018 Politigram essay starts the left's drift: Bernie-supporting socialists, some of whom moved further out after 2016." },
   { n: "The post-left and anarcho-primitivism", x: -0.45, y: -0.9, src: "politigram", d: "Anti-civilization: alienation began with farming and the division of labor, not just capitalism. Degrowth, and the hunter-gatherer as the ideal." },
-  { n: "Anarcho-transhumanism and L/acc", x: -0.6, y: 0.85, src: "politigram", d: "Technology as liberation: the left-accelerationist and anarcho-transhumanist currents in his 2018 catalog." },
-  { n: "Unconditional accelerationism (U/acc)", x: 0.0, y: 1.0, src: "tag", d: "Neither left nor right: the process itself, sped up. One of the three overlapping currents his 2019 survey found growing out of the earlier meme scene." },
-  { n: "Anarcho-capitalism", x: 0.9, y: 0.35, src: "politigram", d: "Markets without the state. In his 2018 essay, the start of one of the drift paths he traced." },
-  { n: "Neoreaction and R/acc", x: 0.55, y: 0.6, src: "politigram", d: "The 'Dark Enlightenment' and right-accelerationism: the techno-hierarchical right in his 2018 catalog." },
-  { n: "The Zoomer Right and paleoconservatism", x: 0.2, y: -0.6, src: "tag", d: "His 2019 young right: protectionist, often isolationist, wary of trade deals and troops abroad, set apart from the free-market Tea Party right before it." },
-  { n: "Reactionary Catholicism", x: 0.0, y: -0.9, src: "tag", d: "Tradition with a liturgy. His 2019 survey notes it has more traction with American populists than European-style identitarianism." },
-  { n: "The mainstream", x: 0.1, y: 0.1, src: "politigram", d: "Outside his catalog: the window his subjects define themselves against, and push past." },
+  { n: "Anarcho-transhumanism and L/acc", x: -0.6, y: 0.85, src: "politigram", d: "Technology as liberation: the left-accelerationist and anarcho-transhumanist currents in the 2018 catalog." },
+  { n: "Unconditional accelerationism (U/acc)", x: 0.0, y: 1.0, src: "tag", d: "Neither left nor right: the process itself, sped up. One of the three overlapping currents the 2019 Tag Yourself survey found growing out of the earlier meme scene." },
+  { n: "Anarcho-capitalism", x: 0.9, y: 0.35, src: "politigram", d: "Markets without the state. In the 2018 Politigram essay, the start of one of the drift paths it traces." },
+  { n: "Neoreaction and R/acc", x: 0.55, y: 0.6, src: "politigram", d: "The 'Dark Enlightenment' and right-accelerationism: the techno-hierarchical right in the 2018 catalog." },
+  { n: "The Zoomer Right and paleoconservatism", x: 0.2, y: -0.6, src: "tag", d: "The 2019 survey's young right: protectionist, often isolationist, wary of trade deals and troops abroad, set apart from the free-market Tea Party right before it." },
+  { n: "Reactionary Catholicism", x: 0.0, y: -0.9, src: "tag", d: "Tradition with a liturgy. The 2019 Tag Yourself survey notes it has more traction with American populists than European-style identitarianism." },
+  { n: "The mainstream", x: 0.1, y: 0.1, src: "politigram", d: "Outside the catalog: the window the currents it covers define themselves against, and push past." },
 ];
 function memeScore(ans) {
   let x = 0, y = 0, n = 0, ir = 0, tot = 0, doom = 0;
@@ -2625,11 +2625,11 @@ async function openMemeMap() {
   box.innerHTML = memeMapSvg(r, past);
   const top = r.near[0], second = r.near[1];
   const lean = (v, neg, pos) => Math.abs(v) < 0.15 ? "the middle" : (Math.abs(v) < 0.45 ? "leans " : "firmly ") + (v < 0 ? neg : pos);
-  const ironyText = r.irony >= 0.6 ? "Mostly ironic picks. His 2018 essay found posts on these pages were ironic and sincere at once, and that the joke is often how people try a position on."
-    : r.irony >= 0.3 ? "A mix of ironic and sincere picks: the register his 2018 essay found everywhere in these spaces, trolling and conviction blended."
-    : "Mostly sincere picks. You took the cards at face value, which, in the spaces he studies, makes you the unusual one.";
+  const ironyText = r.irony >= 0.6 ? "Mostly ironic picks. The 2018 Politigram essay found posts on these pages were ironic and sincere at once, and that the joke is often how people try a position on."
+    : r.irony >= 0.3 ? "A mix of ironic and sincere picks: the register the 2018 Politigram essay found everywhere in these spaces, trolling and conviction blended."
+    : "Mostly sincere picks. You took the cards at face value, which, in these spaces, makes you the unusual one.";
   openSheet([el("div", { class: "memezone" },
-    el("span", { class: "mlabel", text: "For fun · after Joshua Citarella" }),
+    el("span", { class: "mlabel", text: "For fun" }),
     el("h2", { id: "sheet-title", class: "stitle", text: "Your meme map" }),
     box,
     el("p", { class: "fine", text: "Economics " + lean(r.x, "collective", "market") + " (" + fmtS(r.x) + "); time " + lean(r.y, "return", "accelerate") + " (" + fmtS(r.y) + ")." + (past.length ? " Faded dot: your last take." : "") }),
@@ -2639,7 +2639,7 @@ async function openMemeMap() {
     el("h3", { class: "sh3", text: "Irony meter · " + Math.round(100 * r.irony) + "%" }), el("p", { text: ironyText + (r.doom ? " You also reached for the log-off card: a touch of the black pill." : "") }),
     el("details", { class: "rest" }, el("summary", {}, el("span", { text: "The currents on the map" }), el("span", { class: "chev", text: "▾" })),
       el("ol", { class: "cpos" }, ...CURRENTS.map((c) => el("li", {}, el("b", { text: c.n + ". " }), c.d)))),
-    el("p", { class: "fine" }, "The currents and the ideas behind them come from Joshua Citarella's research (", link(MEME_SRC.politigram[1], MEME_SRC.politigram[0]), ", ", link(MEME_SRC.tag[1], MEME_SRC.tag[0]), "); where they sit on this map, the cards and this reading are The Wire's. The cards are originals, not reposted memes, and the map leaves out the currents his work documents that are defined by racism or violence. It's a toy: twelve picks, not a profile."),
+    el("p", { class: "fine" }, "The currents and the ideas behind them come from Joshua Citarella's research (", link(MEME_SRC.politigram[1], MEME_SRC.politigram[0]), ", ", link(MEME_SRC.tag[1], MEME_SRC.tag[0]), "); where they sit on this map, the cards and this reading are The Wire's. The cards are originals, not reposted memes, and the map leaves out the currents the research documents that are defined by racism or violence. It's a toy: twelve picks, not a profile."),
     el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Retake", onclick: async () => { store.set("wire.quizSeed.memes", ""); await saveQuiz({ kind: "memes", restart: true, answers: {} }); openMemes(); } }),
       el("button", { class: "sbtn", text: "Close", onclick: closeSheet }))),
   ], "Your meme map");
