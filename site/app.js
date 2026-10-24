@@ -1864,6 +1864,8 @@ async function quizEntry(g) {
   } else {
     // Statements reworded after you answered them (elections.yaml `changed`).
     const stale = g.quiz.items.filter((it) => it.changed && mine.answers[it.id] && Date.parse(mine.updated || mine.done_at) < Date.parse(it.changed + "T04:00:00Z"));
+    const fresh = g.quiz.items.filter((it) => !mine.answers[it.id]);
+    if (fresh.length) box.append(el("button", { class: "sbtn primary wide", text: "Answer " + fresh.length + " new statement" + (fresh.length === 1 ? "" : "s"), onclick: () => openQuiz(g, fresh.map((it) => it.id)) }));
     if (stale.length) box.append(el("button", { class: "sbtn wide", text: stale.length + " statement" + (stale.length === 1 ? " was" : "s were") + " reworded: re-answer " + (stale.length === 1 ? "it" : "them"), onclick: () => openQuiz(g, stale.map((it) => it.id)) }));
     box.append(el("p", { class: "rjob", text: "Done " + fmtDate.format(new Date(Date.parse(mine.done_at))) + ". Your results compare your answers with the candidates' stated positions." }),
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openMatch(g) }),
