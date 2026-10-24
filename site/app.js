@@ -2048,7 +2048,7 @@ async function pulseEffect() {
 
 // --------------------------------------------------------------- where you stand (2026-10-23)
 // About 30 blind statements (values.yaml), taken about once a year. The map, readings,
-// suggested scorecard weights and the Citarella lens appear only on "See my results".
+// suggested scorecard weights and Undercurrents appear only on "See my results".
 function runStatements(cfg) {
   // cfg: {title, items, seedKey, prior, save(partial), done(), later()}
   const seed = Number(store.get(cfg.seedKey)) || (Date.now() % 100000) + 1;
