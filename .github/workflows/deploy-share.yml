@@ -1,0 +1,52 @@
+name: Deploy ballot quiz
+
+# The public ballot quiz (Ballot Match) for friends and neighbors: a separate Cloudflare Pages
+# project, wire-ballot, outside Cloudflare Access. It carries public information only (built by
+# pipeline/share_build.py) and serves it only while Joe's toggle in The Wire is on (KV share.json).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "share/**"
+      - "elections.yaml"
+      - "explain.yaml"
+      - "pipeline/share_build.py"
+      - ".github/workflows/deploy-share.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Build the public data (public information only)
+        run: python pipeline/share_build.py
+      - name: Create the Pages project (first run only)
+        run: npx --yes wrangler@4 pages project create wire-ballot --production-branch main || echo "Project already exists."
+      - name: Write Pages bindings (the toggle lives in KV)
+        working-directory: share
+        run: |
+          cat > wrangler.toml <<TOML
+          name = "wire-ballot"
+          pages_build_output_dir = "public"
+          compatibility_date = "2026-10-01"
+
+          [[kv_namespaces]]
+          binding = "WIRE"
+          id = "$WIRE_KV_ID"
+          TOML
+      - name: Deploy
+        working-directory: share
+        run: npx --yes wrangler@4 pages deploy public --project-name wire-ballot --branch main --commit-dirty=true
