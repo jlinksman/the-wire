@@ -2319,6 +2319,7 @@ async function openStand() {
     weights ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Your scorecard's weights" }),
       el("p", { class: "fine", text: "From how much the statements tied to each criterion matter to you. Shown only: your scorecard keeps its weights until you change them." }), weights) : null,
     el("button", { class: "sbtn primary wide", text: "Undercurrents", onclick: () => openLens(sc, past) }),
+    el("button", { class: "sbtn wide", text: "Meme map (for fun)", onclick: () => openMemes() }),
     el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Every statement and how it counted" }), el("span", { class: "chev", text: "▾" })),
       el("ul", { class: "cpos" }, ...bank.items.map((it) => { const a = ans[it.id]; return el("li", {},
         el("b", { text: (it.axis ? ax[it.axis].label + " · agreeing points " + (it.dir > 0 ? ax[it.axis].right : ax[it.axis].left).toLowerCase() : "Not on the map") + (it.crit ? " · informs " + it.crit : "") + ". " }),
@@ -2409,6 +2410,9 @@ function questionnairesSection(Q) {
       el("p", { class: "fine", text: "Answer as often as you like: after five, Keep going asks more." }),
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Answer now", onclick: () => openPulse() }), lp ? el("button", { class: "sbtn", text: "What it changed", onclick: () => pulseEffect() }) : null)),
     valuesEntry(Q),
+    el("div", { class: "rbox quizbox memeentry" }, el("span", { class: "mlabel", text: "For fun · after Joshua Citarella" }),
+      el("p", { class: "rjob", text: (Q.memes || {}).done_at ? "Your meme map is ready." : "Twelve rounds of picture cards from the online political subcultures he studies. Pick on instinct; get placed among them." }),
+      el("button", { class: "sbtn primary wide", text: (Q.memes || {}).done_at ? "See my meme map" : "Start the meme map", onclick: () => ((Q.memes || {}).done_at ? openMemeMap() : openMemes()) })),
     g && g.quiz ? el("button", { class: "doclink", text: "Election check for " + g.title + " ›", onclick: () => openGuide() }) : null,
   ].filter(Boolean);
 }
@@ -2468,6 +2472,177 @@ function ideasView() {
     el("ol", { class: "list plainlist" }, ...R.recent.map((t) => el("li", {}, link(t.link, t.title), el("span", { class: "asrc", text: " · " + t.source })))));
   out.push(el("div", { class: "endline", text: "End of Ideas" }));
   return out;
+}
+
+// --------------------------------------------------------------- the meme map (2026-10-23, for fun)
+// Twelve rounds of four picture cards drawn on the page in the style of the online political
+// subcultures Joshua Citarella documents (Politigram & the Post-left, 2018; Tag Yourself, 2019),
+// then a map of where the picks land among those currents, plus an irony meter. Original
+// cards, not reposted memes: real memes are other people's images, and some of that world's
+// iconography belongs to violent or racist movements, which this leaves out entirely.
+// x: economics, collective (-1) to market (+1). y: time, return to nature or tradition (-1) to
+// accelerate technology (+1). ir: the card is the ironic register (counts toward the meter).
+const MEME_SRC = {
+  politigram: ["Politigram & the Post-left (2018)", "https://joshuacitarella.substack.com/p/politigram-and-the-post-left"],
+  tag: ["Tag Yourself (2019)", "https://joshuacitarella.substack.com/p/tag-yourself"],
+  pipeline: ["A New Pipeline (2025)", "https://joshuacitarella.substack.com/p/a-new-pipeline"],
+};
+const MEME_QS = [
+  { id: "m01", q: "Pick your ideal Saturday", cards: [
+    { a: "🛖🌲🔥", c: "Off-grid. No signal. Finally free.", x: -0.4, y: -0.9, bg: "#2f4a2c" },
+    { a: "🚀🧬🤖", c: "Me in 2040 after my third brain upgrade", x: 0.1, y: 0.9, bg: "#1d2f55", ir: 1 },
+    { a: "⛪🕯️🍞", c: "Mass, then baking bread like great-grandma", x: 0.0, y: -0.8, bg: "#5a4630" },
+    { a: "📈🏝️🪙", c: "Day trading from a seastead. No taxes, no masters.", x: 0.9, y: 0.5, bg: "#6b5a12", ir: 1 }] },
+  { id: "m02", q: "Which poster goes on your wall?", cards: [
+    { a: "✊🏭", c: "Workers of the world, log off", x: -0.9, y: 0.0, bg: "#7a1f1f", ir: 1 },
+    { a: "🌹🏥", c: "Medicare for all. Then we'll talk.", x: -0.5, y: 0.0, bg: "#8a2a4a" },
+    { a: "🏛️🗿", c: "Bring back beautiful buildings", x: 0.2, y: -0.6, bg: "#6d6a63", ir: 1 },
+    { a: "🐍💛", c: "Don't tread on my crypto wallet", x: 0.8, y: 0.3, bg: "#8a7a10", ir: 1 }] },
+  { id: "m03", q: "Pick a hero", cards: [
+    { a: "🧔📜", c: "The bearded 19th-century guy who was right about the factories", x: -0.8, y: 0.1, bg: "#5c2222" },
+    { a: "👑💼", c: "The CEO-king of a city-state that runs like a startup", x: 0.6, y: 0.6, bg: "#2a2a3a", ir: 1 },
+    { a: "🌲🚶", c: "The man who walked into the woods and never posted again", x: -0.3, y: -0.9, bg: "#2f4a2c" },
+    { a: "🧑‍🔬⚡", c: "Whoever ships the next breakthrough first", x: 0.2, y: 0.9, bg: "#1d3f5f" }] },
+  { id: "m04", q: "Big news breaks. Your reaction:", cards: [
+    { a: "😶‍🌫️📵", c: "Nothing matters. Logging off.", x: 0.0, y: 0.0, bg: "#33363a", ir: 1, doom: 1 },
+    { a: "⏩⏩⏩", c: "Faster. Whatever it is, faster.", x: 0.0, y: 1.0, bg: "#4a1d6a", ir: 1 },
+    { a: "🙏👨‍👩‍👧", c: "Pray, work, raise a family. Ignore the feed.", x: 0.1, y: -0.8, bg: "#5a4630" },
+    { a: "🗳️📊", c: "Read the polls, call my rep, vote in November", x: 0.1, y: 0.1, bg: "#2d4d6d" }] },
+  { id: "m05", q: "Your group chat's flag", cards: [
+    { a: "🏴", c: "No gods, no masters, no landlords", x: -0.6, y: 0.0, bg: "linear-gradient(135deg,#111 50%,#9b1c1c 50%)" },
+    { a: "💰", c: "Taxation is theft", x: 0.9, y: 0.2, bg: "linear-gradient(135deg,#111 50%,#c9a400 50%)", ir: 1 },
+    { a: "🇺🇸🏭", c: "Made in America or not at all", x: 0.1, y: -0.4, bg: "#24345a" },
+    { a: "🇺🇳📜", c: "The rules-based international order", x: 0.1, y: 0.2, bg: "#2d5d8a" }] },
+  { id: "m06", q: "Pick a future city", cards: [
+    { a: "🌆🤖", c: "Fully automated, fully shared", x: -0.7, y: 0.9, bg: "#5a1d3d", ir: 1 },
+    { a: "🏙️🏦", c: "Charter city run by a company, opt-in citizenship", x: 0.7, y: 0.6, bg: "#2a2a3a" },
+    { a: "🏘️⛪", c: "A small town with a church at the center and nothing over four stories", x: 0.1, y: -0.7, bg: "#5a4630" },
+    { a: "🌳🦌", c: "The city is gone and the forest came back", x: -0.4, y: -1.0, bg: "#2f4a2c" }] },
+  { id: "m07", q: "What's the real problem?", cards: [
+    { a: "💼🏭", c: "Capitalism", x: -0.9, y: 0.0, bg: "#7a1f1f" },
+    { a: "🏛️🔒", c: "The state", x: 0.8, y: 0.0, bg: "#6b5a12" },
+    { a: "📱⛓️", c: "Technology itself", x: -0.2, y: -1.0, bg: "#2f4a2c" },
+    { a: "🕰️🧭", c: "We forgot where we came from", x: 0.1, y: -0.8, bg: "#5a4630" }] },
+  { id: "m08", q: "Pick a reading list", cards: [
+    { a: "📕🔍", c: "Communist theory, but only the obscure 1920s splinter groups", x: -0.9, y: 0.1, bg: "#7a1f1f", ir: 1 },
+    { a: "📗🍄", c: "Thoreau and a field guide to edible plants", x: -0.3, y: -0.9, bg: "#2f4a2c" },
+    { a: "📘₿", c: "Rothbard and the Bitcoin white paper", x: 0.9, y: 0.4, bg: "#6b5a12" },
+    { a: "📙✝️", c: "The Church Fathers and a 1950s cookbook", x: 0.0, y: -0.9, bg: "#5a4630", ir: 1 }] },
+  { id: "m09", q: "Your aesthetic", cards: [
+    { a: "🌐💾🌴", c: "Vaporwave: the future we were promised in 1999", x: 0.0, y: 0.7, bg: "linear-gradient(160deg,#ff71ce,#01cdfe 60%,#b967ff)", ir: 1 },
+    { a: "🏛️🗿", c: "Marble statue profile picture", x: 0.3, y: -0.6, bg: "#6d6a63", ir: 1 },
+    { a: "🍄🌿🧺", c: "Cottagecore", x: -0.2, y: -0.7, bg: "#4f6b3a" },
+    { a: "🟥⬛📐", c: "Constructivist poster, bold type, red wedge", x: -0.8, y: 0.4, bg: "linear-gradient(135deg,#b3191c 40%,#111 40%)", ir: 1 }] },
+  { id: "m10", q: "Where should the money go?", cards: [
+    { a: "🏗️👷", c: "A job guarantee and public housing", x: -0.7, y: 0.0, bg: "#8a2a4a" },
+    { a: "🛰️☢️", c: "Space and fusion", x: 0.2, y: 0.9, bg: "#1d2f55" },
+    { a: "👛🙅", c: "Nowhere. Let people keep it.", x: 0.8, y: 0.0, bg: "#6b5a12" },
+    { a: "👶🏡", c: "Families: big tax credits for every kid", x: 0.1, y: -0.6, bg: "#5a4630" }] },
+  { id: "m11", q: "How do you post?", noaxis: true, cards: [
+    { a: "🤡➡️😐", c: "Ironically, until it quietly becomes sincere", bg: "#4a1d6a", ir: 1 },
+    { a: "🫡", c: "I mean every word", bg: "#2d4d6d" },
+    { a: "🙈", c: "I don't post. I lurk.", bg: "#33363a" },
+    { a: "🔥🐸", c: "Only a shitpost can tell the truth", bg: "#2f4a2c", ir: 1 }] },
+  { id: "m12", q: "Pick the endgame", cards: [
+    { a: "⚙️✊", c: "The workers run everything", x: -0.9, y: 0.2, bg: "#7a1f1f" },
+    { a: "☁️🧠", c: "Everyone uploads. Bodies optional.", x: 0.0, y: 1.0, bg: "#1d2f55", ir: 1 },
+    { a: "🧩🏰", c: "A patchwork of tiny sovereign states", x: 0.6, y: 0.4, bg: "#2a2a3a" },
+    { a: "🌾🏡", c: "Back to the land, small communities", x: -0.2, y: -0.9, bg: "#4f6b3a" }] },
+];
+// The currents on the map, placed by The Wire; descriptions in our words, from his work.
+const CURRENTS = [
+  { n: "Left-communism and the ultra-left", x: -0.9, y: 0.1, src: "tag", d: "Against parties and unions as well as capital. Communization theory, the main left current in his 2019 survey, holds that the next society grows inside this one rather than being built by a vanguard." },
+  { n: "Bernie-era socialism", x: -0.5, y: 0.0, src: "politigram", d: "Where his 2018 essay starts the left's drift: Bernie-supporting socialists, some of whom moved further out after 2016." },
+  { n: "The post-left and anarcho-primitivism", x: -0.45, y: -0.9, src: "politigram", d: "Anti-civilization: alienation began with farming and the division of labor, not just capitalism. Degrowth, and the hunter-gatherer as the ideal." },
+  { n: "Anarcho-transhumanism and L/acc", x: -0.6, y: 0.85, src: "politigram", d: "Technology as liberation: the left-accelerationist and anarcho-transhumanist currents in his 2018 catalog." },
+  { n: "Unconditional accelerationism (U/acc)", x: 0.0, y: 1.0, src: "tag", d: "Neither left nor right: the process itself, sped up. One of the three overlapping currents his 2019 survey found growing out of the earlier meme scene." },
+  { n: "Anarcho-capitalism", x: 0.9, y: 0.35, src: "politigram", d: "Markets without the state. In his 2018 essay, the start of one of the drift paths he traced." },
+  { n: "Neoreaction and R/acc", x: 0.55, y: 0.6, src: "politigram", d: "The 'Dark Enlightenment' and right-accelerationism: the techno-hierarchical right in his 2018 catalog." },
+  { n: "The Zoomer Right and paleoconservatism", x: 0.2, y: -0.6, src: "tag", d: "His 2019 young right: protectionist, often isolationist, wary of trade deals and troops abroad, set apart from the free-market Tea Party right before it." },
+  { n: "Reactionary Catholicism", x: 0.0, y: -0.9, src: "tag", d: "Tradition with a liturgy. His 2019 survey notes it has more traction with American populists than European-style identitarianism." },
+  { n: "The mainstream", x: 0.1, y: 0.1, src: "politigram", d: "Outside his catalog: the window his subjects define themselves against, and push past." },
+];
+function memeScore(ans) {
+  let x = 0, y = 0, n = 0, ir = 0, tot = 0, doom = 0;
+  for (const q of MEME_QS) {
+    const k = ans[q.id];
+    const c = k != null ? q.cards[k] : null;
+    if (!c) continue;
+    tot += 1; ir += c.ir ? 1 : 0; doom += c.doom ? 1 : 0;
+    if (!q.noaxis) { x += c.x; y += c.y; n += 1; }
+  }
+  if (!n) return null;
+  x /= n; y /= n;
+  const near = CURRENTS.map((c) => ({ c, d: Math.hypot(c.x - x, c.y - y) })).sort((a, b) => a.d - b.d);
+  return { x, y, n, irony: tot ? ir / tot : 0, doom, near };
+}
+function memeCard(c, onpick) {
+  return el("button", { class: "mcard", style: "background:" + c.bg, onclick: onpick },
+    el("span", { class: "mart", text: c.a }), el("span", { class: "mcap", text: c.c }));
+}
+async function openMemes() {
+  const Q = await loadQuiz(true);
+  const M = Q.memes || {};
+  const ans = Object.assign({}, M.answers || {});
+  const seed = Number(store.get("wire.quizSeed.memes")) || (Date.now() % 100000) + 1;
+  store.set("wire.quizSeed.memes", seed);
+  const order = shuffled(MEME_QS, seed);
+  let i = order.findIndex((q) => ans[q.id] == null);
+  if (i < 0) { openMemeMap(); return; }
+  const step = () => {
+    if (i >= order.length) { saveQuiz({ kind: "memes", answers: {}, done: true }).then(() => openMemeMap()); return; }
+    const q = order[i];
+    const cards = shuffled(q.cards.map((c, k) => [c, k]), seed + i);
+    openSheet([
+      el("div", { class: "memezone" },
+        el("div", { class: "qprog" }, el("span", { text: (i + 1) + " of " + order.length }), el("span", { class: "qbar" }, el("i", { style: "width:" + Math.round(100 * i / order.length) + "%" }))),
+        el("h2", { id: "sheet-title", class: "mq", text: q.q }),
+        el("div", { class: "mgrid" }, ...cards.map(([c, k]) => memeCard(c, () => { ans[q.id] = k; saveQuiz({ kind: "memes", answers: { [q.id]: k } }); i += 1; step(); }))),
+        el("div", { class: "qnav" }, i > 0 ? el("button", { class: "linkbtn", text: "‹ Back", onclick: () => { i -= 1; step(); } }) : el("span", {}),
+          el("button", { class: "linkbtn", text: "Finish later", onclick: closeSheet }))),
+    ], "Meme map");
+  };
+  step();
+}
+function memeMapSvg(r, past) {
+  const P = (v) => 20 + (v + 1) * 110, Y = (v) => 20 + (1 - v) * 110;
+  const curr = CURRENTS.map((c, k) => `<circle class="cur" cx="${P(c.x)}" cy="${Y(c.y)}" r="4"/><text class="cl" x="${P(c.x) + (c.x > 0.5 ? -6 : 6)}" y="${Y(c.y) + 3}" text-anchor="${c.x > 0.5 ? "end" : "start"}">${k + 1}</text>`).join("");
+  const pts = [...past, r].filter(Boolean);
+  const trail = pts.length > 1 ? `<polyline class="trail" points="${pts.map((p) => P(p.x).toFixed(1) + "," + Y(p.y).toFixed(1)).join(" ")}"/>` : "";
+  return `<svg class="vmap mmap" viewBox="0 0 260 260" role="img" aria-label="Your position among online political currents">
+    <rect x="20" y="20" width="220" height="220" class="frame"/><line x1="130" y1="20" x2="130" y2="240" class="axis"/><line x1="20" y1="130" x2="240" y2="130" class="axis"/>
+    <text x="130" y="14" class="ax" text-anchor="middle">Accelerate</text><text x="130" y="256" class="ax" text-anchor="middle">Return</text>
+    <text x="14" y="130" class="ax" text-anchor="middle" transform="rotate(-90 14 130)">Collective</text><text x="250" y="130" class="ax" text-anchor="middle" transform="rotate(90 250 130)">Market</text>
+    ${curr}${trail}${past.map((p) => `<circle class="was" cx="${P(p.x)}" cy="${Y(p.y)}" r="5"/>`).join("")}<circle class="me" cx="${P(r.x).toFixed(1)}" cy="${Y(r.y).toFixed(1)}" r="7"/></svg>`;
+}
+async function openMemeMap() {
+  const Q = await loadQuiz(true);
+  const M = Q.memes || {};
+  const r = memeScore(M.answers || {});
+  if (!r) { openMemes(); return; }
+  const past = (M.past || []).map((p) => memeScore(p.answers || {})).filter(Boolean);
+  const box = el("div", { class: "vmapbox" });
+  box.innerHTML = memeMapSvg(r, past);
+  const top = r.near[0], second = r.near[1];
+  const lean = (v, neg, pos) => Math.abs(v) < 0.15 ? "the middle" : (Math.abs(v) < 0.45 ? "leans " : "firmly ") + (v < 0 ? neg : pos);
+  const ironyText = r.irony >= 0.6 ? "Mostly ironic picks. His 2018 essay found posts on these pages were ironic and sincere at once, and that the joke is often how people try a position on."
+    : r.irony >= 0.3 ? "A mix of ironic and sincere picks: the register his 2018 essay found everywhere in these spaces, trolling and conviction blended."
+    : "Mostly sincere picks. You took the cards at face value, which, in the spaces he studies, makes you the unusual one.";
+  openSheet([el("div", { class: "memezone" },
+    el("span", { class: "mlabel", text: "For fun · after Joshua Citarella" }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "Your meme map" }),
+    box,
+    el("p", { class: "fine", text: "Economics " + lean(r.x, "collective", "market") + " (" + fmtS(r.x) + "); time " + lean(r.y, "return", "accelerate") + " (" + fmtS(r.y) + ")." + (past.length ? " Faded dot: your last take." : "") }),
+    el("h3", { class: "sh3", text: "Nearest current: " + top.c.n }), el("p", { class: "lens", text: top.c.d }),
+    el("p", { class: "fine" }, "From ", link(MEME_SRC[top.c.src][1], MEME_SRC[top.c.src][0])),
+    el("h3", { class: "sh3", text: "Runner-up: " + second.c.n }), el("p", { text: second.c.d }),
+    el("h3", { class: "sh3", text: "Irony meter · " + Math.round(100 * r.irony) + "%" }), el("p", { text: ironyText + (r.doom ? " You also reached for the log-off card: a touch of the black pill." : "") }),
+    el("details", { class: "rest" }, el("summary", {}, el("span", { text: "The currents on the map" }), el("span", { class: "chev", text: "▾" })),
+      el("ol", { class: "cpos" }, ...CURRENTS.map((c) => el("li", {}, el("b", { text: c.n + ". " }), c.d)))),
+    el("p", { class: "fine" }, "The currents and the ideas behind them come from Joshua Citarella's research (", link(MEME_SRC.politigram[1], MEME_SRC.politigram[0]), ", ", link(MEME_SRC.tag[1], MEME_SRC.tag[0]), "); where they sit on this map, the cards and this reading are The Wire's. The cards are originals, not reposted memes, and the map leaves out the currents his work documents that are defined by racism or violence. It's a toy: twelve picks, not a profile."),
+    el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Retake", onclick: async () => { store.set("wire.quizSeed.memes", ""); await saveQuiz({ kind: "memes", restart: true, answers: {} }); openMemes(); } }),
+      el("button", { class: "sbtn", text: "Close", onclick: closeSheet }))),
+  ], "Your meme map");
 }
 
 // --------------------------------------------------------------- Tell The Wire (2026-10-22)

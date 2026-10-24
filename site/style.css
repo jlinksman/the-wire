@@ -709,3 +709,14 @@ p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
 .plainlist li { padding: 8px 0; border-bottom: 1px solid var(--hair); font-size: 0.97rem; }
 .plainlist a { color: var(--text); text-decoration: none; }
 .explainbtn { display: inline-block; margin: -8px 0 10px; padding: 6px 0; background: none; color: var(--here); font: 600 0.92rem var(--sans); }
+/* The meme map: its own register, louder than the rest of the page */
+.memezone .mq { font: 800 1.35rem/1.25 var(--sans); margin: 6px 0 14px; letter-spacing: -0.01em; }
+.mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mcard { display: flex; flex-direction: column; justify-content: space-between; min-height: 168px; padding: 12px 10px; border-radius: 14px;
+  color: #fff; text-align: left; border: 2px solid rgba(255,255,255,0.12); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+.mcard:active { transform: scale(0.98); }
+.mart { font-size: 2.6rem; line-height: 1.1; letter-spacing: 2px; }
+.mcap { font: 800 0.92rem/1.25 Impact, "Arial Black", var(--sans); text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+.memeentry { border-style: solid; border-color: #b967ff; }
+.mmap .cur { fill: var(--text3); }
+.mmap .cl { fill: var(--text2); font: 700 8px var(--mono); }
