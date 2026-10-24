@@ -1689,6 +1689,7 @@ async function openGuide(focus) {
     el("p", { class: "fine", text: "Positions are the candidates' own words or as reported, each linked to its source. The Wire describes; it doesn't recommend. Your picks stay on this phone." }),
   ];
   if (mine) nodes.push(...scorecardTop(g, mine));
+  if (g.quiz) nodes.push(await quizEntry(g));
   if ((g.dates || []).length) nodes.push(el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Key dates" }),
     el("ol", { class: "ildates" }, ...g.dates.map((d) => el("li", { class: d.date < today ? "past" : d === nextDate(g) ? "next" : "" },
       el("span", { class: "tlt", text: fmtDate.format(new Date(d.date + "T12:00:00")) }),
@@ -1737,7 +1738,7 @@ function raceBlock(r, picks, open, mine) {
   const myPick = picks[pickKey];
   return el("details", { class: "race", open: open ? true : null },
     el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: r.office }), r.district ? " · " + r.district : ""),
-      el("span", { class: "rsub", text: (r.candidates || []).map((c) => c.name.split(" ").slice(-1)[0]).join(" vs. ") + (myPick ? " · your pick: " + myPick : "") }), el("span", { class: "chev", text: "▾" })),
+      el("span", { class: "rsub", text: (r.candidates || []).map((c) => c.name.split(" ").slice(-1)[0]).join(" vs. ") + (myPick ? " · your pick: " + myPick : "") + matchLine(r) }), el("span", { class: "chev", text: "▾" })),
     r.job ? el("p", { class: "rjob" }, el("b", { text: "The job: " }), r.job) : null,
     r.why ? el("p", { class: "rjob" }, el("b", { text: "Why it touches you: " }), r.why) : null,
     r.note ? el("p", { class: "fine", text: r.note }) : null,
@@ -1814,6 +1815,129 @@ function proposalBlock(p, picks, open) {
     p.text ? el("details", { class: "rest" }, el("summary", {}, el("span", { text: "The ballot language" }), el("span", { class: "chev", text: "▾" })), el("p", { class: "excerpt" }, p.text)) : null,
     el("div", { class: "pickrow" }, choose("Yes"), choose("No")),
     p.source ? el("p", { class: "fine" }, link(p.source, "Official source ↗")) : null);
+}
+
+// --------------------------------------------------------------- Questionnaires (2026-10-23)
+// Statements rated without seeing what they measure: shuffled, no labels or running score,
+// results only behind "See my results". Answers live in KV (/quiz), never in the repository.
+const SCALE = [[2, "Strongly agree"], [1, "Agree"], [0, "Neutral"], [-1, "Disagree"], [-2, "Strongly disagree"]];
+const WEIGHT = [[1, "Matters a little"], [2, "Matters"], [3, "Matters a lot"]];
+let myQuiz = null;
+async function loadQuiz(force) {
+  if (myQuiz && !force) return myQuiz;
+  try { const r = await fetch("quiz", { credentials: "same-origin" }); myQuiz = r.ok ? await r.json() : null; } catch (e) { myQuiz = myQuiz || null; }
+  return myQuiz || { elections: {}, pulse: [], values: {} };
+}
+async function saveQuiz(body) {
+  try { const r = await fetch("quiz", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }); if (r.ok) myQuiz = await r.json(); return r.ok; } catch (e) { return false; }
+}
+function shuffled(arr, seed) {
+  const a = arr.slice(); let x = seed || 1;
+  for (let i = a.length - 1; i > 0; i--) { x = (x * 1103515245 + 12345) % 2147483648; const j = x % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+async function quizEntry(g) {
+  const Q = await loadQuiz();
+  const mine = (Q.elections || {})[g.id] || {};
+  const n = g.quiz.items.length;
+  const answered = Object.keys(mine.answers || {}).length;
+  const box = el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: g.quiz.title || "Election check" }));
+  if (!mine.done_at) {
+    box.append(el("p", { class: "rjob", text: n + " statements, about " + Math.ceil(n / 4) + " minutes. Answer how you see it; what each one measures is explained only afterwards." }),
+      el("button", { class: "sbtn primary wide", text: answered ? "Continue (" + answered + " of " + n + " answered)" : "Start the election check", onclick: () => openQuiz(g) }));
+  } else {
+    box.append(el("p", { class: "rjob", text: "Done " + fmtDate.format(new Date(Date.parse(mine.done_at))) + ". Your results compare your answers with the candidates' stated positions." }),
+      el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openMatch(g) }),
+        el("button", { class: "sbtn", text: "Retake", onclick: async () => { await saveQuiz({ kind: "clear", id: g.id }); openQuiz(g); } })));
+  }
+  return box;
+}
+function openQuiz(g) {
+  const Q = myQuiz || { elections: {} };
+  const prior = ((Q.elections || {})[g.id] || {}).answers || {};
+  const seed = Number(store.get("wire.quizSeed." + g.id)) || (Date.now() % 100000) + 1;
+  store.set("wire.quizSeed." + g.id, seed);
+  const order = shuffled(g.quiz.items, seed);
+  let i = order.findIndex((it) => !prior[it.id]);
+  if (i < 0) i = 0;
+  const answers = Object.assign({}, prior);
+  let weight = 2;
+  const render1 = () => {
+    if (i >= order.length) {
+      saveQuiz({ kind: "election", id: g.id, answers, done: true }).then(() => openSheet([
+        el("h2", { id: "sheet-title", class: "stitle", text: "Done" }),
+        el("p", { class: "sdesc", text: "Your answers are saved privately. Look at the results whenever you like; they're not shown anywhere until you do." }),
+        el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openMatch(g) }),
+          el("button", { class: "sbtn", text: "Back to the guide", onclick: () => openGuide() })),
+      ], "Done"));
+      return;
+    }
+    const it = order[i];
+    const cur = answers[it.id];
+    weight = cur && cur.w ? cur.w : 2;
+    const wrow = el("div", { class: "wrow" }, ...WEIGHT.map(([w, label]) => { const b = el("button", { class: "chip" + (w === weight ? " on" : ""), text: label });
+      b.onclick = () => { weight = w; [...wrow.children].forEach((c) => c.classList.toggle("on", c === b)); }; return b; }));
+    const pick = (v) => { answers[it.id] = { v, w: weight }; saveQuiz({ kind: "election", id: g.id, answers: { [it.id]: answers[it.id] } }); i += 1; render1(); };
+    openSheet([
+      el("div", { class: "qprog" }, el("span", { text: (i + 1) + " of " + order.length }), el("span", { class: "qbar" }, el("i", { style: "width:" + Math.round(100 * i / order.length) + "%" }))),
+      el("h2", { id: "sheet-title", class: "qtext", text: it.text }),
+      el("p", { class: "fine", text: "How much does this matter to you? (set this first)" }), wrow,
+      el("div", { class: "qscale" }, ...SCALE.map(([v, label]) => el("button", { class: "qopt" + (cur && cur.v === v ? " on" : ""), text: label, onclick: () => pick(v) }))),
+      el("div", { class: "qnav" },
+        i > 0 ? el("button", { class: "linkbtn", text: "‹ Back", onclick: () => { i -= 1; render1(); } }) : el("span", {}),
+        el("button", { class: "linkbtn", text: "Skip", onclick: () => { answers[it.id] = { skip: true }; saveQuiz({ kind: "election", id: g.id, answers: { [it.id]: { skip: true } } }); i += 1; render1(); } }),
+        el("button", { class: "linkbtn", text: "Finish later", onclick: () => openGuide() })),
+    ], g.quiz.title || "Election check");
+  };
+  render1();
+}
+// Agreement with a candidate: over the statements both you and they have a position on,
+// 1 − |yours − theirs| / 4, weighted by how much each matters to you.
+function matchFor(g, name, answers) {
+  const st = ((g.quiz || {}).stances || {})[name] || {};
+  let num = 0, den = 0, n = 0;
+  const rows = [];
+  for (const [q, x] of Object.entries(st)) {
+    const a = answers[q];
+    if (!a || a.skip || a.v == null) continue;
+    const agree = 1 - Math.abs(a.v - x.v) / 4;
+    num += a.w * agree; den += a.w; n += 1;
+    rows.push({ q, you: a.v, them: x.v, w: a.w, agree, source: x.source, note: x.note });
+  }
+  return { pct: den ? Math.round(100 * num / den) : null, n, rows: rows.sort((a, b) => b.agree - a.agree) };
+}
+function matchLine(r) {
+  const g = data.voter_guide;
+  if (!g || !g.quiz || !prefs.showMatch || !myQuiz) return "";
+  const a = ((myQuiz.elections || {})[g.id] || {}).answers;
+  if (!a) return "";
+  const parts = (r.candidates || []).map((c) => { const m = matchFor(g, c.name, a); return m.n >= 2 ? c.name.split(" ").slice(-1)[0] + " " + m.pct + "%" : null; }).filter(Boolean);
+  return parts.length ? " · your match: " + parts.join(", ") : "";
+}
+async function openMatch(g) {
+  const Q = await loadQuiz(true);
+  const a = ((Q.elections || {})[g.id] || {}).answers || {};
+  const text = Object.fromEntries(g.quiz.items.map((x) => [x.id, x.text]));
+  const label = (v) => (SCALE.find(([k]) => k === v) || [0, "–"])[1];
+  const nodes = [
+    el("h2", { id: "sheet-title", class: "stitle", text: "Your election check" }),
+    el("p", { class: "sdesc", text: "How closely your answers match each candidate's stated positions, weighted by how much each statement matters to you. Only statements a candidate has a sourced position on count for them; a candidate with fewer than two isn't scored. Agreement on stated positions is one input, not a recommendation." }),
+  ];
+  for (const r of g.races || []) {
+    const ms = (r.candidates || []).map((c) => ({ c, m: matchFor(g, c.name, a) })).filter((x) => x.m.n > 0);
+    if (!ms.length) continue;
+    nodes.push(el("section", { class: "ssec" }, el("h3", { class: "sh3", text: r.office + (r.district ? " · " + r.district : "") }),
+      ...ms.map(({ c, m }) => el("details", { class: "race" },
+        el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: c.name }), m.n >= 2 ? " · " + m.pct + "% agreement" : " · too few stated positions"),
+          el("span", { class: "rsub", text: m.n + " statement" + (m.n === 1 ? "" : "s") + " in common" }), el("span", { class: "chev", text: "▾" })),
+        el("ul", { class: "cpos" }, ...m.rows.map((x) => el("li", {}, el("b", { text: x.agree >= 0.75 ? "Agree · " : x.agree <= 0.25 ? "Differ · " : "Partly · " }),
+          "“" + text[x.q] + "” You: " + label(x.you) + (x.w === 3 ? " (matters a lot)" : "") + ". " + c.name.split(" ").slice(-1)[0] + ": " + label(x.them) + (x.note ? " (" + x.note + ")" : "") + " ",
+          x.source ? link(x.source, "↗", "srcl") : null)))))));
+  }
+  const show = el("label", { class: "trow" }, el("span", { text: "Show my match on each race in the guide" }),
+    el("input", { type: "checkbox", checked: prefs.showMatch ? true : null, onchange: (e) => { prefs.showMatch = e.target.checked; savePrefs(); } }));
+  nodes.push(show, el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Back to the guide", onclick: () => openGuide() })));
+  openSheet(nodes, "Your election check");
 }
 
 // --------------------------------------------------------------- Tell The Wire (2026-10-22)

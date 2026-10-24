@@ -670,3 +670,15 @@ table.score .tot { font-weight: 700; }
 table.score td.cn { white-space: normal; min-width: 9em; font-family: var(--sans); }
 .okmsg { color: var(--here); font-weight: 600; font-size: 0.95rem; }
 .errmsg { color: var(--live); font-weight: 600; font-size: 0.95rem; }
+
+/* Questionnaires */
+.quizbox { border: 1px dashed var(--hair); }
+.qprog { display: flex; gap: 10px; align-items: center; font: 0.8rem var(--mono); color: var(--text3); margin-bottom: 10px; }
+.qbar { flex: 1; height: 4px; border-radius: 2px; background: var(--raised); overflow: hidden; }
+.qbar i { display: block; height: 100%; background: var(--here); }
+.qtext { font: 600 1.3rem/1.35 var(--serif); margin: 8px 0 18px; }
+.qscale { display: grid; gap: 8px; }
+.qopt { min-height: 50px; border-radius: 12px; background: var(--raised); color: var(--text); font: 600 1rem var(--sans); }
+.qopt.on { background: var(--here); color: var(--on-here, #fff); }
+.wrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 8px; }
+.qnav { display: flex; justify-content: space-between; margin-top: 16px; }

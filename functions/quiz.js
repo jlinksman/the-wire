@@ -1,0 +1,56 @@
+// Questionnaires (2026-10-23): Joe's answers, kept only in Workers KV (quiz.json), never in
+// the public repository. The questions and the candidates' codings are public (elections.yaml);
+// the answers, his map position and his matches are private.
+//
+// GET  /quiz                                   -> {elections:{id:{answers,done_at}}, pulse:[...], values:{...}}
+// POST /quiz {kind:"election", id, answers:{q:{v:-2..2, w:1..3}}, done}
+// POST /quiz {kind:"pulse", answers:[...]}     -> appended (kept to the last 200)
+// POST /quiz {kind:"values", answers:{...}, done}
+// POST /quiz {kind:"clear", id}                -> forget one election's answers
+const KEY = "quiz.json";
+const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
+const clean = (a) => {
+  const out = {};
+  for (const [k, x] of Object.entries(a || {})) {
+    if (!/^[a-z0-9_]{1,24}$/i.test(k) || !x) continue;
+    const v = Number(x.v), w = Number(x.w || 2);
+    if (x.skip) out[k] = { skip: true };
+    else if (Number.isFinite(v) && v >= -2 && v <= 2) out[k] = { v: Math.round(v), w: Math.min(3, Math.max(1, Math.round(w))) };
+  }
+  return out;
+};
+
+export async function onRequestGet({ env }) {
+  if (!env.WIRE) return json({ error: "KV binding WIRE is not configured" }, 500);
+  return json((await env.WIRE.get(KEY, "json")) || { elections: {}, pulse: [], values: {} });
+}
+
+export async function onRequestPost({ request, env }) {
+  if (!env.WIRE) return json({ error: "KV binding WIRE is not configured" }, 500);
+  let b;
+  try { b = await request.json(); } catch (e) { return json({ error: "bad JSON" }, 400); }
+  const q = (await env.WIRE.get(KEY, "json")) || { elections: {}, pulse: [], values: {} };
+  q.elections = q.elections || {}; q.pulse = q.pulse || []; q.values = q.values || {};
+  const now = new Date().toISOString();
+  if (b.kind === "election" && /^[a-z0-9_]{1,40}$/i.test(b.id || "")) {
+    const cur = q.elections[b.id] || { answers: {} };
+    cur.answers = Object.assign(cur.answers || {}, clean(b.answers));
+    cur.updated = now;
+    if (b.done) cur.done_at = now;
+    q.elections[b.id] = cur;
+  } else if (b.kind === "values") {
+    q.values.answers = Object.assign(q.values.answers || {}, clean(b.answers));
+    q.values.updated = now;
+    if (b.done) q.values.done_at = now;
+  } else if (b.kind === "pulse" && Array.isArray(b.answers)) {
+    q.pulse = [...q.pulse, ...b.answers.slice(0, 20).map((a) => ({ ...a, at: now }))].slice(-200);
+  } else if (b.kind === "clear") {
+    if (b.id === "values") q.values = {}; else if (b.id === "pulse") q.pulse = []; else delete q.elections[b.id];
+  } else {
+    return json({ error: "unknown questionnaire" }, 400);
+  }
+  await env.WIRE.put(KEY, JSON.stringify(q));
+  return json(q);
+}
+
+function json(body, status) { return new Response(JSON.stringify(body), { status: status || 200, headers }); }
