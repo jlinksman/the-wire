@@ -82,6 +82,7 @@ elections:
               - {topic: Abortion, text: "Says he is pro-choice and that he has significant policy differences with President Trump.", source: "https://www.fox5ny.com/news/hochul-blakeman-debate-ny-governor-race"}
               - {topic: Other, text: "Pledges to defend Second Amendment rights and to keep transgender girls out of girls' school sports.", source: "https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html"}
         polls:
+          - {who: "Quinnipiac", dates: "Oct 15–19, 1,167 likely voters", result: "Hochul 55, Blakeman 41 (independents: Blakeman 51–44)", source: "https://www.cityandstateny.com/politics/2026/10/hochul-leads-blakeman-14-points-quinnipiac-poll/416739/"}
           - {who: "Marist", dates: "Oct 1–4, registered voters", result: "Hochul 53, Blakeman 42", source: "https://maristpoll.marist.edu/polls/midterm-elections-in-new-york-october-2026/"}
           - {who: "Beacon Research", dates: "Oct 1–6, registered voters", result: "Hochul 53, Blakeman 31", source: "https://politicalwire.com/2026/10/15/kathy-hochul-way-up-in-new-york-governors-race/"}
           - {who: "Siena", dates: "Sep 11–17, likely voters", result: "Hochul 50, Blakeman 41", source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/22/siena-poll--hochul-s-lead-over-blakeman-sees-little-change-among-likely-voters"}
@@ -155,7 +156,7 @@ elections:
         watch: ["Auringer", "Rep. Pat Ryan", "NY-18"]
         job: "One of 435 House members; a two-year term. Votes on federal law and spending."
         why: "Federal law covers EPA cleanup and underground-tank rules (CERCLA, 40 CFR 280), barge anchorages on the Hudson, and federal student-loan repayment."
-        note: "Oct 16 Daily Freeman debate (on Zoom): Auringer read an opening statement and left; Ryan answered questions for about an hour. Fundraising through Sept 30, as reported: Ryan $5.3 million, Auringer $153,000."
+        note: "Oct 16 Daily Freeman debate (on Zoom): Auringer read an opening statement and left; Ryan answered questions for about an hour. They met in person once, at an Oct 22 forum in Newburgh (Mid-Hudson News). Fundraising through Oct 14 (FEC): Ryan $5.36 million raised, $2.54 million on hand; Auringer $158,703 raised, $21,703 on hand."
         candidates:
           - name: "Pat Ryan"
             lines: [Democratic, Working Families]
@@ -167,6 +168,8 @@ elections:
               - {topic: Utilities and groceries, text: "Introduced a bill to study what drives grocery prices; backs limits on utility profits.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
               - {topic: Hudson River, text: "Cites the Hudson River Protection Act, which bans new barge anchorages on the river.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
               - {topic: Farms, text: "Pressed for the federal disaster designation after the April freeze.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+              - {topic: Scaffold Law, text: "Defends New York's Scaffold Law: \"I am with the workers, not the real estate developers.\"", source: "https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/"}
+              - {topic: Israel, text: "Voted in July for an amendment to cut $3.3 billion in military aid to Israel (it failed 104–314); says he doesn't want AIPAC's support and is refunding donors who ask.", source: "https://www.cbsnews.com/news/us-israel-aid-house-democrats-massie-amendment/"}
           - name: "Jackie Mary Auringer"
             lines: [Republican, Conservative]
             bio: "Kingston native who works at her family's construction company, Urban Precast; first run for office."
@@ -174,6 +177,7 @@ elections:
               - {topic: Taxes and spending, text: "Wants lower taxes and less government spending.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
               - {topic: Regulation, text: "Would cut regulations she says raise the cost of housing and doing business.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
               - {topic: Trades and small business, text: "Wants more skilled-trades opportunities and support for small businesses; cites her family business's experience of rising costs.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+              - {topic: Scaffold Law and taxes, text: "Supports reforming New York's Scaffold Law; opposes a proposed 18.75% top state tax rate as a hit to small businesses.", source: "https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/"}
               - {topic: Donors, text: "Criticizes Ryan's donor ties, including AIPAC-linked contributions (his campaign says it returned the money AIPAC's PAC gave directly).", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
         ratings:
           - {who: "Cook Political Report", rating: "Likely Democratic", source: "https://www.cookpolitical.com/house/race/483661"}
@@ -188,7 +192,7 @@ elections:
         watch: ["Rolison", "Rob Rolison", "Lisa Kaul"]
         job: "One of 63 state senators; a two-year term. Votes on state law and the state budget."
         why: "Votes on the Navigation Law, petroleum bulk storage rules, prevailing-wage law and Central Hudson's regulation. The 2024 race was decided by 1.4 points."
-        note: "The Democratic Legislative Campaign Committee lists this race among its six priorities. No debate found."
+        note: "The Democratic Legislative Campaign Committee lists this race among its six priorities. Oct 5: the state approved public matching funds of $139,953 for Kaul and $45,393 for Rolison (pcfb.ny.gov). No debate found."
         candidates:
           - name: "Robert G. Rolison"
             lines: [Republican, Conservative]
@@ -232,7 +236,7 @@ elections:
         desk: LAW
         job: "New York's trial court of general jurisdiction: commercial cases, Article 78 proceedings, matrimonial and major civil and criminal cases. Fourteen-year terms."
         why: "Hears contract and environmental disputes, land-use Article 78 challenges, and Navigation Law cost-recovery actions in the district."
-        note: "Several seats are open; vote for up to the number printed on your ballot (the sample ballot shows it). Three candidates are cross-endorsed by both major parties."
+        note: "Vote for up to 3 of the 5, per the Dutchess sample ballots. Judicial candidates don't take positions on issues, so this race shows backgrounds only."
         candidates:
           - {name: "Maria G. Rosa", lines: [Democratic, Working Families], incumbent: true, bio: "Supreme Court justice since 2013; previously a Dutchess County Family Court judge.", positions: [{text: "Says each case deserves the respectful attention of the judge and her staff.", source: "https://www.ballotready.org/people/maria-g-rosa"}]}
           - {name: "George E. Fufidio", lines: [Democratic, Republican]}

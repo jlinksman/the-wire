@@ -1658,9 +1658,26 @@ function guideCard() {
     el("span", { class: "bc-txt" }, el("span", { class: "bc-t", text: "Voter guide · " + g.title + " · " + fmtDate.format(new Date(g.date + "T12:00:00")) + " · " + when }),
       el("span", { class: "bc-s", text: (n ? "Next: " + n.label + " · " + fmtDate.format(new Date(n.date + "T12:00:00")) + " · " : "") + (g.races || []).length + " races" + ((g.proposals || []).length ? ", " + g.proposals.length + " proposals" : "") })));
 }
-function openGuide(focus) {
+let myBallot = null;          // the private scorecard from /ballot (KV), loaded when the guide opens
+async function loadBallot(force) {
+  if (myBallot && !force) return myBallot;
+  try { const r = await fetch("ballot", { credentials: "same-origin" }); myBallot = r.ok ? await r.json() : {}; } catch (e) { myBallot = myBallot || {}; }
+  return myBallot;
+}
+function weighted(c, crit) {
+  const have = crit.filter((k) => c[k.id] && c[k.id].score != null);
+  if (have.length < 2) return null;
+  const w = have.reduce((a, k) => a + k.weight, 0);
+  return Math.round(10 * have.reduce((a, k) => a + k.weight * c[k.id].score, 0) / w) / 10;
+}
+function dots(n) {
+  return n == null ? el("span", { class: "nr", text: "–" }) : el("span", { class: "dots", "aria-label": n + " of 5" }, ...[1, 2, 3, 4, 5].map((i) => el("i", { class: i <= n ? "on" : "" })));
+}
+async function openGuide(focus) {
   const g = data.voter_guide;
   if (!g) return;
+  const B = await loadBallot();
+  const mine = B && B.election === g.id ? B : null;
   const picks = store.json(KEY.picks, {});
   const today = new Date().toISOString().slice(0, 10);
   const src = (u, label) => u ? link(u, label || "source ↗", "srcl") : null;
@@ -1670,6 +1687,7 @@ function openGuide(focus) {
     el("p", { class: "sdesc", text: g.about || "" }),
     el("p", { class: "fine", text: "Positions are the candidates' own words or as reported, each linked to its source. The Wire describes; it doesn't recommend. Your picks stay on this phone." }),
   ];
+  if (mine) nodes.push(...scorecardTop(g, mine));
   if ((g.dates || []).length) nodes.push(el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Key dates" }),
     el("ol", { class: "ildates" }, ...g.dates.map((d) => el("li", { class: d.date < today ? "past" : d === nextDate(g) ? "next" : "" },
       el("span", { class: "tlt", text: fmtDate.format(new Date(d.date + "T12:00:00")) }),
@@ -1681,7 +1699,7 @@ function openGuide(focus) {
     const races = (g.races || []).filter((r) => (r.level || "state") === lv);
     if (!races.length) continue;
     nodes.push(el("p", { class: "glevel", text: label }));
-    for (const r of races) nodes.push(raceBlock(r, picks, focus === r.id));
+    for (const r of races) nodes.push(raceBlock(r, picks, focus === r.id, mine));
   }
   if ((g.proposals || []).length) {
     nodes.push(el("h3", { class: "sh3 big", text: "Ballot proposals" }));
@@ -1693,21 +1711,27 @@ function openGuide(focus) {
   nodes.push(el("div", { class: "endline", text: "End of the guide" }));
   openSheet(nodes.filter(Boolean), "Voter guide");
 }
-function raceBlock(r, picks, open) {
+function raceBlock(r, picks, open, mine) {
   const th = r.thread && (data.threads || []).find((t) => t.id === r.thread);
+  const P = mine && mine.races ? mine.races[r.id] || null : null;
+  const keep = mine && mine.where && mine.where.keep ? mine.where.keep[r.id] : null;
+  const voteFor = mine && mine.where && mine.where.vote_for ? mine.where.vote_for[r.id] : null;
+  const myDistrict = mine && mine.where && mine.where.district_of ? mine.where.district_of[r.id] : null;
+  if (keep) r = Object.assign({}, r, { candidates: (r.candidates || []).filter((c) => c.name === keep), district: myDistrict || r.district, note: "Your district's candidate (from your scorecard)." });
   const devs = th ? (th.developments || []).slice(-3).reverse() : [];
   const pickKey = "race:" + r.id;
   const cands = (r.candidates || []).map((c) => {
-    const mine = picks[pickKey] === c.name;
-    const pick = el("button", { class: "pick" + (mine ? " on" : ""), text: mine ? "✓ My pick" : "My pick" });
-    pick.onclick = (e) => { e.preventDefault(); const pk = store.json(KEY.picks, {}); pk[pickKey] = mine ? null : c.name; store.set(KEY.picks, JSON.stringify(pk)); openGuide(r.id); };
+    const picked = picks[pickKey] === c.name;
+    const pick = el("button", { class: "pick" + (picked ? " on" : ""), text: picked ? "✓ My pick" : "My pick" });
+    pick.onclick = (e) => { e.preventDefault(); const pk = store.json(KEY.picks, {}); pk[pickKey] = picked ? null : c.name; store.set(KEY.picks, JSON.stringify(pk)); openGuide(r.id); };
     return el("div", { class: "cand" },
       el("div", { class: "chead" }, el("span", { class: "cname", text: c.name }), c.incumbent ? el("span", { class: "inc", text: "incumbent" }) : null, pick),
       (c.lines || []).length ? el("div", { class: "lines" }, ...c.lines.map((l) => el("span", { class: "line", text: l }))) : null,
       c.running_mate ? el("p", { class: "fine", text: "Running mate: " + c.running_mate }) : null,
       c.bio ? el("p", { class: "cbio", text: c.bio }) : null,
       (c.positions || []).length ? el("ul", { class: "cpos" }, ...c.positions.map((p) => el("li", {}, p.topic ? el("b", { text: p.topic + ": " }) : null, p.text + " ", p.source ? link(p.source, "↗", "srcl") : null))) : null,
-      c.site ? el("p", { class: "fine" }, link(c.site, "Campaign site ↗")) : null);
+      c.site ? el("p", { class: "fine" }, link(c.site, "Campaign site ↗")) : null,
+      P && P.candidates && P.candidates[c.name] ? candScores(P.candidates[c.name], mine.criteria) : null);
   });
   const myPick = picks[pickKey];
   return el("details", { class: "race", open: open ? true : null },
@@ -1716,6 +1740,9 @@ function raceBlock(r, picks, open) {
     r.job ? el("p", { class: "rjob" }, el("b", { text: "The job: " }), r.job) : null,
     r.why ? el("p", { class: "rjob" }, el("b", { text: "Why it touches you: " }), r.why) : null,
     r.note ? el("p", { class: "fine", text: r.note }) : null,
+    voteFor ? el("p", { class: "rjob" }, el("b", { text: "Vote for up to " + voteFor + "." })) : null,
+    P && P.analysis ? el("div", { class: "foryou" }, el("span", { class: "mlabel", text: "For you · analysis" }), el("p", { text: P.analysis })) : null,
+    ...((P && P.facts) || []).map((f) => el("p", { class: "fine" }, f.text + " ", f.source ? link(f.source, "↗", "srcl") : null)),
     el("div", { class: "cands" }, ...cands),
     (r.ratings || []).length || (r.polls || []).length ? el("div", { class: "rstat" },
       ...(r.ratings || []).map((x) => el("span", { class: "chip" }, x.who + ": " + x.rating + " ", x.source ? link(x.source, "↗", "srcl") : null)),
@@ -1724,6 +1751,50 @@ function raceBlock(r, picks, open) {
       el("ul", { class: "also" }, ...devs.map((d) => el("li", {}, el("span", { class: "asrc", text: ago(Date.parse(d.t)) + " · " + d.source }), link(d.link, d.text))))) : null,
     th ? el("button", { class: "sbtn wide", text: "Open the race thread (news, Ask) ›", onclick: () => openThread(th) }) : null);
 }
+function candScores(c, crit) {
+  const total = weighted(c, crit);
+  return el("details", { class: "scores" },
+    el("summary", {}, el("span", { class: "mlabel", text: "Your scores" }),
+      ...crit.map((k) => el("span", { class: "sc" }, el("span", { class: "sck", text: k.label }), dots(c[k.id] ? c[k.id].score : null))),
+      el("span", { class: "sct", text: total != null ? "weighted " + total.toFixed(1) : "too thin to total" })),
+    ...crit.map((k) => { const x = c[k.id] || {}; return el("div", { class: "scrow" },
+      el("b", { text: k.label + (x.score != null ? " · " + x.score + " of 5" : " · no record") }),
+      x.why ? el("p", { class: "scwhy", text: x.why }) : null,
+      (x.evidence || []).length ? el("ul", { class: "cpos" }, ...x.evidence.map((e) => el("li", {}, e.text + " ", e.source ? link(e.source, "↗", "srcl") : null))) : null); }));
+}
+function scorecardTop(g, B) {
+  const w = B.where || {};
+  const crit = B.criteria || [];
+  const rows = [];
+  for (const r of g.races || []) {
+    const P = (B.races || {})[r.id];
+    if (!P || !P.candidates) continue;
+    rows.push(el("tr", { class: "race" }, el("td", { colspan: String(crit.length + 2), text: r.office + (r.district ? " · " + r.district : "") })));
+    for (const c of r.candidates || []) {
+      const s0 = P.candidates[c.name];
+      if (!s0) continue;
+      const t = weighted(s0, crit);
+      rows.push(el("tr", {}, el("td", { class: "cn", text: c.name + " (" + (c.lines || []).map((l) => l[0]).join(", ") + ")" + (c.incumbent ? " · inc." : "") }),
+        ...crit.map((k) => el("td", { class: "n", text: s0[k.id] && s0[k.id].score != null ? String(s0[k.id].score) : "–" })),
+        el("td", { class: "n tot", text: t != null ? t.toFixed(1) : "thin" })));
+    }
+  }
+  return [
+    el("div", { class: "rbox mine" },
+      el("span", { class: "mlabel", text: "Your ballot · private, from your scorecard" }),
+      el("p", { class: "rjob" }, el("b", { text: (w.ward || "") }), w.label ? " · " + w.label : ""),
+      w.districts ? el("p", { class: "fine", text: Object.entries(w.districts).map(([k, v]) => k + " " + v).join(" · ") }) : null,
+      w.sample_ballot ? el("p", { class: "fine" }, link(w.sample_ballot, "Your district's official sample ballot ↗"), w.note ? " " + w.note : "") : null),
+    el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Your scorecard: " + crit.map((k) => k.label + " " + Math.round(k.weight * 100) + "%").join(", ") }), el("span", { class: "chev", text: "▾" })),
+      el("p", { class: "fine", text: B.method || "" }),
+      el("ul", { class: "cpos" }, ...crit.map((k) => el("li", {}, el("b", { text: k.label + ": " }), k.means || ""))),
+      el("div", { class: "ptable" }, el("table", { class: "score" },
+        el("thead", {}, el("tr", {}, el("th", { text: "Candidate" }), ...crit.map((k) => el("th", { class: "n", text: k.short || k.label.split(" ")[0] })), el("th", { class: "n", text: "Weighted" }))),
+        el("tbody", {}, ...rows))),
+      el("p", { class: "fine", text: "A filter on your priorities, not a recommendation. Totals over two criteria are reweighted over those two. Updated " + (B.updated || "") + "." })),
+  ];
+}
+
 function proposalBlock(p, picks, open) {
   const pickKey = "prop:" + p.id;
   const mine = picks[pickKey];
@@ -1909,6 +1980,31 @@ function browseInline() {
   return [sectionHead("All threads", all.length + " live", openTopicForm, "Follow a topic"), q, chips, list];
 }
 
+// The private voter-guide scorecard: import (paste or file) and clear. Stored in KV only.
+function scorecardAdmin() {
+  const status = el("p", { class: "fine", text: "Loading…" });
+  const box = el("textarea", { class: "tin", rows: "4", placeholder: "Paste the scorecard file's contents here" });
+  const file = el("input", { type: "file", accept: ".json,application/json" });
+  const go = el("button", { class: "sbtn wide", text: "Import scorecard" });
+  const clear = el("button", { class: "unsave", text: "Remove" });
+  const send = async (text) => {
+    go.textContent = "Importing…";
+    try {
+      const r = await fetch("ballot", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: text });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
+      myBallot = j; box.value = "";
+      status.textContent = "Imported: " + Object.keys(j.races || {}).length + " races for " + j.election + ". Open the voter guide to see it.";
+    } catch (e) { status.textContent = "Couldn't import: " + e.message; }
+    go.textContent = "Import scorecard";
+  };
+  go.onclick = () => box.value.trim() ? send(box.value.trim()) : (status.textContent = "Paste the file, or choose it below.");
+  file.onchange = async () => { if (file.files[0]) send(await file.files[0].text()); };
+  clear.onclick = async () => { await fetch("ballot", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "clear" }) }); myBallot = {}; status.textContent = "Removed."; };
+  loadBallot(true).then((b) => { status.textContent = b && b.election ? "Stored: " + b.election + ", " + Object.keys(b.races || {}).length + " races, updated " + (b.updated || "") + ". Private: it lives only on Cloudflare, never in the repository." : "None stored. The scorecard adds your address-level districts and scores on your own priorities to the voter guide."; });
+  return el("div", {}, status, box, el("p", { class: "fine" }, "Or choose the file: ", file), go, el("p", { class: "fine" }, clear));
+}
+
 // Notes for Claude: work Tell The Wire couldn't do itself. Copy them into a session.
 function notesForClaude() {
   const box = el("div", {}, el("p", { class: "fine", text: "Loading…" }));
@@ -1999,6 +2095,7 @@ function settingsView() {
       el("li", {}, el("span", { class: "asrc", text: k === "more" ? "More about" : "Less about" }), el("span", { text: t }), removeBtn("Remove", { action: "untaste", kind: k, term: t })))),
     el("button", { class: "sbtn wide", text: "Tell The Wire ›", onclick: () => openTell() }),
     el("h3", { class: "sh3", text: "Notes for Claude" }), notesForClaude(),
+    el("h3", { class: "sh3", text: "Your scorecard (voter guide)" }), scorecardAdmin(),
     el("h3", { class: "sh3", text: "Standing threads · " + standing.length }),
     el("p", { class: "fine", text: "Configured in threads.yaml in the repository; the build reads it every run. Edit the file to add, rename or retire one." }),
     el("ul", { class: "admin" }, ...standing.map((t) => el("li", {}, el("span", { class: "asrc", text: (GROUP_LABEL[t.group] || DESK_NAME[t.desk] || t.desk) + " · " + t.n_reports + " reports" }), el("button", { class: "doclink", text: t.title, onclick: () => openThread(t) })))),
