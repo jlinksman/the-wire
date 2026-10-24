@@ -38,6 +38,7 @@ import alerts  # noqa: E402
 import brief  # noqa: E402
 import events  # noqa: E402
 import translate  # noqa: E402
+import pulse  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "sources.yaml"
@@ -1249,6 +1250,11 @@ def main() -> int:
         except ValueError as exc:
             log(f"[follows] unreadable: {exc}")
     data["follows"] = {k: follows.get(k, []) for k in ("threads", "topics", "signals", "searches")} | {"taste": follows.get("taste") or {}}
+    # The pulse (quiz.json from KV, gitignored): its answers join taste; only counts are logged.
+    try:
+        pulse.run(data, follows, log)
+    except Exception as exc:
+        log(f"[pulse] skipped: {type(exc).__name__}")
     # The people directory (people.yaml) for the page: names, roles, perspective, reachability.
     data["people"] = [{k: p[k] for k in ("id", "name", "role", "desk", "perspective", "unreachable") if p.get(k)}
                       for p in load_people_cfg()]

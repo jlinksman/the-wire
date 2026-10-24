@@ -1,0 +1,51 @@
+# The values questionnaire (2026-10-23): about 30 statements, taken about once a year, that place
+# Joe on a political map. The page shows the statements shuffled, with no labels and no running
+# score; what each measures (axis and direction below) is shown only on "See my results".
+#
+# axis: which scale a statement measures. dir: +1 if agreeing moves toward the scale's right-hand
+# pole, -1 if toward the left. About half are reverse-worded so agreeing isn't always one side.
+# crit: which of the scorecard's criteria the statement's importance informs (suggested weights).
+# Statements with no axis aren't placed on the map; their importance still counts.
+#
+# Joe's answers live only in Workers KV (quiz.json), never here.
+
+title: "Where you stand"
+retake_days: 330
+axes:
+  - {id: econ, label: "Economics", left: "Government", right: "Markets", means: "How much to rely on government versus markets for jobs, pay and services."}
+  - {id: culture, label: "Culture", left: "Change", right: "Tradition", means: "How fast social norms should change, and how much weight tradition and faith carry."}
+  - {id: trust, label: "Institutions", left: "Skeptic", right: "Trusting", means: "Whether the press, agencies, courts and officials mostly work as they should."}
+  - {id: world, label: "The world", left: "Restraint", right: "Engagement", means: "How much the US should commit abroad: troops, alliances, military aid."}
+  - {id: growth, label: "Development", left: "Preserve", right: "Build", means: "Whether to make building easier or give places more say in slowing it."}
+  - {id: green, label: "Environment", left: "Cost first", right: "Climate first", means: "When climate goals and energy or business costs collide, which gives."}
+items:
+  - {id: v01, axis: econ, dir: -1, text: "The government should guarantee a job to anyone who wants one and can't find one."}
+  - {id: v02, axis: econ, dir: 1, crit: business, text: "Most regulations on small businesses cost more than they're worth."}
+  - {id: v03, axis: econ, dir: -1, text: "Higher taxes on people earning over $1 million a year are fair."}
+  - {id: v04, axis: econ, dir: 1, text: "Free trade has been good for most Americans."}
+  - {id: v05, axis: econ, dir: -1, crit: business, text: "It should be easier for workers to form a union."}
+  - {id: v06, axis: econ, dir: 1, text: "A private company usually delivers a service better than a government agency would."}
+  - {id: v07, axis: econ, dir: -1, text: "The federal government should cancel more student debt."}
+  - {id: v08, axis: culture, dir: 1, text: "Public schools should stay out of teaching about gender identity."}
+  - {id: v09, axis: culture, dir: 1, text: "Religious faith is important to a healthy society."}
+  - {id: v10, axis: culture, dir: -1, text: "Abortion should be legal in most or all cases."}
+  - {id: v11, axis: culture, dir: 1, text: "The country has changed too much, too fast, in the last twenty years."}
+  - {id: v12, axis: culture, dir: -1, text: "Immigration makes American culture stronger."}
+  - {id: v13, axis: culture, dir: -1, text: "Legalizing recreational marijuana has been good for New York."}
+  - {id: v14, axis: trust, dir: 1, text: "Mainstream news outlets mostly get the important facts right."}
+  - {id: v15, axis: trust, dir: -1, text: "Most elected officials care more about keeping their jobs than about people like me."}
+  - {id: v16, axis: trust, dir: 1, text: "Public health agencies deserve the public's trust."}
+  - {id: v17, axis: trust, dir: -1, text: "Big institutions (government, media, universities) are mostly run for the benefit of insiders."}
+  - {id: v18, axis: world, dir: 1, text: "The US should keep troops in Europe and Asia to deter attacks on its allies."}
+  - {id: v19, axis: world, dir: -1, text: "America spends too much on other countries' defense."}
+  - {id: v20, axis: world, dir: 1, crit: antisemitism, text: "The US should keep providing military aid to Israel."}
+  - {id: v21, axis: world, dir: -1, text: "The US should press Ukraine to accept a negotiated settlement, even one that gives up territory."}
+  - {id: v22, crit: antisemitism, text: "Antisemitism in America is a bigger problem than most people realize."}
+  - {id: v23, axis: growth, dir: 1, crit: development, text: "Beacon and the river towns should allow more apartment buildings, especially near the train stations."}
+  - {id: v24, axis: growth, dir: -1, crit: development, text: "New development is changing the Hudson Valley too fast."}
+  - {id: v25, axis: growth, dir: 1, crit: development, text: "Big infrastructure projects should be allowed to skip some environmental reviews to get built faster."}
+  - {id: v26, axis: growth, dir: -1, crit: development, text: "Residents should have the final say over large projects in their town."}
+  - {id: v27, axis: green, dir: 1, crit: business, text: "New York should keep its climate law's deadlines even if energy bills rise."}
+  - {id: v28, axis: green, dir: 1, crit: business, text: "Environmental rules should be enforced strictly, even when compliance is costly for small firms."}
+  - {id: v29, axis: green, dir: -1, crit: business, text: "Right now, energy costs matter more than emissions targets."}
+  - {id: v30, axis: green, dir: -1, text: "Natural gas should stay part of New York's energy supply for decades."}

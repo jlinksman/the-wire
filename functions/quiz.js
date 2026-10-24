@@ -5,7 +5,7 @@
 // GET  /quiz                                   -> {elections:{id:{answers,done_at}}, pulse:[...], values:{...}}
 // POST /quiz {kind:"election", id, answers:{q:{v:-2..2, w:1..3}}, done}
 // POST /quiz {kind:"pulse", answers:[...]}     -> appended (kept to the last 200)
-// POST /quiz {kind:"values", answers:{...}, done}
+// POST /quiz {kind:"values", answers:{...}, done, restart}  (restart keeps the last take in values.past)
 // POST /quiz {kind:"clear", id}                -> forget one election's answers
 const KEY = "quiz.json";
 const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
@@ -19,6 +19,17 @@ const clean = (a) => {
   }
   return out;
 };
+
+// One pulse answer: a pair ({t:"pair", a:{id,title}, b:{id,title}, pick:"a"|"b"|"both"|"neither"})
+// or a care question ({t:"care", id, title, v:-2..2}). Anything else is dropped.
+const side = (x) => (x && typeof x.title === "string" ? { id: String(x.id || "").slice(0, 40), title: x.title.slice(0, 160) } : null);
+function pulseOne(a) {
+  if (!a) return null;
+  if (a.t === "pair" && side(a.a) && side(a.b) && ["a", "b", "both", "neither"].includes(a.pick)) return { t: "pair", a: side(a.a), b: side(a.b), pick: a.pick };
+  const v = Number(a.v);
+  if (a.t === "care" && typeof a.title === "string" && Number.isFinite(v) && v >= -2 && v <= 2) return { t: "care", id: String(a.id || "").slice(0, 40), title: a.title.slice(0, 160), v: Math.round(v) };
+  return null;
+}
 
 export async function onRequestGet({ env }) {
   if (!env.WIRE) return json({ error: "KV binding WIRE is not configured" }, 500);
@@ -39,11 +50,16 @@ export async function onRequestPost({ request, env }) {
     if (b.done) cur.done_at = now;
     q.elections[b.id] = cur;
   } else if (b.kind === "values") {
+    if (b.restart && q.values.done_at) {
+      // A retake keeps the earlier take (answers and date), so drift can be shown; last 5.
+      q.values.past = [...(q.values.past || []), { answers: q.values.answers, done_at: q.values.done_at }].slice(-5);
+      q.values.answers = {}; delete q.values.done_at;
+    }
     q.values.answers = Object.assign(q.values.answers || {}, clean(b.answers));
     q.values.updated = now;
     if (b.done) q.values.done_at = now;
   } else if (b.kind === "pulse" && Array.isArray(b.answers)) {
-    q.pulse = [...q.pulse, ...b.answers.slice(0, 20).map((a) => ({ ...a, at: now }))].slice(-200);
+    q.pulse = [...q.pulse, ...b.answers.slice(0, 20).map(pulseOne).filter(Boolean).map((a) => ({ ...a, at: now }))].slice(-200);
   } else if (b.kind === "clear") {
     if (b.id === "values") q.values = {}; else if (b.id === "pulse") q.pulse = []; else delete q.elections[b.id];
   } else {

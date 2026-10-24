@@ -346,6 +346,12 @@ def taste(follows: dict) -> tuple[set[str], set[str]]:
         liked |= words(term)
     for term in tst.get("less", []):
         disliked |= words(term)
+    # The pulse: what he picked, and what he said he doesn't care about (pipeline/pulse.py).
+    pl = follows.get("pulse") or {}
+    for title in pl.get("more", []):
+        liked |= words(title)
+    for title in pl.get("less", []):
+        disliked |= words(title)
     return liked, disliked - liked
 
 

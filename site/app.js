@@ -335,6 +335,8 @@ function todayView() {
       })) : el("p", { text: data.day_so_far.text })));
   }
   if (data.voter_guide) out.push(guideCard());
+  const pc = myQuiz ? pulseCard(myQuiz) : (loadQuiz().then(() => { if (myQuiz && pulseCard(myQuiz) && tab === "today") render(); }), null);
+  if (pc) out.push(pc);
   out.push(el("button", { class: "briefcard", onclick: openBrief },
     el("span", { class: "bc-ico", "aria-hidden": "true", text: "▶" }),
     el("span", { class: "bc-txt" },
@@ -1940,6 +1942,349 @@ async function openMatch(g) {
   openSheet(nodes, "Your election check");
 }
 
+// --------------------------------------------------------------- the pulse (2026-10-23)
+// Five quick questions from live threads: three "which would you rather read about" pairs and
+// two "how much do you care how this turns out". Blind: nothing says what an answer does. The
+// build (pipeline/pulse.py) turns the answers into taste; "See what this changed" shows it.
+const CARE = [[2, "A lot"], [1, "Quite a bit"], [0, "Somewhat"], [-1, "Not much"], [-2, "Not at all"]];
+const PULSE_EVERY = 7 * 86400e3;
+function lastPulse(Q) {
+  const p = (Q && Q.pulse) || [];
+  return p.length ? Date.parse(p[p.length - 1].at) : 0;
+}
+function pulsePool(Q) {
+  const recent = new Set(((Q && Q.pulse) || []).filter((a) => Date.now() - Date.parse(a.at) < 21 * 86400e3)
+    .flatMap((a) => a.t === "pair" ? [a.a.id, a.b.id] : [a.id]));
+  return (data.threads || []).filter((t) => t.title && t.last && Date.now() - Date.parse(t.last) < 4 * 86400e3
+    && (t.n_reports || 0) >= 2 && !recent.has(t.id))
+    .sort((a, b) => Date.parse(b.last) - Date.parse(a.last));
+}
+function pulseQuestions(Q) {
+  const pool = pulsePool(Q);
+  if (pool.length < 8) return null;
+  // Pairs across different desks where possible; care questions favor what he follows.
+  const seed = (Date.now() / 86400e3) | 0;
+  const mixed = shuffled(pool.slice(0, 30), seed + 7);
+  const care = mixed.filter((t) => t.followed || t.standing).slice(0, 2);
+  while (care.length < 2) care.push(mixed.find((t) => !care.includes(t)));
+  const rest = mixed.filter((t) => !care.includes(t));
+  const pairs = [];
+  while (pairs.length < 3 && rest.length >= 2) {
+    const a = rest.shift();
+    const j = rest.findIndex((t) => t.desk !== a.desk);
+    const b = rest.splice(j >= 0 ? j : 0, 1)[0];
+    pairs.push({ t: "pair", a, b });
+  }
+  const qs = [...pairs, ...care.map((t) => ({ t: "care", th: t }))];
+  return shuffled(qs, seed + 3);
+}
+function pulseCard(Q) {
+  if (Date.now() - lastPulse(Q) < PULSE_EVERY) return null;
+  if (Date.now() - (Number(store.get("wire.pulseSnooze")) || 0) < 3 * 86400e3) return null;
+  if (pulsePool(Q).length < 8) return null;
+  const card = el("div", { class: "pulsecard" },
+    el("button", { class: "pc-go", onclick: () => openPulse() },
+      el("span", { class: "bc-ico", "aria-hidden": "true", text: "?" }),
+      el("span", { class: "bc-txt" }, el("span", { class: "bc-t", text: "Five quick questions" }), el("span", { class: "bc-s", text: "About a minute · no right answers" }))),
+    el("button", { class: "linkbtn", text: "Not now", onclick: () => { store.set("wire.pulseSnooze", Date.now()); card.remove(); } }));
+  return card;
+}
+async function openPulse() {
+  const Q = await loadQuiz(true);
+  const qs = pulseQuestions(Q);
+  if (!qs) { openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Not enough going on" }), el("p", { class: "sdesc", text: "There aren't enough live threads to ask about right now. Try again later today." })], "Questions"); return; }
+  const out = [];
+  let i = 0;
+  const next = (ans) => { if (ans) out.push(ans); i += 1; step(); };
+  const step = async () => {
+    if (i >= qs.length) {
+      if (out.length) await saveQuiz({ kind: "pulse", answers: out });
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Thanks" }),
+        el("p", { class: "sdesc", text: "Saved privately." }),
+        el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "See what this changed", onclick: () => pulseEffect() }), el("button", { class: "sbtn", text: "Close", onclick: closeSheet }))], "Thanks");
+      render();
+      return;
+    }
+    const q = qs[i];
+    const prog = el("div", { class: "qprog" }, el("span", { text: (i + 1) + " of " + qs.length }), el("span", { class: "qbar" }, el("i", { style: "width:" + Math.round(100 * i / qs.length) + "%" })));
+    const side = (t) => ({ id: t.id, title: t.title });
+    const body = q.t === "pair"
+      ? [el("h2", { id: "sheet-title", class: "qtext", text: "Which would you rather read more about?" }),
+        el("div", { class: "qscale" },
+          el("button", { class: "qopt tall", text: q.a.title, onclick: () => next({ t: "pair", a: side(q.a), b: side(q.b), pick: "a" }) }),
+          el("button", { class: "qopt tall", text: q.b.title, onclick: () => next({ t: "pair", a: side(q.a), b: side(q.b), pick: "b" }) })),
+        el("div", { class: "wrow" }, el("button", { class: "chip", text: "Both", onclick: () => next({ t: "pair", a: side(q.a), b: side(q.b), pick: "both" }) }),
+          el("button", { class: "chip", text: "Neither", onclick: () => next({ t: "pair", a: side(q.a), b: side(q.b), pick: "neither" }) }))]
+      : [el("p", { class: "fine", text: "How much do you care how this turns out?" }), el("h2", { id: "sheet-title", class: "qtext", text: q.th.title }),
+        el("div", { class: "qscale" }, ...CARE.map(([v, label]) => el("button", { class: "qopt", text: label, onclick: () => next({ t: "care", id: q.th.id, title: q.th.title, v }) })))];
+    openSheet([prog, ...body, el("div", { class: "qnav" }, el("span", {}),
+      el("button", { class: "linkbtn", text: "Skip", onclick: () => next(null) }),
+      el("button", { class: "linkbtn", text: "Stop here", onclick: () => { i = qs.length; step(); } }))], "Five quick questions");
+  };
+  step();
+}
+// What the pulse does, shown only when asked: the subjects it now leans toward and away from.
+async function pulseEffect() {
+  const Q = await loadQuiz(true);
+  const cutoff = Date.now() - 120 * 86400e3;
+  const latest = new Map();
+  for (const a of (Q.pulse || []).filter((a) => Date.parse(a.at) >= cutoff)) {
+    if (a.t === "pair") for (const k of ["a", "b"]) {
+      if (a.pick === k || a.pick === "both") latest.set(a[k].id || a[k].title, [a[k].title, 1]);
+      else if (a.pick === "neither") latest.set(a[k].id || a[k].title, [a[k].title, -1]);
+    } else if (a.t === "care") latest.set(a.id || a.title, [a.title, a.v >= 1 ? 1 : a.v <= -1 ? -1 : 0]);
+  }
+  const more = [...latest.values()].filter(([, v]) => v > 0).map(([t]) => t);
+  const less = [...latest.values()].filter(([, v]) => v < 0).map(([t]) => t);
+  const list = (xs) => xs.length ? el("ul", { class: "admin" }, ...xs.map((t) => el("li", { text: t }))) : el("p", { class: "fine", text: "Nothing." });
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "What your answers changed" }),
+    el("p", { class: "sdesc", text: "Your answers from the last four months shape what rises: stories and suggested threads that read like what you picked move up, and ones like what you said you don't care about move down. The other option in a pair counts for nothing. Answers fade after four months, and a newer answer about the same thread replaces the older one." }),
+    el("h3", { class: "sh3", text: "Leaning toward · " + more.length }), list(more),
+    el("h3", { class: "sh3", text: "Leaning away from · " + less.length }), list(less),
+    el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Forget all pulse answers", onclick: async (e) => { e.currentTarget.textContent = "…"; await saveQuiz({ kind: "clear", id: "pulse" }); pulseEffect(); } })),
+  ], "What your answers changed");
+}
+
+// --------------------------------------------------------------- where you stand (2026-10-23)
+// About 30 blind statements (values.yaml), taken about once a year. The map, readings,
+// suggested scorecard weights and the Citarella lens appear only on "See my results".
+function runStatements(cfg) {
+  // cfg: {title, items, seedKey, prior, save(partial), done(), later()}
+  const seed = Number(store.get(cfg.seedKey)) || (Date.now() % 100000) + 1;
+  store.set(cfg.seedKey, seed);
+  const order = shuffled(cfg.items, seed);
+  const answers = Object.assign({}, cfg.prior);
+  let i = order.findIndex((it) => !answers[it.id]);
+  if (i < 0) i = order.length;
+  const render1 = () => {
+    if (i >= order.length) { cfg.done(answers); return; }
+    const it = order[i];
+    const cur = answers[it.id];
+    let weight = cur && cur.w ? cur.w : 2;
+    const wrow = el("div", { class: "wrow" }, ...WEIGHT.map(([w, label]) => { const b = el("button", { class: "chip" + (w === weight ? " on" : ""), text: label });
+      b.onclick = () => { weight = w; [...wrow.children].forEach((c) => c.classList.toggle("on", c === b)); }; return b; }));
+    const put = (x) => { answers[it.id] = x; cfg.save({ [it.id]: x }); i += 1; render1(); };
+    openSheet([
+      el("div", { class: "qprog" }, el("span", { text: (i + 1) + " of " + order.length }), el("span", { class: "qbar" }, el("i", { style: "width:" + Math.round(100 * i / order.length) + "%" }))),
+      el("h2", { id: "sheet-title", class: "qtext", text: it.text }),
+      el("p", { class: "fine", text: "How much does this matter to you? (set this first)" }), wrow,
+      el("div", { class: "qscale" }, ...SCALE.map(([v, label]) => el("button", { class: "qopt" + (cur && cur.v === v ? " on" : ""), text: label, onclick: () => put({ v, w: weight }) }))),
+      el("div", { class: "qnav" },
+        i > 0 ? el("button", { class: "linkbtn", text: "‹ Back", onclick: () => { i -= 1; render1(); } }) : el("span", {}),
+        el("button", { class: "linkbtn", text: "Skip", onclick: () => put({ skip: true }) }),
+        el("button", { class: "linkbtn", text: "Finish later", onclick: () => cfg.later() })),
+    ], cfg.title);
+  };
+  render1();
+}
+function valuesEntry(Q) {
+  const bank = data.values_bank;
+  if (!bank) return null;
+  const V = (Q && Q.values) || {};
+  const n = bank.items.length, answered = Object.keys(V.answers || {}).length;
+  const due = V.done_at && Date.now() - Date.parse(V.done_at) > (bank.retake_days || 330) * 86400e3;
+  const box = el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: bank.title }));
+  if (!V.done_at) {
+    box.append(el("p", { class: "rjob", text: n + " statements, about " + Math.ceil(n / 4) + " minutes. Answer how you see it; what each one measures is explained only afterwards." }),
+      el("button", { class: "sbtn primary wide", text: answered ? "Continue (" + answered + " of " + n + " answered)" : "Start", onclick: () => openValues() }));
+  } else {
+    box.append(el("p", { class: "rjob", text: "Done " + fmtDate.format(new Date(Date.parse(V.done_at))) + (due ? ". It's been about a year: a retake shows how far you've moved." : ". Take it again in about a year to see how you've moved.") }),
+      el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openStand() }),
+        el("button", { class: "sbtn", text: "Retake", onclick: async () => { store.set("wire.quizSeed.values", ""); await saveQuiz({ kind: "values", restart: true, answers: {} }); openValues(); } })));
+  }
+  return box;
+}
+async function openValues() {
+  const Q = await loadQuiz(true);
+  const bank = data.values_bank;
+  runStatements({
+    title: bank.title, items: bank.items, seedKey: "wire.quizSeed.values", prior: (Q.values || {}).answers || {},
+    save: (partial) => saveQuiz({ kind: "values", answers: partial }),
+    later: () => { closeSheet(); render(); },
+    done: async () => {
+      await saveQuiz({ kind: "values", answers: {}, done: true });
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Done" }),
+        el("p", { class: "sdesc", text: "Your answers are saved privately. Your results aren't shown anywhere until you open them." }),
+        el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openStand() }), el("button", { class: "sbtn", text: "Close", onclick: () => { closeSheet(); render(); } }))], "Done");
+    },
+  });
+}
+// Each scale from -1 to +1: Σ(answer × direction × importance) / Σ(2 × importance), over the
+// values statements and the election check's statements that measure the same scale.
+function standScores(answers, extra) {
+  const bank = data.values_bank;
+  const items = [...bank.items.map((it) => [it, answers]), ...(extra || [])];
+  const out = {};
+  for (const ax of bank.axes) out[ax.id] = { num: 0, den: 0, n: 0 };
+  for (const [it, ans] of items) {
+    const a = ans && ans[it.id];
+    if (!it.axis || !out[it.axis] || !a || a.skip || a.v == null) continue;
+    const w = a.w || 2;
+    out[it.axis].num += a.v * it.dir * w; out[it.axis].den += 2 * w; out[it.axis].n += 1;
+  }
+  return Object.fromEntries(Object.entries(out).map(([k, x]) => [k, { s: x.den ? x.num / x.den : null, n: x.n }]));
+}
+function electionExtra(Q) {
+  const g = data.voter_guide;
+  if (!g || !g.quiz) return [];
+  const a = ((Q.elections || {})[g.id] || {}).answers;
+  return a ? g.quiz.items.filter((it) => it.axis).map((it) => [it, a]) : [];
+}
+const lean = (s, ax) => s == null ? "not enough answers" : Math.abs(s) < 0.15 ? "near the middle" : (Math.abs(s) < 0.45 ? "leans " : "firmly ") + (s < 0 ? ax.left : ax.right).toLowerCase();
+const fmtS = (s) => (s > 0 ? "+" : s < 0 ? "−" : "") + Math.abs(s).toFixed(2);
+function mapSvg(sc, past) {
+  // x: economics (Government ← → Markets); y: culture (Tradition up, Change down).
+  const P = (x) => 20 + (x + 1) * 110;
+  const Y = (y) => 20 + (1 - y) * 110;
+  const dot = (s, cls) => s.econ.s == null || s.culture.s == null ? "" : `<circle class="${cls}" cx="${P(s.econ.s).toFixed(1)}" cy="${Y(s.culture.s).toFixed(1)}" r="${cls === "me" ? 7 : 5}"/>`;
+  let trail = "";
+  const pts = [...past, sc].filter((s) => s.econ.s != null && s.culture.s != null);
+  if (pts.length > 1) trail = `<polyline class="trail" points="${pts.map((s) => P(s.econ.s).toFixed(1) + "," + Y(s.culture.s).toFixed(1)).join(" ")}"/>`;
+  return `<svg class="vmap" viewBox="0 0 260 260" role="img" aria-label="Your position: economics ${fmtS(sc.econ.s || 0)}, culture ${fmtS(sc.culture.s || 0)}">
+    <rect x="20" y="20" width="220" height="220" class="frame"/><line x1="130" y1="20" x2="130" y2="240" class="axis"/><line x1="20" y1="130" x2="240" y2="130" class="axis"/>
+    <text x="130" y="14" class="ax" text-anchor="middle">Tradition</text><text x="130" y="256" class="ax" text-anchor="middle">Change</text>
+    <text x="14" y="130" class="ax" text-anchor="middle" transform="rotate(-90 14 130)">Government</text><text x="250" y="130" class="ax" text-anchor="middle" transform="rotate(90 250 130)">Markets</text>
+    ${trail}${past.map((s) => dot(s, "was")).join("")}${dot(sc, "me")}</svg>`;
+}
+function barRow(ax, x) {
+  const pct = x.s == null ? 50 : Math.round(50 + 50 * x.s);
+  return el("div", { class: "vbar" }, el("div", { class: "vbl" }, el("b", { text: ax.label }), el("span", { class: "asrc", text: " " + lean(x.s, ax) + (x.s != null ? " (" + fmtS(x.s) + ")" : "") })),
+    el("div", { class: "vtrack" }, el("span", { class: "vpole", text: ax.left }), el("span", { class: "vline" }, x.s != null ? el("i", { style: "left:" + pct + "%" }) : null), el("span", { class: "vpole r", text: ax.right })));
+}
+async function openStand() {
+  const Q = await loadQuiz(true);
+  const bank = data.values_bank;
+  const V = Q.values || {};
+  const ans = V.answers || {};
+  const extra = electionExtra(Q);
+  const sc = standScores(ans, extra);
+  const past = (V.past || []).map((p) => Object.assign(standScores(p.answers || {}), { at: p.done_at }));
+  const ax = Object.fromEntries(bank.axes.map((a) => [a.id, a]));
+  const holder = el("div", { class: "vmapbox" });
+  holder.innerHTML = mapSvg(sc, past);
+  const heavy = bank.items.filter((it) => ans[it.id] && ans[it.id].w === 3 && !ans[it.id].skip);
+  // Suggested scorecard weights: average importance of the statements tied to each criterion.
+  const B = await loadBallot();
+  const crits = (B && B.criteria) || [];
+  const imp = {};
+  for (const it of bank.items) {
+    const a = ans[it.id];
+    if (!it.crit || !a || a.skip) continue;
+    (imp[it.crit] = imp[it.crit] || []).push(a.w || 2);
+  }
+  const avg = Object.fromEntries(Object.entries(imp).map(([k, xs]) => [k, xs.reduce((s, x) => s + x, 0) / xs.length]));
+  const tot = Object.values(avg).reduce((s, x) => s + x, 0);
+  const weights = crits.length && tot ? el("table", { class: "score" },
+    el("tr", {}, el("th", { text: "Criterion" }), el("th", { text: "Now" }), el("th", { text: "Your answers suggest" })),
+    ...crits.map((c) => el("tr", {}, el("td", { class: "cn", text: c.label }), el("td", { text: Math.round(100 * c.weight) + "%" }),
+      el("td", { text: avg[c.id] ? Math.round(100 * avg[c.id] / tot) + "%" : "–" })))) : null;
+  const drift = past.length ? past[past.length - 1] : null;
+  const nodes = [
+    el("h2", { id: "sheet-title", class: "stitle", text: "Where you stand" }),
+    el("p", { class: "sdesc", text: "Each scale runs from −1 to +1: your answers times the direction each statement points, weighted by how much it matters to you." + (extra.length ? " The election check's statements on the same questions count too." : "") }),
+    holder,
+    drift ? el("p", { class: "fine", text: "Faded dot: your take on " + fmtYear.format(new Date(Date.parse(drift.at))) + ". The line shows the path." }) : null,
+    el("section", { class: "ssec" }, ...bank.axes.map((a) => barRow(a, sc[a.id]))),
+    el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Readings" }),
+      el("ul", { class: "cpos" }, ...bank.axes.filter((a) => sc[a.id].n).map((a) => el("li", {}, el("b", { text: a.label + ": " }), lean(sc[a.id].s, a) + ". " + a.means + " " + sc[a.id].n + " statement" + (sc[a.id].n === 1 ? "" : "s") + "."
+        + (drift && drift[a.id].s != null && sc[a.id].s != null && Math.abs(sc[a.id].s - drift[a.id].s) >= 0.1 ? " Moved " + Math.abs(sc[a.id].s - drift[a.id].s).toFixed(2) + " toward " + (sc[a.id].s > drift[a.id].s ? a.right : a.left).toLowerCase() + " since your last take." : ""))))),
+    heavy.length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "What you said matters a lot" }), el("ul", { class: "cpos" }, ...heavy.map((it) => el("li", { text: "“" + it.text + "” " + (SCALE.find(([k]) => k === ans[it.id].v) || [0, ""])[1] + "." })))) : null,
+    weights ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Your scorecard's weights" }),
+      el("p", { class: "fine", text: "From how much the statements tied to each criterion matter to you. Shown only: your scorecard keeps its weights until you change them." }), weights) : null,
+    el("button", { class: "sbtn primary wide", text: "The Citarella lens", onclick: () => openLens(sc, past) }),
+    el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Every statement and how it counted" }), el("span", { class: "chev", text: "▾" })),
+      el("ul", { class: "cpos" }, ...bank.items.map((it) => { const a = ans[it.id]; return el("li", {},
+        el("b", { text: (it.axis ? ax[it.axis].label + " · agreeing points " + (it.dir > 0 ? ax[it.axis].right : ax[it.axis].left).toLowerCase() : "Not on the map") + (it.crit ? " · informs " + it.crit : "") + ". " }),
+        "“" + it.text + "” You: " + (!a ? "not answered" : a.skip ? "skipped" : (SCALE.find(([k]) => k === a.v) || [0, ""])[1] + ", " + (WEIGHT.find(([k]) => k === a.w) || [0, ""])[1].toLowerCase()) + "."); }))),
+    el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Close", onclick: closeSheet })),
+  ];
+  openSheet(nodes.filter(Boolean), "Where you stand");
+}
+
+// --------------------------------------------------------------- the Citarella lens
+const fmtYear = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" });
+// Joe's answers read through frameworks from Joshua Citarella's published research on online
+// politics. Written in The Wire's voice: no quotes put in his mouth, every framework credited
+// and linked. The frameworks are his; the reading is The Wire's.
+const CITARELLA = {
+  home: "https://joshuacitarella.substack.com/about",
+  politigram: ["Politigram & the Post-left (2018)", "https://joshuacitarella.substack.com/p/politigram-and-the-post-left"],
+  tag: ["Tag Yourself (2019)", "https://joshuacitarella.substack.com/p/tag-yourself"],
+  pipeline: ["A New Pipeline (2025)", "https://joshuacitarella.substack.com/p/a-new-pipeline"],
+};
+function lensReadings(sc, past) {
+  const v = (k) => (sc[k] && sc[k].s != null ? sc[k].s : 0);
+  const e = v("econ"), c = v("culture"), tr = v("trust"), w = v("world"), gr = v("growth"), gn = v("green");
+  const out = [];
+  // 1. Class or culture (A New Pipeline).
+  const louder = Math.abs(e) >= Math.abs(c) + 0.1 ? "class" : Math.abs(c) >= Math.abs(e) + 0.1 ? "culture" : "even";
+  let quad;
+  if (e < -0.15 && c > 0.15) quad = "Government on economics and tradition on culture: a pairing neither party offers. It's close to the voter his 2025 piece is aimed at: economic frustration that could feed right-wing populism or be drawn into a class politics.";
+  else if (e > 0.15 && c < -0.15) quad = "Markets on economics and change on culture: the economic common ground he says the two parties now share, with one party's culture.";
+  else if (e < -0.15 && c < -0.15) quad = "Government and change: the left's usual pairing.";
+  else if (e > 0.15 && c > 0.15) quad = "Markets and tradition: the right's usual pairing.";
+  else if (Math.abs(e) >= 0.15) quad = "Toward " + (e > 0 ? "markets" : "government") + " on economics, near the middle on culture.";
+  else if (Math.abs(c) >= 0.15) quad = "Toward " + (c > 0 ? "tradition" : "change") + " on culture, near the middle on economics.";
+  else quad = "Close to the middle on both.";
+  out.push({ head: "Class or culture", src: "pipeline",
+    text: (louder === "class" ? "Your economic answers come through stronger than your cultural ones (" + fmtS(e) + " against " + fmtS(c) + "). In his terms, you're sorted more by class, the line he argues politics should be redrawn along." :
+      louder === "culture" ? "Your cultural answers come through stronger than your economic ones (" + fmtS(c) + " against " + fmtS(e) + "). You're sorted more by culture, the axis he says the parties fight on while largely agreeing on economics." :
+      "Your economic and cultural answers are about equally strong (" + fmtS(e) + " and " + fmtS(c) + "): neither class nor culture sorts you more than the other.") + " " + quad });
+  // 2. Nearest current in his catalog (Politigram 2018, Tag Yourself 2019).
+  let cur;
+  if (gn > 0.4 && gr < -0.3 && e < 0) cur = ["The post-left's degrowth wing", "politigram", "Climate first and preserve over build, on the economic left: the direction of the post-left current his 2018 essay documents, without its anti-civilization end point."];
+  else if (e < -0.4 && tr < -0.2) cur = ["The ultra-left and left-communist currents", "tag", "Firmly for government economically and skeptical of the institutions that run it: the anti-party left he surveyed in 2019."];
+  else if (e < -0.15) cur = ["The Bernie-era socialists", "politigram", "Government on economics, without the turn against institutions: where his 2018 essay starts the left's drift, before some of it moved further out."];
+  else if (e > 0.4 && tr < -0.2 && c < 0.2) cur = ["Anarcho-capitalism", "politigram", "Firmly for markets, skeptical of institutions and not traditional on culture: the ancaps his 2018 essay catalogs, and the start of one of the drift paths it traces."];
+  else if (c > 0.25 && w < -0.15) cur = ["The Zoomer Right", "tag", "Tradition at home and restraint abroad: the young right he described in 2019, set apart from the free-market right by protectionism and wariness of troops overseas." + (ansOf("v04") != null && ansOf("v04") < 0 ? " Your doubts about free trade fit it too." : "")];
+  else if (e > 0.15 && c > 0.15 && w > 0.15) cur = ["The free-market right the Zoomer Right broke from", "tag", "Markets, tradition and engagement abroad: closer to the Tea Party-era right his 2019 survey says the younger right left behind."];
+  else cur = ["Outside his catalog", "politigram", "The currents he documented live at the edges. Your answers sit inside the mainstream range his 2018 essay describes them pushing past."];
+  out.push({ head: "Nearest current: " + cur[0], src: cur[1], text: cur[2] + (cur[0] === "Outside his catalog" ? "" : " His catalog describes online currents, mostly of teenagers in 2018 and 2019; a match here means your answers point the same way on the questions they care about, not that you share their politics.") });
+  // 3. Institutions.
+  out.push({ head: "Inside or outside the window", src: "politigram",
+    text: tr < -0.3 ? "You're skeptical of institutions (" + fmtS(tr) + "). The radical currents in his research, left and right, share that distrust of the mainstream; on this you're closer to them than to it." :
+      tr > 0.3 ? "You largely trust the institutions (" + fmtS(tr) + "). That puts you with the mainstream his subjects define themselves against." :
+      "Your trust in institutions is mixed (" + fmtS(tr) + "): neither the mainstream's confidence nor the distrust his subjects share." });
+  // 4. Drift.
+  const last = past.length ? past[past.length - 1] : null;
+  if (last && last.econ.s != null && last.culture.s != null) {
+    const de = e - last.econ.s, dc = c - last.culture.s;
+    const dist = Math.hypot(de, dc);
+    out.push({ head: "Drift", src: "politigram",
+      text: dist < 0.1 ? "Since " + fmtYear.format(new Date(Date.parse(last.at))) + " you've barely moved. His 2018 essay found politics shifting in steps over time; yours is holding." :
+        "Since " + fmtYear.format(new Date(Date.parse(last.at))) + " you've moved " + dist.toFixed(2) + ": " + (Math.abs(de) >= 0.05 ? (de > 0 ? "toward markets" : "toward government") : "") + (Math.abs(de) >= 0.05 && Math.abs(dc) >= 0.05 ? " and " : "") + (Math.abs(dc) >= 0.05 ? (dc > 0 ? "toward tradition" : "toward change") : "") + ". His 2018 essay calls this drift: politics moving in steps over time." });
+  } else {
+    out.push({ head: "Drift", src: "politigram", text: "This is your first take. His 2018 essay tracks how people's politics drift in steps over time; retake this in a year and the lens shows how far yours has moved." });
+  }
+  return out;
+  function ansOf(id) { const a = ((myQuiz || {}).values || {}).answers || {}; return a[id] && !a[id].skip ? a[id].v : null; }
+}
+function openLens(sc, past) {
+  const rs = lensReadings(sc, past);
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "The Citarella lens" }),
+    el("p", { class: "sdesc" }, "Your answers read through frameworks from ", link(CITARELLA.home, "Joshua Citarella"), "'s research on online politics. Written by The Wire, not by him: the frameworks are his, the reading is ours."),
+    ...rs.map((r) => el("section", { class: "ssec" }, el("h3", { class: "sh3", text: r.head }), el("p", { class: "lens", text: r.text }),
+      el("p", { class: "fine" }, "From ", link(CITARELLA[r.src][1], CITARELLA[r.src][0])))),
+    el("p", { class: "fine" }, "Sources: ", link(CITARELLA.politigram[1], CITARELLA.politigram[0]), " · ", link(CITARELLA.tag[1], CITARELLA.tag[0]), " · ", link(CITARELLA.pipeline[1], CITARELLA.pipeline[0])),
+    el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Back to your results", onclick: () => openStand() })),
+  ], "The Citarella lens");
+}
+function questionnairesSection(Q) {
+  const lp = lastPulse(Q);
+  const g = data.voter_guide;
+  return [
+    el("h2", { class: "sh2", text: "Questionnaires" }),
+    el("p", { class: "fine", text: "Your answers are stored only on Cloudflare (quiz.json), never in the code repository. Results show only when you open them." }),
+    el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Five quick questions" }),
+      el("p", { class: "rjob", text: lp ? "Last answered " + fmtDate.format(new Date(lp)) + "." : "Not answered yet." }),
+      el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Answer now", onclick: () => openPulse() }), lp ? el("button", { class: "sbtn", text: "What it changed", onclick: () => pulseEffect() }) : null)),
+    valuesEntry(Q),
+    g && g.quiz ? el("button", { class: "doclink", text: "Election check for " + g.title + " ›", onclick: () => openGuide() }) : null,
+  ].filter(Boolean);
+}
+
 // --------------------------------------------------------------- Tell The Wire (2026-10-22)
 // Joe writes or dictates what matters; the model proposes changes; he ticks and applies.
 // Nothing changes until Apply. functions/tell.js does the work; everything stays in KV.
@@ -2188,6 +2533,8 @@ function settingsView() {
     t ? el("button", { class: "doclink", text: x.title || t.title, onclick: () => openThread(t) }) : el("span", { text: x.title || x.id }),
     removeBtn("Clear", { action: "signal", id: x.id, value: "clear" })); });
   const standing = (data.threads || []).filter((t) => t.standing);
+  const qbox = el("div", {});
+  loadQuiz().then((Q) => qbox.replaceChildren(...questionnairesSection(Q)));
   const mutedPeople = (prefs.mutedPeople || []).map((pid) => (data.people || []).find((p) => p.id === pid)).filter(Boolean);
   return [
     el("h1", { class: "yw", text: "Settings" }),
@@ -2206,6 +2553,7 @@ function settingsView() {
     el("h3", { class: "sh3", text: "Saved" }), savedList,
     el("p", { class: "fine", text: "Reading settings and saved items stay on this device." }),
 
+    qbox,
     el("h2", { class: "sh2", text: "Admin" }),
     el("p", { class: "fine", text: "Follows, topics and signals are stored on Cloudflare (follows.json) and reach the build; they work on every device." }),
     el("h3", { class: "sh3", text: "Threads you follow · " + f.threads.length }), adminList(threadRows),
