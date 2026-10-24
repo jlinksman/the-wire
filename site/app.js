@@ -363,7 +363,7 @@ function todayView() {
   }
 
   // 4. People, ahead, scores, edition
-  const following = followingItems(5);
+  const following = followingItems(followingCount());
   if (following.length) {
     out.push(sectionHead("From people you follow", null, () => openPeople(), "People"));
     out.push(el("ol", { class: "list" }, ...following.map((it) => row(it, { desk: true }))));
@@ -1964,14 +1964,14 @@ function pulsePool(Q) {
     && (t.n_reports || 0) >= 2 && !recent.has(t.id))
     .sort((a, b) => Date.parse(b.last) - Date.parse(a.last));
 }
-function pulseQuestions(Q) {
+function pulseQuestions(Q, min) {
   const pool = pulsePool(Q);
-  if (pool.length < 8) return null;
+  if (pool.length < (min || 8)) return null;
   // Pairs across different desks where possible; care questions favor what he follows.
   const seed = (Date.now() / 86400e3) | 0;
   const mixed = shuffled(pool.slice(0, 30), seed + 7);
   const care = mixed.filter((t) => t.followed || t.standing).slice(0, 2);
-  while (care.length < 2) care.push(mixed.find((t) => !care.includes(t)));
+  while (care.length < Math.min(2, mixed.length)) care.push(mixed.find((t) => !care.includes(t)));
   const rest = mixed.filter((t) => !care.includes(t));
   const pairs = [];
   while (pairs.length < 3 && rest.length >= 2) {
@@ -1984,8 +1984,17 @@ function pulseQuestions(Q) {
   return shuffled(qs, seed + 3);
 }
 function pulseCard(Q) {
-  if (Date.now() - lastPulse(Q) < PULSE_EVERY) return null;
   if (Date.now() - (Number(store.get("wire.pulseSnooze")) || 0) < 3 * 86400e3) return null;
+  if (data.baseline_bank && !(Q.baseline || {}).done_at) {
+    // First things first: the starting questionnaire gives everything else a baseline.
+    const card = el("div", { class: "pulsecard" },
+      el("button", { class: "pc-go", onclick: () => openBaseline() },
+        el("span", { class: "bc-ico", "aria-hidden": "true", text: "?" }),
+        el("span", { class: "bc-txt" }, el("span", { class: "bc-t", text: "What you want to follow" }), el("span", { class: "bc-s", text: data.baseline_bank.items.length + " quick questions · about three minutes" }))),
+      el("button", { class: "linkbtn", text: "Not now", onclick: () => { store.set("wire.pulseSnooze", Date.now()); card.remove(); } }));
+    return card;
+  }
+  if (Date.now() - lastPulse(Q) < PULSE_EVERY) return null;
   if (pulsePool(Q).length < 8) return null;
   const card = el("div", { class: "pulsecard" },
     el("button", { class: "pc-go", onclick: () => openPulse() },
@@ -1994,10 +2003,12 @@ function pulseCard(Q) {
     el("button", { class: "linkbtn", text: "Not now", onclick: () => { store.set("wire.pulseSnooze", Date.now()); card.remove(); } }));
   return card;
 }
-async function openPulse() {
+async function openPulse(again) {
   const Q = await loadQuiz(true);
-  const qs = pulseQuestions(Q);
-  if (!qs) { openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Not enough going on" }), el("p", { class: "sdesc", text: "There aren't enough live threads to ask about right now. Try again later today." })], "Questions"); return; }
+  const qs = pulseQuestions(Q, again ? 3 : 8);
+  if (!qs) { openSheet([el("h2", { id: "sheet-title", class: "stitle", text: again ? "That's everything for now" : "Not enough going on" }),
+    el("p", { class: "sdesc", text: again ? "You've answered about every live thread. New ones come up through the day." : "There aren't enough live threads to ask about right now. Try again later today." }),
+    el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Close", onclick: closeSheet }))], "Questions"); return; }
   const out = [];
   let i = 0;
   const next = (ans) => { if (ans) out.push(ans); i += 1; step(); };
@@ -2006,7 +2017,8 @@ async function openPulse() {
       if (out.length) await saveQuiz({ kind: "pulse", answers: out });
       openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Thanks" }),
         el("p", { class: "sdesc", text: "Saved privately." }),
-        el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "See what this changed", onclick: () => pulseEffect() }), el("button", { class: "sbtn", text: "Close", onclick: closeSheet }))], "Thanks");
+        el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Keep going", onclick: () => openPulse(true) }),
+          el("button", { class: "sbtn", text: "See what this changed", onclick: () => pulseEffect() }), el("button", { class: "sbtn", text: "Close", onclick: closeSheet }))], "Thanks");
       render();
       return;
     }
@@ -2033,7 +2045,7 @@ async function pulseEffect() {
   const Q = await loadQuiz(true);
   const cutoff = Date.now() - 120 * 86400e3;
   const latest = new Map();
-  for (const a of (Q.pulse || []).filter((a) => Date.parse(a.at) >= cutoff)) {
+  for (const a of (Q.pulse || []).slice(-60).filter((a) => Date.parse(a.at) >= cutoff)) {
     if (a.t === "pair") for (const k of ["a", "b"]) {
       if (a.pick === k || a.pick === "both") latest.set(a[k].id || a[k].title, [a[k].title, 1]);
       else if (a.pick === "neither") latest.set(a[k].id || a[k].title, [a[k].title, -1]);
@@ -2044,11 +2056,82 @@ async function pulseEffect() {
   const list = (xs) => xs.length ? el("ul", { class: "admin" }, ...xs.map((t) => el("li", { text: t }))) : el("p", { class: "fine", text: "Nothing." });
   openSheet([
     el("h2", { id: "sheet-title", class: "stitle", text: "What your answers changed" }),
-    el("p", { class: "sdesc", text: "Your answers from the last four months shape what rises: stories and suggested threads that read like what you picked move up, and ones like what you said you don't care about move down. The other option in a pair counts for nothing. Answers fade after four months, and a newer answer about the same thread replaces the older one." }),
+    el("p", { class: "sdesc", text: "Your most recent 60 answers (none older than four months) shape what rises: stories and suggested threads that read like what you picked move up, and ones like what you said you don't care about move down. The other option in a pair counts for nothing, and a newer answer about the same thread replaces the older one. Your starting questionnaire's subjects count too, and don't fade." }),
     el("h3", { class: "sh3", text: "Leaning toward · " + more.length }), list(more),
     el("h3", { class: "sh3", text: "Leaning away from · " + less.length }), list(less),
+    ...baselineEffect(Q),
     el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Forget all pulse answers", onclick: async (e) => { e.currentTarget.textContent = "…"; await saveQuiz({ kind: "clear", id: "pulse" }); pulseEffect(); } })),
   ], "What your answers changed");
+}
+
+// --------------------------------------------------------------- the starting questionnaire
+// What Joe wants to follow, by subject (baseline.yaml). Standing preferences: they don't fade.
+// Shuffled, one subject per screen, no hint of the effect until "What it changed".
+function baselineEffect(Q) {
+  const bank = data.baseline_bank;
+  const A = ((Q && Q.baseline) || {}).answers || {};
+  if (!bank || !Object.keys(A).length) return [];
+  const scale = Object.fromEntries(bank.scale);
+  const rows = (pick) => bank.items.filter((it) => !it.kind && A[it.id] && !A[it.id].skip && pick(A[it.id].v));
+  const list = (xs) => xs.length ? el("ul", { class: "admin" }, ...xs.map((it) => el("li", {}, it.text, el("span", { class: "asrc", text: " " + scale[A[it.id].v] })))) : el("p", { class: "fine", text: "Nothing." });
+  const h = bank.items.find((it) => it.kind === "habit");
+  const hv = h && A[h.id] && !A[h.id].skip ? (h.options.find(([v]) => v === A[h.id].v) || [])[1] : null;
+  return [el("h3", { class: "sh3", text: "Your starting questionnaire: more of" }), list(rows((v) => v >= 1)),
+    el("h3", { class: "sh3", text: "Your starting questionnaire: less of" }), list(rows((v) => v <= -1)),
+    hv ? el("p", { class: "fine", text: "“" + h.text + "” " + hv + ". " + h.effect }) : null].filter(Boolean);
+}
+function baselineEntry(Q) {
+  const bank = data.baseline_bank;
+  if (!bank) return null;
+  const B = (Q && Q.baseline) || {};
+  const n = bank.items.length, answered = Object.keys(B.answers || {}).length;
+  const box = el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: bank.title }));
+  if (!B.done_at) box.append(el("p", { class: "rjob", text: n + " quick questions, about three minutes. Start here: it gives the rest a baseline." }),
+    el("button", { class: "sbtn primary wide", text: answered ? "Continue (" + answered + " of " + n + " answered)" : "Start", onclick: () => openBaseline() }));
+  else box.append(el("p", { class: "rjob", text: "Done " + fmtDate.format(new Date(Date.parse(B.done_at))) + ". Change any answer by retaking it." }),
+    el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "What it changed", onclick: () => pulseEffect() }),
+      el("button", { class: "sbtn", text: "Retake", onclick: async () => { store.set("wire.quizSeed.baseline", ""); await saveQuiz({ kind: "clear", id: "baseline" }); openBaseline(); } })));
+  return box;
+}
+async function openBaseline() {
+  const Q = await loadQuiz(true);
+  const bank = data.baseline_bank;
+  const seed = Number(store.get("wire.quizSeed.baseline")) || (Date.now() % 100000) + 1;
+  store.set("wire.quizSeed.baseline", seed);
+  const order = shuffled(bank.items, seed);
+  const answers = Object.assign({}, ((Q.baseline || {}).answers) || {});
+  let i = order.findIndex((it) => !answers[it.id]);
+  if (i < 0) i = order.length;
+  const step = async () => {
+    if (i >= order.length) {
+      await saveQuiz({ kind: "baseline", answers: {}, done: true });
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Baseline set" }),
+        el("p", { class: "sdesc", text: "Saved privately. From here, five quick questions a week (or as many as you like) keep it current." }),
+        el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Five quick questions", onclick: () => openPulse() }),
+          el("button", { class: "sbtn", text: "See what this changed", onclick: () => pulseEffect() }), el("button", { class: "sbtn", text: "Close", onclick: () => { closeSheet(); render(); } }))], "Baseline set");
+      return;
+    }
+    const it = order[i];
+    const cur = answers[it.id];
+    const put = (x) => { answers[it.id] = x; saveQuiz({ kind: "baseline", answers: { [it.id]: x } }); i += 1; step(); };
+    const opts = it.kind === "habit" ? it.options : bank.scale;
+    openSheet([
+      el("div", { class: "qprog" }, el("span", { text: (i + 1) + " of " + order.length }), el("span", { class: "qbar" }, el("i", { style: "width:" + Math.round(100 * i / order.length) + "%" }))),
+      it.kind === "habit" ? null : el("p", { class: "fine", text: bank.prompt }),
+      el("h2", { id: "sheet-title", class: "qtext", text: it.text }),
+      el("div", { class: "qscale" }, ...opts.map(([v, label]) => el("button", { class: "qopt" + (cur && cur.v === v ? " on" : ""), text: label, onclick: () => put({ v }) }))),
+      el("div", { class: "qnav" },
+        i > 0 ? el("button", { class: "linkbtn", text: "‹ Back", onclick: () => { i -= 1; step(); } }) : el("span", {}),
+        el("button", { class: "linkbtn", text: "Skip", onclick: () => put({ skip: true }) }),
+        el("button", { class: "linkbtn", text: "Finish later", onclick: () => { closeSheet(); render(); } })),
+    ].filter(Boolean), bank.title);
+  };
+  step();
+}
+// How many "From people you follow" items Today shows, from the habit question.
+function followingCount() {
+  const a = myQuiz && myQuiz.baseline && (myQuiz.baseline.answers || {}).h01;
+  return !a || a.skip || a.v == null ? 5 : a.v > 0 ? 8 : a.v < 0 ? 3 : 5;
 }
 
 // --------------------------------------------------------------- where you stand (2026-10-23)
@@ -2282,8 +2365,10 @@ function questionnairesSection(Q) {
   return [
     el("h2", { class: "sh2", text: "Questionnaires" }),
     el("p", { class: "fine", text: "Your answers are stored only on Cloudflare (quiz.json), never in the code repository. Results show only when you open them." }),
+    baselineEntry(Q),
     el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Five quick questions" }),
       el("p", { class: "rjob", text: lp ? "Last answered " + fmtDate.format(new Date(lp)) + "." : "Not answered yet." }),
+      el("p", { class: "fine", text: "Answer as often as you like: after five, Keep going asks more." }),
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Answer now", onclick: () => openPulse() }), lp ? el("button", { class: "sbtn", text: "What it changed", onclick: () => pulseEffect() }) : null)),
     valuesEntry(Q),
     g && g.quiz ? el("button", { class: "doclink", text: "Election check for " + g.title + " ›", onclick: () => openGuide() }) : null,

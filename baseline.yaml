@@ -1,0 +1,52 @@
+# The starting questionnaire (2026-10-23): what Joe wants to follow, by subject rather than by
+# this week's headlines. One answer per subject on a five-point scale; retake any time.
+#
+# Unlike the pulse, these answers don't fade: they're standing preferences. "A lot" and "Quite
+# a bit" add the subject's terms to the more-of vocabulary; "Not much" and "Not at all" add them
+# to the less-of vocabulary (pipeline/pulse.py). The page shows the questions shuffled, with no
+# hint of their effect; "What it changed" shows it on request.
+#
+# Habits (kind: habit) change one concrete thing each, named in `effect`.
+# Joe's answers live only in Workers KV (quiz.json).
+
+title: "What you want to follow"
+scale: [[2, "A lot"], [1, "Quite a bit"], [0, "Somewhat"], [-1, "Not much"], [-2, "Not at all"]]
+prompt: "How much do you want to follow this?"
+items:
+  - {id: b01, group: Business, text: "Spills, cleanups and DEC enforcement", terms: [spill, spills, DEC, cleanup, contamination, remediation, enforcement]}
+  - {id: b02, group: Business, text: "Petroleum storage tanks and fuel rules", terms: [petroleum, tank, tanks, fuel, heating oil, storage]}
+  - {id: b03, group: Business, text: "Brownfields and contaminated-site redevelopment", terms: [brownfield, brownfields, superfund, redevelopment]}
+  - {id: b04, group: Business, text: "Prevailing wage, labor law and public contracts", terms: [prevailing wage, union, labor, contractor, contractors, bid]}
+  - {id: b05, group: Business, text: "Insurance and liability costs for businesses", terms: [insurance, liability, scaffold law, premiums]}
+  - {id: b06, group: Business, text: "Electric and gas rates, Central Hudson", terms: [Central Hudson, utility, rates, electric, energy bills]}
+  - {id: b07, group: Business, text: "Markets and the national economy", terms: [stocks, markets, Fed, inflation, economy, earnings]}
+  - {id: l01, group: Law, text: "Bankruptcy cases and bankruptcy law", terms: [bankruptcy, chapter 11, creditors]}
+  - {id: l02, group: Law, text: "New York's courts and their big rulings", terms: [court of appeals, appellate division, ruling, judge]}
+  - {id: l03, group: Law, text: "The Supreme Court", terms: [supreme court, justices, scotus]}
+  - {id: l04, group: Law, text: "Zoning and land-use fights", terms: [zoning, planning board, land use, variance]}
+  - {id: g01, group: Government, text: "Beacon's City Council and City Hall", terms: [Beacon, city council, mayor, city hall]}
+  - {id: g02, group: Government, text: "Dutchess County government", terms: [Dutchess, county executive, county legislature]}
+  - {id: g03, group: Government, text: "Albany: the governor, the legislature, the budget", terms: [Hochul, Albany, state budget, assembly, state senate]}
+  - {id: g04, group: Government, text: "Congress and the White House", terms: [Congress, White House, Senate, House, Trump]}
+  - {id: g05, group: Government, text: "Student loans and repayment rules", terms: [student loan, student loans, SAVE plan, forgiveness, repayment]}
+  - {id: g06, group: Government, text: "Campaigns, polls and elections", terms: [election, campaign, poll, polls, candidate]}
+  - {id: c01, group: Beacon, text: "Housing and development in Beacon and the river towns", terms: [housing, apartments, development, Newburgh, Fishkill, Cold Spring]}
+  - {id: c02, group: Beacon, text: "Beacon schools", terms: [school board, Beacon City School District, schools, BCSD]}
+  - {id: c03, group: Beacon, text: "Restaurants, arts and things to do around Beacon", terms: [restaurant, gallery, festival, concert, Dia]}
+  - {id: i01, group: Israel, text: "Israel's security and its wars", terms: [IDF, Hamas, Hezbollah, Gaza, Iran, Houthis]}
+  - {id: i02, group: Israel, text: "Israeli politics and the election", terms: [Knesset, Netanyahu, coalition, Bennett, Eisenkot]}
+  - {id: i03, group: Israel, text: "Antisemitism and Jewish life in America", terms: [antisemitism, antisemitic, Jewish, synagogue]}
+  - {id: w01, group: World, text: "Ukraine and Russia", terms: [Ukraine, Russia, Kyiv, Putin, Zelensky]}
+  - {id: w02, group: World, text: "China and the rest of Asia", terms: [China, Taiwan, Beijing, Japan, Korea, India]}
+  - {id: w03, group: World, text: "Europe's politics", terms: [EU, Europe, France, Germany, Britain, Macron]}
+  - {id: s01, group: Sports, text: "NYCFC, Gotham FC and MLS", terms: [NYCFC, Gotham, MLS]}
+  - {id: s02, group: Sports, text: "Tottenham and the Premier League", terms: [Tottenham, Spurs, Premier League]}
+  - {id: s03, group: Sports, text: "The US national soccer teams", terms: [USMNT, USWNT, World Cup]}
+  - {id: s04, group: Sports, text: "The Rangers and the NHL", terms: [Rangers, NHL]}
+  - {id: t01, group: Tech, text: "AI and the companies building it", terms: [AI, artificial intelligence, OpenAI, Anthropic, chatbot]}
+  - id: h01
+    kind: habit
+    group: Habits
+    text: "When something big happens, what do you want more of?"
+    options: [[1, "Analysis and opinion"], [0, "A mix"], [-1, "Straight reporting"]]
+    effect: "How many items show under From people you follow on Today: 8 for analysis, 5 for a mix, 3 for straight reporting."

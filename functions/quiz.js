@@ -4,6 +4,7 @@
 //
 // GET  /quiz                                   -> {elections:{id:{answers,done_at}}, pulse:[...], values:{...}}
 // POST /quiz {kind:"election", id, answers:{q:{v:-2..2, w:1..3}}, done}
+// POST /quiz {kind:"baseline", answers:{id:{v}}, done}  (the starting questionnaire)
 // POST /quiz {kind:"pulse", answers:[...]}     -> appended (kept to the last 200)
 // POST /quiz {kind:"values", answers:{...}, done, restart}  (restart keeps the last take in values.past)
 // POST /quiz {kind:"clear", id}                -> forget one election's answers
@@ -58,10 +59,15 @@ export async function onRequestPost({ request, env }) {
     q.values.answers = Object.assign(q.values.answers || {}, clean(b.answers));
     q.values.updated = now;
     if (b.done) q.values.done_at = now;
+  } else if (b.kind === "baseline") {
+    q.baseline = q.baseline || {};
+    q.baseline.answers = Object.assign(q.baseline.answers || {}, clean(b.answers));
+    q.baseline.updated = now;
+    if (b.done) q.baseline.done_at = now;
   } else if (b.kind === "pulse" && Array.isArray(b.answers)) {
     q.pulse = [...q.pulse, ...b.answers.slice(0, 20).map(pulseOne).filter(Boolean).map((a) => ({ ...a, at: now }))].slice(-200);
   } else if (b.kind === "clear") {
-    if (b.id === "values") q.values = {}; else if (b.id === "pulse") q.pulse = []; else delete q.elections[b.id];
+    if (b.id === "values") q.values = {}; else if (b.id === "baseline") q.baseline = {}; else if (b.id === "pulse") q.pulse = []; else delete q.elections[b.id];
   } else {
     return json({ error: "unknown questionnaire" }, 400);
   }
