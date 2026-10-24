@@ -231,6 +231,10 @@ def run(state: dict, data: dict, pool: list[dict], src_by_id: dict, session, rob
     log(f"[reading] {len(books_out)} books ({sum(1 for b in books_out if b['takeaways'])} with takeaways), "
         f"{len(essays_out)} essays ({sum(1 for e in essays_out if e['takeaways'])} with takeaways), {len(talk_out)} talk; "
         f"neurons today≈{st.get('neurons', 0):.0f}{'; ' + err if err else ''}")
+    for b in books_out:      # public titles only, so the log shows what was picked
+        log(f"[reading] book: {b['title']}{' by ' + b['author'] if b['author'] else ''} · {len(b['reviews'])} reviews{' · takeaways' if b['takeaways'] else ''}")
+    for e in essays_out:
+        log(f"[reading] essay: {e['title']} ({e['source']}){' · takeaways' if e['takeaways'] else ''}")
     st["error"] = err
     return {"id": "reading", "name": "Worth reading (books, essays, what people are discussing)", "short": "Reading", "desk": "SYSTEM",
             "poll": PICK_EVERY_H * 60, "last_success": st.get("books_at"), "last_attempt": now.isoformat(), "last_error": err,
