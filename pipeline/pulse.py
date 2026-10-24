@@ -25,6 +25,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 PULSE_DAYS = 120
+PULSE_LAST = 60          # only the most recent answers steer, so answering a lot doesn't flatten taste
 
 
 def load_answers() -> dict:
@@ -44,7 +45,7 @@ def taste(q: dict, now: datetime | None = None) -> dict:
     latest: dict[str, int] = {}          # title -> score (latest answer wins)
     titles: dict[str, str] = {}
     n = 0
-    for a in q.get("pulse") or []:
+    for a in (q.get("pulse") or [])[-PULSE_LAST:]:
         try:
             at = datetime.fromisoformat(str(a.get("at", "")).replace("Z", "+00:00"))
         except ValueError:
@@ -73,8 +74,26 @@ def taste(q: dict, now: datetime | None = None) -> dict:
                 titles[key] = t
                 v = int(a.get("v") or 0)
                 latest[key] = 1 if v >= 1 else -1 if v <= -1 else 0
-    return {"more": [titles[k] for k, v in latest.items() if v > 0],
-            "less": [titles[k] for k, v in latest.items() if v < 0], "n": n}
+    more = [titles[k] for k, v in latest.items() if v > 0]
+    less = [titles[k] for k, v in latest.items() if v < 0]
+    # The starting questionnaire (baseline.yaml): standing preferences by subject; they don't fade.
+    bank = {it["id"]: it for it in (baseline_bank() or {}).get("items", []) if it.get("terms")}
+    nb = 0
+    for qid, a in ((q.get("baseline") or {}).get("answers") or {}).items():
+        it = bank.get(qid)
+        if not it or a.get("skip") or a.get("v") is None:
+            continue
+        nb += 1
+        if a["v"] >= 1:
+            more += it["terms"]
+        elif a["v"] <= -1:
+            less += it["terms"]
+    return {"more": more, "less": less, "n": n, "baseline_n": nb}
+
+
+def baseline_bank() -> dict | None:
+    f = ROOT / "baseline.yaml"
+    return yaml.safe_load(f.read_text()) if f.exists() else None
 
 
 def values_bank() -> dict | None:
@@ -90,6 +109,9 @@ def run(data: dict, follows: dict, log) -> None:
     bank = values_bank()
     if bank:
         data["values_bank"] = bank
+    bb = baseline_bank()
+    if bb:
+        data["baseline_bank"] = bb
     # Counts only: the build log is public.
-    log(f"[pulse] {t['n']} answers in the last {PULSE_DAYS} days; values questionnaire "
+    log(f"[pulse] {t['n']} answers in the last {PULSE_DAYS} days (newest {PULSE_LAST} count); starting questionnaire {t['baseline_n']} answers; values questionnaire "
         f"{'done' if (q.get('values') or {}).get('done_at') else 'not done'}")
