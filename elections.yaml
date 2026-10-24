@@ -1,0 +1,264 @@
+# elections.yaml — the voter guide (2026-10-23).
+#
+# Every election a Beacon voter takes part in. A guide shows on the page from `show_days`
+# before the date to a week after. It describes and never recommends: candidates' positions
+# are their own words or as reported, each with a source; ballot proposals give what Yes and
+# No do and who argues each side. "why" says, as plain fact, how an office touches Joe's work
+# and interests. Written in a Claude session from official sources and established outlets;
+# a scheduled task checks for a missing guide before each election.
+#
+# Fields
+#   races[].level   federal | state | judicial | county | local (the guide groups by it)
+#   races[].search  a news search the build runs for the race (config, so it lives here)
+#   races[].watch   extra watch terms for the race thread (candidates' names are always used)
+#   recurring       the elections that come every year, so the page always knows what's next
+
+recurring:
+  - {rule: general, title: "General election", note: "Every November. Odd years: city offices (Beacon mayor and council); even years: federal, state and county offices."}
+  - {rule: primary, title: "Party primaries", note: "Fourth Tuesday in June; only voters enrolled in a party, for that party's contests."}
+  - {rule: school, title: "Beacon City School District budget vote and board election", note: "Third Tuesday in May, 6 AM to 9 PM; the district confirms the date each spring."}
+
+elections:
+  - id: ny_2026_general
+    date: "2026-11-03"
+    title: "General election"
+    jurisdiction: "City of Beacon, Dutchess County, New York"
+    show_days: 60
+    updated: "Oct 23, 2026"
+    about: "Governor and the other statewide offices, the House seat for NY-18, the State Senate and Assembly, State Supreme Court seats, the sheriff and a county legislator. No US Senate seat, no statewide ballot proposal and no City of Beacon office is on this ballot."
+    dates:
+      - {date: "2026-10-19", label: "Change of address due at the board of elections", source: "https://www.steubencountyny.gov/DocumentCenter/View/4876"}
+      - {date: "2026-10-24", label: "Last day to register (applications must be received); last day to apply for a mail ballot by mail or online", source: "https://elections.ny.gov/registration-and-voting-deadlines"}
+      - {date: "2026-10-24", label: "Early voting opens: Oct 24 to Nov 1, any of Dutchess County's seven sites (nearest: Fishkill Town Hall, 807 Route 52)", note: "Sat–Sun 9–5; Mon and Wed noon–8; Tue and Thu–Sun 9–5", source: "https://elections.dutchessny.gov/early-voting/"}
+      - {date: "2026-11-01", label: "Last day of early voting (none on Monday, Nov 2)", source: "https://ag.ny.gov/election-key-dates"}
+      - {date: "2026-11-02", label: "Last day to apply for a mail ballot in person at the board of elections", source: "https://ag.ny.gov/election-key-dates"}
+      - {date: "2026-11-03", label: "Election Day: polls close at 9 PM. Mail ballots must be postmarked today, or dropped at any poll site or the board before 9 PM", source: "https://ag.ny.gov/election-key-dates"}
+      - {date: "2026-11-10", label: "Mail ballots postmarked by Nov 3 must arrive by today", source: "https://ag.ny.gov/election-key-dates"}
+    links:
+      - {label: "Your registration and poll site (NYS)", url: "https://voterlookup.elections.ny.gov/"}
+      - {label: "Dutchess sample ballots", url: "https://elections.dutchessny.gov/2026/09/23/general-election-2026-sample-ballots/"}
+      - {label: "Official candidate list (Dutchess)", url: "https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf"}
+      - {label: "Voting problems: NYS Attorney General hotline 1-866-390-2992", url: "https://ag.ny.gov/election-key-dates"}
+    sources:
+      - {label: "Dutchess County Board of Elections: General Election 2026 candidate list", url: "https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf"}
+      - {label: "NYS Board of Elections: offices to be filled Nov 3, 2026", url: "https://elections.ny.gov/certification-offices-be-filled-november-3-2026-general-election"}
+      - {label: "NYS Attorney General: election key dates", url: "https://ag.ny.gov/election-key-dates"}
+      - {label: "Spectrum News: the Hochul–Blakeman debate", url: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/10/14/hochul-and-blakeman-trade-barbs-in-only-governor-debate"}
+      - {label: "The Highlands Current: NY-18", url: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+      - {label: "The Highlands Current: SD-39", url: "https://highlandscurrent.org/2026/08/07/democrats-target-rolison-in-state-senate-race/"}
+      - {label: "City & State: Lisa Kaul's campaign", url: "https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/"}
+    races:
+      - id: governor
+        level: state
+        office: "Governor and Lieutenant Governor"
+        desk: GOV
+        search: "Hochul Blakeman governor"
+        watch: ["governor's race", "gubernatorial"]
+        job: "Runs the executive branch for four years, proposes the state budget, signs or vetoes every bill, and appoints agency heads. Governor and lieutenant governor are elected together on one vote."
+        why: "Appoints the DEC commissioner and the Public Service Commission, which oversee spill response and Central Hudson's rates, and signs or vetoes any change to the Navigation Law or prevailing-wage law."
+        note: "One debate, Oct 13 on Spectrum News/NY1. In New York a vote on any of a candidate's party lines counts for that candidate."
+        candidates:
+          - name: "Kathy Hochul"
+            running_mate: "Adrienne Adams, former New York City Council Speaker"
+            lines: [Democratic, Working Families]
+            incumbent: true
+            bio: "Governor since 2021; previously lieutenant governor and a member of Congress from western New York."
+            positions:
+              - {topic: Taxes, text: "Says there has been no income or corporate tax increase while she's been governor; points to a middle-class tax cut, a $1,000 credit for families with children under 4, and energy and property-tax rebates. Pledged no new taxes in 2026.", source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/29/hochul-blakeman-tax-relief"}
+              - {topic: Child care, text: "Proposes universal child care statewide within four years, starting with 2-year-olds in New York City, and universal pre-K for 4-year-olds by 2028–29.", source: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/01/13/affordability--fed-pushback--re-election-focus-of-hochul-s-state-of-the-state"}
+              - {topic: Housing, text: "Proposed $250 million in affordable-housing grants, $100 million for manufactured housing, and an overhaul of environmental review for housing.", source: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/01/13/affordability--fed-pushback--re-election-focus-of-hochul-s-state-of-the-state"}
+              - {topic: Energy, text: "Wants to expand nuclear capacity from 3.4 to 8.4 gigawatts as part of an all-of-the-above approach; says federal actions are blocking state energy projects.", source: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/10/14/hochul-and-blakeman-trade-barbs-in-only-governor-debate"}
+              - {topic: Immigration enforcement, text: "Proposed requiring judicial warrants for federal immigration agents at schools, hospitals and houses of worship, and letting New Yorkers sue federal agents in state court.", source: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/01/13/affordability--fed-pushback--re-election-focus-of-hochul-s-state-of-the-state"}
+              - {topic: Prices, text: "Says ending federal tariffs would bring grocery prices down.", source: "https://www.fox5ny.com/news/hochul-blakeman-debate-ny-governor-race"}
+          - name: "Bruce Blakeman"
+            running_mate: "Todd Hood, Madison County Sheriff"
+            lines: [Republican, Conservative, Vote Affordable]
+            bio: "Nassau County Executive since 2022. Endorsed by President Trump after Elise Stefanik left the Republican race in December 2025."
+            positions:
+              - {topic: Taxes, text: "Proposes what he calls the largest income-tax cut in state history, with no state income tax for joint filers earning $100,000, paid for by restructuring spending, including migrant assistance.", source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/29/hochul-blakeman-tax-relief"}
+              - {topic: Energy costs, text: "Would roll back state mandates and charges he says inflate energy bills; criticizes the number of utility rate increases approved under Hochul.", source: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/10/14/hochul-and-blakeman-trade-barbs-in-only-governor-debate"}
+              - {topic: Public safety, text: "Opposes cashless bail and the Raise the Age law; pledges to back police and keep violent offenders in prison.", source: "https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html"}
+              - {topic: Immigration, text: "Opposes sanctuary policies and supports local cooperation with federal enforcement; says he supports a guest-worker program.", source: "https://www.fox5ny.com/news/hochul-blakeman-debate-ny-governor-race"}
+              - {topic: Abortion, text: "Says he is pro-choice and that he has significant policy differences with President Trump.", source: "https://www.fox5ny.com/news/hochul-blakeman-debate-ny-governor-race"}
+              - {topic: Other, text: "Pledges to defend Second Amendment rights and to keep transgender girls out of girls' school sports.", source: "https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html"}
+        polls:
+          - {who: "Marist", dates: "Oct 1–4, registered voters", result: "Hochul 53, Blakeman 42", source: "https://maristpoll.marist.edu/polls/midterm-elections-in-new-york-october-2026/"}
+          - {who: "Beacon Research", dates: "Oct 1–6, registered voters", result: "Hochul 53, Blakeman 31", source: "https://politicalwire.com/2026/10/15/kathy-hochul-way-up-in-new-york-governors-race/"}
+          - {who: "Siena", dates: "Sep 11–17, likely voters", result: "Hochul 50, Blakeman 41", source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/22/siena-poll--hochul-s-lead-over-blakeman-sees-little-change-among-likely-voters"}
+
+      - id: attorney_general
+        level: state
+        office: "Attorney General"
+        desk: GOV
+        search: "Letitia James Komatireddy attorney general"
+        watch: ["Komatireddy", "attorney general race"]
+        job: "The state's lawyer: brings civil enforcement and consumer, labor and environmental cases, defends state laws, and prosecutes some crimes."
+        why: "The AG brings the state's Navigation Law suits to recover Oil Spill Fund cleanup costs from responsible parties, enforces environmental law, and brings wage-theft cases."
+        note: "Debate Oct 8 on Spectrum News/NY1. Example of a state Navigation Law cost-recovery case: nycourts.gov/reporter/3dseries/2023/2023_01034.htm"
+        candidates:
+          - name: "Letitia James"
+            lines: [Democratic, Working Families]
+            incumbent: true
+            bio: "Attorney General since 2019, seeking a third term; previously New York City Public Advocate and a City Council member."
+            positions:
+              - {topic: Guns, text: "Pursuing gun violence, illegal firearms and ghost guns.", source: "https://www.jamesforny.com/priorities"}
+              - {topic: Consumers, text: "Backs the FAIR Business Practices Act; works on deed theft and data privacy.", source: "https://www.jamesforny.com/priorities"}
+              - {topic: Health care, text: "Cites recoveries from opioid companies and nursing homes.", source: "https://www.jamesforny.com/priorities"}
+              - {topic: Housing, text: "Sues landlords who violate tenants' and voucher holders' rights.", source: "https://www.jamesforny.com/priorities"}
+              - {topic: Federal government, text: "Challenges federal immigration actions, defends birthright citizenship, and says she will protect the 2026 elections from federal interference.", source: "https://www.jamesforny.com/priorities"}
+          - name: "Saritha Komatireddy"
+            lines: [Republican, Conservative]
+            bio: "Former federal prosecutor in the Eastern District of New York; first run for office. Endorsed by President Trump."
+            positions:
+              - {topic: Crime and fraud, text: "Would put the office's weight on prosecuting crime and fraud, including Medicaid and welfare fraud.", source: "https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy"}
+              - {topic: Homelessness and mental illness, text: "Proposes an Office of Civil Commitment inside the AG's office to address severe mental illness and homelessness.", source: "https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy"}
+              - {topic: Bail, text: "Opposes cashless bail.", source: "https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy"}
+              - {topic: Sex crimes, text: "Would close what she calls a loophole in cases where victims had been drinking or using drugs.", source: "https://foxbaltimore.com/news/nation-world/ny-republican-attorney-general-candidate-drops-52-count-indictment-against-letitia-james-saritha-komatireddy-president-trump-medicaid-fraud"}
+        polls:
+          - {who: "Siena", dates: "Sep 11–17, likely voters", result: "James 52, Komatireddy 39", source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/22/siena-poll--hochul-s-lead-over-blakeman-sees-little-change-among-likely-voters"}
+
+      - id: comptroller
+        level: state
+        office: "State Comptroller"
+        desk: GOV
+        search: "DiNapoli Hernandez comptroller"
+        watch: ["DiNapoli", "comptroller race"]
+        job: "The state's chief fiscal officer: audits state agencies, counties, cities and school districts, approves state contracts, and runs the state pension fund."
+        why: "The Comptroller's office administers the Oil Spill Fund (the Office of the Fund handles cleanup claims) and audits Beacon, Dutchess County and the school district."
+        note: "Debate Oct 1 on Spectrum News/NY1. The Office of the Comptroller's annual Oil Spill Fund report: osc.ny.gov/files/about/pdf/oil-spill-annual-report-2026.pdf"
+        candidates:
+          - name: "Thomas DiNapoli"
+            lines: [Democratic, Working Families]
+            incumbent: true
+            bio: "Comptroller since 2007; won the June primary with 65%."
+            positions:
+              - {topic: Fraud, text: "Cites 55 Medicaid-fraud arrests and $44 million recovered since 2023.", source: "https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/"}
+              - {topic: Contracts, text: "Wants stronger limits on donations from vendors seeking state contracts.", source: "https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/"}
+              - {topic: Pension fund, text: "Supports the governor's data-center moratorium and diversifying the fund against a possible AI bubble; opposes investing in cryptocurrency.", source: "https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/"}
+          - name: "Joseph Hernandez"
+            lines: [Republican, Conservative]
+            bio: "Biotech entrepreneur who has helped start a dozen companies; immigrated from Cuba; ran as an independent for New York City mayor in 2025."
+            positions:
+              - {topic: Fraud, text: "Says fraud and abuse in Medicaid and the MTA are out of control.", source: "https://spectrumlocalnews.com/nys/central-ny/news/2026/09/25/republican-candidate-for-state-comptroller-joe-hernandez-discusses-his-priorities"}
+              - {topic: State finances, text: "Says the state is in a fiscal crisis and wants to address its debt.", source: "https://spectrumlocalnews.com/nys/central-ny/news/2026/09/25/republican-candidate-for-state-comptroller-joe-hernandez-discusses-his-priorities"}
+              - {topic: Pension fund, text: "Wants more of the fund invested in New York; criticizes donations to DiNapoli from law firms that represent the fund; opposes the data-center moratorium; opposes investing in cryptocurrency.", source: "https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/"}
+        polls:
+          - {who: "Siena", dates: "Sep 11–17, likely voters", result: "DiNapoli 56, Hernandez 33", source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/22/siena-poll--hochul-s-lead-over-blakeman-sees-little-change-among-likely-voters"}
+
+      - id: ny18
+        level: federal
+        office: "US House"
+        district: "NY-18"
+        desk: GOV
+        scope: local
+        search: "Pat Ryan Auringer"
+        watch: ["Auringer", "Rep. Pat Ryan", "NY-18"]
+        job: "One of 435 House members; a two-year term. Votes on federal law and spending."
+        why: "Federal law covers EPA cleanup and underground-tank rules (CERCLA, 40 CFR 280), barge anchorages on the Hudson, and federal student-loan repayment."
+        note: "Oct 16 Daily Freeman debate (on Zoom): Auringer read an opening statement and left; Ryan answered questions for about an hour. Fundraising through Sept 30, as reported: Ryan $5.3 million, Auringer $153,000."
+        candidates:
+          - name: "Pat Ryan"
+            lines: [Democratic, Working Families]
+            incumbent: true
+            bio: "West Point graduate and Iraq veteran; Ulster County Executive 2019–2022; in Congress since a 2022 special election."
+            positions:
+              - {topic: Costs, text: "Says lowering costs is his first, second and third priority.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+              - {topic: Housing, text: "Points to the bipartisan ROAD to Housing Act, signed in July, and a bill he introduced to finance middle-income housing.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+              - {topic: Utilities and groceries, text: "Introduced a bill to study what drives grocery prices; backs limits on utility profits.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+              - {topic: Hudson River, text: "Cites the Hudson River Protection Act, which bans new barge anchorages on the river.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+              - {topic: Farms, text: "Pressed for the federal disaster designation after the April freeze.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+          - name: "Jackie Mary Auringer"
+            lines: [Republican, Conservative]
+            bio: "Kingston native who works at her family's construction company, Urban Precast; first run for office."
+            positions:
+              - {topic: Taxes and spending, text: "Wants lower taxes and less government spending.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+              - {topic: Regulation, text: "Would cut regulations she says raise the cost of housing and doing business.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+              - {topic: Trades and small business, text: "Wants more skilled-trades opportunities and support for small businesses; cites her family business's experience of rising costs.", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+              - {topic: Donors, text: "Criticizes Ryan's donor ties, including AIPAC-linked contributions (his campaign says it returned the money AIPAC's PAC gave directly).", source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+        ratings:
+          - {who: "Cook Political Report", rating: "Likely Democratic", source: "https://www.cookpolitical.com/house/race/483661"}
+
+      - id: sd39
+        level: state
+        office: "State Senate"
+        district: "39th District"
+        desk: GOV
+        scope: local
+        search: "Rolison Kaul state senate"
+        watch: ["Rolison", "Rob Rolison", "Lisa Kaul"]
+        job: "One of 63 state senators; a two-year term. Votes on state law and the state budget."
+        why: "Votes on the Navigation Law, petroleum bulk storage rules, prevailing-wage law and Central Hudson's regulation. The 2024 race was decided by 1.4 points."
+        note: "The Democratic Legislative Campaign Committee lists this race among its six priorities. No debate found."
+        candidates:
+          - name: "Robert G. Rolison"
+            lines: [Republican, Conservative]
+            incumbent: true
+            bio: "State senator since 2023; Mayor of Poughkeepsie 2016–2022; Dutchess County Legislature 2003–2015; former Town of Poughkeepsie police detective."
+            positions:
+              - {topic: Utilities, text: "Sponsors a bill requiring the Public Service Commission to hold a public hearing in the affected region at least 90 days before deciding a utility rate increase.", source: "https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-bill-requiring-public-hearings-utility"}
+              - {topic: Public safety and economy, text: "Campaigns on public safety and on fixing the state's economy.", source: "https://www.ballotready.org/people/rob-rolison"}
+          - name: "Lisa Kaul"
+            lines: [Democratic, Working Families]
+            bio: "Dutchess County legislator (Town of Poughkeepsie) since 2024 and chair of its Environment Committee; former Vassar College administrator; Rhodes Scholar. Won the June primary with 62%."
+            positions:
+              - {topic: Utilities, text: "Would replace Central Hudson with a public, nonprofit Hudson Valley Power Authority.", source: "https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/"}
+              - {topic: Housing, text: "Supports the REST Act and the Social Housing Development Act.", source: "https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/"}
+              - {topic: Health care, text: "Supports the New York Health Act (single-payer).", source: "https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/"}
+              - {topic: Transit and energy, text: "Wants more state transit funding, solar and electrification incentives, and simpler solar permitting.", source: "https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/"}
+
+      - id: ad104
+        level: state
+        office: "State Assembly"
+        district: "104th District"
+        desk: GOV
+        scope: local
+        watch: ["Jacobson"]
+        job: "One of 150 Assembly members; a two-year term."
+        why: "Votes on the same state laws as the Senate; Jacobson chairs the Assembly's Democratic majority conference."
+        note: "Unopposed."
+        candidates:
+          - name: "Jonathan G. Jacobson"
+            lines: [Democratic, Working Families]
+            incumbent: true
+            bio: "In the Assembly since 2019; former assistant attorney general and workers' compensation judge; New York Law School graduate."
+            positions:
+              - {topic: Utilities, text: "Co-sponsored the law ending automatic utility rate increases, enacted in the 2026 budget, and the rate-transparency law signed in December 2025.", source: "https://assembly.ny.gov/mem/Jonathan-G-Jacobson/press"}
+              - {topic: Jobs, text: "Sponsored the 'ghost jobs' bill requiring employers to say whether and when they plan to fill posted jobs; it passed the Legislature in June.", source: "https://assembly.ny.gov/mem/Jonathan-G-Jacobson/press"}
+
+      - id: supreme_court
+        level: judicial
+        office: "State Supreme Court Justice"
+        district: "9th Judicial District"
+        desk: LAW
+        job: "New York's trial court of general jurisdiction: commercial cases, Article 78 proceedings, matrimonial and major civil and criminal cases. Fourteen-year terms."
+        why: "Hears contract and environmental disputes, land-use Article 78 challenges, and Navigation Law cost-recovery actions in the district."
+        note: "Several seats are open; vote for up to the number printed on your ballot (the sample ballot shows it). Three candidates are cross-endorsed by both major parties."
+        candidates:
+          - {name: "Maria G. Rosa", lines: [Democratic, Working Families], incumbent: true, bio: "Supreme Court justice since 2013; previously a Dutchess County Family Court judge.", positions: [{text: "Says each case deserves the respectful attention of the judge and her staff.", source: "https://www.ballotready.org/people/maria-g-rosa"}]}
+          - {name: "George E. Fufidio", lines: [Democratic, Republican]}
+          - {name: "Alden H. Wolfe", lines: [Democratic, Conservative], bio: "New City attorney and former Majority Leader of the Rockland County Legislature.", positions: [{text: "Nominated for the seat left by Justice Sherri Eisenpress's retirement.", source: "https://rcbizjournal.com/?p=20800"}]}
+          - {name: "Richard S. Fava Pastilha", lines: [Republican, Conservative]}
+          - {name: "John Ciampoli", lines: [Republican]}
+
+      - id: sheriff
+        level: county
+        office: "Dutchess County Sheriff"
+        desk: BEACON
+        watch: ["Imperati"]
+        job: "Runs the county jail, road patrol and civil process; a four-year term."
+        note: "Unopposed."
+        candidates:
+          - {name: "Kirk A. Imperati", lines: [Republican, Conservative], incumbent: true, bio: "Sheriff since 2022; previously undersheriff and acting sheriff."}
+
+      - id: county_legislature
+        level: county
+        office: "Dutchess County Legislator"
+        district: "District 16 or 18"
+        desk: BEACON
+        job: "Sets the county budget and county law; one of 25 legislators. On the ballot again in 2026 because of the state's move of county elections to even years."
+        note: "Beacon is split between two districts; your sample ballot shows which one is yours. Both candidates are unopposed."
+        candidates:
+          - {name: "Yvette Valdés Smith", lines: [Democratic, Working Families], incumbent: true, bio: "District 16 (Fishkill and Beacon); chair of the County Legislature."}
+          - {name: "Molly Rhodes", lines: [Democratic, Working Families], incumbent: true, bio: "District 18 (Beacon and Fishkill); former Beacon City Council member for Ward 1."}
+
+    proposals: []
