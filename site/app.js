@@ -1897,6 +1897,7 @@ function openQuiz(g) {
     openSheet([
       el("div", { class: "qprog" }, el("span", { text: (i + 1) + " of " + order.length }), el("span", { class: "qbar" }, el("i", { style: "width:" + Math.round(100 * i / order.length) + "%" }))),
       el("h2", { id: "sheet-title", class: "qtext", text: it.text }),
+      explainBtn(it.id, render1),
       el("p", { class: "fine", text: "How much does this matter to you? (set this first)" }), wrow,
       el("div", { class: "qscale" }, ...SCALE.map(([v, label]) => el("button", { class: "qopt" + (cur && cur.v === v ? " on" : ""), text: label, onclick: () => pick(v) }))),
       el("div", { class: "qnav" },
@@ -2075,6 +2076,31 @@ async function pulseEffect() {
   ], "What your answers changed");
 }
 
+// "What's this about?" (2026-10-23): background on a statement before answering it, from
+// explain.yaml (where things stand, the case on each side and who makes it, sources) plus the
+// newest matching coverage the build found. Neutral by rule; says nothing about scoring.
+function explainBtn(id, back) {
+  const e = (data.explain || {})[id];
+  if (!e || !e.now) return null;
+  return el("button", { class: "explainbtn", text: "ⓘ What's this about?", onclick: () => openExplain(id, back) });
+}
+function openExplain(id, back) {
+  const e = data.explain[id];
+  const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (x) { return u; } };
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Back to the question", onclick: () => back() }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "What's this about?" }),
+    el("h3", { class: "sh3", text: "Where things stand" }), el("p", { text: e.now }),
+    (e.latest || []).length ? el("h3", { class: "sh3", text: "Latest coverage" }) : null,
+    (e.latest || []).length ? el("ul", { class: "admin" }, ...e.latest.map((x) => el("li", {}, el("span", { class: "asrc", text: (x.source || "") + " · " + ago(Date.parse(x.t)) + " ago" }), link(x.link, x.title)))) : null,
+    el("h3", { class: "sh3", text: "The case for agreeing" }), el("p", { text: e.case_for }),
+    el("h3", { class: "sh3", text: "The case for disagreeing" }), el("p", { text: e.case_against }),
+    (e.sources || []).length ? el("p", { class: "fine" }, "Sources: ", ...e.sources.flatMap((u, i) => [i ? " · " : "", link(u, host(u))])) : null,
+    el("p", { class: "fine", text: "Background written from the sources above; the latest coverage is matched automatically. Neither says anything about how your answer is used." }),
+    el("button", { class: "sbtn primary wide", text: "Back to the question", onclick: () => back() }),
+  ].filter(Boolean), "What's this about?");
+}
+
 // --------------------------------------------------------------- the starting questionnaire
 // What Joe wants to follow, by subject (baseline.yaml). Standing preferences: they don't fade.
 // Shuffled, one subject per screen, no hint of the effect until "What it changed".
@@ -2167,6 +2193,7 @@ function runStatements(cfg) {
     openSheet([
       el("div", { class: "qprog" }, el("span", { text: (i + 1) + " of " + order.length }), el("span", { class: "qbar" }, el("i", { style: "width:" + Math.round(100 * i / order.length) + "%" }))),
       el("h2", { id: "sheet-title", class: "qtext", text: it.text }),
+      explainBtn(it.id, render1),
       el("p", { class: "fine", text: "How much does this matter to you? (set this first)" }), wrow,
       el("div", { class: "qscale" }, ...SCALE.map(([v, label]) => el("button", { class: "qopt" + (cur && cur.v === v ? " on" : ""), text: label, onclick: () => put({ v, w: weight }) }))),
       el("div", { class: "qnav" },

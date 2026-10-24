@@ -708,3 +708,4 @@ p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
 .rdline { display: block; font-size: 0.92rem; color: var(--text2); margin: 2px 0 6px; }
 .plainlist li { padding: 8px 0; border-bottom: 1px solid var(--hair); font-size: 0.97rem; }
 .plainlist a { color: var(--text); text-decoration: none; }
+.explainbtn { display: inline-block; margin: -8px 0 10px; padding: 6px 0; background: none; color: var(--here); font: 600 0.92rem var(--sans); }

@@ -1313,6 +1313,12 @@ def main() -> int:
         data["sources"].append(reading.run(state, data, pool, rsrc, session, robots_allows, TIMEOUT, log))
     except Exception as exc:
         log(f"[reading] failed: {type(exc).__name__}: {exc}")
+    # Explainers for questionnaire statements, with the newest matching coverage.
+    try:
+        import explain
+        explain.run(data, log)
+    except Exception as exc:
+        log(f"[explain] failed: {type(exc).__name__}: {exc}")
     # Voter guide: the active election from elections.yaml, and what's next.
     try:
         data["sources"].append(elections.run(data, log))
