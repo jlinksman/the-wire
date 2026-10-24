@@ -1,0 +1,199 @@
+# Images for the meme map: Wikimedia Commons files under PD, CC0, CC BY or CC BY-SA (licenses from Commons metadata, 2026-10-23),
+# hotlinked at 330px with credit, license and file page shown on the card. Links: the real meme formats on Know Your Meme, opened from the card.
+images:
+  gadsden:
+    title: Gadsden flag.svg
+    page: https://commons.wikimedia.org/wiki/File:Gadsden_flag.svg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Gadsden_flag.svg/330px-Gadsden_flag.svg.png
+    license: Public domain
+    credit: Christopher Gadsden (design, 1775); SVG by Lexicon and Vikrum
+  wilderness:
+    title: Cole Thomas The Course of Empire The Savage State 1836.jpg
+    page: https://commons.wikimedia.org/wiki/File:Cole_Thomas_The_Course_of_Empire_The_Savage_State_1836.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/Cole_Thomas_The_Course_of_Empire_The_Savage_State_1836.jpg/330px-Cole_Thomas_The_Course_of_Empire_The_Savage_State_1836.jpg
+    license: Public domain
+    credit: Thomas Cole
+  fusion:
+    title: Island three view from endcap.jpg
+    page: https://commons.wikimedia.org/wiki/File:Island_three_view_from_endcap.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Island_three_view_from_endcap.jpg/330px-Island_three_view_from_endcap.jpg
+    license: Public domain
+    credit: Donald Davis for NASA Ames
+  flag_ancom:
+    title: Anarchist communism.svg
+    page: https://commons.wikimedia.org/wiki/File:Anarchist_communism.svg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Anarchist_communism.svg/330px-Anarchist_communism.svg.png
+    license: CC BY-SA 3.0
+    credit: Mikko Kortelainen (KordeX)
+  flag_ancap:
+    title: Anarcho-capitalist flag.svg
+    page: https://commons.wikimedia.org/wiki/File:Anarcho-capitalist_flag.svg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Anarcho-capitalist_flag.svg/330px-Anarcho-capitalist_flag.svg.png
+    license: Public domain
+    credit: EVCM
+  flag_green:
+    title: Green and Black flag.svg
+    page: https://commons.wikimedia.org/wiki/File:Green_and_Black_flag.svg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/Green_and_Black_flag.svg/330px-Green_and_Black_flag.svg.png
+    license: Public domain
+    credit: Rocket000
+  thoreau:
+    title: Replica of Thoreau House at Walden Pond, Concord MA.jpg
+    page: https://commons.wikimedia.org/wiki/File:Replica_of_Thoreau_House_at_Walden_Pond,_Concord_MA.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Replica_of_Thoreau_House_at_Walden_Pond%2C_Concord_MA.jpg/330px-Replica_of_Thoreau_House_at_Walden_Pond%2C_Concord_MA.jpg
+    license: CC BY 4.0
+    credit: John Phelan
+  latin_mass:
+    title: Traditional Latin Mass - Elevation.jpg
+    page: https://commons.wikimedia.org/wiki/File:Traditional_Latin_Mass_-_Elevation.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/Traditional_Latin_Mass_-_Elevation.jpg/330px-Traditional_Latin_Mass_-_Elevation.jpg
+    license: CC BY 4.0
+    credit: Andrewgardner1
+  wpa:
+    title: WPA-Work-Pays-America-Poster.jpg
+    page: https://commons.wikimedia.org/wiki/File:WPA-Work-Pays-America-Poster.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/WPA-Work-Pays-America-Poster.jpg/330px-WPA-Work-Pays-America-Poster.jpg
+    license: Public domain
+    credit: Vera Bock for the WPA Federal Art Project
+  river_rouge:
+    title: RIVER ROUGE PLANT OF THE FORD MOTOR COMPANY COVERS 1200 ACRES OF LAND IN DEARBORN - NARA - 549725.jpg
+    page: https://commons.wikimedia.org/wiki/File:RIVER_ROUGE_PLANT_OF_THE_FORD_MOTOR_COMPANY_COVERS_1200_ACRES_OF_LAND_IN_DEARBORN_-_NARA_-_549725.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/RIVER_ROUGE_PLANT_OF_THE_FORD_MOTOR_COMPANY_COVERS_1200_ACRES_OF_LAND_IN_DEARBORN_-_NARA_-_549725.jpg/330px-RIVER_ROUGE_PLANT_OF_THE_FORD_MOTOR_COMPANY_COVERS_1200_ACRES_OF_LAND_IN_DEARBORN_-_NARA_-_549725.jpg
+    license: Public domain
+    credit: Joe Clark; U.S. National Archives (NARA 549725)
+  shaker:
+    title: Canterbury Shaker Village Meetinghouse.jpg
+    page: https://commons.wikimedia.org/wiki/File:Canterbury_Shaker_Village_Meetinghouse.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Canterbury_Shaker_Village_Meetinghouse.jpg/330px-Canterbury_Shaker_Village_Meetinghouse.jpg
+    license: Public domain
+    credit: SayCheeeeeese
+  torus:
+    title: Artist- Rick Guidice interior of Torus wheel (L-5) Space Colonization Module (ARC-1975-AC75-1086).jpg
+    page: https://commons.wikimedia.org/wiki/File:Artist-_Rick_Guidice_interior_of_Torus_wheel_(L-5)_Space_Colonization_Module_(ARC-1975-AC75-1086).jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Artist-_Rick_Guidice_interior_of_Torus_wheel_%28L-5%29_Space_Colonization_Module_%28ARC-1975-AC75-1086%29.jpg/330px-Artist-_Rick_Guidice_interior_of_Torus_wheel_%28L-5%29_Space_Colonization_Module_%28ARC-1975-AC75-1086%29.jpg
+    license: Public domain
+    credit: Rick Guidice for NASA Ames Research Center
+  europarl:
+    title: European Parliament Strasbourg Hemicycle - Diliff.jpg
+    page: https://commons.wikimedia.org/wiki/File:European_Parliament_Strasbourg_Hemicycle_-_Diliff.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/European_Parliament_Strasbourg_Hemicycle_-_Diliff.jpg/330px-European_Parliament_Strasbourg_Hemicycle_-_Diliff.jpg
+    license: CC BY-SA 3.0
+    credit: Diliff
+  boccioni:
+    title: Unique Forms of Continuity in Space MET DT6411.jpg
+    page: https://commons.wikimedia.org/wiki/File:Unique_Forms_of_Continuity_in_Space_MET_DT6411.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Unique_Forms_of_Continuity_in_Space_MET_DT6411.jpg/330px-Unique_Forms_of_Continuity_in_Space_MET_DT6411.jpg
+    license: CC0
+    credit: Umberto Boccioni; photo The Metropolitan Museum of Art
+  seattle_strike:
+    title: Seattle General Strike 1919 Participants Leaving Shipyard.jpg
+    page: https://commons.wikimedia.org/wiki/File:Seattle_General_Strike_1919_Participants_Leaving_Shipyard.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Seattle_General_Strike_1919_Participants_Leaving_Shipyard.jpg/330px-Seattle_General_Strike_1919_Participants_Leaving_Shipyard.jpg
+    license: Public domain
+    credit: Webster & Stevens, 1919
+  chartres:
+    title: South rose window of Chartres Cathedral.jpg
+    page: https://commons.wikimedia.org/wiki/File:South_rose_window_of_Chartres_Cathedral.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/South_rose_window_of_Chartres_Cathedral.jpg/330px-South_rose_window_of_Chartres_Cathedral.jpg
+    license: CC BY-SA 3.0
+    credit: Ludwig Schneider
+  lawrence_strike:
+    title: 1912 Lawrence Textile Strike 1.jpg
+    page: https://commons.wikimedia.org/wiki/File:1912_Lawrence_Textile_Strike_1.jpg
+    thumb: https://upload.wikimedia.org/wikipedia/commons/5/55/1912_Lawrence_Textile_Strike_1.jpg
+    license: Public domain
+    credit: Unknown photographer, 1912
+  empire_consummation:
+    title: Cole Thomas The Consummation The Course of the Empire 1836.jpg
+    page: https://commons.wikimedia.org/wiki/File:Cole_Thomas_The_Consummation_The_Course_of_the_Empire_1836.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Cole_Thomas_The_Consummation_The_Course_of_the_Empire_1836.jpg/330px-Cole_Thomas_The_Consummation_The_Course_of_the_Empire_1836.jpg
+    license: Public domain
+    credit: Thomas Cole
+  monk_sea:
+    title: Caspar David Friedrich - Monk by the Sea.jpg
+    page: https://commons.wikimedia.org/wiki/File:Caspar_David_Friedrich_-_Monk_by_the_Sea.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Caspar_David_Friedrich_-_Monk_by_the_Sea.jpg/330px-Caspar_David_Friedrich_-_Monk_by_the_Sea.jpg
+    license: Public domain
+    credit: Caspar David Friedrich
+  capitol:
+    title: United States Capitol - west front.jpg
+    page: https://commons.wikimedia.org/wiki/File:United_States_Capitol_-_west_front.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/United_States_Capitol_-_west_front.jpg/330px-United_States_Capitol_-_west_front.jpg
+    license: Public domain
+    credit: Architect of the Capitol
+  nighthawks:
+    title: Nighthawks by Edward Hopper 1942.jpg
+    page: https://commons.wikimedia.org/wiki/File:Nighthawks_by_Edward_Hopper_1942.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/Nighthawks_by_Edward_Hopper_1942.jpg/330px-Nighthawks_by_Edward_Hopper_1942.jpg
+    license: Public domain
+    credit: Edward Hopper
+  compass_std:
+    title: Political Compass standard model.svg
+    page: https://commons.wikimedia.org/wiki/File:Political_Compass_standard_model.svg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Political_Compass_standard_model.svg/330px-Political_Compass_standard_model.svg.png
+    license: Public domain
+    credit: Tilon3 and translators (see file page)
+    light: true
+  compass_purple:
+    title: Political Compass purple LibRight.svg
+    page: https://commons.wikimedia.org/wiki/File:Political_Compass_purple_LibRight.svg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Political_Compass_purple_LibRight.svg/330px-Political_Compass_purple_LibRight.svg.png
+    license: Public domain
+    credit: Unknown; translation by Alhadis
+    light: true
+  red_wedge:
+    title: Beat the Whites with the Red Wedge.jpg
+    page: https://commons.wikimedia.org/wiki/File:Beat_the_Whites_with_the_Red_Wedge.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Beat_the_Whites_with_the_Red_Wedge.jpg/330px-Beat_the_Whites_with_the_Red_Wedge.jpg
+    license: Public domain
+    credit: El Lissitzky
+  apollo:
+    title: Apollo 11 Launch - GPN-2000-000630.jpg
+    page: https://commons.wikimedia.org/wiki/File:Apollo_11_Launch_-_GPN-2000-000630.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Apollo_11_Launch_-_GPN-2000-000630.jpg/330px-Apollo_11_Launch_-_GPN-2000-000630.jpg
+    license: Public domain
+    credit: NASA
+  datacenter:
+    title: BalticServers data center.jpg
+    page: https://commons.wikimedia.org/wiki/File:BalticServers_data_center.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/BalticServers_data_center.jpg/330px-BalticServers_data_center.jpg
+    license: CC BY-SA 3.0
+    credit: BalticServers.com
+  american_gothic:
+    title: Grant Wood - American Gothic - Google Art Project.jpg
+    page: https://commons.wikimedia.org/wiki/File:Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg/330px-Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg
+    license: Public domain
+    credit: Grant Wood
+  oxbow:
+    title: Cole Thomas The Oxbow (The Connecticut River near Northampton 1836).jpg
+    page: https://commons.wikimedia.org/wiki/File:Cole_Thomas_The_Oxbow_(The_Connecticut_River_near_Northampton_1836).jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Cole_Thomas_The_Oxbow_%28The_Connecticut_River_near_Northampton_1836%29.jpg/330px-Cole_Thomas_The_Oxbow_%28The_Connecticut_River_near_Northampton_1836%29.jpg
+    license: Public domain
+    credit: Thomas Cole
+  cottage:
+    title: Helen Allingham Cottage Garden 1894.jpg
+    page: https://commons.wikimedia.org/wiki/File:Helen_Allingham_Cottage_Garden_1894.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Helen_Allingham_Cottage_Garden_1894.jpg/330px-Helen_Allingham_Cottage_Garden_1894.jpg
+    license: Public domain
+    credit: Helen Allingham
+  neon:
+    title: Boulevard Hotel (Neon sign), Miami Beach.jpg
+    page: https://commons.wikimedia.org/wiki/File:Boulevard_Hotel_(Neon_sign),_Miami_Beach.jpg
+    thumb: https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Boulevard_Hotel_%28Neon_sign%29%2C_Miami_Beach.jpg/330px-Boulevard_Hotel_%28Neon_sign%29%2C_Miami_Beach.jpg
+    license: Public domain
+    credit: Radomianin
+links:
+  gadsden: https://knowyourmeme.com/memes/taxation-is-theft
+  ancap: https://knowyourmeme.com/memes/cultures/anarcho-capitalism
+  compass: https://knowyourmeme.com/memes/political-compass
+  anprim: https://knowyourmeme.com/memes/cultures/anarcho-primitivism
+  eacc: https://knowyourmeme.com/memes/cultures/eacc-effective-accelerationism
+  touchgrass: https://knowyourmeme.com/memes/touch-grass
+  galaxy: https://knowyourmeme.com/memes/galaxy-brain
+  centrist: https://knowyourmeme.com/memes/centrist-dad
+  trad: https://knowyourmeme.com/memes/trad-girl-tradwife
+  bernie: https://knowyourmeme.com/memes/i-am-once-again-asking-for-your-financial-support
+  doomer: https://knowyourmeme.com/memes/doomer
+  bloomer: https://knowyourmeme.com/memes/bloomer
+  accel: https://knowyourmeme.com/memes/people/nick-land-accelerationism

@@ -65,14 +65,16 @@ export async function onRequestPost({ request, env }) {
     q.baseline.updated = now;
     if (b.done) q.baseline.done_at = now;
   } else if (b.kind === "memes") {
-    // The meme map: {m01: 0..3}. A retake keeps the last take for drift (last 5).
+    // The meme map: a take is 12 question ids (take) and the card picked for each ({p01: 0..3}).
+    // A new take after a finished one keeps the finished one in past (last 8) for drift.
     q.memes = q.memes || {};
-    if (b.restart && q.memes.done_at) {
-      q.memes.past = [...(q.memes.past || []), { answers: q.memes.answers, done_at: q.memes.done_at }].slice(-5);
+    if (Array.isArray(b.take)) {
+      if (b.restart && q.memes.done_at) q.memes.past = [...(q.memes.past || []), { answers: q.memes.answers, done_at: q.memes.done_at }].slice(-8);
+      q.memes.take = b.take.filter((id) => /^[a-z]\d{2}$/.test(id)).slice(0, 16);
       q.memes.answers = {}; delete q.memes.done_at;
     }
     const ok = {};
-    for (const [k, v] of Object.entries(b.answers || {})) if (/^m\d{2}$/.test(k) && [0, 1, 2, 3].includes(v)) ok[k] = v;
+    for (const [k, v] of Object.entries(b.answers || {})) if (/^[a-z]\d{2}$/.test(k) && [0, 1, 2, 3].includes(v)) ok[k] = v;
     q.memes.answers = Object.assign(q.memes.answers || {}, ok);
     if (b.done) q.memes.done_at = now;
   } else if (b.kind === "pulse" && Array.isArray(b.answers)) {
