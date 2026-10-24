@@ -278,18 +278,18 @@ elections:
         - {id: q02, text: "A utility rate increase should never be decided without a public hearing in the region that pays it."}
         - {id: q03, axis: econ, dir: -1, text: "New York's Scaffold Law, which holds owners and contractors fully liable for workers' falls, should stay as it is."}
         - {id: q04, axis: econ, dir: 1, text: "Cutting state income taxes is worth cutting state programs to pay for it."}
-        - {id: q05, axis: growth, dir: 1, text: "More new housing should be allowed to skip the state's environmental review."}
+        - {id: q05, axis: growth, dir: 1, changed: "2026-10-24", text: "New York should widen this year's environmental-review exemptions for new housing to cover more projects."}
         - {id: q06, axis: culture, dir: 1, text: "New York should roll back cashless bail."}
-        - {id: q07, axis: culture, dir: -1, text: "Federal immigration agents should need a judge's warrant to make arrests at schools, hospitals and houses of worship."}
+        - {id: q07, axis: culture, dir: -1, changed: "2026-10-24", text: "New York should keep its new rule requiring a judge's warrant for ICE to enter schools and hospitals."}
         - {id: q08, axis: econ, dir: -1, text: "New York should adopt single-payer health care for everyone in the state."}
         - {id: q09, text: "New York should build more nuclear power."}
         - {id: q10, axis: growth, dir: -1, text: "New data centers in New York should be paused until their effect on power bills is understood."}
         - {id: q11, text: "The Attorney General's office should put more of its effort into criminal prosecution and less into civil cases."}
         - {id: q12, axis: world, dir: 1, text: "US military aid to Israel should continue at current levels."}
         - {id: q13, text: "The state pension fund should keep investing in Israel bonds."}
-        - {id: q14, axis: econ, dir: 1, text: "Federal tariffs are raising prices and should be lifted."}
+        - {id: q14, axis: econ, dir: 1, changed: "2026-10-24", text: "The new federal tariffs that replaced the ones the Supreme Court struck down are raising prices and should be lifted."}
         - {id: q15, axis: econ, dir: 1, text: "Government regulation is the main reason housing and business costs are so high."}
-        - {id: q16, axis: econ, dir: -1, text: "The Attorney General should be able to pursue business practices that are unfair, not only ones that are deceptive."}
+        - {id: q16, axis: econ, dir: -1, changed: "2026-10-24", text: "New York should keep the new law letting the Attorney General go after business practices that are unfair, not only deceptive ones."}
         - {id: q17, text: "The state pension fund should put more of its money into companies that grow in New York."}
         - {id: q18, axis: econ, dir: -1, text: "The state should build and own housing directly, not only subsidize private developers."}
       stances:
