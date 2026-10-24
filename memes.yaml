@@ -1,0 +1,240 @@
+# The meme map's bank (2026-10-23, for fun). Built into site/memes.json by pipeline/memes_build.py.
+# Inspired by published research on online political subcultures (credited on the results page,
+# by title). Placements, cards and readings are The Wire's. Currents that research documents
+# but that are defined by racism, fascism or violence are left out entirely, cards and results.
+#
+# Each take draws 12 questions: 4 from `map` and 1 from each other dimension plus a future.
+# Card effects: x (collective -1 .. market +1), y (return -1 .. accelerate +1), anti
+# (institutionalist -1 .. anti-establishment +1), ir (0 earnest, 1 ironic-sincere, 2 shitposter),
+# cls (culture -1 .. class +1), subj (nation | class | individual), col (committed -1 .. collector
+# +1), fun (0 casual, 1 back catalog, 2 niche theory), body (terminally online -1 .. offline/gym +1),
+# w (a word for the stacked label). `art` is emoji; `img` names an image in images: (Commons,
+# freely licensed, hotlinked with credit); `see` names a link in links: (the real meme format).
+
+sources:
+  politigram: {t: "Politigram & the Post-left (2018)", u: "https://joshuacitarella.substack.com/p/politigram-and-the-post-left"}
+  ffp: {t: "Forward-Facing Politics catalogue interview (2019)", u: "https://corcoran.gwu.edu/sites/g/files/zaxdzs2941/f/downloads/JoshuaCitarellaCatalogue.pdf"}
+  tag: {t: "Tag Yourself (2019)", u: "https://joshuacitarella.substack.com/p/tag-yourself"}
+  aeoh: {t: "After the End of History (2019)", u: "https://old.rhizome.org/events/after-the-end-of-history"}
+  edeo: {t: "E-deologies, as reported by Jacobin (2024)", u: "https://jacobin.com/2024/11/gen-z-internet-politics-fascism"}
+  memetic: {t: "Memetic Histories (2025)", u: "https://joshuacitarella.substack.com/p/memetic-histories"}
+  pipeline: {t: "A New Pipeline (2025)", u: "https://joshuacitarella.substack.com/p/a-new-pipeline"}
+  mw: {t: "Modern Wisdom interview (2025)", u: "https://singjupost.com/the-dark-subcultures-of-online-politics-joshua-citarella-on-modern-wisdom-transcript/"}
+  manos: {t: "Interview magazine on the manosphere (2023)", u: "https://interviewmagazine.com/culture/joshua-citarella-takes-us-into-the-dark-corners-of-the-manosphere"}
+  market: {t: "The Online Marketplace of Ideas (2026)", u: "https://joshuacitarella.substack.com/p/the-online-marketplace-of-ideas"}
+  luddism: {t: "National Luddism interview (2019)", u: "https://joshuacitarella.substack.com/p/national-luddism"}
+  cyber: {t: "Cyber-nihilism interview (2019)", u: "https://joshuacitarella.substack.com/p/cyber-nihilism"}
+
+currents:
+  - {id: leftcom, n: "Left-communism and the ultra-left", short: "Leftcom", x: -0.9, y: 0.1, src: tag, d: "Against parties and unions as well as capital. Communization theory, the main left current in the 2019 survey, holds that the next society grows inside this one rather than being built by a vanguard."}
+  - {id: socdem, n: "Social democracy, Bernie-era", short: "Social Democrat", x: -0.5, y: 0.0, src: pipeline, d: "Where the 2018 essay starts the left's drift, and where the 2025 pipeline aims to land people: a class politics for the downwardly mobile, a 21st-century social democracy."}
+  - {id: postleft, n: "The post-left and anarcho-primitivism", short: "Post-Leftist", x: -0.45, y: -0.9, src: politigram, d: "Anti-civilization: alienation began with farming and the division of labor, not just capitalism. Degrowth, and the hunter-gatherer as the ideal; the first stage of its path is rejecting technology."}
+  - {id: lacc, n: "Left-accelerationism and the tech left", short: "Left-Accelerationist", x: -0.6, y: 0.85, src: politigram, d: "Technology as liberation: automate the work and share the output. One of the three accelerationisms in the 2018 catalog."}
+  - {id: uacc, n: "U/acc and cyber-nihilism", short: "Cyber-Nihilist", x: 0.0, y: 0.95, src: cyber, d: "Neither left nor right: the process itself, sped up. The 2019 cyber-nihilist interview mixes communization and egoism in cyberpunk theory-memes."}
+  - {id: egoist, n: "Egoism (Stirner)", short: "Egoist", x: 0.45, y: -0.1, src: politigram, d: "Amoral individualist anarchism: causes, nations and morals are 'spooks.' In the 2018 essay, the second stage of the post-left path, and an avatar culture built on an 1840s sketch of Stirner."}
+  - {id: ancap, n: "Anarcho-capitalism", short: "Ancap", x: 0.9, y: 0.35, src: politigram, d: "Markets without the state: property rights and non-aggression. In the 2018 essay, the start of one of the drift paths it traces."}
+  - {id: netstate, n: "Network-state libertarianism", short: "Network-Stater", x: 0.7, y: 0.7, src: manos, d: "Opt-in, startup-style polities and exit over voice: one of the post-2016 right's strands in the 2023 interview."}
+  - {id: paleocon, n: "The Zoomer Right and paleoconservatism", short: "Paleocon", x: 0.25, y: -0.5, src: tag, d: "Protectionist, often isolationist, wary of trade deals and troops abroad, and set apart from the neocons and the free-market Tea Party right before it."}
+  - {id: trad, n: "Reactionary Catholicism", short: "Trad", x: 0.3, y: -0.9, src: tag, d: "Tradition with a liturgy. The 2019 survey notes it has more traction with American populists than European-style identitarianism."}
+  - {id: luddite, n: "Neo-Luddism", short: "Neo-Luddite", x: -0.05, y: -0.8, src: luddism, d: "Defined against transhumanism: slow the machine down. The 2019 interview's subject later moved to the progressive left."}
+  - {id: liberal, n: "The mainstream", short: "Liberal", x: 0.1, y: 0.1, src: politigram, d: "Outside the catalog: the window the subcultures define themselves against, and push past."}
+
+dims:
+  anti: {t: "Anti-establishment", lo: "Institutionalist", hi: "Anti-establishment", src: mw, d: "Proposed as the axis that matters more now than left and right: whether you trust the institutions and the people who run them."}
+  ir: {t: "Irony", lo: "Earnest", hi: "Shitposter", src: ffp, d: "Irony works as a pass: say it as a joke and you don't own it. Repeat a joke long enough and it can become belief (irony poisoning); cringe, by contrast, is sincerity that can't be bought."}
+  cls: {t: "Class or culture", lo: "Culture", hi: "Class", src: pipeline, d: "The argument that the parties converged on economics and split on culture, and that politics should be redrawn along class."}
+  col: {t: "Collector or committed", lo: "Committed", hi: "Collector", src: mw, d: "Young posters collecting ideologies like Pokémon, stacking flairs and trying combinations until one sticks, versus settling on one."}
+  fun: {t: "Funnel depth", lo: "Casual", hi: "Niche theory", src: pipeline, d: "The politicization funnel: come for a familiar guest, dig through the back catalog, end up with niche thinkers."}
+  body: {t: "Body politics", lo: "Terminally online", hi: "Offline and gym-pilled", src: manos, d: "The fitness and self-sufficiency world as politics, and the argument that the left's neglect of the body is a missed coalition."}
+  subj: {t: "Collective subject", src: memetic, d: "Who 'we' are: the nation (mythic), the class (material), or the free individual at the center of the old compass."}
+
+questions:
+  # ------------------------------------------------ the map (4 per take)
+  - {id: p01, dim: map, q: "Pick your ideal Saturday", cards: [
+      {art: "🛖🌲🔥", c: "Off-grid. No signal. Finally free.", x: -0.4, y: -0.9, w: Agrarian, bg: "#2f4a2c"},
+      {art: "🚀🧬🤖", c: "Me in 2040 after my third brain upgrade", x: 0.1, y: 0.9, w: Cybernetic, ir: 1, bg: "#1d2f55"},
+      {art: "⛪🕯️🍞", c: "Mass, then baking bread like great-grandma", x: 0.25, y: -0.85, w: Traditionalist, bg: "#5a4630"},
+      {art: "📈🏝️🪙", c: "Day trading from a seastead. No taxes, no masters.", x: 0.9, y: 0.5, w: Voluntarist, ir: 1, bg: "#6b5a12"}]}
+  - {id: p02, dim: map, q: "Which poster goes on your wall?", cards: [
+      {art: "✊🏭", c: "Workers of the world, log off", x: -0.9, y: 0.0, w: Internationalist, ir: 2, bg: "#7a1f1f"},
+      {art: "🌹🏥", c: "Medicare for all. Then we'll talk.", x: -0.5, y: 0.0, w: Social, bg: "#8a2a4a"},
+      {art: "🇺🇸🏭", c: "Made in America or not at all", x: 0.25, y: -0.5, w: Protectionist, bg: "#24345a"},
+      {img: gadsden, c: "Don't tread on my crypto wallet", x: 0.85, y: 0.3, w: Libertarian, ir: 2, bg: "#8a7a10", see: gadsden}]}
+  - {id: p03, dim: map, q: "Pick a hero", cards: [
+      {img: marx, c: "The bearded 19th-century guy who was right about the factories", x: -0.8, y: 0.1, w: Marxian, bg: "#5c2222"},
+      {img: stirner, c: "The original 'it's all spooks' guy", x: 0.45, y: -0.1, w: Egoist, ir: 1, bg: "#33363a"},
+      {art: "🌲🚶", c: "The man who walked into the woods and never posted again", x: -0.3, y: -0.9, w: Primitivist, bg: "#2f4a2c"},
+      {art: "🧑‍🔬⚡", c: "Whoever ships the next breakthrough first", x: 0.2, y: 0.9, w: Accelerationist, bg: "#1d3f5f"}]}
+  - {id: p04, dim: map, q: "Pick a future city", cards: [
+      {art: "🌆🤖", c: "Fully automated, fully shared", x: -0.7, y: 0.9, w: Luxury-Communist, ir: 1, bg: "#5a1d3d", see: falc},
+      {art: "🏙️🏦", c: "Opt-in charter city, citizenship by subscription", x: 0.75, y: 0.6, w: Network-State, bg: "#2a2a3a"},
+      {art: "🏘️⛪", c: "A small town with a church at the center and nothing over four stories", x: 0.2, y: -0.7, w: Distributist, bg: "#5a4630"},
+      {img: wilderness, c: "The city is gone and the forest came back", x: -0.4, y: -1.0, w: Green, bg: "#2f4a2c"}]}
+  - {id: p05, dim: map, q: "What's the real problem?", cards: [
+      {art: "💼🏭", c: "Capitalism", x: -0.9, y: 0.0, w: Anti-Capitalist, bg: "#7a1f1f"},
+      {art: "🏛️🔒", c: "The state", x: 0.85, y: 0.0, w: Anarcho, bg: "#6b5a12"},
+      {art: "📱⛓️", c: "Technology itself", x: -0.1, y: -1.0, w: Neo-Luddite, bg: "#2f4a2c"},
+      {art: "🕰️🧭", c: "We forgot where we came from", x: 0.25, y: -0.8, w: Paleo, bg: "#5a4630"}]}
+  - {id: p06, dim: map, q: "Pick a reading list", cards: [
+      {art: "📕🔍", c: "Communist theory, but only the obscure 1920s splinter groups", x: -0.9, y: 0.1, w: Bordigist, ir: 1, bg: "#7a1f1f"},
+      {art: "📗🍄", c: "Thoreau and a field guide to edible plants", x: -0.3, y: -0.9, w: Agrarian, bg: "#2f4a2c"},
+      {art: "📘₿", c: "Rothbard and the Bitcoin white paper", x: 0.9, y: 0.4, w: Austrian, bg: "#6b5a12"},
+      {art: "📙✝️", c: "The Church Fathers and a 1950s cookbook", x: 0.25, y: -0.9, w: Integralist, ir: 1, bg: "#5a4630"}]}
+  - {id: p07, dim: map, q: "Where should the money go?", cards: [
+      {art: "🏗️👷", c: "A job guarantee and public housing", x: -0.7, y: 0.0, w: Social, bg: "#8a2a4a"},
+      {img: fusion, c: "Space and fusion", x: 0.2, y: 0.9, w: Techno-Optimist, bg: "#1d2f55"},
+      {art: "👛🙅", c: "Nowhere. Let people keep it.", x: 0.85, y: 0.0, w: Minarchist, bg: "#6b5a12"},
+      {art: "👶🏡", c: "Families: big tax credits for every kid", x: 0.2, y: -0.6, w: Pro-Natalist, bg: "#5a4630"}]}
+  - {id: p08, dim: map, q: "Pick the endgame", cards: [
+      {art: "⚙️✊", c: "The workers run everything", x: -0.9, y: 0.2, w: Syndicalist, bg: "#7a1f1f"},
+      {art: "☁️🧠", c: "Everyone uploads. Bodies optional.", x: 0.0, y: 1.0, w: Transhumanist, ir: 1, bg: "#1d2f55"},
+      {art: "🏝️📜", c: "Opt-in cities with competing rulebooks", x: 0.8, y: 0.5, w: Voluntarist, bg: "#2a2a3a"},
+      {art: "🌾🏡", c: "Back to the land, small communities", x: -0.2, y: -0.9, w: Agrarian, bg: "#4f6b3a"}]}
+  - {id: p09, dim: map, q: "Which object is on your desk?", cards: [
+      {art: "📄📄📄", c: "A stack of photocopied theory zines", x: -0.7, y: 0.2, w: Theory-Brained, bg: "#7a1f1f"},
+      {art: "🔐💡", c: "A hardware wallet and a ring light", x: 0.8, y: 0.5, w: Creator-Economy, bg: "#2a2a3a"},
+      {art: "🌱📻", c: "Seed packets and a hand-crank radio", x: -0.2, y: -0.8, w: Prepper, bg: "#4f6b3a"},
+      {art: "📿📖", c: "A rosary and a well-thumbed missal", x: 0.3, y: -0.85, w: Traditionalist, bg: "#5a4630"}]}
+  - {id: p10, dim: map, q: "2008 broke something. The fix?", cards: [
+      {art: "🏦✂️", c: "Break up the banks. Unions everywhere.", x: -0.7, y: 0.0, w: Populist, bg: "#8a2a4a"},
+      {art: "🏭🇺🇸", c: "Bring the factories home", x: 0.25, y: -0.4, w: Protectionist, bg: "#24345a"},
+      {art: "🔥🏛️", c: "End the Fed. Sound money.", x: 0.85, y: 0.2, w: Hard-Money, bg: "#6b5a12"},
+      {art: "🤖📦", c: "Let the machines do the work and share the output", x: -0.4, y: 0.9, w: Post-Work, bg: "#1d2f55"}]}
+  - {id: p11, dim: map, q: "Pick a flag for your profile", cards: [
+      {img: flag_ancom, c: "No gods, no masters, no landlords", x: -0.7, y: 0.0, w: Anarcho-Communist, bg: "#111"},
+      {img: flag_ancap, c: "Taxation is theft", x: 0.9, y: 0.2, w: Anarcho-Capitalist, ir: 1, bg: "#111", see: ancap},
+      {img: flag_green, c: "Rewild everything", x: -0.4, y: -0.9, w: Green, bg: "#111"},
+      {art: "🇺🇳📜", c: "The rules-based international order", x: 0.1, y: 0.2, w: Liberal, bg: "#2d5d8a"}]}
+  - {id: p12, dim: map, q: "What should technology do?", cards: [
+      {art: "🏖️🤖", c: "Free everyone from work", x: -0.6, y: 0.9, w: Post-Work, bg: "#5a1d3d"},
+      {art: "🧬♾️", c: "Make me immortal", x: 0.3, y: 1.0, w: Transhumanist, bg: "#1d2f55"},
+      {art: "🚫📡", c: "Leave us alone", x: -0.1, y: -0.9, w: Neo-Luddite, bg: "#2f4a2c"},
+      {art: "💸📈", c: "Make money, obviously", x: 0.8, y: 0.4, w: Market, bg: "#6b5a12"}]}
+  # ------------------------------------------------ anti-establishment
+  - {id: a01, dim: anti, q: "The experts say one thing. You:", cards: [
+      {art: "👩‍🔬✅", c: "Trust them. That's their job.", anti: -1, bg: "#2d4d6d"},
+      {art: "📑🔎", c: "Read the primary sources myself", anti: 0.3, fun: 2, bg: "#33363a"},
+      {art: "🙃🔄", c: "Assume the opposite is true", anti: 1, ir: 2, bg: "#4a1d6a"},
+      {art: "💰❓", c: "Ask who paid for the study", anti: 0.7, bg: "#6b5a12"}]}
+  - {id: a02, dim: anti, q: "Pick the villain", cards: [
+      {art: "🎓📰", c: "Media, academic and nonprofit elites", anti: 1, cls: -0.5, bg: "#5a4630"},
+      {art: "🛥️📱", c: "Billionaires and their platforms", anti: 0.8, cls: 1, bg: "#7a1f1f"},
+      {art: "🔥🏛️", c: "Populists burning down institutions", anti: -1, bg: "#2d4d6d"},
+      {art: "🤷", c: "Nobody. It's complicated.", anti: -0.4, bg: "#33363a"}]}
+  - {id: a03, dim: anti, q: "The next election:", cards: [
+      {art: "🗳️✅", c: "Vote. It matters.", anti: -0.8, bg: "#2d4d6d"},
+      {art: "🗳️3️⃣", c: "Vote, but third party", anti: 0.3, bg: "#4f6b3a"},
+      {art: "🧱🔨", c: "The whole system needs replacing", anti: 1, bg: "#7a1f1f"},
+      {art: "📋🤝", c: "Skip the vote, organize the block", anti: 0.6, cls: 1, body: 1, bg: "#8a2a4a"}]}
+  # ------------------------------------------------ irony
+  - {id: i01, dim: ir, q: "How do you post?", cards: [
+      {art: "🤡➡️😐", c: "Ironically, until it quietly becomes sincere", ir: 1, bg: "#4a1d6a"},
+      {art: "🫡", c: "I mean every word", ir: 0, bg: "#2d4d6d"},
+      {art: "🙈", c: "I don't post. I lurk.", ir: 0, body: 0.3, bg: "#33363a"},
+      {art: "🔥🃏", c: "Only a shitpost can tell the truth", ir: 2, bg: "#2f4a2c"}]}
+  - {id: i02, dim: ir, q: "Someone calls your take cringe.", cards: [
+      {art: "😤💯", c: "Good. Cringe is honest.", ir: 0, bg: "#2d4d6d"},
+      {art: "📢🔁", c: "Post it again, bigger", ir: 2, bg: "#4a1d6a"},
+      {art: "🫣🗑️", c: "Delete it and say it was a bit", ir: 1, bg: "#33363a"},
+      {art: "🤔💬", c: "Ask what they'd say instead", ir: 0, anti: -0.3, bg: "#2d5d8a"}]}
+  - {id: i03, dim: ir, q: "Your profile picture:", cards: [
+      {art: "🙂📸", c: "My actual face", ir: 0, bg: "#2d4d6d"},
+      {img: stirner, c: "An 1840s sketch of a dead philosopher", ir: 1, fun: 2, bg: "#33363a"},
+      {art: "🍳🖼️", c: "A deep-fried meme", ir: 2, body: -1, bg: "#8a4a10"},
+      {img: flag_ancom, c: "A flag. Just a flag.", ir: 1, bg: "#111"}]}
+  # ------------------------------------------------ class or culture
+  - {id: c01, dim: cls, q: "What divides the country most?", cards: [
+      {art: "💰🧍", c: "The rich and everyone else", cls: 1, bg: "#7a1f1f"},
+      {art: "🏙️🌾", c: "City and country", cls: -0.5, bg: "#4f6b3a"},
+      {art: "⛪🔭", c: "Faith and secularism", cls: -1, bg: "#5a4630"},
+      {art: "🎓🛠️", c: "A college degree or not", cls: 0.4, bg: "#24345a"}]}
+  - {id: c02, dim: cls, q: "A candidate wins you over by…", cards: [
+      {art: "💵🏠", c: "Raising wages and cutting rent", cls: 1, bg: "#8a2a4a"},
+      {art: "🏡🛡️", c: "Defending your way of life", cls: -1, bg: "#5a4630"},
+      {art: "✂️🏢", c: "Breaking up monopolies", cls: 0.8, anti: 0.5, bg: "#7a1f1f"},
+      {art: "⚔️📺", c: "Fighting the culture war on your side", cls: -1, bg: "#24345a"}]}
+  - {id: c03, dim: cls, q: "The headline you'd click:", cards: [
+      {art: "📦🚶", c: "Warehouse workers walk out", cls: 1, bg: "#7a1f1f"},
+      {art: "📚⚖️", c: "School board fights over library books", cls: -1, bg: "#5a4630"},
+      {art: "🏥💼", c: "Private equity buys your local hospital", cls: 1, bg: "#8a2a4a"},
+      {art: "🗿🚧", c: "Statue comes down in the town square", cls: -1, bg: "#6d6a63"}]}
+  # ------------------------------------------------ collective subject
+  - {id: s01, dim: subj, q: "Finish the sentence: we are…", cards: [
+      {art: "🇺🇸", c: "…a nation", subj: nation, bg: "#24345a"},
+      {art: "👷‍♀️👷", c: "…a class", subj: class, bg: "#7a1f1f"},
+      {art: "🧍🧍‍♀️", c: "…free individuals", subj: individual, bg: "#6b5a12"},
+      {art: "🏘️", c: "…neighbors", subj: nation, cls: 0.3, bg: "#4f6b3a"}]}
+  - {id: s02, dim: subj, q: "Who do you owe the most?", cards: [
+      {art: "🏛️🇺🇸", c: "My country", subj: nation, bg: "#24345a"},
+      {art: "🛠️🤝", c: "My coworkers", subj: class, bg: "#7a1f1f"},
+      {art: "🪞", c: "Myself", subj: individual, ir: 1, bg: "#6b5a12"},
+      {art: "👨‍👩‍👧‍👦", c: "My family", subj: nation, bg: "#5a4630"}]}
+  - {id: s03, dim: subj, q: "The flag on your porch:", cards: [
+      {art: "🇺🇸", c: "The Stars and Stripes", subj: nation, bg: "#24345a"},
+      {art: "🪧✊", c: "A union local's banner", subj: class, bg: "#7a1f1f"},
+      {img: gadsden, c: "A coiled snake on yellow", subj: individual, bg: "#8a7a10", see: gadsden},
+      {art: "🚫🏳️", c: "No flag", subj: individual, anti: 0.3, bg: "#33363a"}]}
+  # ------------------------------------------------ collector or committed
+  - {id: k01, dim: col, q: "How many times has your flair changed?", cards: [
+      {art: "1️⃣", c: "Never", col: -1, bg: "#2d4d6d"},
+      {art: "2️⃣", c: "Once or twice", col: -0.3, bg: "#4f6b3a"},
+      {art: "♾️", c: "I've lost count", col: 1, ir: 1, bg: "#4a1d6a", see: compass},
+      {art: "👻", c: "Flair is a spook", col: 0.5, ir: 2, bg: "#33363a"}]}
+  - {id: k02, dim: col, q: "A brand-new ideology drops online. You:", cards: [
+      {art: "📚🌙", c: "Read all of it by morning", col: 1, fun: 2, bg: "#4a1d6a"},
+      {art: "🧱", c: "Ignore it. I know what I believe.", col: -1, bg: "#2d4d6d"},
+      {art: "🖼️😂", c: "Make a meme of it", col: 0.5, ir: 2, bg: "#8a4a10"},
+      {art: "👀⏳", c: "Wait to see who adopts it", col: -0.3, bg: "#33363a"}]}
+  - {id: k03, dim: col, q: "Your political label is…", cards: [
+      {art: "🔤", c: "One word", col: -1, bg: "#2d4d6d"},
+      {art: "🔤➖🔤", c: "Two words, hyphenated", col: 0, bg: "#4f6b3a"},
+      {art: "🔤🔤🔤🔤🔤", c: "Five words, two of them start with 'post-'", col: 1, ir: 1, bg: "#4a1d6a"},
+      {art: "📅❔", c: "Ask me tomorrow", col: 0.8, bg: "#33363a"}]}
+  # ------------------------------------------------ funnel depth
+  - {id: f01, dim: fun, q: "You liked a podcast guest. Next:", cards: [
+      {art: "📱↩️", c: "Back to my feed", fun: 0, bg: "#33363a"},
+      {art: "🎧🗂️", c: "Binge their whole back catalog", fun: 1, bg: "#2d4d6d"},
+      {art: "📦📕", c: "Order the 600-page book they cited", fun: 2, bg: "#5a4630"},
+      {art: "💬🔒", c: "Find their Discord", fun: 2, body: -0.5, col: 0.5, bg: "#4a1d6a"}]}
+  - {id: f02, dim: fun, q: "Your news diet:", cards: [
+      {art: "🔔📰", c: "Headlines and push alerts", fun: 0, bg: "#24345a"},
+      {art: "🎙️⏱️", c: "Two or three long podcasts a week", fun: 1, bg: "#2d4d6d"},
+      {art: "📄🗃️", c: "Primary sources and theory PDFs", fun: 2, bg: "#5c2222"},
+      {art: "💬📲", c: "The group chat tells me what matters", fun: 0, body: -0.5, bg: "#33363a"}]}
+  - {id: f03, dim: fun, q: "Pick a bookshelf", cards: [
+      {art: "📚⭐", c: "This year's bestsellers", fun: 0, bg: "#2d4d6d"},
+      {art: "📚🌍", c: "Big-idea history and nonfiction", fun: 1, bg: "#4f6b3a"},
+      {art: "📜🕯️", c: "Out-of-print pamphlets", fun: 2, bg: "#5a4630"},
+      {art: "🖼️📱", c: "Mostly screenshots", fun: 0, ir: 1, body: -1, bg: "#33363a"}]}
+  # ------------------------------------------------ body politics
+  - {id: b01, dim: body, q: "Your morning:", cards: [
+      {art: "🏋️☕", c: "Lift, cold plunge, black coffee", body: 1, bg: "#33363a"},
+      {art: "🛏️📱", c: "An hour on my phone in bed", body: -1, bg: "#4a1d6a"},
+      {art: "🏃‍♂️👟", c: "Run with the club", body: 1, cls: 0.3, bg: "#4f6b3a"},
+      {art: "🧵🌙", c: "Catch up on the overnight threads", body: -1, fun: 1, bg: "#24345a"}]}
+  - {id: b02, dim: body, q: "The left should…", cards: [
+      {art: "🥊🏟️", c: "Open boxing gyms and run clubs", body: 1, cls: 0.5, bg: "#7a1f1f"},
+      {art: "⌨️🔥", c: "Post harder", body: -1, ir: 2, bg: "#4a1d6a"},
+      {art: "📖👥", c: "Start reading groups", body: -0.2, fun: 2, bg: "#5a4630"},
+      {art: "🏫🗳️", c: "Run for school board", body: 0.5, anti: -0.5, bg: "#2d4d6d"}]}
+  - {id: b03, dim: body, q: "Pick a supplement", cards: [
+      {art: "☀️😴", c: "Sunlight and sleep", body: 1, bg: "#8a7a10"},
+      {art: "🎙️💊", c: "Whatever the podcast sponsor sells", body: 0.3, ir: 1, anti: 0.5, bg: "#5a4630"},
+      {art: "⌨️🥤", c: "None. I'm online.", body: -1, bg: "#33363a"},
+      {art: "😬🍬", c: "Mewing gum", body: 0.4, ir: 2, bg: "#4a1d6a"}]}
+  # ------------------------------------------------ the future (1 per take, the finale)
+  - {id: u01, dim: future, q: "It's 2045. Pick the headline.", cards: [
+      {art: "🏭🛑📅", c: "Last coal plant closes as the four-day week becomes law", x: -0.5, y: 0.6, bg: "#5a1d3d"},
+      {art: "🏙️1️⃣M", c: "Opt-in charter city passes a million residents", x: 0.8, y: 0.6, bg: "#2a2a3a"},
+      {art: "🏡📈", c: "Census: small towns grow for the tenth year as people leave cities", x: 0.1, y: -0.7, bg: "#4f6b3a"},
+      {art: "📱⏩", c: "Nothing changed. The feed just got faster.", x: 0.0, y: 0.3, ir: 2, anti: 1, bg: "#33363a"}]}
+  - {id: u02, dim: future, q: "2045: who's in charge?", cards: [
+      {art: "🤝🏭", c: "Unions and co-ops", x: -0.8, y: 0.2, cls: 1, bg: "#7a1f1f"},
+      {art: "🖥️🏢", c: "The platforms", x: 0.6, y: 0.8, anti: 0.5, bg: "#1d2f55"},
+      {art: "⛪👨‍👩‍👧", c: "Churches and families", x: 0.2, y: -0.9, cls: -1, bg: "#5a4630"},
+      {art: "🧩🏘️", c: "Nobody: it broke into small self-run communities", x: -0.2, y: -0.6, anti: 1, bg: "#4f6b3a"}]}
+  - {id: u03, dim: future, q: "2045: your job?", cards: [
+      {art: "🤖📋", c: "Robot supervisor, 20 hours a week", x: -0.4, y: 0.9, bg: "#1d2f55"},
+      {art: "🏪🚫📑", c: "My own business, no regulators", x: 0.9, y: 0.2, bg: "#6b5a12"},
+      {art: "🚜🌾", c: "Farming", x: -0.2, y: -0.9, body: 1, bg: "#4f6b3a"},
+      {art: "🖥️🖥️", c: "Same job, more screens", x: 0.1, y: 0.3, body: -1, bg: "#33363a"}]}
