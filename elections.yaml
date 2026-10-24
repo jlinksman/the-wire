@@ -266,3 +266,67 @@ elections:
           - {name: "Molly Rhodes", lines: [Democratic, Working Families], incumbent: true, bio: "District 18 (Beacon and Fishkill); former Beacon City Council member for Ward 1."}
 
     proposals: []
+
+    # The election check: statements you rate without seeing what they measure. Order is shuffled
+    # on the page; about half are worded so that agreeing points the other way. Each candidate is
+    # coded on the statements their sourced positions speak to (-2 strongly disagree … +2 strongly
+    # agree); a candidate with no stated position isn't scored on that statement.
+    quiz:
+      title: "Election check"
+      items:
+        - {id: q01, text: "New York should replace Central Hudson with a public, nonprofit power authority."}
+        - {id: q02, text: "A utility rate increase should never be decided without a public hearing in the region that pays it."}
+        - {id: q03, text: "New York's Scaffold Law, which holds owners and contractors fully liable for workers' falls, should stay as it is."}
+        - {id: q04, text: "Cutting state income taxes is worth cutting state programs to pay for it."}
+        - {id: q05, text: "More new housing should be allowed to skip the state's environmental review."}
+        - {id: q06, text: "New York should roll back cashless bail."}
+        - {id: q07, text: "Federal immigration agents should need a judge's warrant to make arrests at schools, hospitals and houses of worship."}
+        - {id: q08, text: "New York should adopt single-payer health care for everyone in the state."}
+        - {id: q09, text: "New York should build more nuclear power."}
+        - {id: q10, text: "New data centers in New York should be paused until their effect on power bills is understood."}
+        - {id: q11, text: "The Attorney General's office should put more of its effort into criminal prosecution and less into civil cases."}
+        - {id: q12, text: "US military aid to Israel should continue at current levels."}
+        - {id: q13, text: "The state pension fund should keep investing in Israel bonds."}
+        - {id: q14, text: "Federal tariffs are raising prices and should be lifted."}
+        - {id: q15, text: "Government regulation is the main reason housing and business costs are so high."}
+        - {id: q16, text: "The Attorney General should be able to pursue business practices that are unfair, not only ones that are deceptive."}
+        - {id: q17, text: "The state pension fund should put more of its money into companies that grow in New York."}
+        - {id: q18, text: "The state should build and own housing directly, not only subsidize private developers."}
+      stances:
+        "Kathy Hochul":
+          q05: {v: 1, source: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/01/13/affordability--fed-pushback--re-election-focus-of-hochul-s-state-of-the-state"}
+          q07: {v: 2, source: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/01/13/affordability--fed-pushback--re-election-focus-of-hochul-s-state-of-the-state"}
+          q09: {v: 2, source: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/01/13/affordability--fed-pushback--re-election-focus-of-hochul-s-state-of-the-state"}
+          q14: {v: 2, source: "https://www.fox5ny.com/news/hochul-blakeman-debate-ny-governor-race"}
+        "Bruce Blakeman":
+          q04: {v: 2, source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/29/hochul-blakeman-tax-relief"}
+          q06: {v: 2, source: "https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html"}
+          q07: {v: -1, source: "https://spectrumlocalnews.com/nys/central-ny/politics/2026/10/14/hochul-and-blakeman-trade-barbs-in-only-governor-debate", note: "opposes sanctuary policies; supports local cooperation with federal enforcement"}
+        "Letitia James":
+          q11: {v: -1, source: "https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy", note: "says the office primarily focuses on civil investigations"}
+          q16: {v: 2, source: "https://www.jamesforny.com/priorities"}
+        "Saritha Komatireddy":
+          q06: {v: 2, source: "https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy"}
+          q11: {v: 2, source: "https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy"}
+        "Thomas DiNapoli":
+          q10: {v: 2, source: "https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/"}
+          q13: {v: 2, source: "https://vinnews.com/2026/10/18/dinapoli-pledges-to-continue-investing-new-york-pension-funds-in-israel-bonds/"}
+        "Joseph Hernandez":
+          q10: {v: -2, source: "https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/"}
+          q17: {v: 2, source: "https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/"}
+        "Pat Ryan":
+          q03: {v: 2, source: "https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/"}
+          q12: {v: -2, source: "https://www.cbsnews.com/news/us-israel-aid-house-democrats-massie-amendment/"}
+          q14: {v: 1, source: "https://patryan.house.gov/media/press-releases/congressman-pat-ryan-introduces-small-business-relief-act-eliminate-trumps", note: "would exempt small businesses from tariffs and refund what they paid"}
+        "Jackie Mary Auringer":
+          q03: {v: -2, source: "https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/"}
+          q04: {v: 1, source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/", note: "lower taxes and less government spending"}
+          q15: {v: 2, source: "https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/"}
+        "Robert G. Rolison":
+          q02: {v: 2, source: "https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-bill-requiring-public-hearings-utility"}
+          q10: {v: 2, source: "https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html", note: "voted for a one-year statewide data-center moratorium"}
+          q15: {v: 1, source: "https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html", note: "called for cutting regulatory challenges for small businesses"}
+        "Lisa Kaul":
+          q01: {v: 2, source: "https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/"}
+          q08: {v: 2, source: "https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/"}
+          q18: {v: 2, source: "https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/", note: "supports the Social Housing Development Act"}
