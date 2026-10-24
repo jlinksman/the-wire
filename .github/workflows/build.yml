@@ -57,6 +57,13 @@ jobs:
             || echo '{"threads":[],"topics":[]}' > follows.json
           python3 -c "import json;d=json.load(open('follows.json'));print(len(d.get('threads',[])),'followed threads,',len(d.get('topics',[])),'topics')" \
             || echo '{"threads":[],"topics":[]}' > follows.json
+      - name: Check for your voter-guide scorecard in Workers KV
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
+        run: |
+          # Only whether it's there, which election and how many races reach the (public) log; never its contents.
+          npx --yes wrangler@4 kv key get ballot.json --namespace-id "$WIRE_KV_ID" --remote > ballot.json 2>/dev/null || echo '{}' > ballot.json
+          python3 -c "import json;d=json.load(open('ballot.json'));print('scorecard:', d.get('election') or 'none', len(d.get('races') or {}), 'races')" \
+            || echo '{}' > ballot.json
       - name: Build
         run: python pipeline/build.py
 
