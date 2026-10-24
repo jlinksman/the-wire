@@ -1,7 +1,7 @@
-# Explainers for questionnaire statements (2026-10-23), shown by "What's this about?" before
-# answering. Written in a Claude session from the sources listed under each (all opened and
-# checked on 2026-10-23); neutral by rule: the case for agreeing and for disagreeing get equal
-# space, and nothing says how an answer is counted. The build adds the newest matching coverage
+# Explainers for questionnaire statements (2026-10-23; election statements q19-q44 added 2026-10-24),
+# shown by "What's this about?" before answering. Written in Claude sessions from the sources listed
+# under each (all opened and checked); neutral by rule: the case for agreeing and for disagreeing get
+# equal space, and nothing says how an answer is counted. The build adds the newest matching coverage
 # (pipeline/explain.py). Refresh before each election and each annual values take.
 q01:
   now: Sen. Michelle Hinchey and Assemblymember Sarahana Shrestha sponsor the Hudson Valley Power Authority Act (S2026A / A2127A). It would create a public authority able to buy Central Hudson and run it as a public utility, with a goal that households spend no more than 6% of income on energy. The bill was re-referred to committee on Jan. 7, 2026 and has not had a floor vote. Central Hudson, owned by Canada's Fortis, says it is 'not for sale.' Meanwhile the PSC approved three years of electric delivery increases in August 2025 ($29.7M, $31.6M and $34.5M).
@@ -717,3 +717,355 @@ v30:
   - https://www.nyserda.ny.gov/About/Newsroom/2025-Announcements/2025-12-16-State-Energy-Planning-Board-Approves-State-Energy-Plan
   - https://www.eenews.net/articles/appeals-court-tosses-case-challenging-new-york-permits-for-nese-pipeline/
   - https://www.clm.com/new-yorks-all-electric-buildings-act-survives-challenge-and-may-go-into-effect-this-fall/
+q19:
+  now: Since Jan. 5, 2025, most drivers entering Manhattan below 60th Street pay a $9 peak toll that funds the MTA's capital plan. Hochul said it netted more than $550 million in its first year; a federal judge blocked the Trump administration's attempt to end it in March 2026, and the administration has appealed.
+  case_for: Blakeman, Long Island and Staten Island officials, and many outer-borough and suburban drivers argue the toll is a new tax on middle-class commuters who already pay for roads, and that the MTA should fix its own spending before charging drivers more.
+  case_against: Hochul, the MTA and transit advocates argue the toll has cut traffic noticeably, is on track to fund $15 billion in subway and rail repairs, and that ending it would leave a hole in the MTA's budget that riders or taxpayers would fill.
+  terms:
+  - congestion pricing
+  - MTA
+  - toll
+  - transit funding
+  sources:
+  - https://newjerseymonitor.com/2026/05/04/trump-administration-appeals-congestion-pricing/
+  - https://longisland.news12.com/2026/07/29/blakeman-targets-mta-leadership-congestion-pricing-while-riding-lirr/01qlKmNuFL7wlamtEdBMHY
+  - https://abc7ny.com/post/nyc-congestion-pricing-gov-kathy-hochul-stands-mta-tolling-plan-vowing-fight-trump-administrations-move/15933727/
+q20:
+  now: The 2019 Climate Leadership and Community Protection Act sets emissions cuts of 85% below 1990 levels by 2050. In late May 2026 Hochul signed budget amendments that pushed the deadline for emissions rules to December 2028, added a 2040 target and changed how methane is counted; a 2025 state report put the law's programs at 5% to 9.5% of a typical home electric bill.
+  case_for: Blakeman and many Republicans and business groups argue the law's mandates drive up utility bills and home heating costs, rely on renewable projects that are behind schedule, and should be replaced with an all-of-the-above approach that includes more natural gas.
+  case_against: Hochul, environmental groups and many Democratic legislators argue the targets are needed to cut pollution and climate risk, that the law's programs are a small share of bills, and that repeal would strand clean-energy investment and jobs already underway.
+  terms:
+  - CLCPA
+  - climate law
+  - emissions targets
+  - utility bills
+  - renewables
+  sources:
+  - https://policyintegrity.org/publications/detail/new-yorks-climate-law-amendments-usher-in-new-challenges-and-opportunities
+  - https://insideclimatenews.org/?p=114954
+  - https://www.audacy.com/wben/news/blakeman-backs-fracking-but-not-the-clcpa
+q21:
+  now: New York has barred high-volume hydraulic fracturing since 2014 and wrote a permanent ban into the 2021 state budget. Blakeman has pledged to open the Southern Tier's Marcellus Shale to drilling by emergency order; Hochul defended the ban in June 2026.
+  case_for: Blakeman, EPA Administrator Lee Zeldin and some Southern Tier officials argue New York sits on a large natural gas reserve that could lower energy bills, create jobs and revive struggling upstate economies, as drilling has done across the border in Pennsylvania.
+  case_against: Hochul and environmental and health groups argue fracking risks water contamination and methane leaks, that the safety record has not clearly improved, and that the state should build out renewable power and grid capacity instead.
+  terms:
+  - fracking
+  - Marcellus Shale
+  - natural gas
+  - Southern Tier
+  sources:
+  - https://spectrumlocalnews.com/nys/central-ny/news/2026/06/12/hochul-defends-fracking-ban-as-blakeman-presses-for-it-to-be-overturned
+  - https://spectrumlocalnews.com/nys/central-ny/politics/2026/10/20/hochul-blakeman-push-affordability-
+q22:
+  now: A state law enacted in May 2026 and in effect since late August bars formal 287(g) agreements, which let local officers do immigration enforcement, and stops local jails from holding people for ICE. Thirteen jurisdictions, including Nassau County, had such agreements; a federal judge rejected the Trump administration's challenge, while a suit by 15 sheriffs continues.
+  case_for: Hochul, immigrant advocates and many Democrats argue local police should focus on local crime, that the agreements discourage immigrants from reporting crimes, and that the law still allows cooperation on prosecuting dangerous criminals.
+  case_against: Blakeman, county sheriffs and Republicans argue the agreements help remove people with criminal records who are in the country illegally, and that ending them makes communities less safe and hinders work with federal law enforcement.
+  terms:
+  - 287(g)
+  - ICE
+  - sanctuary
+  - immigration enforcement
+  - sheriffs
+  sources:
+  - https://www.wamc.org/2026-08-26/blakeman-bows-to-ny-law-limiting-cooperation-with-ice
+  - https://spectrumlocalnews.com/nys/central-ny/politics/2026/08/27/national-issues-dominate-govenrors-race-
+  - https://www.cityandstateny.com/politics/2026/08/hochul-blasts-tariffs-state-fair-blakeman-agrees-end-formal-ice-agreement/415660/
+q23:
+  now: The 2017 Raise the Age law set the age of criminal responsibility at 18, so most cases against 16- and 17-year-olds go to family court or a youth part. District attorneys asked for changes on gun cases and transfers to adult court, but Hochul left the law out of her January 2026 budget.
+  case_for: Hochul, public defenders and youth advocates argue the law keeps teenagers out of adult jails, lowers the odds they reoffend, and that the fix is to fund the youth programs and services the law promised rather than roll it back.
+  case_against: Blakeman, many district attorneys and police groups argue the law lets gangs recruit teenagers to commit serious crimes with few consequences, and that judges need clearer power to move gun and violent cases to adult court.
+  terms:
+  - Raise the Age
+  - youth justice
+  - family court
+  - district attorneys
+  sources:
+  - https://nystateofpolitics.com/state-of-politics/new-york/politics/2026/01/17/hochul-s-budget-won-t-change-raise-the-age-law
+  - https://imprintnews.org/justice/juvenile-justice-2/new-york-governor-stands-by-states-raise-the-age-law/270374
+  - https://www.fox5ny.com/news/bruce-blakeman-takes-aim-nys-justice-system-a-revolving-door-criminality
+q24:
+  now: Local governments control most zoning in New York. Hochul's 2023 plan to require more housing near train stations, with state override power, was shelved after suburban pushback; the state is now building on its own land near transit, including about 265 homes planned at the Beacon Metro-North station.
+  case_for: Hochul, housing advocates and groups like Open New York argue a severe shortage drives up rents and home prices, that local rules block apartments near transit, and that polls show broad support, including 53% of Long Island voters backing a state override.
+  case_against: Blakeman and many suburban officials argue communities should decide what gets built around them, that Albany mandates ignore local land, schools and infrastructure, and that growth should be 'smart' and locally negotiated.
+  terms:
+  - zoning
+  - housing supply
+  - transit-oriented development
+  - local control
+  sources:
+  - https://empire.streetsblog.org/poll-new-yorkers-back-apartments-near-transit-as-blakeman-touts-high-housing-costs
+  - https://www.wnycstudios.org/podcasts/bl/segments/nassau-county-exec-gov-hochuls-call-more-housing-long-island
+q25:
+  now: The 2025 federal budget law (H.R. 1) cut federal health funding; about 450,000 New Yorkers lost Essential Plan coverage on July 1, 2026, and Medicaid eligibility changes begin in 2027. Hospital groups project the cuts could reach $10 billion a year by 2033.
+  case_for: Blakeman and Republicans argue New York spends far more on Medicaid than other states, that fraud, waste and payments to ineligible people cost billions, and that a hard audit and deeper cuts would protect care for those who truly need it.
+  case_against: Hochul, hospitals and health-care unions argue the federal cuts already threaten coverage and rural and safety-net hospitals, and that deeper state cuts would mean closures and more uninsured people, with savings better found in targeted reforms.
+  terms:
+  - Medicaid
+  - Essential Plan
+  - H.R. 1
+  - hospitals
+  - health coverage
+  sources:
+  - https://www.cityandstateny.com/politics/2026/07/congressional-democrats-blast-trump-blakeman-over-newly-enacted-essential-plan-cuts/414576/
+  - https://nny360.com/top_stories/as-hospitals-face-uncertain-fiscal-future-candidates-for-governor-offer-different-views-on-state-s/article_4b3dc540-db1c-5d77-959a-161c8bf7b799.html
+  - https://ny1.com/nyc/all-boroughs/politics/2026/07/24/hochul-blakeman-tough-budget
+q26:
+  now: New York's anti-discrimination laws protect gender identity. In 2024 Blakeman barred transgender athletes from women's and girls' teams at Nassau County facilities; a court struck down the order, the county then passed it as law, a trial judge upheld that law in October 2025, and an appeals court paused it days later.
+  case_for: Hochul, Attorney General Letitia James and civil-liberties groups argue transgender girls and women deserve the same chance to play as other athletes, that bans single out a small group of kids, and that state law forbids this kind of discrimination.
+  case_against: Blakeman and many Republicans argue that athletes who went through male puberty can hold physical advantages, and that separate women's and girls' teams exist to give female athletes fair competition, safety and scholarship chances.
+  terms:
+  - transgender athletes
+  - women's sports
+  - Nassau County
+  - anti-discrimination
+  sources:
+  - https://www.nbcnews.com/nbc-out/out-news/long-island-county-bans-transgender-athletes-competing-girls-rcna140184
+  - https://www.wsls.com/health/2025/10/06/new-york-judge-upholds-transgender-athlete-ban-on-long-island/
+  - https://www.foxnews.com/sports/long-island-county-executive-vows-protect-womens-sports-after-appeals-court-halts-trans-athlete-ban.amp
+q27:
+  now: James's office has led or joined dozens of lawsuits against the second Trump administration, over birthright citizenship, federal funding cuts, immigration and elections; it counted 17 by May 2025. Komatireddy, endorsed by Trump, made the office's focus on Trump a central attack in the Oct. 8, 2026 NY1 debate.
+  case_for: Komatireddy and Republicans argue the office has become a political weapon against one man, that taxpayer-funded lawyers should be pointed at crime and fraud at home, and that former AG G. Oliver Koppell has said slowing a president's agenda is not really the AG's role.
+  case_against: James and her supporters argue the suits protect federal money, jobs and rights New Yorkers rely on, that many have won in court, and that former AG Eric Schneiderman says the office has the reach and experience to check federal overreach.
+  terms:
+  - Trump lawsuits
+  - multistate suits
+  - People's Lawyer
+  - federal overreach
+  sources:
+  - https://news.bloomberglaw.com/new-york-brief/ex-ags-split-on-suing-trump
+  - https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy
+  - https://ny1.com/nyc/all-boroughs/politics/2026/10/09/attorney-general-candidates-trade-blows-in-fiery-ny1-debate-letitia-james-saritha-komatireddy
+q28:
+  now: In September 2026 Komatireddy proposed an Office of Civil Commitment inside the AG's office, staffed by law enforcement and doctors, for people with serious mental illness and a history of violence, along with new residential treatment centers. James rejects the idea and says she is directing part of a $3 billion opioid settlement toward psychiatric beds.
+  case_for: Komatireddy argues people too sick to come indoors are dying on the streets and endangering others, that Albany has closed inpatient beds, and that a dedicated office would get the most dangerous cases into treatment faster.
+  case_against: James and the Alliance for Rights and Recovery argue it hands mental health care to police and lawyers, that new institutions would be very expensive, and that outpatient care and more hospital beds work better than turning back the clock.
+  terms:
+  - civil commitment
+  - involuntary treatment
+  - severe mental illness
+  - homelessness
+  - psychiatric beds
+  sources:
+  - https://spectrumlocalnews.com/nys/capital-region/news/2026/09/10/saritha-komatireddy-discusses-campaign-for-n-y--state-attorney-general
+  - https://spectrumlocalnews.com/nys/capital-region/news/2026/09/14/mental-health-advocate-pans-expansion-of-civil-commitment-for-people-with-severe-mental-illness
+  - https://spectrumlocalnews.com/nys/central-ny/news/2026/09/30/ag-letitia-james-comments-on-cornell-gang-rape-case--shield-challenge-and-her-republican-challenger-saritha-komatireddy
+q29:
+  now: The AG's Medicaid Fraud Control Unit prosecutes provider fraud and patient abuse. Komatireddy says its indictments fell from more than 100 a year before James took office to nine; James says the unit has shifted to bigger organized schemes and her campaign pointed to a $31 million pharmacy fraud case charged in October 2026.
+  case_for: James argues the unit has deliberately moved to bigger targets such as organized fraud rings, which can recover more money per case than many small prosecutions, and that her office files real cases in real courts every day.
+  case_against: Komatireddy argues the steep fall in cases and penalties shows the unit has stopped doing its job, and that steady prosecution of individual fraudsters is what deters theft from a program that serves the poor and sick.
+  terms:
+  - Medicaid fraud
+  - MFCU
+  - prosecutions
+  - fraud recovery
+  sources:
+  - https://wjla.com/news/nation-world/ny-republican-attorney-general-candidate-drops-52-count-indictment-against-letitia-james-saritha-komatireddy-president-trump-medicaid-fraud
+  - https://thepostmillennial.com/pathetic-gop-challenger-komatireddy-torches-tish-james-in-ny-attorney-general-debate-over-lax-bail-laws-medicaid-fraud
+  - https://ny1.com/nyc/all-boroughs/news/2026/08/05/republican-saritha-komatireddy-lays-out-record-in-challenge-to-ag-letitia-james
+q30:
+  now: The comptroller audits state agencies, public authorities and local governments and must approve most state contracts. DiNapoli, in office since 2007, is seeking a sixth term; at the Oct. 1, 2026 debate he conceded a multibillion-dollar Medicaid contract was awarded without his office's review, which he called a mistake.
+  case_for: Hernandez argues the office has become a 'lapdog' for Albany, and pledges to expand audits of agencies, public authorities and the MTA, publish findings, and add a forensic-accountant fraud strike team.
+  case_against: DiNapoli argues his audits and fiscal stress monitoring have a long, proven record, that he has publicly criticized contracts that bypassed his review, and that Hernandez's attacks are rhetoric without evidence.
+  terms:
+  - audits
+  - watchdog
+  - contract review
+  - MTA oversight
+  - fiscal stress
+  sources:
+  - https://spectrumlocalnews.com/nys/capital-region/politics/2026/09/30/state-comptroller-candidates-set-to-square-off-on-ny1
+  - https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+  - https://www.ballotready.org/people/joseph-hernandez-cacc2699-2953-4d32-99ef-82d4cb313356
+q31:
+  now: The Common Retirement Fund holds about $297 billion for more than 1.2 million members and is about 97% funded. It returned 11.94% in fiscal 2024-25 and 8.94% a year over the past decade, and its long-term expected return is 5.9%.
+  case_for: Hernandez argues the fund lags peers like California, that AI and robotics are where growth is, and that steering $10 billion a year into tech would raise returns while drawing jobs to New York.
+  case_against: DiNapoli argues diversification is the fund's strength, that a possible AI bubble is a reason to spread risk rather than add it, and that a nearly fully funded plan should not 'play risky games' with retirees' money.
+  terms:
+  - pension returns
+  - AI investing
+  - diversification
+  - AI bubble
+  - Common Retirement Fund
+  sources:
+  - https://www.dailygazette.com/cjfund/political/joseph-hernandez-thomas-dinapoli-comptroller-race/article_758a5c6e-c69a-450a-9d11-5355bbbe8672.html
+  - https://spectrumlocalnews.com/nys/capital-region/news/2026/09/24/comptroller-tom-dinapoli-discusses-his-tenure
+  - https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+q32:
+  now: The comptroller audits Medicaid payments and refers fraud cases for prosecution alongside the AG's fraud unit. DiNapoli says his office has produced 55 arrests and $44 million in recoveries since 2023; Hernandez says fraud is out of control, and DiNapoli accuses him of fabricating statistics.
+  case_for: DiNapoli argues his audits have steadily found and recovered improper payments, that his record is documented, and that the biggest recent lapse came from a contract awarded without his review, not from his own oversight.
+  case_against: Hernandez argues New York's fraud rate is elevated and prosecutions are few, that the office has acted as a lapdog rather than a watchdog, and that a dedicated strike team of forensic accountants would catch far more.
+  terms:
+  - Medicaid fraud
+  - audits
+  - recoveries
+  - fraud strike team
+  sources:
+  - https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+  - https://ny1.com/nyc/all-boroughs/politics/2026/10/02/state-comptroller-dinapoli-fends-off-repeated-attacks-in-ny1-debate-joseph-hernandez
+q33:
+  now: Under a Climate Action Plan aiming for a net-zero portfolio by 2040, the fund announced in Feb. 2024 it would divest eight oil and gas companies, including Exxon Mobil, worth about $26.8 million, and make no new private investments in fossil-fuel extraction. Its restrictions do not apply to index funds, so it still holds some fossil-fuel stocks.
+  case_for: DiNapoli and climate groups argue companies with no plan for the low-carbon transition are a long-term financial risk, and that dropping them while growing a $40 billion climate-solutions target by 2035 protects returns.
+  case_against: Fiscal conservatives, including Hernandez, who says investing should rest on fundamentals and 'no political pet projects,' argue divestment lets politics into a fiduciary decision and can cost returns when energy stocks rise.
+  terms:
+  - fossil fuel divestment
+  - Climate Action Plan
+  - net zero 2040
+  - ESG
+  - fiduciary duty
+  sources:
+  - https://www.osc.ny.gov/press/releases/2024/02/ny-common-retirement-fund-announces-new-measures-protect-state-pension-fund-climate-risk-and-invest
+  - https://www.fortune.com/2026/06/22/new-york-comptroller-drew-warshaw-tom-dipapoli-raj-goyle-primary/
+  - https://www.ballotready.org/people/joseph-hernandez-cacc2699-2953-4d32-99ef-82d4cb313356
+q34:
+  now: The fund relies on hundreds of outside managers; DiNapoli's office says it paid about $1 billion in fees, which a state ranking places 33rd of 74 large public funds for investment expenses. Primary challenger Drew Warshaw and Republican Hernandez both proposed bringing more management in-house.
+  case_for: Hernandez and Warshaw argue outside managers charge high fees that eat into retirees' returns year after year, and that large public funds elsewhere run more of their money with their own salaried staff at lower cost.
+  case_against: DiNapoli's office argues its fees are a low share of assets and in line with peers, that spreading money across many managers is part of diversification, and that the critics' cost estimates rest on bad math.
+  terms:
+  - Wall Street fees
+  - in-house management
+  - outside managers
+  - pension costs
+  sources:
+  - https://www.fortune.com/2026/06/22/new-york-comptroller-drew-warshaw-tom-dipapoli-raj-goyle-primary/
+  - https://www.dailygazette.com/cjfund/political/joseph-hernandez-thomas-dinapoli-comptroller-race/article_758a5c6e-c69a-450a-9d11-5355bbbe8672.html
+  - https://ny1.com/nyc/all-boroughs/politics/2025/12/23/n-y--comptroller-candidate-s-report-decries-dinapoli
+q35:
+  now: On July 22, 2026 the House passed H.R. 7008, 232-198. The bill bans members of Congress from buying stocks and also requires photo ID to vote in federal elections, in person or by mail. Senate Democrats blocked the Senate version in late September 2026, so no federal ID rule is in effect.
+  case_for: Supporters, including House Republicans and Auringer, say a photo-ID rule is a basic safeguard that most voters back. They point to a Siena poll showing 54% support, and to exemptions for military, overseas, elderly and disabled voters.
+  case_against: Opponents, including most House Democrats and Ryan, say a national ID mandate would block eligible voters who lack a current ID. They also object to pairing it with a popular stock-trading ban to force a vote, and they call it voter suppression.
+  terms:
+  - voter ID
+  - SAVE Act
+  - Stop Insider Trading Act
+  - H.R. 7008
+  - election integrity
+  sources:
+  - https://clerk.house.gov/evs/2026/roll280
+  - https://leadstories.com/hoax-alert/2026/07/fact-check-democrats-voted-against-stock-trading-ban-bill-but-it-also-included-a-voter-id-provision.html
+  - https://katv.com/news/nation-world/senate-democrats-block-gop-bills-on-insider-trading-ban-national-voter-id-ahead-of-midterms-voter-id
+q36:
+  now: Congress funded ICE through 2026 in votes on Jan. 22 and Feb. 3, 2026, without new limits on how agents operate. Democrats sought judicial warrants, body cameras, a mask ban and a bar on detaining citizens after agents killed an unarmed woman in Minnesota. A proposed ICE detention site in Chester, Orange County, drew a petition of more than 20,000 signatures.
+  case_for: Backers, including Ryan and most House Democrats, say ICE has a budget bigger than most militaries and too little oversight. They argue warrants, cameras and visible identification protect citizens' constitutional rights and rebuild trust in enforcement.
+  case_against: Opponents, including House Republicans and Auringer, say ICE needs steady funding to remove people who have committed crimes. They argue that warrant and mask rules would slow arrests and endanger officers, and that holding back funding is a political tactic.
+  terms:
+  - ICE
+  - DHS funding
+  - judicial warrant
+  - mask ban
+  - Chester detention facility
+  sources:
+  - https://patryan.house.gov/media/press-releases/congressman-pat-ryan-votes-against-bill-funding-ices-unconstitutional
+  - https://patryan.house.gov/media/press-releases/congressman-pat-ryan-votes-against-bill-funding-ices-unconstitutional-0
+  - https://winwithjackie.com/press/auringer-statement-newburgh-ice-facility
+q37:
+  now: Since the Supreme Court's 2022 Dobbs decision, each state sets its own abortion law. New York's legislature gave second passage to an Equal Rights Amendment covering reproductive autonomy on Jan. 24, 2023, and it went to voters after that. Congress has not passed either a national ban or a national right to abortion.
+  case_for: Supporters of leaving it to states, including Auringer, say the Supreme Court returned the question to voters and legislatures. They argue states can reflect local views, and that New York already protects access under its own law.
+  case_against: Supporters of a federal law, including Ryan, say rights should not depend on where a woman lives. They back the Women's Health Protection Act to restore Roe-level protection nationwide, and warn that a future Congress could otherwise pass a national ban.
+  terms:
+  - abortion
+  - Dobbs
+  - Roe v. Wade
+  - Women's Health Protection Act
+  - states' rights
+  sources:
+  - https://westchester.news12.com/meet-jackie-auringer-the-29-year-old-gop-challenger-taking-on-rep-pat-ryan-for-ny-18
+  - https://patryan.house.gov/media/press-releases/51st-anniversary-roe-v-wade-congressman-pat-ryan-condemns-far-rights
+  - https://www.nysenate.gov/legislation/bills/2023/S108/amendment/A
+q38:
+  now: Federal tax cuts passed by Congress in 2025 included lower rates for top earners. Ryan says they cost more than a trillion dollars and were paid for partly with health-care cuts. In 2026 Ulster County weighed an income-tax surcharge on high earners that Auringer says would push the top combined rate to 18.75%.
+  case_for: Supporters, including Ryan, say the top 1% received the largest share of recent tax cuts while families face rising costs. They argue higher top rates could restore health-care funding, pay for middle-class relief and help control the debt.
+  case_against: Opponents, including Auringer, say higher taxes on high earners hit small-business owners and doctors who file as individuals. They argue New York already loses residents to lower-tax states and that more taxes would speed that exodus.
+  terms:
+  - tax cuts
+  - top 1%
+  - millionaires tax
+  - Ulster County surcharge
+  - fair share
+  sources:
+  - https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+  - https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/
+q39:
+  now: Indian Point's last reactor shut down in April 2021 under a 2017 settlement with the state. On March 6, 2026, US Energy Secretary Chris Wright and Rep. Mike Lawler called for restarting it. Gov. Hochul is pursuing 4 gigawatts of new nuclear elsewhere but has not backed reopening Indian Point.
+  case_for: Supporters, including Lawler, Wright and Auringer, say the plant once supplied about a quarter of the New York City region's power. They argue restarting it would add carbon-free power, steady the grid and help lower bills.
+  case_against: Opponents, including Westchester County Executive Ken Jenkins, cite the safety and environmental concerns that led to the closure. They say the state's plan relies on renewables, and that any restart would face heavy regulatory, cost and political hurdles.
+  terms:
+  - Indian Point
+  - nuclear restart
+  - Buchanan
+  - grid reliability
+  - energy costs
+  sources:
+  - https://westchester.news12.com/2026/03/09/debate-reignites-over-reopening-indian-point-nuclear-power-plant/5IlK1PCWpsJ5YQK8D2ChF9
+  - https://www.ans.org/news/2026-03-10/article-7832/doe-secretary-and-new-york-congressman-call-for-reopening-of-indian-point/
+  - https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+q40:
+  now: The FY2027 state budget, passed in May 2026, pushed the climate law's rule-writing deadline to the end of 2028 and delayed the electric school bus mandate to 2032. It kept the 2030 and 2050 emissions targets. The All-Electric Buildings Act's rules are on hold, and Senate Republicans have filed bills to repeal it.
+  case_for: Supporters of slowing down, including Senate Republicans and Rolison, say mandates like the gas ban add to already high bills. They want the state to calculate each ratepayer's share of climate-law costs before moving ahead.
+  case_against: Opponents of slowing down, including Kaul, say climate change itself drives up costs through storms and disasters. They argue faster solar, batteries and transmission will lower bills over time and create local jobs.
+  terms:
+  - CLCPA
+  - climate law
+  - gas ban
+  - All-Electric Buildings Act
+  - energy costs
+  sources:
+  - https://www.cityandstateny.com/policy/2026/05/heres-whats-fy-27-new-york-state-budget/413729/
+  - https://www.nysenate.gov/affordable-energy-not-albany-mandates
+  - https://www.nysenate.gov/newsroom/press-releases/2023/rob-rolison/sen-rob-rolison-launches-petition-protect-gas-cooking-and
+  - https://voterguide.abundanceny.org/questionnaires/lisa-kaul
+q41:
+  now: The state Senate gave second passage to New York's Equal Rights Amendment on Jan. 24, 2023, by a vote of 43-20, sending it to voters. It bars discrimination based on reproductive health care and autonomy, along with sex, disability and other traits. Abortion is also protected in state statute.
+  case_for: Supporters, including Kaul and Senate Democrats, say constitutional protection guards abortion access against a future legislature or court. They argue it secures reproductive freedom in New York regardless of what happens nationally.
+  case_against: Opponents, including Rolison and most Senate Republicans, say abortion is already legal under state law, so a constitutional change was unnecessary. They object that the amendment's broad wording reaches well beyond abortion and could have effects voters did not intend.
+  terms:
+  - Equal Rights Amendment
+  - Proposal 1
+  - reproductive autonomy
+  - abortion
+  - state constitution
+  sources:
+  - https://www.nysenate.gov/legislation/bills/2023/S108/amendment/A
+  - https://highlandscurrent.org/2026/08/07/democrats-target-rolison-in-state-senate-race/
+  - https://www.dlcc.org/candidates/lisa-kaul/
+q42:
+  now: The REST Act (S.4659A) would let localities outside New York City declare a housing emergency using public data such as eviction and homelessness rates, rather than a costly vacancy study. It would require buildings with four or more units to be covered. The bill cleared Assembly committees on May 20, 2026, but never reached a floor vote in either chamber.
+  case_for: Supporters, including Kaul and Sen. Brian Kavanagh, say Hudson Valley rents have outpaced wages. They argue towns should be able to act on local data, and that the vacancy study now required is too expensive and too slow for small municipalities.
+  case_against: Opponents, including landlord groups, say rent regulation discourages new building and upkeep. They argue it squeezes small landlords who face rising taxes and repair costs, and that building more housing is the real fix for high rents.
+  terms:
+  - REST Act
+  - rent stabilization
+  - ETPA
+  - housing emergency
+  - S.4659A
+  sources:
+  - https://www.cityandstateny.com/policy/2026/05/state-dems-move-quickly-advance-upstate-rent-control-bill/413689/
+  - https://therealdeal.com/policy-pro/new-york/2026/07/brian-kavanagh-is-bullish-on-rest-acts-albany-chances/
+  - https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+q43:
+  now: Central Hudson delivery rates rose again on July 1, 2026, adding about $6.25 a month for electricity and $11.27 for gas on average. The state budget instead sent one-time $100-$200 rebate checks and added new rules on rate cases. Rolison's S8463 holiday bill did not pass; he says every member of the Senate majority voted against it.
+  case_for: Supporters, including Rolison and Senate Republicans, say about a third of a utility bill is taxes, fees and state charges rather than energy. They argue suspending them would give families and small businesses direct, immediate relief.
+  case_against: Opponents, including the Senate's Democratic majority, say the charges fund clean-energy and low-income help programs. They argue a short holiday would leave a budget hole and would not fix the rate increases that drive bills.
+  terms:
+  - utility tax holiday
+  - S8463
+  - Central Hudson rates
+  - green energy surcharge
+  - ratepayer relief
+  sources:
+  - https://www.nysenate.gov/newsroom/press-releases/2026/rob-rolison/senator-rolison-urges-energy-committee-advance-utility-tax
+  - https://www.nysenate.gov/newsroom/in-the-news/2026/rob-rolison/letter-editor-rolison-working-solutions-battle-high-utility
+  - https://highlandscurrent.org/2026/07/01/new-central-hudson-rates-take-effect/
+  - https://www.cityandstateny.com/policy/2026/05/heres-whats-fy-27-new-york-state-budget/413729/
+q44:
+  now: Under Raise the Age, most cases against 16- and 17-year-olds are moved to family court. Gov. Hochul left changes to the law out of her January 2026 executive budget. Rolison's S.8531 would restore judicial discretion over those transfers and keep firearm cases from moving automatically.
+  case_for: Supporters, including Rolison, say repeat and violent young offenders are not held accountable in family court. They argue judges, not automatic rules, should decide where gun cases are heard, so that serious cases get serious consequences.
+  case_against: Opponents, including a coalition of more than 220 groups, say 16- and 17-year-olds are not driving crime trends and that youth reoffending is at or below pre-law levels. They want nearly $1 billion in unspent Raise the Age funds put toward services instead.
+  terms:
+  - Raise the Age
+  - family court
+  - youth crime
+  - S.8531
+  - juvenile justice
+  sources:
+  - https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-urges-governor-hochul-include-raise-age
+  - https://cccnewyork.org/press-and-media/statement-on-the-hochul-administration-declining-to-include-regressive-changes-to-raise-the-age-in-new-yorks-fy2027-budget-unveiling/
