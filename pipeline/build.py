@@ -752,6 +752,11 @@ def pick_parser(src: dict):
 def fetch_source(src: dict, state: dict, session: requests.Session) -> tuple[str, list[dict] | None]:
     """Returns (outcome, items). items is None when nothing new was fetched."""
     st = state["sources"].setdefault(src["id"], {})
+    if st.get("url") != src["url"]:
+        # The source moved to a new address: the old one's backoff and cache headers don't apply.
+        for k in ("next_allowed", "etag", "last_modified"):
+            st.pop(k, None)
+        st["url"] = src["url"]
     if not is_due(src, st):
         return "skipped", None
     st["last_attempt"] = iso(now_utc())
