@@ -1320,6 +1320,10 @@ def main() -> int:
     mark_changed(state)
     save_state(state)
     failing = sum(1 for h in data["sources"] if h["last_error"])
+    for h in data["sources"]:
+        if h["last_error"]:
+            # Your own searches (u_…) stay anonymous in the public log.
+            log(f"[failing] {h['id']}: " + ("(your search)" if str(h["id"]).startswith("u_") else str(h["last_error"])[:160]))
     log(f"built {len(data['items'])} items from {len(sources)} sources "
         f"({failing} failing) in {time.time() - started:.1f}s")
     return 0
