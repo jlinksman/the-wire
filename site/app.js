@@ -2192,7 +2192,7 @@ async function openStand() {
     heavy.length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "What you said matters a lot" }), el("ul", { class: "cpos" }, ...heavy.map((it) => el("li", { text: "“" + it.text + "” " + (SCALE.find(([k]) => k === ans[it.id].v) || [0, ""])[1] + "." })))) : null,
     weights ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Your scorecard's weights" }),
       el("p", { class: "fine", text: "From how much the statements tied to each criterion matter to you. Shown only: your scorecard keeps its weights until you change them." }), weights) : null,
-    el("button", { class: "sbtn primary wide", text: "The Citarella lens", onclick: () => openLens(sc, past) }),
+    el("button", { class: "sbtn primary wide", text: "Undercurrents", onclick: () => openLens(sc, past) }),
     el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Every statement and how it counted" }), el("span", { class: "chev", text: "▾" })),
       el("ul", { class: "cpos" }, ...bank.items.map((it) => { const a = ans[it.id]; return el("li", {},
         el("b", { text: (it.axis ? ax[it.axis].label + " · agreeing points " + (it.dir > 0 ? ax[it.axis].right : ax[it.axis].left).toLowerCase() : "Not on the map") + (it.crit ? " · informs " + it.crit : "") + ". " }),
@@ -2202,7 +2202,7 @@ async function openStand() {
   openSheet(nodes.filter(Boolean), "Where you stand");
 }
 
-// --------------------------------------------------------------- the Citarella lens
+// --------------------------------------------------------------- Undercurrents (frameworks from Joshua Citarella, cited)
 const fmtYear = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" });
 // Joe's answers read through frameworks from Joshua Citarella's published research on online
 // politics. Written in The Wire's voice: no quotes put in his mouth, every framework credited
@@ -2263,13 +2263,13 @@ function lensReadings(sc, past) {
 function openLens(sc, past) {
   const rs = lensReadings(sc, past);
   openSheet([
-    el("h2", { id: "sheet-title", class: "stitle", text: "The Citarella lens" }),
-    el("p", { class: "sdesc" }, "Your answers read through frameworks from ", link(CITARELLA.home, "Joshua Citarella"), "'s research on online politics. Written by The Wire, not by him: the frameworks are his, the reading is ours."),
+    el("h2", { id: "sheet-title", class: "stitle", text: "Undercurrents" }),
+    el("p", { class: "sdesc" }, "Your answers read through frameworks for how online politics forms and moves. The frameworks come from the research of ", link(CITARELLA.home, "Joshua Citarella"), ", cited under each reading; the reading is The Wire's."),
     ...rs.map((r) => el("section", { class: "ssec" }, el("h3", { class: "sh3", text: r.head }), el("p", { class: "lens", text: r.text }),
       el("p", { class: "fine" }, "From ", link(CITARELLA[r.src][1], CITARELLA[r.src][0])))),
     el("p", { class: "fine" }, "Sources: ", link(CITARELLA.politigram[1], CITARELLA.politigram[0]), " · ", link(CITARELLA.tag[1], CITARELLA.tag[0]), " · ", link(CITARELLA.pipeline[1], CITARELLA.pipeline[0])),
     el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Back to your results", onclick: () => openStand() })),
-  ], "The Citarella lens");
+  ], "Undercurrents");
 }
 function questionnairesSection(Q) {
   const lp = lastPulse(Q);
