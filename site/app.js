@@ -1744,7 +1744,8 @@ function raceBlock(r, picks, open, mine) {
     pick.onclick = (e) => { e.preventDefault(); const pk = store.json(KEY.picks, {}); pk[pickKey] = picked ? null : c.name; store.set(KEY.picks, JSON.stringify(pk)); openGuide(r.id); };
     return el("div", { class: "cand" },
       el("div", { class: "chead" }, el("span", { class: "cname", text: c.name }), c.incumbent ? el("span", { class: "inc", text: "incumbent" }) : null, pick),
-      (c.lines || []).length ? el("div", { class: "lines" }, ...c.lines.map((l) => el("span", { class: "line", text: l }))) : null,
+      (c.lines || []).length ? el("div", { class: "lines" }, ...c.lines.map((l) => el("span", { class: "line" + (l === bestLine(c) ? " best" : ""), text: l }))) : null,
+      (c.lines || []).length > 1 ? whichLine(c) : null,
       c.running_mate ? el("p", { class: "fine", text: "Running mate: " + c.running_mate }) : null,
       c.bio ? el("p", { class: "cbio", text: c.bio }) : null,
       (c.positions || []).length ? el("ul", { class: "cpos" }, ...c.positions.map((p) => el("li", {}, p.topic ? el("b", { text: p.topic + ": " }) : null, p.text + " ", p.source ? link(p.source, "↗", "srcl") : null))) : null,
@@ -1769,6 +1770,33 @@ function raceBlock(r, picks, open, mine) {
       el("ul", { class: "also" }, ...devs.map((d) => el("li", {}, el("span", { class: "asrc", text: ago(Date.parse(d.t)) + " · " + d.source }), link(d.link, d.text))))) : null,
     th ? el("button", { class: "sbtn wide", text: "Open the race thread (news, Ask) ›", onclick: () => openThread(th) }) : null);
 }
+// "Which line?" (2026-10-24): for a candidate on more than one line, what each line stands for,
+// how fusion voting works, and which of the candidate's lines sits closest to Joe's own answers
+// ("Where you stand" plus the election check's statements on the same scales).
+function myLean() {
+  const A = myQuiz && myQuiz.values && myQuiz.values.answers;
+  if (!data.values_bank || !myQuiz) return null;
+  const sc = standScores(A || {}, electionExtra(myQuiz));
+  return sc.econ.s == null || sc.culture.s == null || sc.econ.n + sc.culture.n < 4 ? null : [sc.econ.s, sc.culture.s];
+}
+function bestLine(c) {
+  const g = data.voter_guide, me = myLean();
+  if (!g || !g.line_info || !me || (c.lines || []).length < 2) return null;
+  return c.lines.filter((l) => g.line_info[l]).map((l) => [l, Math.hypot(g.line_info[l].pos[0] - me[0], g.line_info[l].pos[1] - me[1])]).sort((a, b) => a[1] - b[1])[0][0];
+}
+function whichLine(c) {
+  const g = data.voter_guide;
+  if (!g || !g.line_info) return null;
+  const best = bestLine(c);
+  const major = ["Democratic", "Republican"];
+  return el("details", { class: "whichline" },
+    el("summary", { text: best && !major.includes(best) ? "Which line? Your answers sit closest to the " + best + " line" : best ? "Which line? Your answers sit closest to the " + best + " line" : "Which line?" }),
+    el("ul", { class: "cpos" }, ...c.lines.map((l) => { const L = g.line_info[l] || {}; return el("li", {}, el("b", { text: l + (l === best ? " · closest to your answers" : "") + ": " }), (L.what || "") + " ", L.source ? link(L.source, "↗", "srcl") : null); })),
+    el("p", { class: "fine", text: g.fusion }),
+    best ? el("p", { class: "fine", text: "Closest is from your economic and cultural answers on “Where you stand” and the election check, against The Wire's rough placement of each line. It describes fit, not what to do." })
+      : el("p", { class: "fine", text: "Take “Where you stand” (Settings › Questionnaires) and this shows which of the lines is closest to your answers." }));
+}
+
 function candScores(c, crit) {
   const total = weighted(c, crit);
   return el("details", { class: "scores" },

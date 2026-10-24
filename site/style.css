@@ -731,3 +731,5 @@ p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
 .subj { flex: 1; text-align: center; padding: 10px 4px; border-radius: 10px; background: var(--raised); font: 600 0.9rem var(--sans); }
 .subj.on { background: #b967ff; color: #fff; }
 .dialwhy summary { font-size: 0.8rem; color: var(--text3); cursor: pointer; margin-top: 4px; }
+.line.best { outline: 2px solid var(--here); }
+.whichline summary { font: 600 0.88rem var(--sans); color: var(--here); cursor: pointer; margin: 6px 0; }
