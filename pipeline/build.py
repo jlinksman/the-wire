@@ -39,6 +39,7 @@ import brief  # noqa: E402
 import events  # noqa: E402
 import translate  # noqa: E402
 import pulse  # noqa: E402
+import livecheck  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "sources.yaml"
@@ -682,6 +683,25 @@ def parse_senate_floor(src: dict, content: bytes) -> list[dict]:
     return items
 
 
+def parse_senate_gallery(src: dict, content: bytes) -> list[dict]:
+    """The Senate Press Gallery's daily floor log (dailypress.senate.gov, a WordPress feed),
+    which replaced senate.gov's floor-activity page when that began answering 403 to cloud
+    servers (2026-10-23). One post per session day."""
+    items = []
+    for e in feedparser.parse(content).entries[:4]:
+        body = clean_text(e.get("summary") or "", 600)
+        try:
+            when = datetime.strptime(re.sub(r"^\w+,\s*", "", e.title).strip(), "%B %d, %Y").replace(hour=18, tzinfo=NY)
+        except ValueError:
+            continue
+        first = re.sub(r"^\d{1,2}:\d\d\s*[ap]\.m\.\s*", "", body)
+        items.append({
+            "title": f"Senate floor, {when.strftime('%a')} {when.month}/{when.day}: " + (first.split(". ")[0][:120] if first else "floor log"),
+            "link": e.link, "summary": body, "published": iso(when),
+        })
+    return items
+
+
 def parse_nws_afd(src: dict, content: bytes) -> list[dict]:
     """NWS Area Forecast Discussion (forecasters' own reasoning), latest issue only."""
     data = json.loads(content)
@@ -718,6 +738,8 @@ def pick_parser(src: dict):
         return parse_dec_spills
     if "floor_activity" in url:
         return parse_senate_floor
+    if "dailypress.senate.gov" in url:
+        return parse_senate_gallery
     if src.get("type") == "links":
         return parse_links
     if src.get("type") == "rss":
@@ -1221,6 +1243,10 @@ def main() -> int:
 
     prune(state, sources)
     data = write_dist(state, sources, video, teams)
+    try:
+        data["sources"].append(livecheck.run(state, data, session, log))
+    except Exception as exc:
+        log(f"[live] skipped: {type(exc).__name__}: {exc}")
     # City desks: French and Hebrew headlines in English (machine-translated, labeled).
     try:
         tstats = translate.run(state, data["items"], {s["id"]: s for s in sources}, session, log)

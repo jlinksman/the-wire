@@ -991,7 +991,9 @@ function liveView() {
       onclick: (e) => { e.stopPropagation(); prefs.pins = pinned ? prefs.pins.filter((x) => x !== v.id) : [...prefs.pins, v.id]; savePrefs(); renderView("live"); } });
     const info = el("span", { class: "chi" },
       el("span", { class: "chn", text: v.name }),
-      el("span", { class: "cht", text: on ? "Playing" : v.link ? "Opens their site" : (v.note || (v.audio ? "Live radio" : "Live stream")) }));
+      el("span", { class: "cht" + (v.live ? " onair" : v.live === false ? " offair" : ""), text: on ? "Playing" : v.link ? "Opens their site"
+        : v.live ? "● Live" + (v.live_title ? " · " + v.live_title.replace(/^\s*(?:🔴|🟡)?\s*(?:LIVE(?: NEWS)?\s*:)?\s*/i, "") : "") : v.live === false ? "Not live now" + (v.note ? " · " + v.note : "")
+        : (v.note || (v.audio ? "Live radio" : "Live stream")) }));
     return v.link
       ? el("div", { class: "chrow" }, el("a", { class: "chmain", href: v.link, target: "_blank", rel: "noopener" }, info, el("span", { class: "chgo out", "aria-hidden": "true", text: "↗" })), star)
       : el("div", { class: "chrow" + (on ? " on" : "") }, el("button", { class: "chmain", onclick: () => play(v.id) }, info, el("span", { class: "chgo", "aria-hidden": "true", text: on ? "■" : "▶" })), star);
@@ -1000,7 +1002,7 @@ function liveView() {
     el("div", { class: "stage", id: "stage" }, playing ? null : el("div", { class: "stage-empty", text: "Choose a channel below. It keeps playing in a small player while you read other tabs." })),
     pills,
     el("div", { class: "chlist" }, ...rows),
-    el("p", { class: "fine", text: "Official streams only: the publishers' own YouTube channels, players and radio streams. Channels marked \"when live\" only carry events; between events YouTube says the video is unavailable." }),
+    el("p", { class: "fine", text: "Official streams only: the publishers' own YouTube channels, players and radio streams. Live status is checked every 20 minutes; a channel that isn't live may still say the video is unavailable." }),
   ];
 }
 
@@ -1035,7 +1037,7 @@ function renderPlayer() {
   $("pyt").href = v.site || (v.channel_id ? "https://www.youtube.com/channel/" + v.channel_id + "/live" : v.embed || v.audio);
   $("pyt").textContent = v.channel_id ? "YouTube ↗" : "Site ↗";
   $("psound").hidden = Boolean(v.embed || v.audio);   // radio has its own controls
-  const key = v.channel_id || v.audio || v.embed;
+  const key = (v.live_id ? v.live_id + "@" : "") + (v.channel_id || v.audio || v.embed);
   const existing = $("frame").firstElementChild;
   if (existing && existing.dataset.channel === key) return;
   if (v.audio) {
@@ -1053,8 +1055,11 @@ function renderPlayer() {
   }
   {
     $("frame").replaceChildren(el("iframe", {
-      src: "https://www.youtube.com/embed/live_stream?channel=" + encodeURIComponent(v.channel_id) + "&autoplay=1&mute=0&playsinline=1&enablejsapi=1&origin=" + encodeURIComponent(location.origin),
-      title: v.name + " live", "data-channel": v.channel_id,
+      // The channel's current live video when the build found one (YouTube's channel-level
+      // live embed misses most streams); otherwise the channel embed.
+      src: (v.live_id ? "https://www.youtube.com/embed/" + encodeURIComponent(v.live_id) + "?" : "https://www.youtube.com/embed/live_stream?channel=" + encodeURIComponent(v.channel_id) + "&")
+        + "autoplay=1&mute=0&playsinline=1&enablejsapi=1&origin=" + encodeURIComponent(location.origin),
+      title: v.name + " live", "data-channel": key,
       allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: true,
       referrerpolicy: "strict-origin-when-cross-origin",
     }));

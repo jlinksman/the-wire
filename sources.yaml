@@ -209,7 +209,7 @@ federal:
   - {id: govinfo, name: GovInfo (Federal Register, Congressional Record), type: api, url: "https://api.govinfo.gov/", status: KEY, key_env: DATA_GOV_API_KEY, poll: 60}
   - {id: federal_register, name: Federal Register API, type: api, url: "https://www.federalregister.gov/api/v1/documents.json", status: OK, poll: 60, notes: "No key. Filter by agency (EPA, FinCEN, Treasury, DOJ). Worked from the sandbox on 10-05, then returned 'Your IP address has been blocked' on 10-14; may rate-limit cloud IPs. GovInfo (FR collection) is the fallback."}
   - {id: house_bills_week, name: "House: bills scheduled this week", short: "House floor", type: rss, url: "https://docs.house.gov/BillsThisWeek-RSS.xml", status: OK, poll: 120, max_items: 25, enabled: true, desk: GOV}
-  - {id: senate_floor_activity, name: "Senate: recent floor activity", short: "Senate floor", type: html, url: "https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm", status: OK, poll: 120, enabled: true, desk: GOV}
+  - {id: senate_floor_activity, name: "Senate: daily floor log (Senate Press Gallery)", short: "Senate floor", type: rss, url: "https://www.dailypress.senate.gov/feed/", status: OK, poll: 120, enabled: true, desk: GOV, notes: "senate.gov's floor-activity page answers 403 to cloud servers (2026-10-23); the Press Gallery's official floor log has a feed and robots allows it."}
   - {id: house_floor, name: House floor summary, type: html, url: "https://clerk.house.gov/floorsummary/floor-download.aspx", status: OK, poll: 10}
   - {id: house_committee_calendar, name: House committee calendar, type: html, url: "https://docs.house.gov/Committee/Calendar/ByWeek.aspx", status: OK, poll: 60}
   - {id: senate_floor, name: Senate floor activity, type: html, url: "https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm", status: OK, poll: 10}
@@ -441,6 +441,10 @@ teams:
 # embed = the publisher's own player page (only where it allows framing); link = open
 # elsewhere (embedding not allowed). Round 2 added 2026-10-17. Tested 2026-10-16 evening;
 # Israeli channels were off air for Shabbat, so a daytime retest decides which stay.
+# 2026-10-23: YouTube's channel embed (live_stream?channel=) stopped finding most streams;
+# every live stream played when embedded by its video id. pipeline/livecheck.py now finds
+# each channel's current live video, so the "opens YouTube" link-outs went back to embeds.
+# Added ABC News Live, LiveNOW from FOX and Sky News (all played by video id).
 live_lineup:
   Beacon:
     - {name: City meetings, channel_id: UCvPpigGwZDeR7WYmw-SuDxg, note: "council, boards", meetings: true}
@@ -462,7 +466,9 @@ live_lineup:
     - {name: C-SPAN events, channel_id: UCb--64Gl51jIEVE-GLDAVTg}
     - {name: White House, channel_id: UCYxRlFDqcWM4y7FfpiAN3KQ}
     - {name: House floor, channel_id: UCqU8qiVHYmLsF0JIMByCTvw, note: "when in session"}
-    - {name: Scripps News, link: "https://www.youtube.com/channel/UCTln5ss6h6L_xNfMeujfPbg/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
+    - {name: ABC News Live, channel_id: UCBi2mrWuNuyYy4gbM6fU18Q}
+    - {name: LiveNOW from FOX, channel_id: UCJg9wBPyKMNA5sRDnvzmkdg, note: "raw feeds: pressers, hearings"}
+    - {name: Scripps News, channel_id: UCTln5ss6h6L_xNfMeujfPbg}
     - {name: PBS NewsHour, channel_id: UC6ZFN9Tx6xh-skXCuRHCDpQ, note: "evenings and hearings"}
     - {name: NASA, channel_id: UCLA_DiR1FfKNvjuUpBHmylQ, note: "launches and events"}
     - {name: C-SPAN floor & hearings, link: "https://www.c-span.org/live/"}
@@ -473,25 +479,26 @@ live_lineup:
     - {name: DW News, channel_id: UCknLrEdhRCp1aegoMqRaCZg}
     - {name: Reuters, channel_id: UChqUTb7kYRX8-EiaN3XFrSQ, note: "events"}
     - {name: TRT World, channel_id: UC7fWeaHhqgM4Ry-RMpM2YYw}
-    - {name: Euronews, link: "https://www.youtube.com/channel/UCSrZ3UV4jOidv8ppoVuvW9Q/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
+    - {name: Euronews, channel_id: UCSrZ3UV4jOidv8ppoVuvW9Q}
+    - {name: Sky News, channel_id: UCoMdktPbSTixAyNGwb-UYkQ}
     - {name: European Parliament, channel_id: UCvU4p_w08osQsrNi_I4ZtDA, note: "plenary, when live"}
     - {name: United Nations, channel_id: UC5O114-PQNYkurlTg6hekZw, note: "Security Council, when live"}
   France:
     - {name: France 24, channel_id: UCCCPCZNChQdGa9EkATeye4g}
-    - {name: franceinfo, link: "https://www.youtube.com/channel/UCO6K_kkdP-lnSCiO3tPx7WA/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
+    - {name: franceinfo, channel_id: UCO6K_kkdP-lnSCiO3tPx7WA}
     - {name: BFMTV, channel_id: UCXwDLMDV86ldKoFVc_g8P0g}
     - {name: Euronews FR, channel_id: UCW2QcKZiU8aUGg4yxCIditg}
     - {name: LCP Assemblée, channel_id: UCHGFbA0KWBgf6gMbyUCZeCQ, note: "in session"}
     - {name: Public Sénat, channel_id: UCTa1bPArjpvNMgSHAb_pflA, note: "when live"}
   Israel:
     - {name: i24NEWS English, channel_id: UCvHDpsWKADrDia0c99X37vg}
-    - {name: i24NEWS עברית, link: "https://www.youtube.com/channel/UCisowXt5wZkp2sR3rFh9lnQ/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
-    - {name: Kan 11, link: "https://www.youtube.com/channel/UCKqFqiCe1dCUxRe0_YNZ6gg/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
-    - {name: Channel 13, link: "https://www.youtube.com/channel/UCvQmPpU20hw1Trss_CVwaew/live", note: "opens YouTube; didn't play in the page (2026-10-18)"}
+    - {name: i24NEWS עברית, channel_id: UCisowXt5wZkp2sR3rFh9lnQ}
+    - {name: Kan 11, channel_id: UCKqFqiCe1dCUxRe0_YNZ6gg}
+    - {name: Channel 13, channel_id: UCvQmPpU20hw1Trss_CVwaew}
     - {name: Channel 14, channel_id: UCKEImtWikw9usC1pl_9m1nQ}
     - {name: Knesset 99, channel_id: UCpjNXONNE-JUz7QACB1Cgcw, note: "in session"}
     - {name: ILTV, channel_id: UCuxgEyMeaks7HS5gAw6Tt7w}
-    - {name: i24NEWS Français, link: "https://www.youtube.com/channel/UCgPYsPyGhhQJQ9zOUQDWDMA/live"}
+    - {name: i24NEWS Français, channel_id: UCgPYsPyGhhQJQ9zOUQDWDMA}
 
 # ---------------------------------------------------------------
 # VIDEO REGISTRY for V4 (Watch Now). V1's live player uses live_lineup above.
