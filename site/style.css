@@ -646,3 +646,25 @@ details.race[open] .chev { transform: rotate(180deg); }
 .rnews { margin: 8px 0; }
 .pside { margin: 8px 0; }
 .pickrow { display: flex; gap: 8px; margin: 8px 0 12px; }
+
+/* Voter guide: private scorecard */
+.rbox.mine { border: 1px solid var(--here); }
+.foryou { margin: 8px 0; padding: 10px 12px; border-radius: 10px; background: var(--raised); }
+.foryou p { margin: 4px 0 0; font-size: 0.92rem; }
+details.scores { margin-top: 8px; border-top: 1px solid var(--hair); padding-top: 8px; }
+details.scores > summary { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; cursor: pointer; }
+details.scores > summary::-webkit-details-marker { display: none; }
+.sc { display: inline-flex; gap: 5px; align-items: center; }
+.sck { font: 0.75rem var(--mono); color: var(--text3); }
+.sct { font: 600 0.78rem var(--mono); color: var(--text2); }
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--gov); }
+.dots i.on { background: var(--gov); }
+.nr { font: 0.75rem var(--mono); color: var(--text3); }
+.scrow { margin: 8px 0; }
+.scwhy { margin: 2px 0; font-size: 0.85rem; color: var(--text2); font-style: italic; }
+table.score { font-size: 0.82rem; }
+table.score tr.race td { font: 600 0.72rem var(--mono); color: var(--text3); padding-top: 10px; text-align: left; }
+table.score td.n, table.score th.n { text-align: center; }
+table.score .tot { font-weight: 700; }
+table.score td.cn { white-space: normal; min-width: 9em; font-family: var(--sans); }
