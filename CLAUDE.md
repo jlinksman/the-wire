@@ -20,7 +20,7 @@ You are my build partner on a private, single-user news site. I set scope; you i
 5. **Polite fetching.** Honor robots.txt, use ETag and If-Modified-Since, send an honest User-Agent, and back off on 403 and 429. Never try to get around a block.
 6. **Video is official embed or link only.** Never rehost, restream, or download video.
 7. **No silent failures.** Every source records its last success, last error, and item count, and the page shows a source-health list. A broken source must be visible, never hidden.
-8. **Private.** The site sits behind Cloudflare Access, locked to my email. The code repository is public, so it must never contain fetched content, my data, or keys. Fetched data goes straight to Cloudflare, not into git.
+8. **Private.** The site sits behind Cloudflare Access, locked to my email. One approved exception (2026-10-24): Ballot Match, a separate public Pages project (wire-ballot) with the election check on the same races, public information only, open only while Joe's toggle in Settings is on; visitors' answers stay in their browsers. The code repository is public, so it must never contain fetched content, my data, or keys. Fetched data goes straight to Cloudflare, not into git.
 9. **Secrets** (Cloudflare API token, account ID, KV namespace ID, GitHub dispatch token, ntfy topic) live in GitHub Actions secrets. Never commit them.
 
 ## V1 architecture

@@ -81,7 +81,7 @@ function home() {
     ...boxes,
     lookup ? el("p", { class: "fine" }, "Not sure which districts you're in? ", link(lookup.url, "Look up your registration and districts"), ".") : null,
     el("h3", { text: "How long?" }),
-    el("button", { class: "btn primary", text: "Quick: about 12 statements", onclick: () => go("quick") }),
+    el("button", { class: "btn primary", text: "Quick: about 15 statements", onclick: () => go("quick") }),
     el("button", { class: "btn", text: "Full: every statement for your races", onclick: () => go("full") }),
   );
 }
