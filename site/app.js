@@ -343,8 +343,10 @@ function todayView() {
       el("span", { class: "bc-t", text: "Brief me" }),
       el("span", { class: "bc-s", text: (since ? "What's new since " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) : "What matters today") + " · newscast or narrative" }))));
 
-  // 2. Threads you follow
+  // 2. Threads you follow, then a little new territory
   out.push(...threadsStrip());
+  const fresh = (data.explore || []).map((id) => (data.threads || []).find((t) => t.id === id)).filter((t) => t && !isFollowed(t.id)).slice(0, 2);
+  if (fresh.length) out.push(sectionHead("Outside your usual", "new each day"), suggestList(fresh));
 
   // 3. Top stories as units: Beacon first, then the ranked front page
   const cutoff = Date.now() - 48 * 3600000;
@@ -367,6 +369,11 @@ function todayView() {
   if (following.length) {
     out.push(sectionHead("From people you follow", null, () => openPeople(), "People"));
     out.push(el("ol", { class: "list" }, ...following.map((it) => row(it, { desk: true }))));
+  }
+  const other = otherSide(following);
+  if (other) {
+    out.push(sectionHead("The other side", other.why));
+    out.push(el("ol", { class: "list" }, row(other.it, { desk: true })));
   }
   const ahead = aheadBlock();
   if (ahead) out.push(ahead);
@@ -1970,7 +1977,9 @@ function pulseQuestions(Q, min) {
   // Pairs across different desks where possible; care questions favor what he follows.
   const seed = (Date.now() / 86400e3) | 0;
   const mixed = shuffled(pool.slice(0, 30), seed + 7);
-  const care = mixed.filter((t) => t.followed || t.standing).slice(0, 2);
+  // One care question is new territory (data.explore) when there is some; the other is something he follows.
+  const explore = new Set(data.explore || []);
+  const care = [...mixed.filter((t) => explore.has(t.id)).slice(0, 1), ...mixed.filter((t) => (t.followed || t.standing) && !explore.has(t.id))].slice(0, 2);
   while (care.length < Math.min(2, mixed.length)) care.push(mixed.find((t) => !care.includes(t)));
   const rest = mixed.filter((t) => !care.includes(t));
   const pairs = [];
@@ -2704,6 +2713,32 @@ function followingItems(limit) {
     }
   }
   return out.sort((a, b) => b.ms - a.ms);
+}
+
+// "The other side" (2026-10-23, Joe: "push my political leanings"): one recent piece from a voice
+// on the side his answers lean against. With "Where you stand" done, the side is the opposite of
+// his economic and cultural lean (both scales averaged); near the middle, or before he's taken
+// it, it rotates daily among left, right, libertarian and heterodox voices. Never a voice already
+// shown under From people you follow.
+function otherSide(shown) {
+  const A = myQuiz && myQuiz.values && myQuiz.values.done_at ? myQuiz.values.answers : null;
+  let want, why;
+  if (A && data.values_bank) {
+    const sc = standScores(A, electionExtra(myQuiz));
+    const lean = ((sc.econ.s || 0) + (sc.culture.s || 0)) / 2;
+    if (lean > 0.15) { want = ["left", "center-left"]; why = "from the left; your answers lean right"; }
+    else if (lean < -0.15) { want = ["right", "center-right", "libertarian"]; why = "from the right; your answers lean left"; }
+    else { want = ["heterodox", "cross", "libertarian"]; why = "from outside both camps; your answers sit near the middle"; }
+  } else {
+    const turn = [["left", "center-left"], ["right", "center-right"], ["libertarian"], ["heterodox", "cross"]];
+    want = turn[Math.floor(Date.now() / 86400e3) % turn.length];
+    why = "a different voice each day";
+  }
+  const seen = new Set((shown || []).flatMap((it) => it.people || []));
+  const pool = data.items.filter((it) => it.people && it.perspective && want.includes(it.perspective) && it.kind !== "POST"
+    && Date.now() - it.ms < 4 * 86400e3 && !isMuted(it) && !it.people.some((p) => seen.has(p) || (prefs.mutedPeople || []).includes(p)))
+    .sort((a, b) => b.ms - a.ms);
+  return pool.length ? { it: pool[0], why } : null;
 }
 
 function openPeople() {

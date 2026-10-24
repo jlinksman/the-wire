@@ -282,6 +282,7 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
     out.sort(key=lambda t: (t.get("followed", False), t["last"]), reverse=True)
     data["threads"] = out
     data["suggest"] = suggest(out, follows or {}, now)
+    data["explore"] = explore(out, follows or {}, now)
     log(f"[threads] {len(out)} active ({sum(1 for t in out if t['followed'])} followed, {sum(1 for t in out if t.get('standing'))} standing), "
         f"matched {matched}, opened {opened}, revived {revivals}, developments logged {devs}, "
         f"dormant {sum(1 for t in threads.values() if t['status'] == 'dormant')}, suggested {len(data['suggest'])}")
@@ -374,6 +375,43 @@ def suggest(shipped: list[dict], follows: dict, now: datetime, limit: int = 3) -
         scored.append((score, t["id"]))
     scored.sort(reverse=True)
     return [tid for _, tid in scored[:limit]]
+
+
+def explore(shipped: list[dict], follows: dict, now: datetime, limit: int = 4) -> list[str]:
+    """New territory (2026-10-23, Joe: "introduce new topics from time to time to expand my
+    exposure"): live, substantial threads unlike anything he follows or asked for more of, and
+    unlike what he asked for less of, spread across desks. Rotates daily, so each day brings a
+    different few; what he does with them (follow, more/less, the pulse) feeds back as usual."""
+    liked, disliked = taste(follows)
+    day = now.strftime("%Y-%m-%d")
+    cands = []
+    for t in shipped:
+        if t.get("followed") or t.get("named") or t.get("standing") or t.get("signal"):
+            continue
+        if not (t.get("outlets", 0) >= 3 or len(t.get("developments", [])) >= 3):
+            continue
+        age_h = (now - datetime.fromisoformat(t["last"].replace("Z", "+00:00"))).total_seconds() / 3600
+        if age_h > 48:
+            continue
+        tw = words(t.get("title", ""))
+        if _sim(tw, liked) >= 0.15 or _sim(tw, disliked) >= 0.1:
+            continue
+        # A stable daily shuffle, weighted toward busier threads.
+        h = int(hashlib.md5((day + t["id"]).encode()).hexdigest()[:8], 16) / 0xFFFFFFFF
+        cands.append((h * (1 + 0.15 * min(t.get("outlets", 0), 8)), t["desk"], t["id"]))
+    cands.sort(reverse=True)
+    out, desks = [], set()
+    for _, desk, tid in cands:                 # one per desk first, then fill
+        if desk not in desks:
+            out.append(tid); desks.add(desk)
+        if len(out) >= limit:
+            return out
+    for _, _, tid in cands:
+        if tid not in out:
+            out.append(tid)
+        if len(out) >= limit:
+            break
+    return out
 
 
 def apply_signals(stories: list[dict], shipped: list[dict], follows: dict) -> int:
