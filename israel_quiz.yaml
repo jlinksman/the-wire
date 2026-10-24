@@ -1,0 +1,870 @@
+# Israel match (2026-10-24): which lists in Israel's October 27, 2026 Knesset election Joe's views sit
+# closest to. Statements and explainers written in Claude sessions; each list coded on a statement only
+# where a source (platform, leader's statement, Knesset vote, reliable reporting) shows its position,
+# never from its bloc. Roster from Wikipedia's election page, IDI, Israel Policy Forum and the Times of
+# Israel (2026-10-24). Answers are private (KV quiz.json, id il_2026). Shipped as data.il_quiz.
+title: Israel match
+election: '2026-10-27'
+axes:
+- id: security
+  label: Security and diplomacy
+  left: Dovish
+  right: Hawkish
+- id: religion
+  label: Religion and state
+  left: Secular
+  right: Religious
+- id: courts
+  label: The courts
+  left: Independent courts
+  right: Government control
+- id: econ
+  label: The economy
+  left: State
+  right: Market
+map:
+- security
+- religion
+bloc_names:
+  gov: Netanyahu's bloc
+  opp: Opposition
+  arab: Arab parties
+lists:
+- id: likud
+  name: Likud
+  short: Likud
+  leader: Benjamin Netanyahu
+  bloc: gov
+  poll_name: Likud
+  what: The governing national-conservative party led by Prime Minister Netanyahu. It opposes a Palestinian state, conditions further Gaza withdrawal on Hamas's disarmament, supports West Bank settlement and continued Israeli security control.
+  sources:
+  - https://en.wikipedia.org/wiki/2026_Israeli_legislative_election
+  - https://israelpolicyforum.org/onetwenty/
+- id: together
+  name: Together (B'Yachad / Beyachad)
+  short: Together
+  leader: Naftali Bennett (list head) and Yair Lapid
+  bloc: opp
+  poll_name: Together
+  what: A centre-right/centrist joint list of former prime ministers Bennett and Lapid. It runs on universal draft, a state commission of inquiry into October 7, cost of living and a constitution; Bennett opposes a Palestinian state and says the list will not rely on Arab parties.
+  sources:
+  - https://en.wikipedia.org/wiki/Together_(Israel)
+  - https://israelpolicyforum.org/onetwenty/
+- id: rzp
+  name: Religious Zionism – Zehut
+  short: RZ–Zehut
+  leader: Bezalel Smotrich (with Moshe Feiglin of Zehut)
+  bloc: gov
+  poll_name: RZP–Zehut
+  what: The religious-nationalist settler party of Finance Minister Smotrich, running with Feiglin's libertarian Zehut. It seeks full Israeli sovereignty over the West Bank, expanded settlement and a larger role for Jewish values in public life, and opposes a Palestinian state.
+  sources:
+  - https://israelpolicyforum.org/onetwenty/
+  - https://www.ynetnews.com/article/h1dpvu9cgl
+- id: otzma
+  name: Otzma Yehudit (Jewish Power)
+  short: Otzma
+  leader: Itamar Ben-Gvir
+  bloc: gov
+  poll_name: Otzma
+  what: A far-right nationalist party led by National Security Minister Ben-Gvir. It sponsored the 2026 death-penalty-for-terrorists law, backs sovereignty over the West Bank, Israeli military control of Gaza and 'voluntary emigration' of Palestinians, and seeks to bar Arab parties from the Knesset.
+  sources:
+  - https://www.jpost.com/israel-election-2026/article-909348
+  - https://israelpolicyforum.org/onetwenty/
+- id: shas
+  name: Shas
+  short: Shas
+  leader: Aryeh Deri
+  bloc: gov
+  poll_name: Shas
+  what: The Sephardi/Mizrahi Haredi party. Its central demand is a law preserving draft exemptions for yeshiva students, alongside welfare spending and the state's traditional religious character; it opposes a Palestinian state. Quit its government posts in July 2025 over the draft law, but polls count it in the pro-Netanyahu bloc.
+  sources:
+  - https://israelpolicyforum.org/onetwenty/
+  - https://www.timesofisrael.com/deri-says-like-utj-shas-wont-join-next-government-without-a-draft-exemption-law/
+- id: utj
+  name: United Torah Judaism
+  short: UTJ
+  leader: Yaakov Asher
+  bloc: gov
+  poll_name: UTJ
+  what: The Ashkenazi Haredi alliance. Its priorities are preserving yeshiva students' draft exemptions, funding Torah institutions and the religious status quo, including on Shabbat; it has no unified West Bank position. Both factions left the government in July 2025 and Asher says UTJ 'does not belong to any bloc'; polls and IPF still count it in Netanyahu's bloc. Wikipedia's election page lists it with the opposition.
+  sources:
+  - https://israelpolicyforum.org/onetwenty/
+  - https://jpost.com/israel-news/politics-and-diplomacy/article-907655
+- id: yb
+  name: Yisrael Beiteinu
+  short: Yisrael Beiteinu
+  leader: Avigdor Lieberman
+  bloc: opp
+  poll_name: Yisrael Beiteinu
+  what: 'A secular right-wing party with roots among former-Soviet immigrants. It is hawkish on security (sovereignty over Area C, a tougher line on Iran, death penalty for terrorists) and strongly secular at home: universal draft, civil marriage and local choice on Shabbat transport; it rules out Arab and Haredi parties as partners.'
+  sources:
+  - https://www.jpost.com/israel-election-2026/article-906447
+  - https://israelpolicyforum.org/onetwenty/
+- id: raam
+  name: Ra'am (United Arab List)
+  short: Ra'am
+  leader: Mansour Abbas
+  bloc: arab
+  poll_name: Ra'am
+  what: A conservative Islamist Arab party focused on the practical interests of Arab citizens such as crime and services. It joined the 2021-22 Bennett-Lapid coalition, is open to joining governments again, and supports a negotiated two-state solution.
+  sources:
+  - https://israelpolicyforum.org/onetwenty/
+  - https://www.ynetnews.com/article/h1dpvu9cgl
+- id: joint
+  name: The Joint List (Hadash–Ta'al–Balad)
+  short: Joint List
+  leader: Yousef Jabareen (Hadash), with Ahmad Tibi (Ta'al)
+  bloc: arab
+  poll_name: Joint List
+  what: 'An alliance of secular Arab-led parties: socialist Arab-Jewish Hadash, Ta''al and Arab-nationalist Balad. It opposes the Gaza war, settlements and annexation, supports Palestinian statehood (Balad favours a ''state of all its citizens''), and on principle does not join coalitions, though it could back a non-Netanyahu government from outside.'
+  sources:
+  - https://israelpolicyforum.org/onetwenty/
+  - https://unpacked.media/israel-elections-2026-a-guide-to-the-parties-candidates-and-issues/
+- id: dems
+  name: The Democrats
+  short: Democrats
+  leader: Yair Golan
+  bloc: opp
+  poll_name: Dems
+  what: The Zionist left, a social-democratic and liberal merger of Labor and Meretz. It backs universal service, a constitution, civil marriage and limited Shabbat transport, opposes annexation, sees separation from the Palestinians as a long-term goal, and is the only Jewish party openly willing to include an Arab party in a coalition.
+  sources:
+  - https://en.idi.org.il/israeli-elections-and-parties/parties/the-democrats/
+  - https://www.jpost.com/israel-election-2026/article-910100
+- id: yashar
+  name: Yashar! (Gadi Eisenkot)
+  short: Yashar
+  leader: Gadi Eisenkot
+  bloc: opp
+  poll_name: Yashar
+  what: A centrist, security-focused list led by former IDF chief of staff Eisenkot, leading recent polls. It promises a state commission of inquiry into October 7, 'service for all', and an end to Hamas rule in Gaza; it says a Palestinian state is not on its agenda and sets conditions that currently exclude Arab parties.
+  sources:
+  - https://en.idi.org.il/israeli-elections-and-parties/parties/yashar/
+  - https://israelpolicyforum.org/onetwenty/
+- id: reservists
+  name: The Reservists – New Economic Party
+  short: Reservists
+  leader: Yoaz Hendel, with co-chair Yaron Zelekha
+  bloc: opp
+  poll_name: Reserv.–NEP
+  what: A centre-right list built around reserve soldiers and universal conscription with sanctions on evaders, plus anti-monopoly economics. It opposes a Palestinian state, supports settlement, wants a state commission into October 7, and calls for a 'Zionist unity government' without Arab or Haredi parties. Formally joins no bloc and has not ruled out Netanyahu; ToI polls count it in neither bloc. Coded 'opp' only because it is outside the current government.
+  sources:
+  - https://en.wikipedia.org/wiki/The_Reservists_(political_party)
+  - https://www.timesofisrael.com/liveblog_entry/hendel-makes-universal-draft-a-condition-for-joining-government-slams-pm-as-well-as-rivals/
+items:
+- id: il01
+  axis: security
+  dir: -1
+  text: Israel should agree to a Palestinian state alongside it if security arrangements are guaranteed.
+- id: il02
+  axis: security
+  dir: 1
+  text: Israel should apply sovereignty to (annex) parts of the West Bank.
+- id: il03
+  axis: security
+  dir: -1
+  text: New settlement construction should be frozen.
+- id: il04
+  axis: security
+  dir: 1
+  text: Israel should keep military control of Gaza until Hamas is fully dismantled, even at a high cost.
+- id: il05
+  axis: security
+  dir: -1
+  text: The Palestinian Authority should have a role in governing Gaza after the war.
+- id: il06
+  axis: security
+  dir: 1
+  text: Israel should strike Iran's nuclear program again if diplomacy fails, even without US backing.
+- id: il07
+  axis: courts
+  dir: -1
+  text: A state commission of inquiry should investigate the failures of October 7.
+- id: il08
+  axis: security
+  dir: 1
+  text: Terrorists convicted of murder should face the death penalty.
+- id: il09
+  axis: security
+  dir: -1
+  text: Normalizing relations with Saudi Arabia is worth concessions toward Palestinian statehood.
+- id: il10
+  axis: security
+  dir: -1
+  text: Arab parties should be legitimate partners in a governing coalition.
+- id: il11
+  axis: religion
+  dir: -1
+  text: Haredi yeshiva students should be drafted like everyone else, with sanctions for those who refuse.
+- id: il12
+  axis: religion
+  dir: -1
+  text: Public transportation should run on Shabbat.
+- id: il13
+  axis: religion
+  dir: -1
+  text: Israel should allow civil marriage, including between people of different religions.
+- id: il14
+  axis: religion
+  dir: 1
+  text: State funding for yeshivas should continue even for students who don't serve in the army.
+- id: il15
+  axis: religion
+  dir: 1
+  text: The Chief Rabbinate should keep its control over conversion and kashrut.
+- id: il16
+  axis: religion
+  dir: -1
+  text: Same-sex couples should be able to marry or register as couples in Israel.
+- id: il17
+  axis: religion
+  dir: -1
+  text: Haredi schools that get state funding should have to teach core subjects like math and English.
+- id: il18
+  axis: courts
+  dir: 1
+  text: The government should have more control over choosing judges.
+- id: il19
+  axis: courts
+  dir: -1
+  text: The Supreme Court should be able to strike down laws passed by the Knesset.
+- id: il20
+  axis: courts
+  dir: 1
+  text: The government should be able to choose its own legal adviser instead of an independent Attorney General.
+- id: il21
+  axis: courts
+  dir: -1
+  text: A prime minister under criminal indictment should not serve.
+- id: il23
+  axis: econ
+  dir: -1
+  text: The state should expand subsidized childcare and public housing even if taxes rise.
+- id: il24
+  axis: econ
+  dir: -1
+  text: Israel's big food companies and banks need much tougher regulation to bring down the cost of living.
+stances:
+  likud:
+    il01:
+      v: -2
+      source: https://israelpolicyforum.org/onetwenty/
+      note: 'IPF: Likud ''opposes the establishment of a Palestinian state''.'
+    il02:
+      v: 1
+      source: https://www.timesofisrael.com/knesset-votes-71-13-for-non-binding-motion-calling-to-annex-west-bank/
+      note: Likud backed the July 2025 non-binding annexation motion (71-13) but boycotted the Oct 2025 binding bill on timing/US grounds (ToI, ANX); Netanyahu not prepared to annex the whole West Bank.
+    il03:
+      v: -2
+      source: https://unpacked.media/israel-elections-2026-a-guide-to-the-parties-candidates-and-issues/
+      note: Unpacked lists 'support for the settlements in the West Bank'.
+    il04:
+      v: 2
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Conditions further withdrawal from the Yellow Line on Hamas's disarmament and the Strip's demilitarization; Netanyahu ordered control extended to 70% (May 2026).
+    il05:
+      v: -2
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Opposes transferring postwar Gaza control to the PA.
+    il06:
+      v: 1
+      source: https://en.wikipedia.org/wiki/2025_United_States_strikes_on_Iranian_nuclear_sites
+      note: Netanyahu launched the June 13, 2025 strikes alone; the US joined only on June 22. JPost (Oct 2026) judges him more willing than Eisenkot to take risk on Iran.
+    il07:
+      v: -2
+      source: https://www.ynetnews.com/article/hkqfct9qgx
+      note: Coalition bill by Likud MK Kallner for a politically appointed panel passed 1st reading July 2026; Netanyahu has resisted a state commission (IPF).
+    il08:
+      v: 1
+      source: https://en.wikipedia.org/wiki/Death_Penalty_for_Terrorists_Law
+      note: Voted for the March 2026 law; Netanyahu backed it after earlier reservations (ToI).
+    il10:
+      v: -2
+      source: https://www.ksat.com/news/world/2026/10/16/israels-arab-led-parties-could-decide-the-election-if-anyone-would-partner-with-them/
+      note: 'AP: Netanyahu says he won''t form a coalition with any Arab-led party; Likud also petitioned to disqualify the Arab lists (Al Jazeera).'
+    il11:
+      v: -1
+      source: https://www.timesofisrael.com/bismuth-presents-bill-exempting-yeshiva-students-from-idf-draft-loosening-sanctions/
+      note: Likud MK Bismuth's coalition bill keeps full-time yeshiva exemptions with phased targets and looser sanctions.
+    il12:
+      v: -1
+      source: https://www.ynetnews.com/article/hkd6el4ogg
+      note: 'Ynet (Oct 2026): Likud opposes local Shabbat transport ''to preserve the status quo''.'
+    il13:
+      v: -1
+      source: https://www.jpost.com/israel-election-2026/article-911432
+      note: 'JPost explainer (Oct 2026): Likud''s record on marriage, conversion and Shabbat leans toward ''preserving existing religious arrangements'' rather than ''broad liberalization''. No explicit civil-marriage plank.'
+    il14:
+      v: 1
+      source: https://www.timesofisrael.com/shas-quits-its-coalition-posts-to-protest-failure-to-legislate-haredi-draft-exemption/
+      note: Likud's Bismuth framework (Oct 2025) would cut yeshiva funding only if enlistment quotas are missed after a year; the coalition voted down opposition bills penalizing draft-evading yeshiva students. Netanyahu revived the exemption bill in May 2026 (ToI) and called arrests of draft evaders 'unacceptable'.
+    il18:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-911432
+      note: Justice Minister Yariv Levin's package sought 'greater political influence over judicial appointments'; the March 2025 Judicial Selection Law (Globes) passed with the coalition's majority. Likud declined Ynet's questionnaire.
+    il19:
+      v: -1
+      source: https://www.jpost.com/israel-election-2026/article-911432
+      note: Levin's package proposed 'restrictions on judicial review'; the explainer gives no current Likud override position.
+    il20:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-911432
+      note: The Likud-led cabinet voted to dismiss AG Baharav-Miara in Aug 2025, and ministers and candidates still call for her dismissal. Levin called the AG institution 'corrupted to its core' and backs the bill to split the role (ToI, Dec 2025).
+    il21:
+      v: -2
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: Likud is led by Netanyahu, who has been under indictment since 2020 and calls the charges a 'witch hunt'. He is running for PM again while on trial.
+  together:
+    il01:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: 'Questionnaire: ''We oppose a Palestinian state and the transfer of territory.'' Bennett is the list head; Lapid has cooled on two states (JTA).'
+    il02:
+      v: 1
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Cites Bennett's plan in which Area C is viewed as a future sovereign part of Israel; Lapid voted for the Ma'ale Adumim bill but against the broad bill (ToI).
+    il03:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: '''We support Jewish settlement anywhere it is carried out legally''; opposes illegal outposts and settler violence (IPF).'
+    il04:
+      v: 1
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Backs freedom of military action until Hamas is disarmed and keeping Israel on the Yellow Line; Bennett wants a 'significant security zone' but says disarming Hamas needs diplomacy too (JPost).
+    il05:
+      v: 1
+      source: https://www.jpost.com/israel-news/article-906838
+      note: Bennett is 'willing to give the PA some role in Gaza', with Egypt central (JPost, Aug 2026).
+    il07:
+      v: 2
+      source: https://en.wikipedia.org/wiki/Together_(Israel)
+      note: Bennett says forming a state commission would be his government's first action; Lapid pledged one in the first month (Ynet).
+    il09:
+      v: -2
+      source: https://www.middleeasteye.net/news/ahead-israel-elections-bennett-rejects-two-state-solution-eisenkot-surges-polls
+      note: 'Bennett (July 2026): will not allow a Palestinian state even at the cost of Saudi normalization.'
+    il10:
+      v: -2
+      source: https://arabcenterdc.org/resource/israels-election-and-eisenkots-arab-coalition-dilemma/
+      note: 'Bennett: ''the Arab parties are not Zionist, and therefore we will not rely on them''; Lapid said he would not form another coalition with Ra''am (AP).'
+    il11:
+      v: 2
+      source: https://en.wikipedia.org/wiki/Together_(Israel)
+      note: Both leaders support mandatory Haredi conscription; Bennett pledges to investigate 'sabotage of Haredi enlistment'.
+    il12:
+      v: 1
+      source: https://www.timesofisrael.com/liveblog_entry/ex-pm-bennett-backs-public-transport-on-shabbat-civil-marriage-sparking-haredi-backlash/
+      note: 'Bennett (Apr 2026): ''cities must be allowed to choose'' Shabbat public transport; local-option, not national service.'
+    il13:
+      v: 2
+      source: https://jpost.com/israel-election-2026/article-908711
+      note: 'Lapid (No. 2): ''In the State of Israel, there should be a parallel civil marriage option for anyone who wants it.'' The JPost B''Yachad explainer also has marriage performed ''rather than through the Chief Rabbinate''.'
+    il14:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-910703
+      note: 'Platform: end state funding for draft evasion and ''no exemptions to haredim who evade IDF service''.'
+    il15:
+      v: -1
+      source: https://www.jpost.com/israel-election-2026/article-910703
+      note: Opposes the Rabbinate's role in marriage and calls for 'greater competition in kosher certification'. Conversion is not addressed.
+    il16:
+      v: 2
+      source: https://www.ynetnews.com/article/bjvkbbsfmx
+      note: Plan for an Interior Ministry civil partnership open to all couples regardless of gender, with marital rights. Lapid pledges an equal-rights-for-all-couples law in the first 100 days (JPost). Ynet says Bennett's personal view on same-sex marriage itself is unclear.
+    il17:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-910703
+      note: Bennett opposes state funding for 'education without core subjects'.
+    il18:
+      v: -2
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: Would repeal the new judicial appointments law, which it says would politicize the courts.
+    il19:
+      v: 1
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: 'Would pass a Basic Law: Legislation specifying when the Supreme Court may intervene, which keeps judicial review but defines its limits.'
+    il24:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-910703
+      note: Would break up monopolies, stop exclusive importers from taking on more major brands, and require Shufersal to sell stores where it limits competition. Banks are not addressed.
+  rzp:
+    il01:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Says its policies have 'in practice, eliminated the idea of a Palestinian state'.
+    il02:
+      v: 2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: '''Supports applying full Israeli sovereignty over Judea and Samaria.'''
+    il03:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Touts approving 3,401 E1 units and 104 new communities; backs full regularization of outposts.
+    il04:
+      v: 2
+      source: https://www.jns.org/news/israel-news/smotrich-urges-permanent-israeli-sovereignty-in-gaza-lebanon
+      note: 'JNS (Oct 2026): Smotrich urges permanent Israeli sovereignty in Gaza; Zehut also backs sovereignty over Gaza (IPF).'
+    il05:
+      v: -2
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Smotrich has moved to 'financially strangle the Palestinian Authority'; general hostility to the PA rather than a Gaza-specific statement.
+    il08:
+      v: 1
+      source: https://en.wikipedia.org/wiki/Death_Penalty_for_Terrorists_Law
+      note: Religious Zionist Party voted for the March 2026 law.
+    il11:
+      v: -1
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Supports gradual expansion of Haredi service but opposes coercive measures for mass enlistment.
+    il15:
+      v: 1
+      source: https://www.jpost.com/israel-news/politics-and-diplomacy/article-902584
+      note: RZP MK Ohad Tal steered the July 2026 law restoring Rabbinate control of kashrut ('This is a law for the Israeli consumer'). Kashrut only; no conversion statement found.
+    il18:
+      v: 2
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: 'Smotrich and Rothman back restructuring, including Supreme Court president and deputy chosen by judges'' secret ballot. JPost (Aug 2026): ''giving elected officials more say in judicial appointments''. Zehut (No. 2 Feiglin) would have voters elect justices.'
+    il19:
+      v: -1
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: Laws could be struck down only by an expanded bench with a special majority, and a 61-vote Knesset override could reenact them.
+    il20:
+      v: 2
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: Would split the role; the AG and ministry legal advisers would become political appointments serving at the government's confidence. Rothman (RZP) introduced the split bill (Ynet, Oct 2025).
+    il21:
+      v: -1
+      source: https://jpost.com/israel-election-2026/article-905686
+      note: The party will back Netanyahu for PM. It has no stated position on indicted PMs in general.
+  otzma:
+    il01:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-909348
+      note: Platform includes 'opposition to the establishment of a Palestinian state'.
+    il02:
+      v: 2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: '''We will work to apply full Israeli sovereignty.'''
+    il03:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Supports 'establishing new communities in all parts of Judea and Samaria'.
+    il04:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-909348
+      note: Seeks complete military victory over Hamas, opposes deals that leave Hamas intact; backs Israeli military control and resettlement of Gaza (IPF).
+    il05:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Would 'dismantle the Palestinian Authority of its assets and weapons'.
+    il08:
+      v: 2
+      source: https://www.timesofisrael.com/knesset-passes-death-penalty-law-for-palestinians-convicted-of-deadly-acts-of-terror/
+      note: 'Sponsored and championed the law; Ben-Gvir: ''Whoever chooses terrorism chooses death.'''
+    il10:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-909348
+      note: Petitioned to bar Ra'am, calling its members 'Hamas-supporting terrorists'.
+    il14:
+      v: 0
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: Mixed. The ToI guide says Otzma prefers 'encouraging participation' over 'sanctions or punitive coercion', but Ben-Gvir told JPost (Oct 23, 2026) that as defense minister he would draft haredim who aren't enlisting.
+    il18:
+      v: 2
+      source: https://en.idi.org.il/israeli-elections-and-parties/parties/otzma-yehudit
+      note: The IDI party profile says Otzma advocates 'the selection of Supreme Court justices by politicians'. Its 2026 judicial plan was not yet published (Ynet, Sep 2026).
+    il19:
+      v: -1
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: Supports a 'High Court override clause' letting 61 MKs reject rulings that strike down laws.
+    il20:
+      v: 1
+      source: https://jpost.com/israel-news/article-829671
+      note: Ben-Gvir has repeatedly called for firing AG Baharav-Miara (Nov 2024). In July 2026 he reportedly made her dismissal a condition for joining the next government (Yeshiva World News). This is about the current AG; no structural plan found.
+    il21:
+      v: -1
+      source: https://www.jpost.com/israel-election-2026/article-912643
+      note: Ben-Gvir wants Netanyahu to lead a 'full, full right-wing government' (Oct 23, 2026). No general statement on indicted PMs.
+  shas:
+    il01:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: 'Ynet: Shas opposes a Palestinian state (not a central campaign issue).'
+    il02:
+      v: 1
+      source: https://www.timesofisrael.com/knesset-votes-71-13-for-non-binding-motion-calling-to-annex-west-bank/
+      note: Ultra-Orthodox parties voted for the July 2025 non-binding annexation motion; Shas was absent from the Oct 2025 binding bill (ToI).
+    il03:
+      v: -1
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Has backed settlement initiatives advanced by right-wing partners; not a central issue.
+    il08:
+      v: 1
+      source: https://en.wikipedia.org/wiki/Death_Penalty_for_Terrorists_Law
+      note: Shas voted for the law; Deri voted in person (ToI).
+    il11:
+      v: -2
+      source: https://www.timesofisrael.com/deri-says-like-utj-shas-wont-join-next-government-without-a-draft-exemption-law/
+      note: 'Deri (Oct 2026): won''t join or support the next government unless yeshiva students'' exemption is enshrined in law.'
+    il12:
+      v: -2
+      source: https://www.timesofisrael.com/liveblog_entry/ex-pm-bennett-backs-public-transport-on-shabbat-civil-marriage-sparking-haredi-backlash/
+      note: Attacked Bennett's Shabbat transport support as trading away 'our sacred Shabbat'.
+    il13:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-907982
+      note: Opposes expanding alternatives to religious law such as civil marriage. The ToI guide says Shas 'firmly opposes civil marriage'.
+    il14:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-907982
+      note: Backs enshrining Torah study as a Basic Law value and prioritizes yeshiva funding. Deri said the party 'stood behind' jailed draft evaders, and Shas quit government posts in 2025 over the exemption bill.
+    il15:
+      v: 2
+      source: https://www.jpost.com/israel-news/politics-and-diplomacy/article-902584
+      note: 'Deri on the July 2026 law restoring Rabbinate kashrut control: ''Kashrut is not a business. Kashrut is a state responsibility.'' Shas also wants conversion kept in the Orthodox establishment (JPost 907982).'
+    il16:
+      v: -2
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: The ToI guide says Shas opposes LGBTQ rights and firmly opposes civil marriage.
+    il18:
+      v: 1
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: No detailed plan. Deri wants to 'fundamentally reform the judicial system and return power to the people and their elected representatives'.
+    il19:
+      v: -1
+      source: https://www.jpost.com/israel-election-2026/article-907982
+      note: Supports reducing the High Court's power to overturn legislation or government decisions, especially on haredi matters.
+    il20:
+      v: 1
+      source: https://www.ynetnews.com/article/s1h0byjjwe
+      note: Haredi MKs supplied votes for the AG-split bill's preliminary reading (Oct 29, 2025) in exchange for expanded rabbinical court powers. This is a vote, not a stated platform.
+  utj:
+    il08:
+      v: 0
+      source: https://www.timesofisrael.com/knesset-passes-death-penalty-law-for-palestinians-convicted-of-deadly-acts-of-terror/
+      note: 'Split: Degel HaTorah voted for the law, Agudat Yisrael against.'
+    il11:
+      v: -2
+      source: https://www.timesofisrael.com/deri-says-like-utj-shas-wont-join-next-government-without-a-draft-exemption-law/
+      note: 'Chairman Asher (Oct 2026): UTJ won''t enter a government that doesn''t pass the yeshiva student (exemption) law.'
+    il12:
+      v: -2
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Preserves the religious status quo including on Shabbat; Goldknopf called Bennett's proposal 'Sabbath desecration' (ToI).
+    il13:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-907982
+      note: Opposes civil marriage and wants marriages kept with the Rabbinate.
+    il14:
+      v: 2
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: Won't back any government that doesn't pass a law keeping haredi men out of the military. Prioritizes yeshiva funding (JPost).
+    il15:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-907982
+      note: Co-sponsored the repeal of the 2021 kashrut reform and wants conversion kept within the Orthodox establishment.
+    il17:
+      v: -2
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: Opposes introducing secular subjects such as English and math in haredi schools.
+    il19:
+      v: -1
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: Argues the Supreme Court has accumulated excessive power that needs to be reconsidered and more clearly defined.
+    il20:
+      v: 1
+      source: https://www.ynetnews.com/article/s1h0byjjwe
+      note: Haredi MKs backed the AG-split bill's preliminary reading (Oct 2025) in a deal on rabbinical courts. This is a vote, not a stated platform.
+  yb:
+    il01:
+      v: -2
+      source: https://www.aljazeera.com/news/2026/10/21/far-from-fringe-how-israels-mainstream-parties-vote-with-the-far-right
+      note: Voted for the July 2024 Knesset resolution calling a Palestinian state an 'existential danger' (68-9); historically backed two states with land/population swaps (IPF).
+    il02:
+      v: 2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: '''We support applying Israeli sovereignty to Area C''; sponsored the Ma''ale Adumim sovereignty bill (ToI).'
+    il03:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Supports strengthening settlement including construction in E1.
+    il05:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Calls the PA 'a terrorist organization specializing in diplomatic terrorism'; proposes Egypt take responsibility for Gaza (IPF).
+    il07:
+      v: 2
+      source: https://unpacked.media/israel-elections-2026-a-guide-to-the-parties-candidates-and-issues/
+      note: Unpacked lists a State Commission of Inquiry after October 7 among its positions.
+    il08:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-906447
+      note: Has long supported death-penalty legislation and voted for the 2026 law (ToI).
+    il10:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-906447
+      note: Lieberman rejects coalitions with Arab parties as 'anti-Zionist'.
+    il11:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-906447
+      note: Supports universal conscription; platform would end allowances for yeshiva/kollel students; rules out Shas and UTJ as partners.
+    il12:
+      v: 1
+      source: https://www.jpost.com/israel-election-2026/article-906447
+      note: Supports Shabbat public transport legislation; framed as local authorities' choice (Ynet).
+    il13:
+      v: 2
+      source: https://jpost.com/israel-election-2026/article-906447
+      note: Has repeatedly backed civil marriage legislation. The ToI guide platform says 'civil marriage and divorce'.
+    il14:
+      v: -2
+      source: https://jpost.com/israel-election-2026/article-906447
+      note: Goal is to 'impose universal conscription', and Liberman campaigns against the 'draft-dodgers' bloc' (Ynet, Oct 2026). Yeshiva funding is not named explicitly in these sources.
+    il15:
+      v: -2
+      source: https://jpost.com/israel-election-2026/article-906447
+      note: Supports widening conversion options; Liberman advocates separating religion and state. Kashrut is not addressed.
+    il17:
+      v: 2
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: Calls for 'compulsory core studies in all publicly funded schools'.
+    il21:
+      v: 2
+      source: https://www.ynetnews.com/article/h1jtvqw3fl
+      note: Liberman vows to pass the 'defendant law' barring an indicted MK from forming a government, in three readings after replacing the Knesset speaker (Oct 17, 2026).
+    il24:
+      v: -1
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: Calls for 'reductions in regulation and government bureaucracy' and more competition, which is the opposite of 'tougher regulation'. No statement on food companies or banks specifically.
+  raam:
+    il01:
+      v: 2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Supports 'a negotiated two-state solution' with a Palestinian state alongside Israel.
+    il02:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Opposes extending Israeli sovereignty over West Bank territory.
+    il08:
+      v: -2
+      source: https://en.wikipedia.org/wiki/Death_Penalty_for_Terrorists_Law
+      note: United Arab List voted against the law.
+    il10:
+      v: 2
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Openness to joining coalitions is its 'key distinguishing characteristic'; joined the 2021-22 government.
+    il18:
+      v: 0
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: Not categorically opposed to changing the selection committee. Abbas has proposed opposition and Arab-society representation, possibly an Arab judge.
+  joint:
+    il01:
+      v: 2
+      source: https://unpacked.media/israel-elections-2026-a-guide-to-the-parties-candidates-and-issues/
+      note: Supports a two-state solution; Balad component prefers a 'state of all its citizens' (IPF).
+    il02:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Rejects sovereignty moves as 'dangerous messianic fantasies'.
+    il03:
+      v: 2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: All settlements 'must be evacuated immediately and without delay'.
+    il04:
+      v: -2
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Opposes the war in Gaza.
+    il08:
+      v: -2
+      source: https://www.timesofisrael.com/knesset-passes-death-penalty-law-for-palestinians-convicted-of-deadly-acts-of-terror/
+      note: Hadash-Ta'al called the law 'institutionalization of apartheid' and petitioned against it.
+    il10:
+      v: 1
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Does not join coalitions on principle but would support a non-Netanyahu government from outside.
+    il18:
+      v: -1
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: Favors a 'balanced' appointment mechanism that preserves judicial independence.
+    il19:
+      v: 1
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: Supports strong checks and balances; no explicit override position.
+    il23:
+      v: 2
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: Calls for 'free education from age 0 through university' and more welfare investment. No statement on taxes.
+    il24:
+      v: 2
+      source: https://www.timesofisrael.com/everything-you-need-to-know-tois-guide-to-the-37-parties-that-israelis-can-finally-choose-from/amp/
+      note: Calls for 'nationalizing wide swaths of the economy' and nearly doubling the minimum wage, which goes beyond regulation.
+  dems:
+    il01:
+      v: 1
+      source: https://www.jpost.com/israel-election-2026/article-910100
+      note: Golan seeks 'a more nuanced solution' since Oct 7; No. 3 Kariv backs a demilitarized Palestinian state within a regional deal; IPF says Golan supports a two-state outcome.
+    il02:
+      v: -2
+      source: https://en.idi.org.il/israeli-elections-and-parties/parties/the-democrats/
+      note: 'Platform: ''halt the annexation process in the West Bank''; voted against the 2025 annexation motion and bill.'
+    il03:
+      v: 1
+      source: https://www.jpost.com/israel-election-2026/article-910100
+      note: Would stop state funding for new outposts and farms and evacuate illegal outposts; no general freeze pledge found.
+    il07:
+      v: 2
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Supports a state commission of inquiry.
+    il08:
+      v: -2
+      source: https://www.timesofisrael.com/knesset-passes-death-penalty-law-for-palestinians-convicted-of-deadly-acts-of-terror/
+      note: 'Kariv: ''an immoral law''; the party petitioned the High Court.'
+    il09:
+      v: 1
+      source: https://www.jpost.com/israel-election-2026/article-910100
+      note: 'Kariv: divide the land and a demilitarized Palestinian state ''as part of a regional agreement''; questionnaire: separation ''as part of a regional move with the United States'' (Ynet).'
+    il10:
+      v: 2
+      source: https://www.timesofisrael.com/liveblog_entry/one-day-after-they-pledged-not-to-fight-opposition-chiefs-split-over-arab-parties-in-coalition/
+      note: 'Golan: an Arab party in government is ''natural, right, appropriate and democratic''.'
+    il11:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-910100
+      note: Opposes Haredi draft exemptions; conscription for all (IDI). Sanctions not specified.
+    il12:
+      v: 1
+      source: https://en.idi.org.il/israeli-elections-and-parties/parties/the-democrats/
+      note: Promotes limited Shabbat public transport in secular localities.
+    il13:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-912335
+      note: 'Golan (Oct 20, 2026): civil marriage and recognition of all streams; ''freedom of religion and freedom from religion''.'
+    il14:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-912335
+      note: 'Golan: ''We will end benefits for those who evade service.'''
+    il15:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-912335
+      note: Calls for an 'end to the Chief Rabbinate's monopoly over conversion and kashrut certification'.
+    il16:
+      v: 2
+      source: https://www.ynetnews.com/article/bjvkbbsfmx
+      note: 'Platform: full legal equality and civil marriage for all couples.'
+    il17:
+      v: 1
+      source: https://www.jpost.com/israel-election-2026/article-912335
+      note: Would seek the Education Ministry and reform state education for the haredi sector, calling it 'a national priority'. A core-subject mandate is not spelled out.
+    il18:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-912335
+      note: Would repeal all judicial-reform laws passed by the current government.
+    il19:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-910100
+      note: Seeks to preserve the judiciary's role as a check on government and to 'strengthen the gatekeepers' (IDI platform summary).
+    il20:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-910100
+      note: Golan gave 'full backing' to AG Baharav-Miara against the government's attempts to fire her.
+    il21:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-910100
+      note: 'Golan: ''Anyone under criminal indictment cannot serve as prime minister or as a government minister.'''
+    il23:
+      v: 1
+      source: https://en.idi.org.il/israeli-elections-and-parties/parties/the-democrats/
+      note: 'Platform: ''improve social services'' and ''rebuild the public sector''. The ToI guide says it would shift sectoral funding to social services. No tax or childcare specifics.'
+  yashar:
+    il01:
+      v: -1
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: '''The establishment of a Palestinian state is not on the agenda as far as we are concerned''; IPF: opposes it ''for the foreseeable future''.'
+    il03:
+      v: -1
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Supports strengthening settlement blocs and 'establishing new communities legally'. A JPost analysis (Oct 2026) instead expects Eisenkot to limit construction and block E1.
+    il05:
+      v: 1
+      source: https://www.jpost.com/israel-news/defense-news/article-912193
+      note: 'JPost analysis: willing to proceed with Trump''s plan including PA-linked technocrats and police; IPF: opposes policies that could collapse the PA.'
+    il07:
+      v: 2
+      source: https://israelpolicyforum.org/onetwenty/
+      note: Supports a state commission of inquiry; central platform plank (Arab Center DC).
+    il10:
+      v: -1
+      source: https://www.timesofisrael.com/liveblog_entry/one-day-after-they-pledged-not-to-fight-opposition-chiefs-split-over-arab-parties-in-coalition/
+      note: Vowed not to include Ra'am; partners must recognize Israel as Jewish and democratic and accept service, which he says no Arab party now meets (ToI).
+    il11:
+      v: 1
+      source: https://en.idi.org.il/israeli-elections-and-parties/parties/yashar/
+      note: '''Service for All'' (military or national service); proposes one-year Torah-study deferments for up to 3% of each cohort (ToI).'
+    il14:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-909543
+      note: 'Eisenkot would revoke state incentives for evaders and said: ''Whoever is not in state education ... will not receive funding from the state.'''
+    il16:
+      v: 1
+      source: https://www.ynetnews.com/article/bjvkbbsfmx
+      note: Eisenkot pledged equality legislation at the 'Sagi Laws' LGBTQ conference. There's no specific marriage or partnership plank.
+    il17:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-909543
+      note: All children would study in the state system, which teaches core subjects such as math and English, over a four-year reform.
+    il18:
+      v: -2
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: Would repeal the committee-composition law as 'politicizing the appointment process' and set selection by Basic Law.
+    il19:
+      v: 1
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: Opposes an override and would set judicial-review rules in Basic Laws on the judiciary and on legislation.
+    il21:
+      v: 1
+      source: https://www.ynetnews.com/article/hkqhy5hife
+      note: 'No. 2 Yoram Cohen backs the ''defendant law'' barring an indicted MK from forming a government: ''I very much hope we will manage to do it.'' This is not a formal platform item.'
+  reservists:
+    il01:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-904910
+      note: 'Hendel (Aug 2026): ''We will not allow a Palestinian state to be established.'''
+    il02:
+      v: 1
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Supports sovereignty 'through actions, not words', including in the Jordan Valley and the blocs.
+    il03:
+      v: -2
+      source: https://www.ynetnews.com/article/h1dpvu9cgl
+      note: Supports settlement throughout the country; anything approved 'will remain'.
+    il07:
+      v: 2
+      source: https://en.wikipedia.org/wiki/The_Reservists_(political_party)
+      note: Calls for a State Commission of Inquiry.
+    il10:
+      v: -2
+      source: https://en.wikipedia.org/wiki/The_Reservists_(political_party)
+      note: Wants a 'Zionist unity government' excluding Arab and Haredi parties.
+    il11:
+      v: 2
+      source: https://www.timesofisrael.com/liveblog_entry/hendel-makes-universal-draft-a-condition-for-joining-government-slams-pm-as-well-as-rivals/
+      note: Universal service is a coalition condition; sanctions for evaders and benefits tied to service.
+    il14:
+      v: -2
+      source: https://www.jpost.com/israel-election-2026/article-912595
+      note: 'Hendel: ''Every Israeli citizen will do something for the country, and anyone who doesn''t will receive nothing.'' Zelekha''s plan cuts benefits for draft evaders.'
+    il17:
+      v: 2
+      source: https://www.jpost.com/israel-election-2026/article-912595
+      note: Core curriculum required in publicly funded classrooms; families who reject it should pay for schooling themselves.
+    il19:
+      v: 0
+      source: https://www.ynetnews.com/article/hkcjtk1cme
+      note: 'Middle position: an override only with more than 72 MKs, and a narrowed (not abolished) reasonableness standard.'
+    il23:
+      v: -1
+      source: https://www.israelnationalnews.com/news/434699
+      note: Zelekha's plan cuts taxes (VAT down to 12%, top income tax 40%, repeal of the high-income surtax), which runs against 'even if taxes rise'. Childcare is not addressed. Arutz Sheva source; JPost 911893 covers the same plan.
+    il24:
+      v: 2
+      source: https://jpost.com/israel-news/article-911893
+      note: Zelekha would bar monopoly manufacturers from also importing, ban exclusive import deals, reinstate a law against excessive monopoly pricing, and set up a new bank (Arutz Sheva).
