@@ -123,8 +123,19 @@ def run(data: dict, log) -> dict:
     nxt = upcoming(cfg, today)
     data["elections_next"] = nxt
     missing = [x for x in nxt if not x["guide"] and (date.fromisoformat(x["date"]) - today).days <= 45]
+    # The private scorecard (fetched from KV by the workflow into ballot.json, gitignored): only
+    # whether it's there and for which election is used here; its contents reach the page via /ballot.
+    sc = {}
+    f = ROOT / "ballot.json"
+    if f.exists():
+        try:
+            import json
+            sc = json.loads(f.read_text()) or {}
+        except ValueError:
+            sc = {}
     if e:
         g = {k: v for k, v in e.items() if k not in ("show_days",)}
+        g["scorecard"] = {"imported": sc.get("imported"), "races": len(sc.get("races") or {})} if sc.get("election") == e["id"] else None
         g["days_until"] = (date.fromisoformat(str(e["date"])) - today).days
         g["date"] = str(e["date"])
         for r in g.get("races") or []:
@@ -134,6 +145,11 @@ def run(data: dict, log) -> dict:
                 p["thread"] = f"prop_{e['id']}_{p['id']}"
         data["voter_guide"] = g
         log(f"[elections] guide: {e['id']} in {g['days_until']} days, {len(g.get('races') or [])} races, {len(g.get('proposals') or [])} proposals")
+    scorecard_row = {"id": "scorecard", "name": "Your voter-guide scorecard (private, Workers KV)", "short": "Scorecard", "desk": "SYSTEM", "poll": 15,
+                     "last_success": sc.get("imported"), "last_attempt": datetime.now(NY).isoformat(),
+                     "last_error": None if not e or sc.get("election") == e["id"] else "Not imported for this election yet: Settings › Admin › Your scorecard",
+                     "last_status": None, "robots": "n/a", "items": len(sc.get("races") or {})}
+    data.setdefault("sources", []).append(scorecard_row)
     return {"id": "voter_guide", "name": "Voter guide (elections.yaml)", "short": "Voter guide", "desk": "SYSTEM", "poll": 15,
             "last_success": datetime.now(NY).isoformat(), "last_attempt": datetime.now(NY).isoformat(),
             "last_error": ("No guide written yet for " + ", ".join(f"{x['title']} ({x['date']})" for x in missing)) if missing else None,

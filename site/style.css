@@ -668,3 +668,5 @@ table.score tr.race td { font: 600 0.72rem var(--mono); color: var(--text3); pad
 table.score td.n, table.score th.n { text-align: center; }
 table.score .tot { font-weight: 700; }
 table.score td.cn { white-space: normal; min-width: 9em; font-family: var(--sans); }
+.okmsg { color: var(--here); font-weight: 600; font-size: 0.95rem; }
+.errmsg { color: var(--live); font-weight: 600; font-size: 0.95rem; }

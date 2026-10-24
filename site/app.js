@@ -1656,7 +1656,8 @@ function guideCard() {
   return el("button", { class: "tellcard guidecard", onclick: () => openGuide() },
     el("span", { class: "bc-ico", "aria-hidden": "true", text: "☑" }),
     el("span", { class: "bc-txt" }, el("span", { class: "bc-t", text: "Voter guide · " + g.title + " · " + fmtDate.format(new Date(g.date + "T12:00:00")) + " · " + when }),
-      el("span", { class: "bc-s", text: (n ? "Next: " + n.label + " · " + fmtDate.format(new Date(n.date + "T12:00:00")) + " · " : "") + (g.races || []).length + " races" + ((g.proposals || []).length ? ", " + g.proposals.length + " proposals" : "") })));
+      el("span", { class: "bc-s", text: (n ? "Next: " + n.label + " · " + fmtDate.format(new Date(n.date + "T12:00:00")) + " · " : "") + (g.races || []).length + " races" + ((g.proposals || []).length ? ", " + g.proposals.length + " proposals" : "")
+        + (g.scorecard || (myBallot && myBallot.election === g.id) ? " · ✓ your scorecard" : " · scorecard not imported") })));
 }
 let myBallot = null;          // the private scorecard from /ballot (KV), loaded when the guide opens
 async function loadBallot(force) {
@@ -1994,14 +1995,16 @@ function scorecardAdmin() {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
       myBallot = j; box.value = "";
-      status.textContent = "Imported: " + Object.keys(j.races || {}).length + " races for " + j.election + ". Open the voter guide to see it.";
-    } catch (e) { status.textContent = "Couldn't import: " + e.message; }
+      status.className = "okmsg";
+      status.textContent = "✓ Imported: " + Object.keys(j.races || {}).length + " races. Opening the voter guide…";
+      setTimeout(() => openGuide(), 900);
+    } catch (e) { status.className = "errmsg"; status.textContent = "Couldn't import: " + e.message; }
     go.textContent = "Import scorecard";
   };
   go.onclick = () => box.value.trim() ? send(box.value.trim()) : (status.textContent = "Paste the file, or choose it below.");
   file.onchange = async () => { if (file.files[0]) send(await file.files[0].text()); };
   clear.onclick = async () => { await fetch("ballot", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "clear" }) }); myBallot = {}; status.textContent = "Removed."; };
-  loadBallot(true).then((b) => { status.textContent = b && b.election ? "Stored: " + b.election + ", " + Object.keys(b.races || {}).length + " races, updated " + (b.updated || "") + ". Private: it lives only on Cloudflare, never in the repository." : "None stored. The scorecard adds your address-level districts and scores on your own priorities to the voter guide."; });
+  loadBallot(true).then((b) => { status.className = b && b.election ? "okmsg" : "fine"; status.textContent = b && b.election ? "✓ " +  "Stored: " + b.election + ", " + Object.keys(b.races || {}).length + " races, updated " + (b.updated || "") + ". Private: it lives only on Cloudflare, never in the repository." : "None stored. The scorecard adds your address-level districts and scores on your own priorities to the voter guide."; });
   return el("div", {}, status, box, el("p", { class: "fine" }, "Or choose the file: ", file), go, el("p", { class: "fine" }, clear));
 }
 
