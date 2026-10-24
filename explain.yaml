@@ -1,0 +1,719 @@
+# Explainers for questionnaire statements (2026-10-23), shown by "What's this about?" before
+# answering. Written in a Claude session from the sources listed under each (all opened and
+# checked on 2026-10-23); neutral by rule: the case for agreeing and for disagreeing get equal
+# space, and nothing says how an answer is counted. The build adds the newest matching coverage
+# (pipeline/explain.py). Refresh before each election and each annual values take.
+q01:
+  now: Sen. Michelle Hinchey and Assemblymember Sarahana Shrestha sponsor the Hudson Valley Power Authority Act (S2026A / A2127A). It would create a public authority able to buy Central Hudson and run it as a public utility, with a goal that households spend no more than 6% of income on energy. The bill was re-referred to committee on Jan. 7, 2026 and has not had a floor vote. Central Hudson, owned by Canada's Fortis, says it is 'not for sale.' Meanwhile the PSC approved three years of electric delivery increases in August 2025 ($29.7M, $31.6M and $34.5M).
+  case_for: Sponsors Hinchey and Shrestha argue that a nonprofit public owner without shareholder profits would hold rates down over time, and they cite public utilities whose rates have risen more slowly than private ones. Supporters also point to Central Hudson's billing failures and repeated rate increases as evidence that private ownership has not served customers.
+  case_against: Central Hudson calls the plan a 'multibillion-dollar gamble' that would make customers and taxpayers pay for costly asset purchases with no guarantee of lower bills or better service. Some labor leaders, including IBEW Local 320's president, have said they are not convinced a takeover would help customers or workers.
+  terms:
+  - Central Hudson
+  - public power
+  - Hudson Valley Power Authority
+  - municipalization
+  - Hinchey Shrestha
+  - rate hike
+  sources:
+  - https://nysenate.gov/legislation/bills/2025/S2026
+  - https://www.dailygazette.com/hv360/central-hudson-takeover-by-state-authority/article_b24604e2-e4c9-460a-a9af-64a4569a4373.html
+  - https://dps.ny.gov/central-hudson-electric-rate-case-summary
+  - https://www.renewableenergyworld.com/energy-business/policy-and-regulation/public-power-push-spreads-to-new-yorks-hudson-valley/
+q02:
+  now: Sen. Rob Rolison's bill S980 (Assembly companion A2004) would require a public hearing in the affected region at least 90 days before the PSC decides any utility rate increase, with residents able to question the commission and the utility. It cleared the Senate Energy Committee in May 2025 but was sent back to committee on Jan. 7, 2026 and has not passed either house. Central Hudson's current rate plan was approved on Aug. 14, 2025, and Rep. Josh Riley asked the PSC to reconsider it, calling the process broken.
+  case_for: Rolison and Assembly Republicans Matt Slater and Anil Beephan argue that people paying the bill deserve to question regulators and the utility face to face, close to home, before a decision is final. Rep. Riley's challenge to the 2025 Central Hudson decision reflects a broader view that the current process does not give ratepayers enough of a voice.
+  case_against: Opponents of a fixed mandate say rate cases already run through a long formal process with intervenors, written comments and evidentiary hearings, and a rigid hearing requirement could add delay and cost. Some senators on the Energy Committee voted no or 'with reservations' on S980, and the bill has stalled in committee.
+  terms:
+  - utility rate hike
+  - public hearing
+  - Public Service Commission
+  - rate case
+  - Rolison bill
+  - Central Hudson
+  sources:
+  - https://www.nysenate.gov/legislation/bills/2025/S980
+  - https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-bill-requiring-public-hearings-utility
+  - https://riley.house.gov/2025/09/11/riley-files-appeal-central-hudson-rate-case
+q03:
+  now: New York is the only state that holds contractors and property owners strictly liable when a worker is hurt in a gravity-related fall, under a law more than 100 years old. As of September 2026 there is no formal state reform proposal; a Hochul spokesperson said she will lay out her agenda in January, though housing advocates say she is interested. A federal bill from Rep. Nick Langworthy would preempt the law on federally funded projects.
+  case_for: The New York State Trial Lawyers Association and its worker-safety and labor allies argue the law puts the cost of serious injuries on those who profit from the work instead of on injured workers and taxpayers. They say insurers and real estate interests are misrepresenting the facts, and that delayed and denied claims are the real problem.
+  case_against: Contractor groups such as the Associated General Contractors of New York and the Building Trades Employers' Association argue the law makes construction insurance 200% to 500% more costly than in nearby states and invites fraud. The New York State Association for Affordable Housing is building a coalition for reform, saying the law raises the cost of building housing.
+  terms:
+  - Scaffold Law
+  - absolute liability
+  - construction insurance
+  - Labor Law 240
+  - tort reform
+  - affordable housing
+  sources:
+  - https://spectrumlocalnews.com/nys/capital-region/news/2026/09/16/scaffold-law-is-reform-on-the-affordable-housing-agenda-as-well-as-on-hochul-s-radar
+  - https://spectrumlocalnews.com/nys/central-ny/politics/2026/06/15/new-york-scaffold-law
+q04:
+  now: Republican nominee Bruce Blakeman proposes what he calls the largest income tax cut in state history, under which a joint filer earning $100,000 would pay no state income tax. He says he would pay for it by restructuring spending, including money now spent assisting immigrants and refugees. Gov. Hochul points to middle-class rate cuts and rebates and says she has not raised income taxes. In February 2026 the Comptroller reported projected budget gaps of $6 billion in FY2028 rising to $12.5 billion in FY2030, along with an estimated $9.4 billion drop in federal support.
+  case_for: Blakeman argues the state overspends and that New Yorkers, especially middle-income families, are leaving because taxes are too high, so leaner programs are a fair price for letting people keep more of their pay. Supporters say lower taxes would make the state more competitive and help keep residents and businesses.
+  case_against: Hochul and her allies argue the state can deliver targeted relief without cutting the programs families rely on. They point to large projected budget gaps and falling federal aid as reasons a big tax cut would force deep cuts to areas such as schools and health care.
+  terms:
+  - income tax cut
+  - Blakeman tax plan
+  - state budget gap
+  - middle-class tax cut
+  - spending cuts
+  - Hochul
+  sources:
+  - https://ny1.com/nyc/all-boroughs/politics/2026/09/29/hochul-blakeman-tax-relief
+  - https://spectrumlocalnews.com/nys/hudson-valley/politics/2026/02/19/dinapoli--projected-n-y--spending-could-outpace-expected-revenues
+q05:
+  now: 'The state budget enacted in late May 2026 exempts most new housing from SEQRA review if it is built on previously disturbed land and connects to existing water and sewer. Caps apply: up to 500 units in denser parts of NYC, 300 in other urban areas, 100 in most non-urban areas and 20 in unzoned areas. Larger projects still get full review, and the law adds deadlines of 120 days for exemption decisions and two years to finish an impact statement. The question now is whether to widen these exemptions.'
+  case_for: Gov. Hochul, the Regional Plan Association and many affordable housing groups argue SEQRA reviews take years, duplicate local rules and are used in lawsuits to block housing. They cite a state and city study finding that virtually none of more than 1,000 reviewed housing projects had significant environmental impacts.
+  case_against: Environmental groups, including the Sierra Club, argue SEQRA is an essential planning tool that lets communities weigh traffic, water and open-space effects before building. They say framing the issue as housing versus the environment is false, and that the 2026 exemptions already went far enough.
+  terms:
+  - SEQRA
+  - environmental review
+  - housing exemption
+  - Let Them Build
+  - state budget
+  - Hochul housing
+  sources:
+  - https://nysfocus.com/2026/05/27/new-york-budget-seqra-housing-environment
+  - https://www.mondaq.com/unitedstates/environmental-law/1797526/new-yorks-2026-enacted-budget-advances-seqra-reforms-promoting-housing-construction-and-streamlining-environmental-review-timelines
+  - https://www.eenews.net/articles/environmental-permitting-changes-bring-the-abundance-agenda-to-housing-in-new-york/
+q06:
+  now: New York's 2019 law ended cash bail for most misdemeanors and nonviolent felonies starting in 2020. It has since been amended several times, including in 2022 and in the 2023 budget, which gave judges more discretion to hold people charged with serious crimes. Gov. Hochul's office says the state has not eliminated cash bail and that rearrests of people on pretrial release fell from 24% in 2020 to 17% in 2024. Republican nominee Bruce Blakeman opposes cashless bail and has made crime a central campaign issue.
+  case_for: Blakeman, Rep. Elise Stefanik and police unions argue that releasing people before trial without bail lets repeat offenders return to the street and has hurt public safety. They want judges to have broad power to set bail or detain based on how dangerous a defendant is.
+  case_against: Public defenders such as the Bronx Defenders and reform advocates argue cash bail jails people for being poor, not for being dangerous, and that judges already have discretion in serious cases. Hochul says the changes already made are working and points to falling rearrest rates.
+  terms:
+  - bail reform
+  - cashless bail
+  - pretrial detention
+  - Blakeman
+  - Hochul crime
+  - judicial discretion
+  sources:
+  - https://www.cbsnews.com/amp/newyork/news/cashless-bail-trump-new-york-nypd
+  - https://www.fox5ny.com/news/ny-bail-reform-changes-hochul
+  - https://www.yahoo.com/news/articles/stefanik-vows-repeal-yorks-cash-163700435.html
+  - https://www.fox5ny.com/news/ny-election-2026-nassau-county-executive-blakeman-new-york-gov-midterms-vote
+q07:
+  now: In January 2025 the Department of Homeland Security rescinded its long-standing guidance limiting arrests at schools, hospitals and houses of worship, leaving it to officers' discretion; federal courts have since blocked enforcement only at specific plaintiffs' churches. New York's FY2027 budget, signed May 29, 2026, includes the New York for All Act. It requires a judicial warrant for ICE to enter public places such as schools and hospitals, and lets private sites like houses of worship require one. On Aug. 3, 2026, a federal judge blocked the state's ICE mask ban but let the limits on cooperation with ICE take effect.
+  case_for: Gov. Hochul, immigrant-rights coalitions and groups such as the Legal Aid Society argue that arrests at schools, clinics and churches keep families from seeking care, education and worship. Faith groups that sued DHS say a warrant rule protects religious freedom and community safety.
+  case_against: The Trump administration argues bright-line limits are unnecessary and that officers should use judgment, since immigration enforcement is a federal power. Republicans who back the administration say warrant rules shield people in the country illegally and that the Justice Department is right to challenge state limits in court.
+  terms:
+  - ICE
+  - sensitive locations
+  - judicial warrant
+  - New York for All
+  - immigration enforcement
+  - protected areas
+  sources:
+  - https://www.jurist.org/news/2026/05/new-york-state-limits-immigration-enforcement-activities/
+  - https://immpolicytracking.org/policies/dhs-rescinds-guidelines-for-enforcement-actions-in-or-near-protected-areas/
+  - https://blackamericaweb.com/2026/08/05/judge-blocks-ban-ice-agents-masks/
+  - https://www.cityandstateny.com/policy/2026/01/hochul-still-not-board-new-york-all/410637/
+q08:
+  now: The New York Health Act (S3425 in the Senate, sponsored by Sen. Gustavo Rivera, with A1466 in the Assembly) would create a single public health plan covering every state resident. It has dozens of Senate co-sponsors but remains in the Senate Health Committee, where it was re-referred on Jan. 7, 2026, and has not reached a floor vote. Separately, the Comptroller projects federal changes enacted in July 2025 will cut federal support for state health programs, with the Essential Plan taking the largest hit.
+  case_for: Sen. Rivera, nurses' unions and single-payer advocates argue one public plan would cover everyone, end medical debt and cut administrative waste. They say it would be cheaper overall than the current mix of private insurers, especially as federal cuts shrink coverage.
+  case_against: Business groups, insurers and many moderate Democrats argue the plan would require very large new taxes and disrupt coverage for people who like their current plans. They also question whether the state could fund it without federal cooperation, given its projected budget gaps.
+  terms:
+  - New York Health Act
+  - single-payer
+  - universal health care
+  - Gustavo Rivera
+  - Medicaid cuts
+  - Essential Plan
+  sources:
+  - https://nysenate.gov/legislation/bills/2025/S3425
+  - https://spectrumlocalnews.com/nys/hudson-valley/politics/2026/02/19/dinapoli--projected-n-y--spending-could-outpace-expected-revenues
+q09:
+  now: In June 2025 Gov. Hochul directed the New York Power Authority to build at least 1 gigawatt of new advanced nuclear power upstate, and in January 2026 she raised the goal to 5 gigawatts. NYPA's 2025 solicitations drew interest from eight upstate communities and 23 companies, and in June 2026 it opened formal windows for developers able to start construction before 2033. As of March 2026 no site, partner or reactor design had been chosen.
+  case_for: Hochul, NYPA, the nuclear industry and host communities such as Oswego and Schuyler counties argue nuclear provides steady, zero-emission power around the clock as demand grows. Supporters say it would anchor good jobs and back up wind and solar to meet climate goals.
+  case_against: Climate groups such as NY Renews and Cornell scientist Robert Howarth argue nuclear is far costlier and slower to build than solar, wind or storage. They also cite unresolved waste storage and the history of projects like Shoreham that never opened.
+  terms:
+  - NYPA nuclear
+  - advanced nuclear
+  - small modular reactor
+  - Hochul nuclear
+  - 5 gigawatts
+  - upstate nuclear plant
+  sources:
+  - https://www.ans.org/news/2026-01-15/article-7677/hochul-upgrades-nuclear-vision-for-ny/
+  - https://insideclimatenews.org/?p=106486
+  - https://wnn.world-nuclear.org/articles/us-states-take-steps-towards-nuclear-new-build
+q10:
+  now: On July 14, 2026, Gov. Hochul signed an executive order pausing large new data centers (50 megawatts or more) for up to a year while the state writes environmental standards, citing the risk of higher utility bills. The Legislature had passed a broader bill in early June, Sen. Kristen Gonzalez's S10642, covering centers over 20 megawatts and adding a separate utility rate for data centers. As of mid-July 2026 that bill still awaited Hochul's decision. More than 12 gigawatts of very large loads, including data centers, were seeking to connect to the state grid as of May.
+  case_for: Hochul, Sen. Gonzalez, Assembly Speaker Heastie and environmental groups argue the state should not approve huge new power users until it knows how they will affect grid costs and household bills. They say a pause gives time to make data centers pay their own way.
+  case_against: Data center firms such as Digital Realty and many building trades unions argue a pause will push investment and union jobs to other states. Republicans such as Assemblyman Scott Gray say rules can be written without stopping projects, and that a moratorium sends a signal that New York is closed for business.
+  terms:
+  - data center moratorium
+  - power bills
+  - Hochul executive order
+  - AI data centers
+  - grid demand
+  - S10642
+  sources:
+  - https://www.thestar.com.my/tech/tech-news/2026/07/14/new-york-becomes-the-first-state-to-impose-a-data-center-moratorium
+  - https://ny1.com/nyc/all-boroughs/politics/2026/07/15/heastie-hochul-data-center-bill-
+  - https://insideclimatenews.org/news/04062026/new-york-data-center-moratorium-bill/
+  - https://www.btpm.org/local/2026-07-14/push-still-on-for-more-extensive-data-center-legislation-after-hochul-executive-order
+q11:
+  now: Attorney General Letitia James, a Democrat, faces Republican Saritha Komatireddy, a longtime federal prosecutor endorsed by President Trump, on Nov. 3. Komatireddy says safety is the attorney general's duty, that the state needs 'a prosecutor in charge,' and that James's civil fraud case against Trump was politically motivated; an appeals court vacated the roughly $500 million penalty in that case. James defends her record of civil suits, including many against the Trump administration. Most street crime is handled by local district attorneys, not the attorney general.
+  case_for: Komatireddy argues the office should use its criminal tools more, naming Medicaid fraud and public safety as priorities, and says James has made New York less safe while pursuing political cases. Supporters say a former prosecutor would put the office's resources toward crimes that directly harm New Yorkers.
+  case_against: 'James and her supporters argue the office''s greatest strength is civil enforcement: consumer protection, fraud and lawsuits that recover money and stop harmful federal or corporate conduct. They note that district attorneys already handle most criminal cases, so shifting resources would leave civil work undone.'
+  terms:
+  - attorney general race
+  - Letitia James
+  - Saritha Komatireddy
+  - Medicaid fraud
+  - Trump civil fraud case
+  - prosecutor
+  sources:
+  - https://ny1.com/nyc/all-boroughs/politics/2026/10/09/attorney-general-candidates-trade-blows-in-fiery-ny1-debate-letitia-james-saritha-komatireddy
+  - https://www.dailygazette.com/community-journalism-fund/political/saritha-komatireddy-ny-attorney-general-candidate/article_cc3cd51f-2260-4017-b4c9-7dae4acfeef7.html
+  - https://wskg.org/james-henry-face-off-in-new-york-attorney-generals-race/
+q12:
+  now: Under a 2016 agreement covering 2019 through 2028, the US pledged $38 billion in military aid to Israel, about $3.8 billion a year, including missile defense. On July 15, 2026 the House rejected Rep. Thomas Massie's amendment to cut the roughly $3.3 billion in annual grants, 314 to 104; 103 Democrats voted yes, including Hudson Valley Rep. Pat Ryan, while Minority Leader Hakeem Jeffries said beforehand he would oppose it. As of June 2026 the US and Israel were reportedly negotiating the next agreement, and Prime Minister Netanyahu has talked about phasing grants out.
+  case_for: Most House Republicans and Democrats such as Jeffries and Steny Hoyer argue the aid supports a key ally, deters Iran and its proxies, and protects US security interests, including missile defense programs the US also benefits from. They say cutting it now would weaken Israel's defense in a dangerous period.
+  case_against: Supporters of cuts or conditions, including Reps. Massie, Ryan and the Congressional Progressive Caucus, argue US taxpayers should not fund a government they say has acted unlawfully in Gaza. Some Republicans and Netanyahu himself have also argued that Israel is now wealthy enough to need less grant aid.
+  terms:
+  - Israel military aid
+  - memorandum of understanding
+  - Massie amendment
+  - Iron Dome
+  - foreign military financing
+  - Gaza
+  sources:
+  - https://www.everycrsreport.com/files/2026-06-04_IN12695_87f8e7141912b29328d8d245218578a04925aef5.html
+  - https://jewishinsider.com/2026/07/nearly-half-of-house-democrats-vote-to-cut-off-aid-to-israel/
+q13:
+  now: The State Common Retirement Fund held $267.8 million in Israel bonds as of October 2023, under 1% of a fund now worth about $310 billion; Comptroller Tom DiNapoli says the holding dates to 1991, has beaten Treasuries and is not political. In the June 23, 2026 Democratic primary, challengers Raj Goyle and Drew Warshaw both called for divesting, and DiNapoli won with about 65% of the vote. He now faces Republican Joseph Hernandez on Nov. 3. In New York City, Mayor Mamdani has signaled divestment while Comptroller Mark Levine opposes it.
+  case_for: DiNapoli argues the bonds are a sound, long-held investment that has outperformed US Treasuries, and that divestment should be a last resort. Supporters say pulling out would bring politics into a fund that should be managed for retirees.
+  case_against: Goyle argued during the primary that a state pension fund should not hold foreign government bonds, and he and other critics say Israel bonds tie retirees' money to a government at war. Warshaw called for selling all foreign government bonds, not just Israel's.
+  terms:
+  - Israel bonds
+  - state pension fund
+  - DiNapoli
+  - divestment
+  - comptroller race
+  - Common Retirement Fund
+  sources:
+  - https://www.newarab.com/news/will-new-york-divest-israel-bonds?amp
+  - https://www.cityandstateny.com/politics/2026/06/who-running-new-york-comptroller/414261/
+  - https://spectrumlocalnews.com/nys/central-ny/politics/2026/06/23/n-y--state-comptroller-tom-dinapoli-wins-democratic-primary
+  - https://www.mychamplainvalley.com/news/local-news/new-york/comptroller-touts-309-7-billion-pension-fund-as-opponent-targets-wall-street-fees/amp/
+q14:
+  now: On Feb. 20, 2026, the US Supreme Court ruled that the emergency powers law (IEEPA) does not let the president impose tariffs, striking down many of them. The administration replaced them with a temporary 10% global tariff, then on July 24, 2026 with new Section 301 tariffs of 10% to 12.5% on goods from 60 economies; steel, auto and other Section 232 tariffs remain. As of August 2026 the Yale Budget Lab put the average tariff rate at 11% and estimated it costs households about $1,100 a year.
+  case_for: Democrats in Congress, many importers and retailers, and economists who track prices argue tariffs are a tax paid largely by US buyers and have pushed up the cost of goods. They say lifting them would ease prices for families and businesses that rely on imported parts and materials.
+  case_against: The Trump administration and its allies argue tariffs protect US manufacturing, punish unfair trade and forced labor, and give the US leverage in trade deals. They say price effects are modest and that tariff revenue, about $1.9 trillion over ten years by Yale's estimate, helps the federal budget.
+  terms:
+  - tariffs
+  - Supreme Court IEEPA
+  - Section 301
+  - Section 232
+  - import prices
+  - trade war
+  sources:
+  - https://www.troutman.com/insights/supreme-court-strikes-down-ieepa-tariffs-trump-responds-with-section-122-global-surcharge/
+  - https://www.bakerdonelson.com/forced-labor-section-301-tariffs-imposed-to-replace-expiring-section-122-tariffs-what-importers-need-to-know
+  - https://budgetlab.yale.edu/research/state-us-tariffs
+q15:
+  now: 'Gov. Hochul''s 2026 ''Let Them Build'' agenda argued that red tape is slowing housing, and the budget enacted in May 2026 exempted much new housing from state environmental review. Other cost drivers are also in the debate: an industry study found insurance per affordable unit rose from $712 to $1,495 between 2017 and 2024. Landlord groups blame the 2019 rent law. Contractors blame the Scaffold Law for high construction insurance.'
+  case_for: Hochul, pro-housing groups and business groups argue that reviews, permits, zoning limits and liability rules add years and large costs to every project. They point to SEQRA reviews averaging about two years and say clearing these barriers is the fastest way to lower prices.
+  case_against: Housing economists, tenant advocates and trial lawyers argue costs are driven mainly by interest rates, land prices, insurance, labor and materials, including tariffs, which deregulation does not fix. They say many rules protect safety, workers and the environment, and that removing them shifts costs elsewhere.
+  terms:
+  - regulation
+  - housing costs
+  - Let Them Build
+  - red tape
+  - zoning
+  - cost of doing business
+  sources:
+  - https://www.bisnow.com/news/new-york/affordable-housing/hochul-proposes-cutting-red-tape-for-developers-new-tax-incentives-for-rent-stabilized-landlords-132701
+  - https://nysfocus.com/2026/05/27/new-york-budget-seqra-housing-environment
+  - https://spectrumlocalnews.com/nys/central-ny/politics/2026/06/15/new-york-scaffold-law
+q16:
+  now: 'This is now law. Gov. Hochul signed the FAIR Business Practices Act on Dec. 19, 2025, after it passed in June 2025, expanding the state''s main consumer law to ban ''unfair'' and ''abusive'' practices, not only deceptive ones. A chapter amendment signed March 27, 2026 narrowed it: unfairness now follows the federal FTC standard, only the Attorney General can sue over unfair or abusive conduct, and private lawsuits stay limited to deception. The question now is whether to keep, expand or roll back that power.'
+  case_for: Attorney General James and sponsors Sen. Leroy Comrie and Assemblymember Micah Lasher argue many harmful practices are not technically deceptive, such as hidden fees, steering borrowers into costly loans, or seizing protected benefits. They say most states already let regulators pursue unfair conduct, and New York was behind.
+  case_against: Business groups and defense lawyers argue 'unfair' is a vague standard that gives one official broad power to decide after the fact what business conduct is illegal. They say that uncertainty raises compliance costs, and they pushed for the 2026 amendment to narrow the law.
+  terms:
+  - FAIR Business Practices Act
+  - unfair and abusive practices
+  - GBL 349
+  - consumer protection
+  - Attorney General James
+  - chapter amendment
+  sources:
+  - https://ag.ny.gov/press-release/2025/attorney-general-james-senator-comrie-and-assemblymember-lasher-celebrate
+  - https://www.arnoldporter.com/en/perspectives/blogs/enforcement-edge/2026/01/new-york-enacts-fair-business-practices-act
+  - https://www.hinshawlaw.com/en/insights/blogs/consumer-crossroads-where-financial-services-and-litigation-intersect/governor-hochul-signs-chapter-amendment-to-the-new-york-fair-business-practices-act
+q17:
+  now: The State Common Retirement Fund was worth about $309.7 billion in August 2026. Its In-State Private Equity Program had committed $2.64 billion and invested $1.9 billion in about 600 New York companies as of March 2025, with roughly a 10% return; separate programs fund small-business loans and affordable housing. Republican comptroller candidate Joseph Hernandez proposes setting aside $10 billion to invest in the state, with a focus on upstate. Incumbent Tom DiNapoli stresses diversification and his fiduciary duty as sole trustee.
+  case_for: Hernandez argues upstate and western New York have been neglected, and that a larger in-state commitment could attract companies and jobs while still earning returns. Supporters say the fund's existing in-state program shows New York businesses can be good investments.
+  case_against: DiNapoli and pension experts argue the fund's only duty is to retirees, and putting more money in one state concentrates risk and could lower returns. They note that if the state's economy weakens, retirees could lose on their investments at the same time taxpayers are under strain.
+  terms:
+  - state pension fund
+  - in-state investment
+  - DiNapoli
+  - Joseph Hernandez
+  - Common Retirement Fund
+  - fiduciary duty
+  sources:
+  - https://www.osc.ny.gov/pension/instate/index.htm
+  - https://www.wbng.com/2025/12/18/republican-comptroller-candidate-joseph-hernandez-emphasizes-upstate-investment-2026-campaign/
+  - https://www.mychamplainvalley.com/news/local-news/new-york/comptroller-touts-309-7-billion-pension-fund-as-opponent-targets-wall-street-fees/amp/
+q18:
+  now: A bill from Assemblymember Emily Gallagher (A6265, Senate companion S5674) would create a state Social Housing Development Authority to buy land, renovate buildings and build permanently affordable homes, with backers proposing $5 billion in start-up funds. It was re-referred to committee on Jan. 7, 2026 and has not passed either house. New York City Mayor Zohran Mamdani's 2026 housing plan aims for 200,000 new affordable homes in ten years, using public land and a bigger role for NYCHA. The state's own approach relies mainly on subsidies and easing rules for private builders.
+  case_for: Gallagher, the Working Families Party and Housing Justice for All argue that public ownership keeps homes affordable permanently instead of for a limited subsidy period. They point to the state's past success building tens of thousands of units directly through the Urban Development Corporation.
+  case_against: Landlord groups such as the Community Housing Improvement Program argue that public ownership does not change the high costs of building and running housing, so a state developer would need large ongoing subsidies. Others point to NYCHA's estimated $78 billion repair backlog as a warning about government as landlord.
+  terms:
+  - social housing
+  - public housing
+  - Social Housing Development Authority
+  - Mamdani housing plan
+  - permanently affordable
+  - NYCHA
+  sources:
+  - https://www.nysenate.gov/legislation/bills/2025/A6265
+  - https://nextcity.org/features/the-plan-to-bring-social-housing-back-to-new-york
+  - https://dhclegal.com/mamdanis-housing-program-summary/
+v01:
+  now: No federal job guarantee exists. In February 2026, Rep. Bonnie Watson Coleman (D-NJ) introduced H.R. 7566, which would fund pilot job-guarantee programs through the Labor Department; it has not passed. Unemployment was 4.2% in September 2026, with 7.1 million people out of work and 1.9 million of them jobless for six months or more. A March 2026 Verasight poll found 65% support for a federal job guarantee funded by higher taxes on incomes over $200,000.
+  case_for: Progressive economists and some Democrats in Congress argue a public job offer would end involuntary unemployment, set a wage floor, and put idle people to work on useful local projects.
+  case_against: Conservatives and many market economists argue it would cost too much, pull workers away from private employers, and create make-work jobs that are hard to manage or end.
+  terms:
+  - federal jobs guarantee
+  - job guarantee pilot
+  - public employment program
+  - unemployment rate
+  - Watson Coleman bill
+  sources:
+  - https://www.govinfo.gov/app/details/BILLS-119hr7566ih
+  - https://www.bls.gov/news.release/empsit.htm?hl=en-GB
+  - https://data.verasight.io/money/a-jobs-guarantee-funded-by-high-income-taxes-has-broad-support
+v02:
+  now: In January 2025, President Trump ordered agencies to repeal at least ten existing rules for every new one, saying overregulation crushes small business. A 2023 study commissioned by the National Association of Manufacturers put federal compliance costs at about $50,100 per employee a year for small manufacturers. The government's own OMB estimates, which cover only some major rules, put fiscal 2023 benefits at $48 to $79 billion against costs of $15 to $19 billion.
+  case_for: Small-business groups like NFIB and the Trump administration argue that paperwork and compliance costs fall hardest on small firms that lack lawyers and compliance staff, which stunts hiring and growth.
+  case_against: Consumer, labor, and environmental groups argue most rules protect workers, customers, and neighbors, and that official cost-benefit reviews show benefits well above costs.
+  terms:
+  - deregulation
+  - 10-to-1 executive order
+  - compliance costs
+  - small business regulations
+  - regulatory relief
+  - NFIB
+  sources:
+  - https://www.whitehouse.gov/fact-sheets/2025/01/fact-sheet-president-donald-j-trump-launches-massive-10-to-1-deregulation-initiative
+  - https://nam.org/regulatory-onslaught-costing-small-manufacturers-more-than-50000-per-employee/
+  - https://regulatorystudies.columbian.gwu.edu/node/5111
+v03:
+  now: The July 2025 federal tax law (the One Big Beautiful Bill Act) made the 37% top income tax rate permanent. In New York, Mayor Mamdani pushed to raise the city income tax on residents earning over $1 million, but the state budget passed in spring 2026 did not raise income taxes on high earners or let the city do so. A February 2026 Siena poll found 54% of New York voters supported that millionaire tax and 29% opposed it.
+  case_for: Progressive lawmakers and groups like Mayor Mamdani argue top earners have gained the most in recent decades and can afford to pay more for transit, child care, and other public services.
+  case_against: Business groups and fiscal conservatives argue New York already taxes high earners heavily, and that higher rates push wealthy residents and their businesses to move away, shrinking the tax base.
+  terms:
+  - millionaires tax
+  - tax the rich
+  - top tax rate
+  - Mamdani tax plan
+  - New York state budget
+  - high earners
+  sources:
+  - https://laporte.com/knowledgecenter/in-the-news/overview-of-the-budget-reconciliation-bill-the-one-big-beautiful-bill-actpl-119-21
+  - https://nysfocus.com/2026/05/29/new-york-final-state-budget-2026-funding-guide-hochul
+  - https://sri.siena.edu/2026/03/04/strong-majorities-of-democrats-nyc-voters-support-gov-leg-giving-nyc-ability-to-raise-income-tax-on-its-residents-earning-at-least-1m/
+v04:
+  now: In February 2026, the Supreme Court ruled 6-3 in Learning Resources v. Trump that the president cannot impose tariffs under the emergency powers law IEEPA. The administration then imposed a 10% tariff on imports from all countries under a different law, Section 122 of the Trade Act of 1974. A January 2026 Pew survey found 60% of Americans disapprove of the tariff increases, while a 2025 Gallup poll found 81% see foreign trade as more of an opportunity than a threat.
+  case_for: Most economists and business groups argue trade lowers prices, widens consumer choice, and opens export markets, which benefits most households even if some industries lose.
+  case_against: Labor unions and trade skeptics in both parties argue trade deals hollowed out manufacturing towns and cost factory jobs, and that the gains went mostly to companies and investors.
+  terms:
+  - tariffs
+  - free trade
+  - IEEPA ruling
+  - Section 122 tariff
+  - trade deficit
+  - manufacturing jobs
+  sources:
+  - https://www.klgates.com/Summary-Supreme-Court-Decision-on-IEEPA-Tariffs-2-20-2026
+  - https://www.pewresearch.org/politics/2026/02/04/americans-largely-disapprove-of-trumps-tariff-increases/
+  - https://abc6onyourside.com/news/nation-world/bipartisan-support-for-foreign-trade-seen-as-economic-opportunity-despite-tariff-debates-gallup-surveys-americans-on-foreign-policy-priorities
+v05:
+  now: Union membership was 10.0% of US wage and salary workers in 2025, including 5.9% in the private sector and 32.9% in the public sector. Gallup's 2026 poll found 71% of Americans approve of unions, and a record 47% want unions to have more influence. The PRO Act, which would make organizing easier, passed the House in 2021 but stalled in the Senate.
+  case_for: Unions, many Democrats, and a few pro-labor Republicans argue current law lets employers delay and fight elections, and that easier organizing would raise wages and give workers a stronger voice.
+  case_against: Business groups and most Republicans argue that easier organizing rules, such as limits on secret-ballot elections, would pressure workers, raise costs, and hurt small employers and flexible jobs.
+  terms:
+  - union drive
+  - PRO Act
+  - NLRB
+  - union approval Gallup
+  - union membership rate
+  - card check
+  sources:
+  - https://www.bls.gov/news.release/archives/union2_02182026.htm
+  - https://axios.com/2026/09/03/labor-unions-record-influence-gallup
+v06:
+  now: Gallup found in 2025 that a record 62% of Americans say the federal government has too much power, and 51% say it does things better left to businesses and individuals. Yet a 2025 Pew survey found Americans view 13 of 16 federal agencies favorably, with the Park Service and Weather Service at 76%. In health care, 54% of eligible Medicare beneficiaries chose private Medicare Advantage plans in 2025, though federal advisers say Medicare pays those plans more than traditional Medicare for similar patients.
+  case_for: Free-market economists and many Republicans argue private firms face competition and the risk of losing customers, which pushes them to cut costs, innovate, and serve people faster than agencies do.
+  case_against: Many Democrats and public-sector advocates argue profit motives can raise costs or cut corners, and that agencies like the Postal Service and Social Security serve everyone, including people firms find unprofitable.
+  terms:
+  - privatization
+  - government efficiency
+  - Medicare Advantage
+  - federal agencies
+  - contracting out
+  - public vs private
+  sources:
+  - https://www.fox5ny.com/news/gallup-poll-shows-62-americans-think-government-has-too-much-power
+  - https://www.pewresearch.org/politics/2025/08/27/republicans-views-of-justice-department-fbi-rebound-as-democrats-views-shift-more-negative/
+  - https://homehealthcarenews.com/2025/07/medicare-advantage-enrollment-reaches-54-in-2025-drives-rising-federal-spending/
+v07:
+  now: The Biden administration approved $188.8 billion in student loan forgiveness for 5.3 million borrowers, after the Supreme Court struck down its broad cancellation plan in 2023. The SAVE plan, which covered about 7.5 million borrowers, ended July 1, 2026 under a court-approved settlement; borrowers had 90 days to pick a new plan or be placed in a standard one. The new Repayment Assistance Plan (RAP) bases payments on income, waives unpaid interest, and forgives remaining balances after 30 years; IBR remains, PSLF continues tax-free, and other income-driven forgiveness became federally taxable again on January 1, 2026.
+  case_for: Borrower advocates and many Democrats argue college costs and interest have left millions unable to repay, with about 12 million delinquent or in default, and that relief would free them to buy homes and start businesses.
+  case_against: Republicans and fiscal conservatives argue cancellation shifts costs to taxpayers who did not borrow or already repaid, and does nothing to stop tuition from rising in the future.
+  terms:
+  - student loan forgiveness
+  - SAVE plan
+  - Repayment Assistance Plan
+  - PSLF
+  - IBR
+  - student debt relief
+  sources:
+  - https://www.ed.gov/about/news/press-release/us-department-of-education-announces-next-steps-borrowers-enrolled-unlawful-save-plan
+  - https://www.vpm.org/npr-news/2025-12-23/federal-student-loans-are-changing-heres-what-to-expect-in-2026
+  - https://www.wjhg.com/2026/02/17/experts-warn-possible-tax-bomb-student-loan-forgiveness
+  - https://www.bestcolleges.com/news/president-biden-track-record-student-loan-forgiveness/
+v08:
+  now: In June 2025, the Supreme Court ruled in Mahmoud v. Taylor that a Maryland district had to let religious parents opt their children out of LGBTQ-themed lessons. As of 2026, the Movement Advancement Project counts 14 to 19 states with laws restricting LGBTQ topics in schools (its own tallies differ) and 8 that require LGBTQ-inclusive curriculum; New York has neither. A 2023 Pew survey found about half of K-12 teachers and 37% of parents say students should not learn about gender identity in school.
+  case_for: Parents' rights groups and many Republicans argue gender identity is a moral and family matter, and that schools should leave it to parents, especially with young children.
+  case_against: LGBTQ advocates, teachers' unions, and many Democrats argue transgender students exist in every school, and that age-appropriate teaching reduces bullying and helps all students feel safe.
+  terms:
+  - gender identity curriculum
+  - parental rights
+  - Mahmoud v. Taylor
+  - opt-out
+  - Don't Say Gay
+  - transgender students
+  sources:
+  - https://njpsa.org/addressing-gender-identity-and-sexual-orientation-in-schools-after-mahmoud-v-taylor/
+  - https://mapresearch.org/maps/lgbtq-curricular-laws/
+  - https://www.pewresearch.org/social-trends/2024/02/22/race-and-lgbtq-issues-in-k-12-schools/
+v09:
+  now: Pew's 2025 Religious Landscape Study found 62% of US adults identify as Christian, down from 78% in 2007 but stable since 2019, while 29% have no religion. In an April 2026 Pew survey, 37% said religion is gaining influence in American life, the highest share since 2002. A 55% majority held a positive view of religion's role, including 75% of Republicans and 38% of Democrats.
+  case_for: Religious leaders and many social scientists argue faith communities build charity, family stability, and shared moral norms, and that weekly worshipers report more civic involvement and well-being.
+  case_against: Secular groups and many nonreligious Americans argue people can be moral and connected without religion, and that faith can also divide people or be used to justify discrimination.
+  terms:
+  - religion in America
+  - religious nones
+  - church attendance
+  - faith and society
+  - Religious Landscape Study
+  sources:
+  - https://www.pbs.org/newshour/nation/survey-shows-u-s-christian-population-leveling-off-after-declining-for-years
+  - https://www.pewresearch.org/religion/2026/05/14/how-americans-feel-about-religions-influence-in-government-and-public-life/
+v10:
+  now: 'Since the Supreme Court''s 2022 Dobbs ruling, abortion law is set by states: as of August 2026, 13 states ban it and 7 more ban it after 6 to 12 weeks, per KFF. In New York, abortion is legal through 24 weeks, and later if the fetus is not viable or the patient''s life or health is at risk; voters added pregnancy outcomes to the state constitution''s equal rights clause in 2024 with 62% support. Gallup''s May 2026 poll found 48% say abortion should be legal in all or most cases and 49% say it should be legal in only a few cases or illegal.'
+  case_for: Abortion-rights groups and most Democrats argue the decision belongs to the pregnant person and her doctor, and that bans endanger women facing pregnancy complications.
+  case_against: Anti-abortion groups and most Republicans argue a fetus is a human life deserving legal protection, and that abortion should be limited to rare cases such as a threat to the mother's life.
+  terms:
+  - abortion ban
+  - Dobbs
+  - abortion rights
+  - Proposal 1
+  - mifepristone
+  - Reproductive Health Act
+  sources:
+  - https://kff.org/womens-health-policy/abortion-in-the-u-s-dashboard/
+  - https://ag.ny.gov/publications/abortion-legal-and-protected-new-york-state
+  - https://en.wikipedia.org/wiki/2024_New_York_Proposal_1
+  - https://www.fox13news.com/news/americans-view-abortion-relatively-unchanged-new-poll-shows
+v11:
+  now: 'A December 2025 Pew survey found 59% of Americans say the country''s best years are behind it, with Democrats (64%) more likely than Republicans (53%) to say so. A 2024 PRRI survey found Americans split on whether US culture and way of life has changed for the worse since the 1950s: 49% said worse and 48% said better. Recent changes include more than 11 million immigrant arrivals from 2020 to 2025, followed by the first drop in the immigrant population since the 1960s in 2025, per Pew.'
+  case_for: Many cultural conservatives and some older Americans argue rapid shifts in technology, family life, immigration, and social norms have weakened communities and left people feeling unmoored.
+  case_against: Many progressives and younger Americans argue recent changes, such as wider rights and new technology, have improved lives, and that every generation has felt unsettled by change.
+  terms:
+  - cultural change
+  - nostalgia
+  - best years behind us
+  - way of life
+  - pace of change
+  sources:
+  - https://courthousenews.com/majority-of-americans-say-countrys-best-years-are-bygone-poll-finds/
+  - https://www.axios.com/2024/11/02/survey-americans-split-life-better-1950s
+  - https://www.planetizen.com/news/2025/10/136195-us-immigrant-population-falls-first-time-over-half-century
+v12:
+  now: Gallup's June 2026 poll found 73% of Americans say immigration is a good thing for the country, down from a record 79% in 2025. In that poll, 29% wanted immigration decreased, 35% wanted it kept at the present level, and 31% wanted it increased. Pew found the US immigrant population fell from 53.3 million in January 2025 to 51.9 million in June 2025, the first decline since the 1960s, amid stepped-up enforcement.
+  case_for: Immigrant advocates, many business leaders, and many Democrats argue newcomers bring food, music, faith, and entrepreneurship that have always renewed American culture.
+  case_against: Immigration restrictionists and many Republicans argue that fast, large-scale immigration strains shared language and civic customs and makes assimilation harder.
+  terms:
+  - immigration
+  - assimilation
+  - Gallup immigration poll
+  - immigrant population
+  - deportations
+  - border
+  sources:
+  - https://www.fox5ny.com/news/new-poll-reveals-how-americans-view-immigration.amp
+  - https://www.planetizen.com/news/2025/10/136195-us-immigrant-population-falls-first-time-over-half-century
+v13:
+  now: 'New York legalized adult-use marijuana with the 2021 MRTA, and licensed stores have sold $4.1 billion since sales began in late 2022, including almost $1.5 billion in 2026 so far, per the state as of October 2026. As of August 2026, 705 legal dispensaries were open statewide. Unlicensed shops remain a problem: New York City padlocked 779 of them in 2024, and the state Office of Cannabis Management reported 2,017 enforcement actions and $20 million in seized products in 2025.'
+  case_for: The state, licensed businesses, and reform advocates argue legalization ended many arrests, created a regulated and tested product, built thousands of businesses, and is generating billions in sales.
+  case_against: Critics, including some local officials and community groups, argue the slow rollout let illegal shops flood neighborhoods, and that legal sales and tax revenue have lagged early promises.
+  terms:
+  - New York cannabis
+  - MRTA
+  - Office of Cannabis Management
+  - illegal smoke shops
+  - Operation Padlock
+  - dispensary licenses
+  sources:
+  - https://www.marijuanamoment.net/new-york-dispensaries-have-sold-more-than-4-billion-in-recreational-marijuana-since-the-market-launched-state-officials-announce/
+  - https://cannabis.ny.gov/8.6.26-ccb-release
+  - https://abc7ny.com/post/bronx-nyc-crime-officials-crackdown-700-illegal-cannabis-shops-new-york-city/15126150/
+  - https://cannabis.ny.gov/system/files/documents/2025/12/cannabis-control-board-and-office-of-cannabis-management-release-2025-annual-report.pdf
+v14:
+  now: 'Gallup''s September 2026 poll found 33% of Americans trust mass media a great deal or fair amount, up from a record low of 28% in 2025. Trust is split by party: 50% of Democrats, 31% of independents, and 22% of Republicans. Pew found in 2025 that 81% of Democrats and 53% of Republicans have at least some trust in national news organizations.'
+  case_for: Journalists and media researchers argue major outlets use editors, fact-checkers, and corrections, so their errors are exceptions that get fixed, and their core reporting usually holds up.
+  case_against: Critics on the right, and some on the left, argue major outlets share blind spots, frame stories selectively, and have gotten big stories wrong, so their facts can't be taken on trust.
+  terms:
+  - trust in media
+  - Gallup media trust
+  - mainstream media
+  - media bias
+  - news credibility
+  - fact-check
+  sources:
+  - https://thedesk.net/2026/10/gallup-trust-in-media-poll-2026/
+  - https://www.axios.com/2025/10/02/media-trust-new-low
+  - https://www.pewresearch.org/newsletter/the-briefing/americans-trust-in-news-organizations-and-social-media/markdown
+v15:
+  now: Gallup's April 2026 poll found 10% of Americans approve of Congress and 86% disapprove. Pew found in September 2025 that 17% trust the federal government to do what is right most of the time, and its 2023 survey found 85% say elected officials don't care what people like them think. In 2023, 63% told Pew most or all politicians ran to make money, versus 15% who said to serve the public.
+  case_for: Reformers and voters across parties argue gerrymandering, big donors, and safe seats reward officials for pleasing their base and funders rather than ordinary constituents.
+  case_against: Political scientists and many officials argue most legislators do respond to voters, help constituents with problems, and pass many bills, and that partisan gridlock reflects a divided public.
+  terms:
+  - Congress approval
+  - trust in government
+  - incumbents
+  - political cynicism
+  - term limits
+  - retirements
+  sources:
+  - https://www.fox5ny.com/news/congress-low-support-poll
+  - https://www.pewresearch.org/politics/2025/12/04/public-trust-in-government-1958-2025/
+  - https://www.pewresearch.org/short-reads/2024/04/30/more-than-80-of-americans-believe-elected-officials-dont-care-what-people-like-them-think/
+v16:
+  now: A Harvard Chan School and de Beaumont Foundation poll taken in spring 2026 found 50% of adults trust CDC health advice, down from 77% a year earlier. Democrats' trust fell from 92% to 34%, while Republicans' rose from 63% to 67%. The drop followed HHS Secretary Robert F. Kennedy Jr. replacing the entire CDC vaccine advisory panel in June 2025 and the CDC cutting the vaccines recommended for every child from 17 to 11 in January 2026.
+  case_for: Supporters of HHS's direction say the agencies are being reformed to win back skeptics, and many public health experts say CDC career staff and core data still deserve reliance. Both groups argue that broad distrust leaves people without a shared source of guidance during outbreaks.
+  case_against: Critics on the left say recent vaccine decisions skipped normal scientific review, while critics on the right point to pandemic-era mistakes. Both argue that trust should be earned through transparent process, not given to agencies by default.
+  terms:
+  - CDC
+  - RFK Jr.
+  - ACIP
+  - vaccine schedule
+  - trust in public health
+  - HHS
+  sources:
+  - https://hsph.harvard.edu/news/poll-trust-in-cdc-has-fallen-dramatically-in-the-last-year/
+  - https://debeaumont.org/news/2026/poll-trust-in-cdc-falls-support-for-childhood-vaccines-and-food-pyramid-changes/
+  - https://www.kpbs.org/news/health/2026/01/05/health-officials-slash-the-number-of-vaccines-recommended-for-all-kids
+  - https://www.aapd.com/wp-content/uploads/2026/04/Vaccine-Actions-Outbreaks-ACIP-Timeline-2.pdf
+v17:
+  now: Gallup's June 2026 survey put average confidence across 14 major institutions at 27%, one point above its 2023 record low. Only 9% expressed confidence in Congress, 14% in television news, 17% in newspapers and 38% in higher education. Small business (67%) and the military (61%) were the only institutions with majority confidence.
+  case_for: Populists on the right and left argue that agencies, newsrooms and elite schools reward connected people and protect their own. They cite record-low confidence as evidence the public sees the same pattern.
+  case_against: Defenders argue these institutions still deliver broad public goods like research, reporting, courts and services, even when they fail. They say low trust reflects polarization and media habits more than proof that insiders run everything for themselves.
+  terms:
+  - Gallup confidence
+  - trust in institutions
+  - elites
+  - establishment
+  - media trust
+  - higher education
+  sources:
+  - https://news.gallup.com/file/poll/712667/2026_06_01%20Topline_Confidence.pdf
+  - https://dailycaller.com/2026/07/14/data-estabishment-losing-trust-institutions-american-public-polling-lies-scandals
+v18:
+  now: About 80,000 US troops are in Europe, and in September 2026 the Pentagon was reported to be weighing cuts of 25,000 to 40,000, with a recommendation due to Defense Secretary Hegseth by early November. In Asia, the 2026 defense bill bars using its funds to cut the 28,500 troops in South Korea unless the administration certifies the cut serves US interests and allies were consulted. A Chicago Council poll in June 2026 found 60% of Americans favor keeping or increasing troop levels in Germany.
+  case_for: Supporters in both parties and most allied governments argue forward-based troops make attacks less likely and are cheaper than fighting a war after deterrence fails. They say pulling back would invite pressure from Russia, China or North Korea.
+  case_against: Advocates of restraint and the administration's America First wing argue wealthy allies can defend themselves and that permanent bases encourage them to underinvest. They say US forces should shift to priorities closer to home or concentrate on China.
+  terms:
+  - US troops Europe
+  - troop withdrawal
+  - USFK
+  - NATO
+  - deterrence
+  - force posture
+  sources:
+  - https://www.businesstoday.in/world/story/major-military-shift-pentagon-considers-pulling-up-to-40000-us-troops-from-europe-556432-2026-09-18
+  - https://www.koreatimes.co.kr/amp/southkorea/defense/20251218/us-senate-approves-annual-defense-policy-bill-restricting-usfk-troop-reduction
+  - https://globalaffairs.org/research/public-opinion-survey/strong-bipartisan-support-nato-ahead-2026-summit
+v19:
+  now: NATO's annual report in March 2026 said the US accounted for roughly 60% of the alliance's defense spending in 2025. European allies and Canada raised defense spending about 20% in real terms that year, and every ally reported meeting the 2% of GDP target. At the 2025 summit, members pledged to reach 5% of GDP on defense and related spending by 2035.
+  case_for: The administration and many fiscal conservatives argue US taxpayers carry a share of allied security far out of line with allies' wealth. They say steady US pressure is what finally pushed Europe to spend more.
+  case_against: Many defense analysts and lawmakers in both parties argue US spending abroad buys influence, trade access and stability that serve American interests directly. They note allies are already raising budgets sharply, so they say the burden is shifting.
+  terms:
+  - burden sharing
+  - NATO spending
+  - 5% of GDP
+  - defense budget
+  - allies pay
+  sources:
+  - https://app.al-monitor.com/originals/2026/03/nato-sees-sharp-increase-europe-and-canadas-defence-spending
+  - https://globalaffairs.org/research/public-opinion-survey/strong-bipartisan-support-nato-ahead-2026-summit
+v20:
+  now: The current 10-year agreement covers fiscal 2019 through 2028 and totals $38 billion, about $3.8 billion a year. Formal talks on the next agreement began in June 2026, and both Prime Minister Netanyahu and US Ambassador Mike Huckabee have described moving from aid toward a reciprocal, trade-based partnership. In June 2026 Rep. Marlin Stutzman introduced a nonbinding resolution calling for a new agreement that ends US aid.
+  case_for: Most members of Congress in both parties and pro-Israel groups argue the aid deters Iran and its allies and supports a key partner. They add that most of the money is spent with US defense manufacturers.
+  case_against: Critics on the progressive left argue the aid makes the US complicit in civilian harm in Gaza, while some America First conservatives say a wealthy ally should pay its own way. Both groups argue the money is better spent elsewhere.
+  terms:
+  - Israel aid
+  - memorandum of understanding
+  - MOU
+  - $3.8 billion
+  - military assistance
+  - Gaza
+  sources:
+  - https://en.wikipedia.org/wiki/Next_U.S.-Israel_Memorandum_of_Understanding
+v21:
+  now: As of October 2026 the war continues and no settlement has been reached. Russia demands that Ukraine give up the rest of Donbas, which its forces have not captured, while Kyiv proposes a ceasefire on the current front line with Western security guarantees. US envoy Steve Witkoff met Zelensky in Oslo and Putin in St. Petersburg on October 20-21, and Zelensky said he backs a freeze and three-way talks with the US and Russia.
+  case_for: Supporters of a deal, including the administration and many restraint-minded analysts, argue Ukraine cannot retake its land at an acceptable cost. They say a negotiated line now would save lives and cut the risk of a wider war.
+  case_against: Ukraine's government, most European allies and many US hawks argue that ceding land rewards invasion and invites future attacks. They say pressure should fall on Russia instead, with firm security guarantees for Ukraine.
+  terms:
+  - Ukraine peace talks
+  - Witkoff
+  - Donbas
+  - ceasefire
+  - territorial concessions
+  - Zelensky Putin
+  sources:
+  - https://kyivindependent.com/ukraines-refusal-to-give-up-territory-to-russia-stalls-peace-deal-trump-envoy-says/
+  - https://boereport.com/2026/10/21/ukraines-zelenskiy-says-he-supports-ceasefire-trilateral-talks-with-us-russia/
+  - https://en.apa.az/cis-countries/meeting-between-putin-and-witkoff-concludes-in-st-petersburg-updated-531364
+v22:
+  now: The ADL counted 6,274 antisemitic incidents in 2025, down 33% from the 2024 record, though physical assaults hit a record 203. FBI data for 2025 showed 1,528 anti-Jewish hate crimes, 63% of all religion-based hate crimes and the third-highest year on record. In AJC's 2025 survey, 31% of American Jews said they were targeted in the past year, and 86% of Jews said antisemitism had risen since October 7, 2023, versus 63% of all adults.
+  case_for: Jewish groups such as the ADL and AJC argue that record assaults and the gap between Jewish and public perceptions show a threat many Americans miss. They note Jews are targets in nearly two-thirds of religion-based hate crimes.
+  case_against: Some researchers and critics argue that broad definitions, such as counting some anti-Israel protest, inflate the totals, and that most Americans already call antisemitism a problem. They point to the 2025 drop in total incidents as a sign of improvement.
+  terms:
+  - antisemitism
+  - ADL audit
+  - hate crimes
+  - FBI data
+  - AJC report
+  - campus
+  sources:
+  - https://wtop.com/australia/2026/05/adl-reports-a-sharp-drop-in-us-antisemitic-incidents-in-2025-driven-by-a-steep-fall-on-campuses/
+  - https://www.adl.org/resources/press-release/2025-marked-third-highest-year-record-anti-jewish-hate-crimes-fbi-reports
+  - https://www.ajc.org/AntisemitismReport2025
+v23:
+  now: In July 2025 the MTA picked Jonathan Rose Companies to build 265 mixed-income homes on the Beacon Metro-North commuter lot, with at least 10% affordable and a garage that keeps commuter parking. Beacon's plan already steers density to Main Street, the creek and the station lots, and its inclusionary rule has produced 47 below-market apartments. Statewide rules forcing towns to allow denser housing near train stations, proposed by Gov. Hochul in 2023, were left out of the budget by the Legislature.
+  case_for: Housing advocates, the MTA and the governor argue station-area apartments add homes without new sprawl and let residents commute without cars. They cite a Dutchess one-bedroom costing about 1.5 full-time jobs as proof the region needs more supply.
+  case_against: Some residents and local officials argue large buildings strain parking, schools and infrastructure and change the scale of small river towns. They say added units tend to be market-rate and do little to help longtime residents.
+  terms:
+  - Beacon station
+  - transit-oriented development
+  - Jonathan Rose
+  - zoning
+  - MTA parking lot
+  - density
+  sources:
+  - https://governor.ny.gov/news/governor-hochul-announces-development-partner-build-transit-oriented-housing-beacon-metro
+  - https://www.chronogram.com/hv-towns/beacon-the-fight-to-shape-a-citys-future-23340740/
+  - https://highlandscurrent.org/2026/10/19/housing-expense-putnam-dutchess/
+  - https://citylimits.org/housing-policy-faultlines-emerge-ahead-of-final-albany-budget-deal/
+v24:
+  now: Dutchess County's median home sale price was $520,000 in the second quarter of 2026, up 13% from a year earlier, with inventory down 2.6%. A Pattern for Progress report in October 2026 found it takes about 1.5 full-time jobs to afford a modest apartment in Dutchess and up to 3.6 in Putnam. Recent Beacon projects include the planned 265-unit station development and the 64-unit 45 Beekman proposal.
+  case_for: Longtime residents and preservation-minded groups argue new buildings are changing town character and pricing out working families faster than roads, schools and services can adjust. They say growth should slow until planning catches up.
+  case_against: Housing advocates and many economists argue prices are rising because too little is being built, not too much. They say slowing development would push costs even higher and make it harder for young people to stay.
+  terms:
+  - Hudson Valley housing
+  - home prices
+  - gentrification
+  - development
+  - affordability
+  - Beacon growth
+  sources:
+  - https://miltoncoste.com/reports/dutchess-q2-2026
+  - https://highlandscurrent.org/2026/10/19/housing-expense-putnam-dutchess/
+  - https://www.chronogram.com/hv-towns/beacon-the-fight-to-shape-a-citys-future-23340740/
+v25:
+  now: Federally, the Supreme Court's May 2025 Seven County ruling told courts to defer to agencies on the scope of NEPA reviews, and the White House CEQ rescinded its NEPA rules in 2025. The House passed the SPEED Act to narrow NEPA reviews on December 18, 2025, and as of October 2026 the Senate had not passed it. In New York, the budget signed May 27, 2026 exempts most housing on previously developed land from SEQRA, within unit caps, and sets a two-year deadline for environmental impact statements.
+  case_for: Gov. Hochul, builders, labor and many clean-energy groups argue long reviews and lawsuits delay housing, transit and transmission for years and raise costs. They say projects still must follow other environmental laws.
+  case_against: Groups such as Riverkeeper argue reviews are how communities learn of harms and press for changes before construction. They say cutting them shifts risk onto nearby residents and invites rushed decisions.
+  terms:
+  - NEPA
+  - SEQRA
+  - permitting reform
+  - SPEED Act
+  - environmental review
+  - Seven County
+  sources:
+  - https://www.everycrsreport.com/reports/R49485.html
+  - https://nysfocus.com/2026/05/27/new-york-budget-seqra-housing-environment
+  - https://hcr.ny.gov/node/78271
+v26:
+  now: New York gives towns control over zoning, and the Legislature rejected Gov. Hochul's 2023 plan to let developers override local zoning when towns miss housing targets. The state instead uses incentives such as Pro-Housing Community certification, which Beacon holds. The May 2026 SEQRA changes speed environmental review for housing but state that they do not override local zoning.
+  case_for: Suburban lawmakers in both parties and many local officials argue the people who live with a project should decide it. They say state mandates ignore local conditions like water, sewer and traffic.
+  case_against: Housing advocates and the governor argue local vetoes let a few residents block homes the whole region needs. They say statewide problems like housing costs and energy need statewide rules.
+  terms:
+  - local control
+  - home rule
+  - zoning
+  - Housing Compact
+  - Pro-Housing Community
+  - NIMBY
+  sources:
+  - https://citylimits.org/housing-policy-faultlines-emerge-ahead-of-final-albany-budget-deal/
+  - https://nysfocus.com/republish/hochul-housing-transit-oriented-development-zoning
+  - https://hcr.ny.gov/node/78271
+  - https://governor.ny.gov/news/governor-hochul-announces-development-partner-build-transit-oriented-housing-beacon-metro
+v27:
+  now: The state budget Gov. Hochul signed in May 2026 dropped the climate law's 2030 target of a 40% emissions cut, added a 60% cut by 2040, and moved DEC's deadline for emissions rules to 2028. It also requires DEC to consider a cap-and-invest program but does not order one. A Siena poll in March 2025 found about 6 in 10 New Yorkers said keeping energy affordable matters more right now than cutting emissions.
+  case_for: Environmental groups such as NRDC and Evergreen Action argue firm deadlines drive investment and that delay locks in fossil fuel costs and climate damage. They say affordability is better handled with targeted bill relief than by moving targets.
+  case_against: The governor, business groups and many upstate and Republican lawmakers argue the original timeline was unrealistic and was raising utility bills. They say targets should flex with costs and grid reliability.
+  terms:
+  - CLCPA
+  - climate law
+  - cap-and-invest
+  - 2030 target
+  - Hochul
+  - emissions
+  sources:
+  - https://www.esgtoday.com/?p=23811
+  - https://sri.siena.edu/2025/04/23/nyers-are-divided-on-energy-policy-46-say-restrict-fossil-fuel-usage-even-if-more-expensive-43-say-lower-energy-costs-even-if-environment-affected/
+v28:
+  now: The Environmental Integrity Project found DOJ filed 16 civil environmental cases from EPA referrals in the first year after January 20, 2025, 76% fewer than in the first year of the Biden administration. EPA adopted a 'compliance first' enforcement policy in December 2025 and says it resolved more cases than in Biden's last year. New York's DEC civil penalty policy, in place since 1990, says small businesses should not expect smaller penalties by default and puts the burden of proving inability to pay on the violator.
+  case_for: Environmental groups and many state regulators argue lax enforcement lets polluters gain an edge and leaves cleanup costs to the public. They say firms that already comply are hurt when rivals cut corners.
+  case_against: Business groups and the current EPA argue strict penalties can sink small firms over paperwork or minor violations. They say helping companies fix problems quickly protects the environment better than punishing them.
+  terms:
+  - EPA enforcement
+  - DEC
+  - compliance first
+  - penalties
+  - consent order
+  - small business
+  sources:
+  - https://insideclimatenews.org/news/05022026/trump-epa-polluter-enforcement-collapses/
+  - https://dec.ny.gov/regulatory/guidance-and-policy-documents/dee-1-civil-penalty-policy
+v29:
+  now: New York's average residential electricity price was 29.9 cents per kWh in July 2026, up 14% from a year earlier and 63% above the US average, according to EIA data compiled by the Empire Center. Central Hudson's 2025 rate deal, approved by the PSC, raises total residential bills about 3.5% a year for electricity and 5% to 7% a year for gas through June 2028. In May 2026 the state dropped its 2030 climate target.
+  case_for: Ratepayer advocates, business groups and many lawmakers argue households and employers cannot absorb rising bills now. They say climate goals should wait until cheaper technology and grid upgrades arrive.
+  case_against: Environmental groups and many climate scientists argue delay raises long-term costs through climate damage and fossil fuel price swings. They say both goals can be pursued together through efficiency and targeted relief.
+  terms:
+  - utility bills
+  - rate case
+  - Central Hudson
+  - electricity prices
+  - affordability
+  - PSC
+  sources:
+  - https://www.empirecenter.org/EnergyData/
+  - https://dps.ny.gov/news/psc-cuts-central-hudsons-rate-request
+  - https://www.esgtoday.com/?p=23811
+v30:
+  now: New York's State Energy Plan, approved in December 2025, says sources including natural gas and advanced nuclear will be needed over the next 15 years. After three earlier denials, the DEC granted water permits for the Williams NESE gas pipeline, and a federal appeals court upheld them in August 2026. The All-Electric Buildings Act, upheld by the Second Circuit in June 2026, bans gas in most new buildings of seven stories or less once a court stay lifts, set for October 28, 2026, with taller buildings covered from 2029.
+  case_for: Utilities, business groups and the building trades argue gas keeps the grid reliable and heating affordable while renewables and storage scale up. They say cutting it too fast risks shortages and higher bills.
+  case_against: Environmental groups and climate-law backers argue new gas infrastructure locks in emissions and costs for decades. They say electrification and renewables should replace gas on the climate law's schedule.
+  terms:
+  - natural gas
+  - NESE pipeline
+  - All-Electric Buildings Act
+  - gas ban
+  - State Energy Plan
+  - Williams
+  sources:
+  - https://www.nyserda.ny.gov/About/Newsroom/2025-Announcements/2025-12-16-State-Energy-Planning-Board-Approves-State-Energy-Plan
+  - https://www.eenews.net/articles/appeals-court-tosses-case-challenging-new-york-permits-for-nese-pipeline/
+  - https://www.clm.com/new-yorks-all-electric-buildings-act-survives-challenge-and-may-go-into-effect-this-fall/
