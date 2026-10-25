@@ -1,0 +1,26 @@
+name: KV usage check
+
+# Today's Workers KV operations by type (reads, writes, deletes, lists), from Cloudflare's
+# analytics API, so a free-tier warning can be traced to its cause. Counts only.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  usage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Query KV operations (today and yesterday, UTC)
+        run: |
+          for day in "$(date -u -d yesterday +%F)" "$(date -u +%F)"; do
+            Q='{"query":"query($a:String!,$d:Date!){viewer{accounts(filter:{accountTag:$a}){kvOperationsAdaptiveGroups(limit:50,filter:{date:$d}){sum{requests}dimensions{actionType}}}}}","variables":{"a":"'"$CLOUDFLARE_ACCOUNT_ID"'","d":"'"$day"'"}}'
+            echo "== $day"
+            curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" https://api.cloudflare.com/client/v4/graphql -d "$Q" \
+              | python3 -c "import sys,json; j=json.load(sys.stdin); print(j.get('errors') or ''); [print(g['dimensions']['actionType'], g['sum']['requests']) for a in (j.get('data') or {}).get('viewer',{}).get('accounts',[]) for g in a['kvOperationsAdaptiveGroups']]"
+          done
