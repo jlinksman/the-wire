@@ -1,0 +1,567 @@
+# Get up to speed (2026-10-25): topics from the questionnaires, each with curated resources in four
+# formats (video, article, podcast, deep dive), picked for quality and balance from reputable outlets,
+# each link opened and checked when added. Statements point here through their `topic`. Perspective
+# labels are The Wire's. Refresh a topic when its story moves. Shipped as data.learn.
+topics:
+  ny_utilities:
+    title: Your utility bill and who should own the grid
+    resources:
+    - format: video
+      title: The Real Reason Electric Rates are Rising
+      outlet: EnergySage (Plugged In)
+      url: https://www.youtube.com/watch?v=JsW-8hgZAdM
+      minutes: 9
+      date: 2025-05
+      perspective: center
+      paywall: false
+      why: Plain explanation of rate cases and why investor-owned utilities earn more by spending more on the grid.
+    - format: article
+      title: State lawmaker proposes new public utility company to replace Central Hudson
+      outlet: Spectrum News (Capital Tonight)
+      url: https://spectrumlocalnews.com/nys/central-ny/politics/2025/08/27/state-lawmaker-proposes-new-public-utility-company-to-replace-central-hudson
+      minutes: 4
+      date: 2025-08
+      perspective: neutral
+      paywall: false
+      why: Shrestha's public-power pitch and Central Hudson's reply, including the roughly $60M a year in local taxes it says towns would lose.
+    - format: article
+      title: Keeping Power Utilities in Corporate Hands Doesn't Make Sense
+      outlet: Jacobin
+      url: https://jacobin.com/2025/12/hudson-valley-public-power
+      minutes: 10
+      date: 2025-12
+      perspective: left
+      paywall: false
+      why: The strongest case for a Hudson Valley Power Authority buying out Central Hudson.
+    - format: article
+      title: State Legislators Should Reject Government Takeovers of Utilities
+      outlet: Citizens Against Government Waste
+      url: https://www.cagw.org/state-legislators-should-reject-government-takeovers-utilities/
+      minutes: 5
+      date: 2025-02
+      perspective: right
+      paywall: false
+      why: 'The case against the Hudson Valley Power Authority Act: buyout cost, debt and TVA comparisons.'
+    - format: podcast
+      title: A Public Utility for New York's Hudson Valley (Local Energy Rules, ep. 227)
+      outlet: Institute for Local Self-Reliance
+      url: https://www.youtube.com/watch?v=ZuV8pI6e16Y
+      minutes: 37
+      date: 2025-07
+      perspective: left
+      paywall: false
+      why: Long interview on how a municipal takeover of Central Hudson would actually work, step by step.
+    - format: deep
+      title: Public Power Push Spreads to the Hudson Valley
+      outlet: New York Focus
+      url: https://nysfocus.com/2024/05/16/central-hudson-public-power-sarahana-shrestha
+      minutes: 12
+      date: 2024-05
+      perspective: center-left
+      paywall: false
+      why: Reported background on Central Hudson's billing failures, its rate history and how the public-power bill came about.
+  ny_climate_law:
+    title: New York's climate law, what it costs, and what changed in 2026
+    resources:
+    - format: video
+      title: Can New York Meet Its Climate Goals?
+      outlet: New York NOW (WMHT/PBS)
+      url: https://www.pbs.org/video/can-new-york-meet-its-climate-goals-x6rsxh/
+      minutes: 13
+      date: 2024-09
+      perspective: neutral
+      paywall: false
+      why: Public TV primer on the CLCPA's targets and why the state was falling behind before the 2026 rewrite.
+    - format: article
+      title: What's Behind the Escalating Fight Over New York's Climate Law?
+      outlet: New York Focus
+      url: https://nysfocus.com/2026/03/10/clcpa-climate-law-rollbacks-hochul-budget
+      minutes: 10
+      date: 2026-03
+      perspective: center-left
+      paywall: false
+      why: Explains Hochul's budget push to change the law and who lined up on each side.
+    - format: article
+      title: Court affirms New York's all-electric buildings mandate
+      outlet: Spectrum News
+      url: https://spectrumlocalnews.com/nys/central-ny/politics/2026/06/30/court-affirms-new-york-s-all-electric-buildings-mandate
+      minutes: 4
+      date: 2026-06
+      perspective: neutral
+      paywall: false
+      why: Where the gas ban in new buildings stands after the federal appeals ruling (the state had paused enforcement in Nov 2025 while the case was pending).
+    - format: podcast
+      title: The high-stakes battle over energy affordability in New York
+      outlet: Volts (David Roberts)
+      url: https://www.volts.wtf/p/the-high-stakes-battle-over-energy
+      minutes: null
+      date: 2026-03
+      perspective: center-left
+      paywall: true
+      why: Wonky conversation on how bill costs and the climate law collided in Albany. The audio is free; some transcripts are for subscribers.
+    - format: deep
+      title: New York Budget Amends the State's Climate Leadership and Community Protection Act
+      outlet: Greenberg Traurig (GT Alert)
+      url: https://www.gtlaw.com/en/insights/2026/5/new-york-budget-amends-the-states-climate-leadership-and-community-protection-act
+      minutes: 8
+      date: 2026-05
+      perspective: neutral
+      paywall: false
+      why: 'A lawyer''s list of the changes: a new 2040 target of 60%, 100-year GWP accounting, DEC rules pushed to 2028, and cap-and-invest made optional.'
+    - format: deep
+      title: How NY Hid the True Cost of 2019 Climate Law—And What Lawmakers Can Do About It
+      outlet: Empire Center
+      url: https://www.empirecenter.org/publications/how-ny-hid/
+      minutes: 15
+      date: 2024-02
+      perspective: center-right
+      paywall: false
+      why: The cost critique that drove the 2026 rollback.
+  ny_bail_justice:
+    title: Bail, discovery and Raise the Age without the talking points
+    resources:
+    - format: video
+      title: 'AP Explains: Bail reform at issue in New York'
+      outlet: Associated Press
+      url: https://www.youtube.com/watch?v=xySBVUG6eM0
+      minutes: null
+      date: 2022-03
+      perspective: neutral
+      paywall: false
+      why: Short primer on what the 2019 bail law did and the first round of rollbacks.
+    - format: article
+      title: Love it or hate it, New York's hotly debated bail reform law just turned 5
+      outlet: Gothamist
+      url: https://gothamist.com/news/love-it-or-hate-it-new-yorks-hotly-debated-bail-reform-law-just-turned-5
+      minutes: 8
+      date: 2025-01
+      perspective: center-left
+      paywall: false
+      why: Five-year look at what the data says on pretrial detention and rearrests.
+    - format: article
+      title: Hochul takes one more discovery victory lap
+      outlet: Spectrum News (State of Politics)
+      url: https://spectrumlocalnews.com/nys/central-ny/politics/2025/08/07/hochul-touts-discovery-changes
+      minutes: 4
+      date: 2025-08
+      perspective: neutral
+      paywall: false
+      why: What the 2025 discovery rewrite changed and why prosecutors wanted it.
+    - format: article
+      title: Manhattan Institute Scholars Respond to Gov. Hochul's 10-Point Bail Reform Proposal
+      outlet: Manhattan Institute
+      url: https://manhattan.institute/article/manhattan-institute-scholars-respond-to-gov-hochuls-10-point-bail-reform-proposal
+      minutes: 6
+      date: 2022-03
+      perspective: right
+      paywall: false
+      why: The conservative case that the rollbacks didn't go far enough, especially on judges weighing dangerousness.
+    - format: podcast
+      title: 'Midday News: Lawmakers Bypass Hochul on Discovery Reform, Legal Aid Challenges NYPD Arrests...'
+      outlet: WNYC (NYC NOW)
+      url: https://wnycstudios.org/podcasts/nyc-now/articles/midday-news-lawmakers-bypass-hochul-on-discovery-reform-legal-aid-challenges-nypd-arrests-and-nyc-child-care-vouchers-at-risk
+      minutes: null
+      date: '2025'
+      perspective: neutral
+      paywall: false
+      why: Short news episode on the 2025 discovery deal. This is the weakest pick in the set; a longer podcast on this topic is still needed.
+    - format: deep
+      title: 'Reality Check: Has Youth Crime in New York Risen After Raise the Age?'
+      outlet: Vital City
+      url: https://www.vitalcitynyc.org/youth-crime-in-new-york-after-raise-the-age/
+      minutes: 15
+      date: 2025-12
+      perspective: center
+      paywall: false
+      why: 'Data-driven answer to the Raise the Age fight: overall youth crime has not risen, but youth gun carrying and shootings have (updated Sept 2026).'
+  ny_housing:
+    title: Housing supply, zoning near trains, SEQRA and the rent freeze
+    resources:
+    - format: video
+      title: Gov. Hochul's Bold Plan for 800,000 New Homes in New York
+      outlet: New York NOW (WMHT/PBS)
+      url: https://www.pbs.org/video/gov-hochuls-bold-plan-800000-new-homes-new-york-ujbrtf/
+      minutes: 13
+      date: 2023-03
+      perspective: neutral
+      paywall: false
+      why: The Housing Compact, including higher density near Metro-North stations, and why suburbs killed it. This is the background for every later fight.
+    - format: article
+      title: Here's what's in the FY 27 New York state budget
+      outlet: City & State
+      url: https://www.cityandstateny.com/policy/2026/05/heres-whats-fy-27-new-york-state-budget/413729/
+      minutes: 12
+      date: 2026-05
+      perspective: neutral
+      paywall: false
+      why: 'The 2026 SEQRA exemption for housing: unit caps by area type (100 units in nonurban areas, 20 where there''s no zoning) and the J-51 renewal.'
+    - format: article
+      title: How Hochul Plans to Build Hundreds of Thousands of Homes Near Train Stations
+      outlet: New York Focus
+      url: https://nysfocus.com/republish/hochul-housing-transit-oriented-development-zoning
+      minutes: 8
+      date: 2023-02
+      perspective: center-left
+      paywall: false
+      why: Explains the transit-oriented zoning mechanics (units per acre within a half-mile of stations) that still frame the debate in the Hudson Valley.
+    - format: article
+      title: Another Blow to New York's Housing Stock
+      outlet: City Journal (Manhattan Institute)
+      url: https://www.city-journal.org/article/another-blow-to-new-yorks-housing-stock
+      minutes: 6
+      date: 2026-05
+      perspective: right
+      paywall: false
+      why: The landlord-side argument that rent stabilization and the freeze push older buildings toward decay.
+    - format: podcast
+      title: Will Mayor Mamdani's Rent Guidelines Board Deliver the Rent Freeze?
+      outlet: WNYC
+      url: https://wnyc.org/browse/shows/episode/simplecast/5b5b44d4-8641-45de-8811-722a470a6e83
+      minutes: null
+      date: 2026-05
+      perspective: neutral
+      paywall: false
+      why: 'THE CITY''s David Brand on how the board''s vote on about 1 million regulated apartments works (the date is approximate: the preliminary vote was in May; the freeze passed in June 2026).'
+    - format: deep
+      title: Building Blocks of a Progressive Building Agenda for New York City
+      outlet: NYU Urban Democracy Lab (working paper)
+      url: https://archive.nyu.edu/handle/2451/75567
+      minutes: 45
+      date: 2026-02
+      perspective: left
+      paywall: false
+      why: The intellectual case for social housing and the Mamdani administration's approach to it.
+  ny_scaffold_law:
+    title: The Scaffold Law and why building in New York costs more
+    resources:
+    - format: video
+      title: 'A Closer Look: Scaffold Law Reform in New York'
+      outlet: New York NOW (WMHT)
+      url: https://www.youtube.com/watch?v=auVOvh7fPw0
+      minutes: null
+      date: 2022-05
+      perspective: center-right
+      paywall: false
+      why: Lawsuit Reform Alliance's Tom Stebbins explains Labor Law 240's absolute liability and the case for comparative negligence.
+    - format: article
+      title: Albany bracing for potential battle over scaffold law
+      outlet: Spectrum News
+      url: https://spectrumlocalnews.com/nys/central-ny/politics/2026/09/10/albany-bracing-battle-scaffold-law-
+      minutes: 4
+      date: 2026-09
+      perspective: neutral
+      paywall: false
+      why: Why Scaffold Law reform may be in the next budget if Hochul is reelected.
+    - format: article
+      title: 'Hidden Scaffold Law tax draining ''billions'' from MTA, other public projects: new report'
+      outlet: amNewYork
+      url: https://www.amny.com/news/hidden-scaffold-law-money-mta-public-projects/
+      minutes: 5
+      date: 2025-12
+      perspective: center-right
+      paywall: false
+      why: What insurance costs from the law add to public projects. The report it covers is reform-side.
+    - format: podcast
+      title: 'Odd Lots: How Insurance Costs Make NYC Construction So Expensive'
+      outlet: Bloomberg (Odd Lots)
+      url: https://www.bloomberg.com/news/audio/2026-02-26/why-building-construction-in-nyc-is-so-expensive
+      minutes: null
+      date: 2026-02
+      perspective: center
+      paywall: false
+      why: Hosts with markets backgrounds work through how liability insurance flows into rents and project budgets.
+    - format: article
+      title: No Easy Lift (what it would take to repeal the Scaffold Law)
+      outlet: CLM Magazine
+      url: https://www.theclm.org/Magazine/articles/what-would-it-take-to-change-the-narrative-and-repeal-the-scaffold-law/3278
+      minutes: 8
+      date: 2025-07
+      perspective: center-right
+      paywall: false
+      why: The claims and insurance industry's view of why repeal keeps failing.
+    - format: deep
+      title: 'Deadly Skyline: An Annual Report on Construction Fatalities in New York State (2024 data)'
+      outlet: NYCOSH
+      url: https://nycosh.org/wp-content/uploads/2026/01/NYCOSH-Deadly-Skyline-Report-2024.pdf
+      minutes: 40
+      date: 2026-01
+      perspective: left
+      paywall: false
+      why: The union and safety-advocate case for keeping the law, built on fatality data.
+  ny_ag_powers:
+    title: What the NY Attorney General can actually do
+    resources:
+    - format: video
+      title: 'Elections Explained: What does the state attorney general do?'
+      outlet: MPR News
+      url: https://www.youtube.com/watch?v=OUBNy3PbJuw
+      minutes: null
+      date: null
+      perspective: neutral
+      paywall: false
+      why: Short general explainer of a state AG's civil, consumer and litigation roles. It's from Minnesota, so the details aren't NY's.
+    - format: article
+      title: What Does the Attorney General Do?
+      outlet: NYC Votes (NYC Campaign Finance Board)
+      url: https://www.nycvotes.org/whats-on-the-ballot/2022-general-election/attorney-general
+      minutes: 3
+      date: '2022'
+      perspective: neutral
+      paywall: false
+      why: 'Plain NY-specific answer to the civil-versus-criminal question: criminal cases mostly need a referral, unlike the DAs.'
+    - format: article
+      title: Governor Hochul Signs the New York FAIR Business Practices Act Into Law
+      outlet: WilmerHale
+      url: https://www.wilmerhale.com/en/insights/client-alerts/20260105-governor-hochul-signs-the-new-york-fair-business-practices-act-into-law
+      minutes: 8
+      date: 2026-01
+      perspective: neutral
+      paywall: false
+      why: What the GBL 349 expansion adds (unfair and abusive practices, B2B coverage) and what it means for businesses.
+    - format: article
+      title: Democratic state AGs will lead opposition to Trump in new year
+      outlet: Stateline
+      url: https://stateline.org/2026/01/07/democratic-state-ags-will-lead-opposition-to-trump-in-new-year/
+      minutes: 7
+      date: 2026-01
+      perspective: neutral
+      paywall: false
+      why: 'The multistate-suit strategy by the numbers: 71 suits in year one, and the AGs say they''ve won 40 of 51 resolved.'
+    - format: podcast
+      title: 'MoForecast: Predictions on State Attorneys General Enforcement'
+      outlet: Morrison Foerster (MoFo Perspectives)
+      url: https://www.mofo.com/resources/podcasts/250116-moforecast-predictions-on-state-attorneys-general-enforcement
+      minutes: null
+      date: 2025-01
+      perspective: center
+      paywall: false
+      why: Defense-bar view of how state AGs use civil investigative demands and multistate coalitions.
+    - format: deep
+      title: The Role of the Modern State Attorney General [2025 National Lawyers Convention]
+      outlet: The Federalist Society
+      url: https://www.youtube.com/watch?v=pOMGFT38jdI
+      minutes: null
+      date: '2025'
+      perspective: center-right
+      paywall: false
+      why: Panel debating how far AG power has grown and whether suits against the federal government are a legitimate use of it.
+  ny_pension:
+    title: Who runs the $300B state pension fund, and the Israel bonds and divestment fights
+    resources:
+    - format: video
+      title: What's at Stake in New York's Comptroller Primary
+      outlet: New York NOW (WMHT/PBS)
+      url: https://www.pbs.org/video/whats-at-stake-in-new-yorks-comptroller-primary-mrwebm/
+      minutes: 27
+      date: 2026-05
+      perspective: neutral
+      paywall: false
+      why: The lead segment of the episode (about 10 minutes) explains the comptroller's sole-trustee power and the challengers' pension pitches.
+    - format: article
+      title: Who's running for New York comptroller
+      outlet: City & State
+      url: https://www.cityandstateny.com/politics/2026/06/who-running-new-york-comptroller/414261/
+      minutes: 6
+      date: 2026-06
+      perspective: neutral
+      paywall: false
+      why: Side-by-side positions on Israel bonds, Palantir, fossil-fuel divestment and Wall Street manager fees.
+    - format: article
+      title: DiNapoli easily wins his first primary challenge in nearly two decades
+      outlet: City & State
+      url: https://www.cityandstateny.com/politics/2026/06/dinapoli-easily-wins-his-first-primary-challenge-nearly-two-decades/414373/
+      minutes: 4
+      date: 2026-06
+      perspective: neutral
+      paywall: false
+      why: Result and what it means for fund policy (DiNapoli faces Republican Joseph Hernandez on Nov 3).
+    - format: article
+      title: New York Democrat Comptroller Candidate's Plan to Divest From Israel Is Imprudent, Republican Opponent Says
+      outlet: Algemeiner
+      url: https://www.algemeiner.com/2026/02/11/new-york-democrat-comptroller-candidates-plan-divest-israel-imprudent-republican-opponent-says/
+      minutes: 5
+      date: 2026-02
+      perspective: center-right
+      paywall: false
+      why: The fiduciary and pro-Israel case for keeping Israel bonds.
+    - format: podcast
+      title: 'The Capitol Pressroom: ...and the Democratic Primary for State Comptroller'
+      outlet: The Capitol Pressroom (WCNY/PBS)
+      url: https://www.pbs.org/video/providing-services-to-crime-victims-problem-gambling-and-the-democratic-primary-for-state-comptroller-su5obc/
+      minutes: 57
+      date: 2026-04
+      perspective: neutral
+      paywall: false
+      why: Albany's main policy show. The comptroller segment covers what the fund invests in and how it's managed.
+    - format: deep
+      title: The Unlikely History of Israel Bonds
+      outlet: The Nation
+      url: https://www.thenation.com/article/politics/israel-bonds-genocide-investment-pensions/
+      minutes: 20
+      date: 2026-06
+      perspective: left
+      paywall: false
+      why: Long-form history of how US public pensions came to hold Israel bonds, written from the divestment side.
+  us_immigration_enforcement:
+    title: ICE, warrants and what New York now forbids
+    resources:
+    - format: video
+      title: Inside Trump's Immigration War on Sanctuary Cities
+      outlet: The Wall Street Journal
+      url: https://www.youtube.com/watch?v=b6DsBVgBero
+      minutes: 6
+      date: 2025-03
+      perspective: center
+      paywall: false
+      why: What sanctuary policies actually do (detainers, information sharing) and the legal levers the administration is pulling.
+    - format: article
+      title: Not opening the door to ICE may no longer stop officers
+      outlet: PBS News (AP)
+      url: https://www.pbs.org/newshour/nation/not-opening-the-door-to-ice-may-no-longer-stop-officers
+      minutes: 6
+      date: 2026-01
+      perspective: neutral
+      paywall: false
+      why: Administrative versus judicial warrants, and the DHS memo claiming power to enter homes without a judge's warrant.
+    - format: article
+      title: State Budget Deal Looks to Restrict ICE Agreements in New York, But Immigrant Advocates Want Harder Stance
+      outlet: City Limits
+      url: https://citylimits.org/state-budget-deal-looks-to-restrict-ice-agreements-in-new-york-but-immigrant-advocates-want-harder-stance/
+      minutes: 7
+      date: 2026-05
+      perspective: center-left
+      paywall: false
+      why: NY's 2026 ban on 287(g) agreements and the new sensitive-locations rule, plus what it does not cover.
+    - format: podcast
+      title: The Staggering Scale of Trump's Anti-Immigrant Crackdown
+      outlet: The Ezra Klein Show (NYT)
+      url: https://poderato.com/shows/the-ezra-klein-show/the-staggering-scale-of-trump-s-anti-immigrant-crackdown
+      minutes: 66
+      date: 2026-01
+      perspective: left
+      paywall: false
+      why: The Atlantic's Caitlin Dickerson on how far the enforcement buildup reaches. The link is a podcast directory listing; the episode is also on NYT and Apple.
+    - format: podcast
+      title: 'Sanctuary Map Update: 170+ New Locations Added (Parsing Immigration Policy, ep. 168)'
+      outlet: Center for Immigration Studies
+      url: https://cis.org/Parsing-Immigration-Policy/Sanctuary-Map-Update-170-New-Locations-Added
+      minutes: null
+      date: 2024-08
+      perspective: right
+      paywall: false
+      why: The restrictionist case for detainer compliance and 287(g), from the group that maps sanctuary jurisdictions.
+    - format: deep
+      title: 'Balancing Act with John Katko: Sanctuary Cities'
+      outlet: Balancing Act (PBS)
+      url: https://www.pbs.org/video/sanctuary-cities-cxh5kg/
+      minutes: 27
+      date: 2026-07
+      perspective: neutral
+      paywall: false
+      why: Structured debate between CIS's Jessica Vaughan and New Haven Mayor Justin Elicker, hosted by a former GOP congressman from upstate NY.
+  us_tariffs:
+    title: The tariffs, the Supreme Court ruling, and what you pay
+    resources:
+    - format: video
+      title: Why the Supreme Court ruled against Trump's tariffs
+      outlet: PBS NewsHour
+      url: https://www.pbs.org/video/tariffs-struckdown-1771627683/
+      minutes: 6
+      date: 2026-02
+      perspective: neutral
+      paywall: false
+      why: The holding in Learning Resources v. Trump (IEEPA is not a tariff statute) and what was left standing.
+    - format: article
+      title: The Supreme Court struck down a bunch of Trump's tariffs. Now what?
+      outlet: NPR Planet Money
+      url: https://www.npr.org/2026/02/21/nx-s1-5721118/supreme-court-justices-ruling-trump-tariffs-section-122
+      minutes: 7
+      date: 2026-02
+      perspective: center
+      paywall: false
+      why: The Section 122 stopgap, refunds, and the Section 232 and 301 tariffs the ruling did not touch.
+    - format: article
+      title: 'Trump Tariffs Tracker: Rates, Revenue, and Impact'
+      outlet: Tax Foundation
+      url: https://taxfoundation.org/research/all/federal/trump-tariffs-trade-war/
+      minutes: 12
+      date: 2026-09
+      perspective: center-right
+      paywall: false
+      why: Running tally of which tariffs are in force, revenue raised, and estimated cost per household.
+    - format: podcast
+      title: Supreme Court Strikes Down Trump Tariffs
+      outlet: Advisory Opinions (The Dispatch / SCOTUSblog)
+      url: https://www.scotusblog.com/podcasts/advisory-opinions/supreme-court-strikes-down-trump-tariffs/
+      minutes: null
+      date: 2026-02
+      perspective: center-right
+      paywall: false
+      why: Two conservative lawyers on the major-questions reasoning and the separate opinions.
+    - format: podcast
+      title: Oren Cass on why Trump's tariffs are a good idea (Today, Explained)
+      outlet: Vox
+      url: https://www.vox.com/politics/407602/oren-cass-tariffs-economy-interview
+      minutes: null
+      date: 2025-04
+      perspective: right
+      paywall: false
+      why: The best pro-tariff, reindustrialization argument, from a conservative economist on a center-left show.
+    - format: deep
+      title: 'The State of U.S. Tariffs: July 24, 2026'
+      outlet: Yale Budget Lab
+      url: https://budgetlab.yale.edu/sites/default/files/page_to_pdf/1568/publication_1568.pdf
+      minutes: 20
+      date: 2026-07
+      perspective: center-left
+      paywall: false
+      why: Effective tariff rate after the Section 122 tariffs expired (about 11.1%), with price-level and household-cost estimates.
+  energy_nuclear_data_centers:
+    title: Data centers, nuclear power and your power bill
+    note: Partial. The nuclear and Indian Point pieces and a podcast are still missing; search budget ran out.
+    resources:
+    - format: video
+      title: How AI is driving a sharp rise in electricity bills
+      outlet: PBS NewsHour
+      url: https://www.pbs.org/video/electric-bills-1757108166/
+      minutes: 6
+      date: 2025-09
+      perspective: neutral
+      paywall: false
+      why: How data-center demand is pushing up grid capacity prices and residential bills.
+    - format: video
+      title: How data center power demand could lower electricity prices
+      outlet: PBS NewsHour
+      url: https://www.pbs.org/video/rising-costs-1761767829/
+      minutes: 6
+      date: 2025-10
+      perspective: center
+      paywall: false
+      why: 'The contrarian case: big new loads can spread fixed grid costs over more kilowatt-hours.'
+    - format: article
+      title: Electric grid faces political roadblocks as it struggles with data center demand
+      outlet: PBS NewsHour
+      url: https://www.pbs.org/newshour/show/electric-grid-faces-political-roadblocks-as-it-struggles-with-data-center-demand
+      minutes: 8
+      date: 2026-03
+      perspective: neutral
+      paywall: false
+      why: 'Supply side: the federal rollback of renewables incentives and the rush for gas and nuclear to meet the load.'
+    - format: article
+      title: Massive data center buildout poses latest inflation threat for consumers
+      outlet: PBS News (AP)
+      url: https://www.pbs.org/newshour/economy/massive-data-center-buildout-poses-latest-inflation-threat-for-consumers
+      minutes: 6
+      date: 2026-07
+      perspective: neutral
+      paywall: false
+      why: How the AI buildout is showing up in the cost of electricity and equipment.
+    - format: deep
+      title: Rising Demand, Rising Electric Bills, and the Case for Competition
+      outlet: Electric Power Supply Association
+      url: https://www.youtube.com/watch?v=2d60ymcleQQ
+      minutes: 44
+      date: 2026-05
+      perspective: center-right
+      paywall: false
+      why: Webinar from the competitive-generator industry on who should pay for data-center load.

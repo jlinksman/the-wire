@@ -2445,7 +2445,7 @@ async function openLearn() {
   const topicRow = (t) => el("li", {}, el("button", { class: "doclink", text: L[t].title, onclick: () => openTopic(t) }),
     flags[t] ? el("span", { class: "asrc", text: " · you " + [...flags[t]].join(", ") }) : null);
   const label = { video: "videos", article: "articles", podcast: "podcasts", doc: "documents" };
-  const actualLine = A.links ? "In the last 60 days you opened " + Object.entries(A.n).filter(([, v]) => v).map(([f, v]) => v + " " + label[f]).join(", ") + (A.avgSheet ? "; you spend about " + A.avgSheet + " seconds on a story or explainer." : ".") : "Nothing logged yet: the log started Oct 25 and fills in as you read.";
+  const actualLine = A.links ? "In the last 60 days you opened " + Object.entries(A.n).filter(([, v]) => v).map(([f, v]) => v + " " + (v === 1 ? label[f].replace(/s$/, "") : label[f])).join(", ") + (A.avgSheet ? "; you spend about " + A.avgSheet + " seconds on a story or explainer." : ".") : "Nothing logged yet: the log started Oct 25 and fills in as you read.";
   const statedLine = st ? "You said: " + FORMATS.map(([f, name]) => name.toLowerCase() + " " + (st[f] || "—")).join(", ") + (st.minutes ? "; usually " + st.minutes + " to get the gist." : ".") : null;
   openSheet([
     el("h2", { id: "sheet-title", class: "stitle", text: "Get up to speed" }),
@@ -2499,7 +2499,7 @@ async function openTopic(t) {
     items.length ? el("h3", { class: "sh3", text: "Start here: the statements on this" }) : null,
     items.length ? el("ul", { class: "admin" }, ...items.map((it) => el("li", {}, (data.explain || {})[it.id] ? el("button", { class: "doclink", text: it.text, onclick: () => openExplain(it.id, () => openTopic(t)) }) : el("span", { text: it.text })))) : null,
     el("h3", { class: "sh3", text: "Go further" }),
-    el("ul", { class: "suggest" }, ...res.map((r) => el("li", {},
+    el("ul", { class: "reslist" }, ...res.map((r) => el("li", {},
       el("span", { class: "asrc", text: (icon[r.format] || "") + " " + (r.format === "deep" ? "Deep dive" : r.format[0].toUpperCase() + r.format.slice(1)) + " · " + r.outlet + (r.minutes ? " · " + r.minutes + " min" : "") + (r.perspective ? " · " + r.perspective : "") + (r.paywall ? " · paywall" : "") + (r.date ? " · " + r.date : "") }),
       link(r.url, r.title, "doclink"),
       r.why ? el("span", { class: "rdline", text: r.why }) : null))),

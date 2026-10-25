@@ -738,3 +738,7 @@ p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
 .mmap .bloc-arab { fill: #3aa37a; }
 .warnbox { border-left: 3px solid var(--live); padding: 6px 10px; margin: 8px 0; font-size: 0.9rem; }
 .warnbox p { margin: 4px 0; }
+.reslist { list-style: none; padding: 0; margin: 0; }
+.reslist li { display: block; padding: 10px 0; border-bottom: 1px solid var(--hair); }
+.reslist .asrc { display: block; margin-bottom: 2px; }
+.reslist .doclink { display: block; font-size: 1.02rem; }
