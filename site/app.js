@@ -1874,12 +1874,50 @@ const WEIGHT = [[1, "Matters a little"], [2, "Matters"], [3, "Matters a lot"]];
 let myQuiz = null;
 async function loadQuiz(force) {
   if (myQuiz && !force) return myQuiz;
+  if (force && Object.keys(quizPending).length) await flushQuiz();
   try { const r = await fetch("quiz", { credentials: "same-origin" }); myQuiz = r.ok ? await r.json() : null; } catch (e) { myQuiz = myQuiz || null; }
   return myQuiz || { elections: {}, pulse: [], values: {} };
 }
-async function saveQuiz(body) {
-  try { const r = await fetch("quiz", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }); if (r.ok) myQuiz = await r.json(); return r.ok; } catch (e) { return false; }
+// Answers are batched (2026-10-25): every save is a Workers KV write, and the free plan allows
+// 1,000 a day. Single answers wait until six have piled up, 20 seconds pass, the quiz finishes,
+// or the page is hidden; anything else (done, a new take, clear, pulse) flushes them first.
+const quizPending = {};
+let quizTimer = null;
+function quizPost(body, keepalive) {
+  return fetch("quiz", { method: "POST", credentials: "same-origin", keepalive: Boolean(keepalive), headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
 }
+async function flushQuiz(keepalive) {
+  clearTimeout(quizTimer); quizTimer = null;
+  const jobs = Object.values(quizPending).filter((p) => Object.keys(p.answers).length);
+  for (const k of Object.keys(quizPending)) delete quizPending[k];
+  for (const body of jobs) {
+    try { const r = await quizPost(body, keepalive); if (r.ok && !keepalive) myQuiz = await r.json(); } catch (e) { /* the next save retries nothing; answers stay in myQuiz below */ }
+  }
+}
+async function saveQuiz(body) {
+  const plain = body.answers && !Array.isArray(body.answers) && !body.done && !body.take && !body.restart && ["election", "values", "baseline", "memes"].includes(body.kind);
+  if (plain) {
+    const k = body.kind + ":" + (body.id || "");
+    const p = quizPending[k] || (quizPending[k] = { kind: body.kind, id: body.id, answers: {} });
+    Object.assign(p.answers, body.answers);
+    // Keep the local copy current so results and resumes see unsent answers.
+    if (myQuiz) {
+      const slot = body.kind === "election" ? ((myQuiz.elections = myQuiz.elections || {})[body.id] = myQuiz.elections[body.id] || { answers: {} })
+        : (myQuiz[body.kind] = myQuiz[body.kind] || { answers: {} });
+      slot.answers = Object.assign(slot.answers || {}, body.answers);
+    }
+    if (Object.keys(p.answers).length >= 6) await flushQuiz();
+    else { clearTimeout(quizTimer); quizTimer = setTimeout(() => flushQuiz(), 20000); }
+    return true;
+  }
+  // Anything else: send pending answers along when they're for the same questionnaire, then post.
+  const k = body.kind + ":" + (body.id || "");
+  if (quizPending[k] && body.answers && !Array.isArray(body.answers)) { body = Object.assign({}, body, { answers: Object.assign({}, quizPending[k].answers, body.answers) }); delete quizPending[k]; }
+  await flushQuiz();
+  try { const r = await quizPost(body); if (r.ok) myQuiz = await r.json(); return r.ok; } catch (e) { return false; }
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushQuiz(true); });
+window.addEventListener("pagehide", () => flushQuiz(true));
 function shuffled(arr, seed) {
   const a = arr.slice(); let x = seed || 1;
   for (let i = a.length - 1; i > 0; i--) { x = (x * 1103515245 + 12345) % 2147483648; const j = x % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }

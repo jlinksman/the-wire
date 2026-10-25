@@ -5,7 +5,7 @@ name: Build feed
 # below is only a backup, because it often runs hours late.
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "7 * * * *"      # hourly backup only (2026-10-25): the Worker timer runs it every 15 minutes, and two schedules doubled the KV writes
   workflow_dispatch:
     inputs:
       force:
