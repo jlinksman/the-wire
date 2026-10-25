@@ -2062,7 +2062,7 @@ async function openMatch(g) {
     el("h2", { id: "sheet-title", class: "stitle", text: "Your election check" }),
     el("p", { class: "sdesc", text: "How closely your answers match each candidate's stated positions, weighted by how much each statement matters to you. Only statements a candidate has a sourced position on count for them; a candidate with fewer than two isn't scored. Agreement on stated positions is one input, not a recommendation." }),
     answerWarnings(g.quiz.items, a),
-    fromProps ? el("p", { class: "fine", text: fromProps + " statement" + (fromProps > 1 ? "s" : "") + " you haven't answered count from Your solutions (marked “from your proposal”)." }) : null,
+    fromProps ? el("p", { class: "fine", text: fromProps + (fromProps > 1 ? " statements you haven't answered count" : " statement you haven't answered counts") + " from Your solutions (marked “from your proposal”)." }) : null,
     el("button", { class: "linkbtn", text: "How this works ›", onclick: () => methodSheet("the election check", { statements: g.quiz.items.length, actor: "candidate", min: 2 }, () => openMatch(g)) }),
   ].filter(Boolean);
   for (const r of g.races || []) {

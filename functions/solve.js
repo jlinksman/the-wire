@@ -21,7 +21,7 @@ You get: the issue, the person's text, a list of statements (id, text), and a li
 For each statement or mechanism the text clearly takes a position on, give:
 - v: for statements, the person's likely answer on a 5-point scale: 2 strongly agree, 1 agree, 0 neutral, -1 disagree, -2 strongly disagree. For mechanisms: 1 proposes or supports it, -1 rejects it, 0 mixed.
 - quote: the exact words from the person's text (copied character for character, 3 to 25 words) that show it.
-Only code what the text actually says. If the text doesn't address a statement or mechanism, leave it out. Never infer from what people "like this" usually think. Use strong values (2 or -2) only when the wording is strong.
+Mind the direction: if the text supports the opposite of a statement, that is disagree, not agree. Only code what the text actually says. If the text doesn't address a statement or mechanism, leave it out. Never infer from what people "like this" usually think. Use strong values (2 or -2) only when the wording is strong.
 Also give:
 - gaps: up to 4 short phrases (under 12 words each) naming concrete ideas in the text that no listed statement or mechanism covers.
 - goals: up to 3 short phrases naming what the proposal is trying to achieve (e.g. "lower monthly bills", "keep the grid reliable").
