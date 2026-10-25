@@ -565,3 +565,619 @@ topics:
       perspective: center-right
       paywall: false
       why: Webinar from the competitive-generator industry on who should pay for data-center load.
+    - format: article
+      title: New York's nuclear power move is full of substance and symbolism
+      outlet: Axios (Ben Geman)
+      url: https://www.axios.com/2025/06/24/nuclear-move-new-york-state
+      minutes: 3
+      date: 2025-06
+      perspective: center
+      paywall: false
+      why: Why Hochul ordering NYPA to build at least 1 GW of new upstate nuclear reverses the logic of closing Indian Point, and what's still undecided.
+    - format: article
+      title: DOE secretary and New York congressman call for reopening of Indian Point
+      outlet: American Nuclear Society (Nuclear Newswire)
+      url: https://www.ans.org/news/2026-03-10/article-7832/doe-secretary-and-new-york-congressman-call-for-reopening-of-indian-point/
+      minutes: 5
+      date: 2026-03
+      perspective: center-right
+      paywall: false
+      why: The Indian Point restart push (Energy Secretary Wright and Rep. Lawler) and the state's 4 GW 'Nuclear Reliability Backbone' plan. The source is the nuclear industry's trade society.
+    - format: video
+      title: 'CONNECT NY: New Nuclear Energy'
+      outlet: WCNY (PBS)
+      url: https://www.pbs.org/video/new-nuclear-energy-oy86j6
+      minutes: 57
+      date: 2025-03
+      perspective: neutral
+      paywall: false
+      why: 'Public-TV panel on New York nuclear: emissions, safety, costs, what Indian Point''s closure did, and Hochul''s new-build plans.'
+  il_palestinian_state:
+    title: Two states, annexation, the PA, and Gaza after the war
+    note: No recent explainer from a right-of-center Israeli outlet turned up; the right is represented by an advocacy report.
+    resources:
+    - format: video
+      title: Countries push for a two-state solution, end of Israel-Hamas war
+      outlet: CBS News
+      url: https://www.cbsnews.com/video/countries-push-for-a-two-state-solution-end-israel-hamas-war
+      minutes: 3
+      date: 2025-07
+      perspective: neutral
+      paywall: false
+      why: Three-minute news piece on the summer 2025 international push for a two-state solution and an end to the Gaza war.
+    - format: article
+      title: Israeli lawmakers advance West Bank annexation bills despite Trump's past objection as Vance visits
+      outlet: CBS News
+      url: https://www.cbsnews.com/news/israel-west-bank-annexation-bills-trump-objection-vance-visit
+      minutes: 5
+      date: 2025-10
+      perspective: neutral
+      paywall: false
+      why: Where formal annexation (sovereignty) bills stand in the Knesset and why Washington has pushed back.
+    - format: article
+      title: Is Annexation of the West Bank Already Here?
+      outlet: Council on Foreign Relations
+      url: https://www.cfr.org/articles/annexation-west-bank-already-here
+      minutes: 15
+      date: 2018-01
+      perspective: neutral
+      paywall: false
+      why: 'Older but still the clearest two-sided debate: Steven Cook says settlements already amount to annexation; Israel Policy Forum''s Michael Koplow says the likely outcome is a stalemate.'
+    - format: podcast
+      title: 'Trump''s Board of Peace: The Good, the Bad, and the Unlikely'
+      outlet: Israel Policy Forum (Israel Policy Pod)
+      url: https://podcast.israelpolicyforum.org/115663/episodes/18747255-trump-s-board-of-peace-the-good-the-bad-and-the-unlikely
+      minutes: 73
+      date: 2026-02
+      perspective: center-left
+      paywall: false
+      why: 'What the Board of Peace has actually committed to in Gaza: money, security forces, Hamas disarmament and the PA''s role.'
+    - format: deep
+      title: 'Gaza After Hamas: The Palestinian Authority''s Capacity to Govern'
+      outlet: Jerusalem Institute of Justice
+      url: https://jij.org/wp-content/uploads/2026/01/2026-GAZA-AFTER-HAMAS.pdf
+      minutes: 40
+      date: 2026-01
+      perspective: right
+      paywall: false
+      why: 'The skeptic''s case: the PA must end ''pay-for-slay'' stipends, reform its textbooks and hold elections before it can be given Gaza. This is an advocacy report, not a neutral one.'
+  il_iran:
+    title: Israel, Iran and the bomb
+    resources:
+    - format: video
+      title: U.S. launches 'most intense' day of strikes on Iran
+      outlet: PBS NewsHour
+      url: https://www.wqln.org/shows/newshour/clip/war-with-iran-1773174689
+      minutes: 5
+      date: 2026-03
+      perspective: neutral
+      paywall: false
+      why: The war at its peak, about ten days after the Feb. 28 U.S.-Israeli strikes began, including U.S. claims that most of Iran's fuel production was destroyed.
+    - format: article
+      title: Conflict With Iran (Global Conflict Tracker)
+      outlet: Council on Foreign Relations
+      url: https://www.cfr.org/global-conflict-tracker/conflict/confrontation-between-united-states-and-iran
+      minutes: 10
+      date: 2026-10
+      perspective: neutral
+      paywall: false
+      why: 'A running backgrounder updated Oct. 23, 2026: the 2025 twelve-day war, the 2026 campaign, and where diplomacy stands.'
+    - format: article
+      title: Five months into US-Israeli strike campaign, Iran's nuclear program remains a threat
+      outlet: Ynet News
+      url: https://www.ynetnews.com/article/sycdcs78zx
+      minutes: 6
+      date: 2026-08
+      perspective: center
+      paywall: false
+      why: The mainstream Israeli view of why the program is still a threat after five months of strikes.
+    - format: podcast
+      title: Did the Iran War Succeed? - with Tamir Hayman and Mark Dubowitz
+      outlet: Call Me Back with Dan Senor
+      url: https://www.youtube.com/watch?v=8uAX1Q-0btI
+      minutes: null
+      date: 2026-06
+      perspective: center-right
+      paywall: false
+      why: A former Israeli intelligence chief and FDD's Iran hawk debate whether the war was a strategic win or unfinished business.
+    - format: deep
+      title: 'The U.S. War on Iran: New and Lingering Nuclear Risks'
+      outlet: Arms Control Association (Kelsey Davenport)
+      url: https://www.armscontrol.org/node/15213
+      minutes: 12
+      date: 2026-03
+      perspective: center-left
+      paywall: false
+      why: The arms-control case that bombing delays but cannot end the program, since Iran keeps the expertise and probably the material.
+  il_judicial_overhaul:
+    title: Israel's judicial overhaul, judge selection and the Attorney General
+    note: No short video found. The anti-overhaul side comes through news coverage and the Attorney General's own arguments, not a dedicated opinion piece.
+    resources:
+    - format: article
+      title: Status of Israel's Judicial Overhaul, January 2026
+      outlet: Center for Israel Education
+      url: https://israeled.org/status-of-israels-judicial-overhaul-january-2026/
+      minutes: 10
+      date: 2026-01
+      perspective: neutral
+      paywall: false
+      why: 'Start here: a plain status report on where each piece of the overhaul stood in early 2026.'
+    - format: article
+      title: Attorney general knocks Levin-Sa'ar plan as politicizing judge selection, harming democracy
+      outlet: Times of Israel
+      url: https://www.timesofisrael.com/attorney-general-knocks-levin-saar-plan-as-politicizing-judge-selection-process/
+      minutes: 5
+      date: 2025-03
+      perspective: center
+      paywall: false
+      why: 'Both sides of the judge-selection law in one story: the AG''s objections and Sa''ar''s reply that she is the one politicizing it.'
+    - format: article
+      title: Israeli Supreme Court rules against government's dismissal of attorney general
+      outlet: Al-Monitor
+      url: https://www.al-monitor.com/originals/2025/12/israeli-supreme-court-rules-against-governments-dismissal-attorney-general
+      minutes: 5
+      date: 2025-12
+      perspective: neutral
+      paywall: true
+      why: How the cabinet's attempt to fire Gali Baharav-Miara ended up in the High Court, and what the court decided.
+    - format: article
+      title: High Court challenges judicial selection overhaul
+      outlet: Jerusalem Post
+      url: https://jpost.com/israel-news/politics-and-diplomacy/article-900025
+      minutes: 5
+      date: 2026-06
+      perspective: center
+      paywall: false
+      why: 'The latest round: the court weighing petitions against the new judge-selection law.'
+    - format: podcast
+      title: '"At the end of the day, someone has the power—either the Court or the Knesset. Why do you trust the Court more?" (Part I)'
+      outlet: Israel from the Inside with Daniel Gordis
+      url: https://danielgordis.substack.com/p/at-the-end-of-the-day-someone-has-a70
+      minutes: 47
+      date: 2023-03
+      perspective: right
+      paywall: false
+      why: Kohelet's chairman Moshe Koppel makes the strongest case for reform, questioned by a skeptical host.
+    - format: deep
+      title: It's Not "the End of Democracy" and a Broad Consensus is Within Reach
+      outlet: Kohelet Policy Forum
+      url: https://www.kohelet.org.il/en/?p=9534
+      minutes: 15
+      date: 2023-02
+      perspective: right
+      paywall: false
+      why: The think tank behind the overhaul explains its argument that Israel's court holds unusual power by international standards.
+  il_haredi_draft:
+    title: The Haredi draft and yeshiva funding
+    note: Missing a piece written by a Haredi author defending the exemption; the halakhic case is covered by the Schechter item.
+    resources:
+    - format: video
+      title: Ultra-Orthodox Jews Defy Israel's Draft
+      outlet: The New York Times (YouTube)
+      url: https://www.youtube.com/watch?v=rLjUkGsMBVI
+      minutes: null
+      date: null
+      perspective: neutral
+      paywall: false
+      why: Short reported video on Haredi resistance to the draft (the date and running time could not be read).
+    - format: video
+      title: Thousands of ultra-Orthodox Jews volunteer for Israeli military
+      outlet: PBS NewsHour
+      url: https://www.pbs.org/newshour/show/thousands-of-ultra-orthodox-jews-volunteer-for-israeli-military
+      minutes: 5
+      date: 2023-10
+      perspective: neutral
+      paywall: false
+      why: 'The other side of the picture: the wave of Haredi volunteers right after Oct. 7.'
+    - format: article
+      title: The Bismuth Outline for the Draft Exemption Law
+      outlet: Israel Democracy Institute
+      url: https://en.idi.org.il/articles/61994
+      minutes: 15
+      date: 2025-10
+      perspective: center
+      paywall: false
+      why: 'A clause-by-clause read of the coalition''s draft bill: enlistment targets, the age-26 exemption and the weak sanctions, including cuts to yeshiva and daycare benefits.'
+    - format: podcast
+      title: Dr. Gilad Malach on TOI's "What Matters Now"
+      outlet: Times of Israel / Israel Democracy Institute
+      url: https://en.idi.org.il/podcasts/62438
+      minutes: null
+      date: 2025-12
+      perspective: center
+      paywall: false
+      why: The history of the exemption since 1948, the changes in Haredi society, and what the current bill would really do.
+    - format: article
+      title: 'Haredim in the IDF: The pros and cons'
+      outlet: Jerusalem Post (opinion, Ronald Eisenberg)
+      url: https://m.jpost.com/opinion/article-838735
+      minutes: 6
+      date: 2025-01
+      perspective: center-right
+      paywall: false
+      why: A religious writer weighs the army's manpower needs against the Haredi fear that service will erode their way of life.
+    - format: deep
+      title: Does Jewish Law Require Yeshivah Students to be Drafted at Age 18?
+      outlet: Schechter Institutes
+      url: https://schechter.edu/does-jewish-law-require-yeshivah-students-to-be-drafted-at-age-18/
+      minutes: 15
+      date: 2024-07
+      perspective: center-left
+      paywall: false
+      why: The halakhic sources on both sides of the Torah-study exemption, from a Masorti (Conservative) rabbinic scholar.
+  il_religion_state:
+    title: 'Religion and state: marriage, Shabbat, the Rabbinate, conversion'
+    note: No good short video or recent podcast found. The newest debate pieces are from 2025; a defense of the Rabbinate's role from the religious right is still missing.
+    resources:
+    - format: article
+      title: Statistical Report on Religion and State in Israel
+      outlet: Israel Democracy Institute
+      url: https://en.idi.org.il/articles/49002
+      minutes: 8
+      date: 2023-04
+      perspective: neutral
+      paywall: false
+      why: 'The data in one place: marrying abroad, conversion numbers, Shabbat bylaws and work, kashrut, and religious-services budgets.'
+    - format: article
+      title: Gov't requests more time to adjust kashrut law
+      outlet: Jerusalem Post
+      url: https://jpost.com/israel-news/article-861024
+      minutes: 4
+      date: 2025-07
+      perspective: neutral
+      paywall: false
+      why: How the 2021 reform meant to end the Rabbinate's kashrut monopoly has stalled, leaving private certifiers like Tzohar in legal limbo.
+    - format: article
+      title: A Bold Move To Decentralize Israel's Chief Rabbinate
+      outlet: Gary Rosenblatt (Substack)
+      url: https://garyrosenblatt.substack.com/p/a-bold-move-to-decentralize-israels
+      minutes: 7
+      date: 2022-03
+      perspective: center
+      paywall: false
+      why: The Kahana conversion and kashrut reforms of the Bennett-Lapid government, and why Haredi parties fought them.
+    - format: podcast
+      title: David Stav and Seth Farber – Marriage and Conversion in the State of Israel
+      outlet: Tikvah Podcast
+      url: https://ideas.tikvah.org/podcasts/the-tikvah-podcast/episode/david-stav-and-seth-farber-marriage-and-conversion-in-the-state-of-israel
+      minutes: null
+      date: 2015-03
+      perspective: center-right
+      paywall: false
+      why: Two Orthodox rabbis (Tzohar and ITIM) explain from inside Orthodoxy why the Rabbinate's monopoly is failing. It's old, but the problem hasn't changed.
+    - format: deep
+      title: Israeli Public Opinion on Civil Marriage
+      outlet: Reichman University, Institute for Liberty and Responsibility
+      url: https://www.runi.ac.il/media/14tdii21/civil_marriage_final_draft.pdf
+      minutes: 30
+      date: 2025-08
+      perspective: center-left
+      paywall: false
+      why: Who supports civil marriage (most secular Jews and Arabs, few religious Jews) and why the workarounds, Cyprus weddings and civil unions, fall short.
+  il_economy:
+    title: Israel's cost of living, housing, taxes and big firms
+    note: No short video found. The podcast is from 2021, but its argument about concentration still frames the debate.
+    resources:
+    - format: article
+      title: Israel's cost of living surpasses wealthiest European countries
+      outlet: Globes
+      url: https://en.globes.co.il/en/article-1001541377
+      minutes: 4
+      date: 2026-04
+      perspective: center
+      paywall: false
+      why: 'The headline numbers from Reichman''s Aaron Institute: prices about 21% above rich European countries, with housing 85% above Southern Europe.'
+    - format: article
+      title: Young Israelis give state failing marks on housing, education ahead of election
+      outlet: Jerusalem Post
+      url: https://jpost.com/israel-election-2026/article-908860
+      minutes: 5
+      date: 2026-09
+      perspective: neutral
+      paywall: false
+      why: How the cost of living is playing as an election issue among younger voters.
+    - format: article
+      title: Israel Moving to Adopt 'European' Import Standards to Lower Prices
+      outlet: The Jewish Press
+      url: https://jewishpress.com/israel-moving-to-adopt-european-import-standards-to-lower-prices/
+      minutes: 4
+      date: 2024-02
+      perspective: center-right
+      paywall: false
+      why: 'The free-market answer: the ''What''s good for Europe is good for Israel'' import reform, which cuts red tape instead of regulating prices.'
+    - format: podcast
+      title: Why is Israel so expensive? (with Guy Rolnik)
+      outlet: Unholy (Keshet / Times of Israel)
+      url: https://www.timesofisrael.com/spotlight/why-is-israel-so-expensive/
+      minutes: null
+      date: 2021-11
+      perspective: center-left
+      paywall: false
+      why: TheMarker's founder on tycoons, concentrated markets and why the economy rarely decides Israeli elections.
+    - format: deep
+      title: 'The State Comptroller: "The cost of living in Israel is skyrocketing"'
+      outlet: Office of the State Comptroller of Israel
+      url: https://www.mevaker.gov.il/en/media/magazine/cost-of-living
+      minutes: 15
+      date: '2025'
+      perspective: neutral
+      paywall: false
+      why: 'The official audit: food prices about 51% above the EU, import barriers, weak competition in credit, and links to the full reports.'
+  israel_parties_2026:
+    title: 'The Oct. 27, 2026 Knesset election: lists, blocs and coalition math'
+    resources:
+    - format: video
+      title: 'Explainer: How Israel Votes'
+      outlet: Center for Israel Education
+      url: https://israeled.org/how-israel-votes
+      minutes: 5
+      date: 2026-08
+      perspective: neutral
+      paywall: false
+      why: 'Five-minute primer on the mechanics: national party lists, proportional seats, the electoral threshold and the 61-seat majority.'
+    - format: video
+      title: 'Explainer: Forming an Israeli Government'
+      outlet: Center for Israel Education
+      url: https://israeled.org/forming-a-government/
+      minutes: 5
+      date: 2026-08
+      perspective: neutral
+      paywall: false
+      why: 'What happens after Tuesday: the president''s consultations, the mandate to form a government, and the coalition deadlines.'
+    - format: article
+      title: Israel's elections 2026 explained in maps and charts
+      outlet: Al Jazeera
+      url: https://www.aljazeera.com/news/2026/10/20/israels-elections-2026-explained-in-maps-and-charts
+      minutes: 8
+      date: 2026-10
+      perspective: center-left
+      paywall: false
+      why: The most current one-page look at the lists, polling by bloc and the Arab parties' role, a week before the vote. The outlet is Qatari state-funded and generally critical of Israel.
+    - format: podcast
+      title: Success of Bennett-Lapid merger hinges on Eisenkot role in race
+      outlet: Times of Israel Daily Briefing
+      url: https://omny.fm/shows/the-daily-briefing/success-of-bennett-lapid-merger-hinges-on-eisenkot-role-in-race
+      minutes: 26
+      date: 2026-04
+      perspective: center
+      paywall: false
+      why: 'How the opposition reshaped itself: the Bennett-Lapid joint run and Eisenkot''s separate list.'
+    - format: podcast
+      title: 'Lawfare Daily: Israel''s Most Consequential Election, with Natan Sachs'
+      outlet: Lawfare
+      url: https://www.lawfaremedia.org/podcasts-multimedia/lawfare-daily--israel's-most-consequential-election--with-natan-sachs
+      minutes: null
+      date: 2026-08
+      perspective: center
+      paywall: false
+      why: A U.S. analyst on the likely outcomes, small parties at risk of missing the threshold, the Arab parties, and what it means for Gaza, Iran and Trump.
+    - format: podcast
+      title: The Looming Israeli Elections 2026
+      outlet: Tablet (Israel Update with Michael Doran and Gadi Taub)
+      url: https://www.tabletmag.com/podcasts/israel-update/the-looming-israeli-elections-2026
+      minutes: null
+      date: 2026-04
+      perspective: right
+      paywall: false
+      why: 'The view from the right: Netanyahu''s health, the Oct. 7 inquiry fight and the Bennett-Lapid merger.'
+  us_health_medicaid:
+    title: Medicaid cuts, ACA subsidies and single-payer
+    note: Nothing recent on the New York Health Act turned up; the RAND and Empire Center pieces are older but still the core cost studies.
+    resources:
+    - format: video
+      title: Exploring the potential impact of Medicaid cuts in Trump's big budget bill
+      outlet: PBS NewsHour
+      url: https://www.pbs.org/newshour/show/exploring-the-potential-impact-of-medicaid-cuts-in-trumps-big-budget-bill
+      minutes: 6
+      date: 2025-05
+      perspective: neutral
+      paywall: false
+      why: What the Medicaid cuts in the 2025 budget bill, including the work requirements, would mean for coverage.
+    - format: article
+      title: 'Medicaid: What to Watch in 2026'
+      outlet: KFF
+      url: https://kff.org/medicaid/medicaid-what-to-watch-in-2026
+      minutes: 10
+      date: 2026-01
+      perspective: neutral
+      paywall: false
+      why: 'The nonpartisan look ahead: when the 2025 law''s Medicaid changes, including work requirements, take effect in states.'
+    - format: podcast
+      title: 'Medicaid Is Now a Campaign Issue (What the Health? #468)'
+      outlet: KFF Health News
+      url: https://kffhealthnews.org/podcast/what-the-health-468-medicaid-midterm-elections-trump-fraud-october-22-2026/
+      minutes: null
+      date: 2026-10
+      perspective: neutral
+      paywall: false
+      why: 'This week''s state of play: the cuts were timed to land after the midterms, but Democrats are campaigning on them anyway.'
+    - format: video
+      title: What's Next for the Affordable Care Act? (The Health Wonk Shop)
+      outlet: KFF (with Paragon Health Institute's Brian Blase)
+      url: https://www.youtube.com/watch?v=9sjUe-rVbns
+      minutes: null
+      date: 2025-02
+      perspective: center-right
+      paywall: false
+      why: The conservative case against extending the enhanced ACA subsidies, challenged by KFF's Larry Levitt. Both sides in one conversation.
+    - format: deep
+      title: 'An Assessment of the New York Health Act: A Single-Payer Option for New York State'
+      outlet: RAND
+      url: https://www.rand.org/pubs/research_reports/RR2424.html
+      minutes: 90
+      date: 2018-08
+      perspective: neutral
+      paywall: false
+      why: 'The main independent cost study: total spending could stay flat if administrative and provider costs fall, paid for with large new taxes.'
+    - format: article
+      title: Report Says Nearly One-Third Would Pay More Under Single-Payer
+      outlet: Empire Center
+      url: https://www.empirecenter.org/publications/report-says-nearly-one-third-would-pay-more-under-single-payer/
+      minutes: 4
+      date: 2019-01
+      perspective: center-right
+      paywall: false
+      why: 'The fiscal-hawk reading of the same RAND numbers: who would pay more, and how much in new taxes.'
+  us_abortion:
+    title: Abortion law after Dobbs, and New York's Equal Rights Amendment
+    resources:
+    - format: video
+      title: Supreme Court extends access to mifepristone, for now
+      outlet: PBS NewsHour
+      url: https://www.pbssocal.org/shows/newshour/clip/abortion-access-1778794622?p=2
+      minutes: null
+      date: 2026-05
+      perspective: neutral
+      paywall: false
+      why: Legal historian Mary Ziegler on the May 2026 order keeping telehealth and mailed abortion pills legal while the Louisiana case goes on.
+    - format: article
+      title: The Intersection of State and Federal Policies on Access to Medication Abortion Via Telehealth after Dobbs
+      outlet: KFF
+      url: https://www.kff.org/womens-health-policy/issue-brief/the-intersection-of-state-and-federal-policies-on-access-to-medication-abortion-via-telehealth-after-dobbs/
+      minutes: 12
+      date: 2025-07
+      perspective: neutral
+      paywall: false
+      why: 'The federal and state map: FDA rules, state bans, shield laws like New York''s, and the interstate legal clash.'
+    - format: article
+      title: Prop 1 explained, in painstaking detail
+      outlet: City & State New York
+      url: https://www.cityandstateny.com/policy/2024/10/prop-1-explained-painstaking-detail/400663/
+      minutes: 10
+      date: 2024-10
+      perspective: neutral
+      paywall: false
+      why: A detailed walk through what the amendment's text covers, including 'pregnancy outcomes' and gender identity.
+    - format: podcast
+      title: U.S. Supreme Court keeps abortion pill available, but state ban is pending
+      outlet: Iowa Public Radio (River to River)
+      url: https://www.iowapublicradio.org/podcast/river-to-river/2026-05-16/mail-order-abortion-pill-access-survives-with-pending-state-ban
+      minutes: null
+      date: 2026-05
+      perspective: neutral
+      paywall: false
+      why: A law professor walks through Danco v. Louisiana and what comes next for pills by mail in states with bans.
+    - format: deep
+      title: 'Prop 1 (New York Equal Rights Amendment): What the Amendment Will and Won''t Do'
+      outlet: New York City Bar Association
+      url: https://www.nycbar.org/reports/prop-1-ny-equal-rights-amendment-what-the-amendment-will-and-wont-do/
+      minutes: 20
+      date: 2024-10
+      perspective: center-left
+      paywall: false
+      why: A lawyer's analysis of what the amendment will and won't change in New York law, including abortion. The City Bar backed the amendment.
+    - format: article
+      title: Leaders see anti-abortion movement worse off four years after Dobbs
+      outlet: Washington Examiner
+      url: https://www.washingtonexaminer.com/?p=4621929
+      minutes: 6
+      date: 2026-06
+      perspective: right
+      paywall: false
+      why: 'The pro-life movement''s own reckoning: abortions are up since Dobbs, driven by mailed pills, and the movement lacks a next goal.'
+  us_student_loans:
+    title: 'Student loans after SAVE: repayment and forgiveness in 2026'
+    note: No reputable long-form podcast found; the podcast slot is a 2-minute NPR segment.
+    resources:
+    - format: video
+      title: Student loan borrowers face 90-day deadline as Biden-era SAVE plan ends
+      outlet: ABC News
+      url: https://abcnews.com/video/131698720/
+      minutes: null
+      date: 2026-04
+      perspective: neutral
+      paywall: false
+      why: 'The deadline in brief: what SAVE borrowers must choose and what happens if they don''t.'
+    - format: article
+      title: 2026 will bring massive changes to federal student loans
+      outlet: NPR
+      url: https://www.npr.org/2025/12/23/nx-s1-5630504/2026-federal-loans-student-changes-save-plan
+      minutes: 8
+      date: 2025-12
+      perspective: center-left
+      paywall: false
+      why: 'The full list of changes: SAVE ends, RAP arrives, the new borrowing caps, and what stays the same for PSLF.'
+    - format: article
+      title: A New Student Loan Repayment Plan Opens Soon. Will It Help Borrowers Avoid a 'Black Hole of Debt'?
+      outlet: Investopedia (via Yahoo Finance)
+      url: https://finance.yahoo.com/economy/policy/articles/student-loan-repayment-plan-opens-191253524.html
+      minutes: 6
+      date: 2026-05
+      perspective: center
+      paywall: false
+      why: 'RAP vs. IBR side by side: AEI''s Preston Cooper says RAP is the best choice for most borrowers, while a borrower adviser objects to the 30-year term.'
+    - format: podcast
+      title: Big changes coming to student loans on July 1
+      outlet: NPR Morning Edition (via WFAE)
+      url: https://www.wfae.org/2026-06-18/big-changes-coming-to-student-loans-on-july-1
+      minutes: 2
+      date: 2026-06
+      perspective: center-left
+      paywall: false
+      why: Cory Turner's two-minute rundown of the six changes that took effect July 1.
+    - format: deep
+      title: 'The new income-driven repayment plan: Student debt outcomes and federal revenue implications'
+      outlet: JPMorganChase Institute
+      url: https://www.jpmorganchase.com/institute/all-topics/household-financial-health/new-income-driven-repayment-plan
+      minutes: 25
+      date: 2025-12
+      perspective: neutral
+      paywall: false
+      why: 'Data on who wins and loses under RAP: balances fall for low-income borrowers, minimum payments strain the poorest, and federal revenue rises about 5%.'
+  us_trans_athletes:
+    title: Transgender athletes in girls' and women's sports
+    resources:
+    - format: video
+      title: Who is affected by Supreme Court's ruling on trans athletes
+      outlet: PBS NewsHour
+      url: https://www.vermontpublic.org/shows/newshour/clip/transgender-athletes-1782856257
+      minutes: 6
+      date: 2026-06
+      perspective: neutral
+      paywall: false
+      why: ESPN's Katie Barnes on how many athletes the June 2026 ruling actually reaches and which state rules it leaves alone.
+    - format: article
+      title: Supreme Court allows state laws regulating transgender athletes
+      outlet: National Constitution Center
+      url: https://constitutioncenter.org/blog/supreme-court-allows-state-laws-regulating-transgender-athletes
+      minutes: 8
+      date: 2026-07
+      perspective: neutral
+      paywall: false
+      why: 'The holding in West Virginia v. B.P.J. (6-3, Kavanaugh): ''sex'' in Title IX means biological sex, and fairness and safety justify the laws. The two dissents are explained too.'
+    - format: article
+      title: Most Americans are uncomfortable with transgender athletes on sports teams that don't match their birth sex
+      outlet: Pew Research Center
+      url: https://www.pewresearch.org/short-reads/2026/08/11/most-americans-are-uncomfortable-with-transgender-athletes-on-sports-teams-that-dont-match-their-birth-sex/
+      minutes: 5
+      date: 2026-08
+      perspective: neutral
+      paywall: false
+      why: 'Where the public is: 66% favor birth-sex team laws; Republicans are near-unanimous and Democrats are split.'
+    - format: podcast
+      title: Breaking down the Supreme Court's ruling on transgender student athletes
+      outlet: NPR All Things Considered (via KAXE)
+      url: https://www.kaxe.org/2026-06-30/breaking-down-the-supreme-courts-ruling-on-transgender-student-athletes
+      minutes: 6
+      date: 2026-06
+      perspective: center-left
+      paywall: false
+      why: The 19th's Brooke Migdon on the ruling, the athletes' side and the 27 states with bans.
+    - format: deep
+      title: 'The transgender athletes cases: an explainer'
+      outlet: SCOTUSblog
+      url: https://www.scotusblog.com/2026/01/the-transgender-athlete-cases-an-explainer
+      minutes: 15
+      date: 2026-01
+      perspective: neutral
+      paywall: false
+      why: 'The full legal background before argument: Title IX and equal-protection theories, and the facts of the Idaho and West Virginia cases.'
+    - format: article
+      title: A major victory for females and the natural order
+      outlet: Catholic World Report (Charles J. Russo)
+      url: https://www.catholicworldreport.com/2026/07/02/a-major-victory-for-females-and-the-natural-order/
+      minutes: 8
+      date: 2026-07
+      perspective: right
+      paywall: false
+      why: 'The socially conservative case for the ruling: biological sex differences, safety and fair competition.'
