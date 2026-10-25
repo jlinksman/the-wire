@@ -334,341 +334,470 @@ elections:
         Kathy Hochul:
           q05:
             v: 1
-            source: https://spectrumlocalnews.com/nys/central-ny/politics/2026/01/13/affordability--fed-pushback--re-election-focus-of-hochul-s-state-of-the-state
+            source: https://www.nixonpeabody.com/insights/alerts/2026/05/28/new-york-seqra-changes---eligibility-for-affordable-housing-projects
+            verified: true
           q07:
             v: 2
-            source: https://spectrumlocalnews.com/nys/central-ny/politics/2026/01/13/affordability--fed-pushback--re-election-focus-of-hochul-s-state-of-the-state
+            source: https://nystateofpolitics.com/state-of-politics/new-york/politics/2026/05/29/hochul-signs-measures-to-limit-ice-cooperation
+            verified: true
           q09:
             v: 2
-            source: https://spectrumlocalnews.com/nys/central-ny/politics/2026/01/13/affordability--fed-pushback--re-election-focus-of-hochul-s-state-of-the-state
+            source: https://www.wshu.org/2026-01-13/ny-gov-kathy-hochul-to-double-down-on-affordability-in-state-of-the-state-speech
+            verified: true
           q14:
             v: 2
-            source: https://www.fox5ny.com/news/hochul-blakeman-debate-ny-governor-race
+            source: https://governor.ny.gov/news/video-audio-rush-transcript-governor-hochul-calls-new-york-congressional-republicans-stand
+            verified: true
           q06:
             v: -1
             source: https://www.wxxinews.org/local-news/2026-08-17/blakeman-touts-dangerousness-standard-in-setting-bail-claiming-crime-is-up
-            note: says judges already have the tools they need; signed earlier bail changes and says New York no longer has cashless bail
+            note: position from the cited source
+            verified: true
           q10:
             v: 2
-            source: https://insideclimatenews.org/?p=114954
+            source: https://abc7ny.com/post/new-york-gov-kathy-hocul-delays-ai-data-centers-energy-environmental-concerns/19505160/
             note: issued an executive order for a one-year statewide data-center moratorium; wants new centers to bring their own power
+            verified: true
           q19:
             v: -2
             source: https://abc7ny.com/post/nyc-congestion-pricing-gov-kathy-hochul-stands-mta-tolling-plan-vowing-fight-trump-administrations-move/15933727/
             note: 'launched the toll in Jan. 2025 and is fighting federal efforts to end it: ''The tolls are staying on.'''
+            verified: true
           q20:
             v: -1
             source: https://policyintegrity.org/publications/detail/new-yorks-climate-law-amendments-usher-in-new-challenges-and-opportunities
             note: signed May 2026 budget amendments that delay rules to 2028 and change methane accounting, but kept the law and its 2050 target
+            verified: true
           q21:
             v: -2
             source: https://spectrumlocalnews.com/nys/central-ny/news/2026/06/12/hochul-defends-fracking-ban-as-blakeman-presses-for-it-to-be-overturned
+            verified: true
           q22:
             v: 2
             source: https://spectrumlocalnews.com/nys/central-ny/politics/2026/08/27/national-issues-dominate-govenrors-race-
             note: signed the law; says 287(g) agreements are 'in the way of making progress'
+            verified: true
           q23:
             v: 2
             source: https://imprintnews.org/justice/juvenile-justice-2/new-york-governor-stands-by-states-raise-the-age-law/270374
             note: kept Raise the Age changes out of her Jan. 2026 budget despite prosecutors' requests
+            verified: true
           q24:
             v: 1
-            source: https://empire.streetsblog.org/poll-new-yorkers-back-apartments-near-transit-as-blakeman-touts-high-housing-costs
-            note: proposed transit-area zoning in 2023 but shelved it; said at the debate she wished she had 'fought harder' for housing
+            source: https://www.governor.ny.gov/news/governor-hochul-announces-statewide-strategy-address-new-yorks-housing-crisis-and-build-800000
+            note: position from the cited source
+            verified: true
           q25:
             v: -1
             source: https://nny360.com/top_stories/as-hospitals-face-uncertain-fiscal-future-candidates-for-governor-offer-different-views-on-state-s/article_4b3dc540-db1c-5d77-959a-161c8bf7b799.html
             note: opposes the 2025 federal cuts and warns of hospital closures, though she is trimming Medicaid costs she calls wasteful
+            verified: true
           q26:
             v: 1
             source: https://www.nbcnews.com/nbc-out/out-news/long-island-county-bans-transgender-athletes-competing-girls-rcna140184
             note: accused Blakeman of bullying transgender kids over his 2024 Nassau ban and said the state would enforce its anti-discrimination laws
+            verified: true
+          q40:
+            v: 1
+            source: https://www.whec.com/?p=936379
+            note: 'Oct. 2025, on delaying the All-Electric Buildings Act: ''my number one focus is affordability right now''; state then paused enforcement (Canary Media, Nov. 2025) and she signed the 2026 CLCPA delay.'
+            coder: B
+          q39:
+            v: -2
+            source: https://www.cityandstateny.com/policy/2026/03/mike-lawler-and-trump-admin-wants-reopen-indian-point/411964
+            note: 'Her office: ''The Governor has emphatically stated she will not support the re-opening of Indian Point.'''
+            coder: B
         Bruce Blakeman:
           q04:
             v: 2
             source: https://ny1.com/nyc/all-boroughs/politics/2026/09/29/hochul-blakeman-tax-relief
+            verified: true
           q06:
             v: 2
             source: https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html
+            verified: true
           q07:
             v: -1
             source: https://spectrumlocalnews.com/nys/central-ny/politics/2026/10/14/hochul-and-blakeman-trade-barbs-in-only-governor-debate
             note: opposes sanctuary policies; supports local cooperation with federal enforcement
+            verified: true
           q15:
             v: 1
-            source: https://www.aol.com/news/q-bruce-blakeman-vows-thwart-183628266.html
+            source: https://rocklandtimes.com/2026/08/06/bruce-blakeman-the-run-for-ny-governor/
             note: would cut 'silly regulations,' but names high taxes as the main reason businesses leave
+            verified: true
           q19:
             v: 2
             source: https://longisland.news12.com/2026/07/29/blakeman-targets-mta-leadership-congestion-pricing-while-riding-lirr/01qlKmNuFL7wlamtEdBMHY
             note: calls the toll 'a tax on the middle class'
+            verified: true
           q20:
             v: 2
             source: https://www.audacy.com/wben/news/blakeman-backs-fracking-but-not-the-clcpa
             note: would scrap the law, which he calls 'that green energy scam'; has floated a 25% renewables goal instead
+            verified: true
           q21:
             v: 2
             source: https://spectrumlocalnews.com/nys/central-ny/news/2026/06/12/hochul-defends-fracking-ban-as-blakeman-presses-for-it-to-be-overturned
-            note: has pledged to start fracking by emergency order
+            note: position from the cited source
+            verified: true
           q22:
             v: -2
             source: https://www.wamc.org/2026-08-26/blakeman-bows-to-ny-law-limiting-cooperation-with-ice
             note: complied in Nassau but called it 'a very, very bad and dangerous law' and joined a sheriffs' lawsuit against it
+            verified: true
           q23:
             v: -2
             source: https://www.fox5ny.com/news/bruce-blakeman-takes-aim-nys-justice-system-a-revolving-door-criminality
-            note: says the law created a loophole gangs exploit; has called it 'a disaster'
+            note: position from the cited source
+            verified: true
           q24:
             v: -2
             source: https://www.wnycstudios.org/podcasts/bl/segments/nassau-county-exec-gov-hochuls-call-more-housing-long-island
             note: 'opposed Hochul''s 2023 plan: ''it''s not a good idea to do planning for Long Island from Albany'''
+            verified: true
           q25:
             v: 1
             source: https://www.cityandstateny.com/politics/2026/07/congressional-democrats-blast-trump-blakeman-over-newly-enacted-essential-plan-cuts/414576/
             note: told Fox Business he would 'cut Medicaid in half'; at the Oct. debate said he never said that and framed cuts as removing fraud and ineligible enrollees
+            verified: true
           q26:
             v: -2
             source: https://www.nbcnews.com/nbc-out/out-news/long-island-county-bans-transgender-athletes-competing-girls-rcna140184
             note: barred transgender athletes from women's and girls' teams at Nassau County facilities by executive order in 2024, later passed as county law
+            verified: true
+          q40:
+            v: 2
+            source: https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html
+            note: Pledges to 'roll back Albany's hidden taxes and mandates driving up energy costs'; called Hochul's mandate pause a 'political stunt' and wants the law gone (WBEN).
+            coder: B
+          q10:
+            v: -2
+            source: https://cbs6albany.com/news/local/after-hochuls-data-center-moratorium-her-republican-challenger-blasts-the-idea
+            note: 'Blasted the moratorium: ''We''re talking about a tremendous amount of jobs.'''
+            coder: B
+          q09:
+            v: 1
+            source: https://rocklandtimes.com/2026/08/06/bruce-blakeman-the-run-for-ny-governor/
+            note: Suggests New York 'explore' small modular nuclear reactors; tentative, so +1.
+            coder: B
         Letitia James:
           q11:
             v: -1
             source: https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy
             note: says the office primarily focuses on civil investigations
+            verified: true
           q16:
             v: 2
-            source: https://www.jamesforny.com/priorities
+            source: https://ag.ny.gov/press-release/2025/attorney-general-james-senator-comrie-and-assemblymember-lasher-celebrate
+            verified: true
           q07:
             v: 2
             source: https://hoodline.com/2026/07/letitia-james-puts-12-new-york-agencies-on-the-clock-to-ditch-ice-deals-6969013/
             note: joined Hochul in June 2026 in suing the federal government to defend the new immigration laws, which shield schools and hospitals from warrantless ICE activity; her office is enforcing the related 287(g) ban
+            verified: true
           q27:
             v: -2
             source: https://news.bloomberglaw.com/new-york-brief/ex-ags-split-on-suing-trump
             note: had filed 17 suits against the second Trump administration by May 2025 and says it is 'sabotaging' the federal government; vowed in Oct. 2026 to 'continue to do the work of the People's Lawyer'
+            verified: true
           q28:
             v: -2
             source: https://spectrumlocalnews.com/nys/central-ny/news/2026/09/30/ag-letitia-james-comments-on-cornell-gang-rape-case--shield-challenge-and-her-republican-challenger-saritha-komatireddy
             note: said of the proposal 'She wants to go backwards ... That is not the answer'; favors funding outpatient services and psychiatric beds
+            verified: true
           q29:
             v: 2
             source: https://thepostmillennial.com/pathetic-gop-challenger-komatireddy-torches-tish-james-in-ny-attorney-general-debate-over-lax-bail-laws-medicaid-fraud
             note: said at the Oct. 8 debate that her office shifted to bigger targets such as organized fraud rather than individual fraudsters
+            verified: true
+          q22:
+            v: 2
+            source: https://governor.ny.gov/news/governor-hochul-and-attorney-general-james-announce-lawsuit-against-rensselaer-county-sheriff
+            note: 'Suing to enforce the 287(g) ban: ''My office is suing to enforce New York''s laws''; her Office of Immigrant Trust ordered 12 agencies to end ICE agreements.'
+            coder: B
+          q41:
+            v: 2
+            source: https://newsweek.com/new-york-letitia-james-early-voting-abortion-proposition-1-1975278
+            note: 'Urged a yes vote on Prop 1 (2024): ''abortion is on the ballot ... It should always be your choice.'''
+            coder: B
         Saritha Komatireddy:
           q06:
             v: 1
-            source: https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy
+            source: https://thepostmillennial.com/pathetic-gop-challenger-komatireddy-torches-tish-james-in-ny-attorney-general-debate-over-lax-bail-laws-medicaid-fraud
             note: wants judges able to weigh dangerousness without repealing the whole bail law
+            verified: true
           q11:
             v: 2
-            source: https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy
+            source: https://www.cityandstateny.com/personality/2026/08/komatireddys-law-and-order-ag-campaign/415186/
+            verified: true
           q27:
             v: 2
             source: https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy
             note: says James pursued a personal vendetta against Trump and is too focused on national politics; also says she would protect New Yorkers 'whether it's against President Trump or President AOC'
+            verified: true
           q28:
             v: 2
-            source: https://spectrumlocalnews.com/nys/capital-region/news/2026/09/10/saritha-komatireddy-discusses-campaign-for-n-y--state-attorney-general
+            source: https://wjla.com/news/nation-world/ny-republican-attorney-general-candidate-drops-52-count-indictment-against-letitia-james-saritha-komatireddy-president-trump-medicaid-fraud
             note: 'her own proposal: an Office of Civil Commitment staffed by law enforcement and doctors, plus residential treatment centers statewide'
+            verified: true
           q29:
             v: -2
             source: https://wjla.com/news/nation-world/ny-republican-attorney-general-candidate-drops-52-count-indictment-against-letitia-james-saritha-komatireddy-president-trump-medicaid-fraud
             note: calls James 'the watchdog that did not bark,' citing a drop in Medicaid fraud indictments from more than 100 a year to nine
+            verified: true
         Thomas DiNapoli:
           q10:
             v: 2
             source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+            verified: true
           q13:
             v: 2
-            source: https://vinnews.com/2026/10/18/dinapoli-pledges-to-continue-investing-new-york-pension-funds-in-israel-bonds/
+            source: https://spectrumlocalnews.com/nys/capital-region/news/2026/09/24/comptroller-tom-dinapoli-discusses-his-tenure
+            verified: true
           q30:
             v: -2
             source: https://ny1.com/nyc/all-boroughs/politics/2026/10/02/state-comptroller-dinapoli-fends-off-repeated-attacks-in-ny1-debate-joseph-hernandez
             note: '''I have a proven track record''; did say a multibillion-dollar Medicaid contract awarded without comptroller review ''was a mistake'''
+            verified: true
           q31:
             v: -2
             source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
             note: wants more diversification to shield the fund from a possible 'AI bubble'; has said 'We don't want to play risky games with our retirees' money'
+            verified: true
           q32:
             v: 2
             source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
             note: cites 55 arrests and $44 million recovered since 2023
+            verified: true
           q33:
             v: 2
-            source: https://www.osc.ny.gov/press/releases/2024/02/ny-common-retirement-fund-announces-new-measures-protect-state-pension-fund-climate-risk-and-invest
+            source: https://www.esgdive.com/news/new-york-pension-fund-to-divest-from-8-oil-companies-exxonmobil/707993/
             note: his fund divested eight oil and gas companies in Feb. 2024 under a Climate Action Plan aiming for net zero by 2040
+            verified: true
           q34:
             v: -1
             source: https://www.fortune.com/2026/06/22/new-york-comptroller-drew-warshaw-tom-dipapoli-raj-goyle-primary/
             note: his office defends outside managers and about $1 billion in fees as 'entirely in line' with peers, saying 'you must diversify'
+            verified: true
         Joseph Hernandez:
           q10:
             v: -2
-            source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+            source: https://ny1.com/nyc/all-boroughs/politics/2026/10/02/state-comptroller-dinapoli-fends-off-repeated-attacks-in-ny1-debate-joseph-hernandez
+            verified: true
           q17:
             v: 2
-            source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+            source: https://ny1.com/nyc/all-boroughs/politics/2026/10/02/state-comptroller-dinapoli-fends-off-repeated-attacks-in-ny1-debate-joseph-hernandez
+            verified: true
           q13:
             v: 2
             source: https://www.algemeiner.com/2026/02/11/new-york-democrat-comptroller-candidates-plan-divest-israel-imprudent-republican-opponent-says/
             note: has pledged to invest $1 billion in Israel bonds; calls them 'good investments'
+            verified: true
           q30:
             v: 2
             source: https://spectrumlocalnews.com/nys/capital-region/politics/2026/09/30/state-comptroller-candidates-set-to-square-off-on-ny1
             note: '''It''s supposed to be a watchdog role, and unfortunately, it''s been a lapdog role for the politicians in Albany'''
+            verified: true
           q31:
             v: 2
             source: https://www.dailygazette.com/cjfund/political/joseph-hernandez-thomas-dinapoli-comptroller-race/article_758a5c6e-c69a-450a-9d11-5355bbbe8672.html
             note: would direct $10 billion a year from the pension fund to tech companies, including AI and advanced robotics
+            verified: true
           q32:
             v: -2
             source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
             note: '''The fraud and abuse in New York is out of control'''
+            verified: true
           q34:
             v: 2
             source: https://www.dailygazette.com/cjfund/political/joseph-hernandez-thomas-dinapoli-comptroller-race/article_758a5c6e-c69a-450a-9d11-5355bbbe8672.html
-            note: would bring in an in-house investment team to run the pension fund; also pledges to cut 'excessive Wall Street fees'
+            note: position from the cited source
+            verified: true
         Pat Ryan:
           q03:
             v: 2
             source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+            verified: true
           q12:
             v: -2
-            source: https://www.cbsnews.com/news/us-israel-aid-house-democrats-massie-amendment/
+            source: https://www.jta.org/2026/07/15/politics/more-than-100-house-democrats-support-failed-massie-bid-to-cut-military-aid-to-israel
+            verified: true
           q14:
-            v: 1
-            source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-introduces-small-business-relief-act-eliminate-trumps
-            note: would exempt small businesses from tariffs and refund what they paid
+            v: 2
+            source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+            note: At the Oct. 23 forum he called for repealing the tariffs and called them taxes that raise costs. This fits the reworded q14 ('should be lifted') fully. A's +1 rested on his narrower small-business exemption bill.
+            verified: true
           q35:
             v: -1
             source: https://clerk.house.gov/evs/2026/roll280
             note: voted no on H.R. 7008, which paired a photo-ID requirement with a stock-trading ban he otherwise supports
+            verified: true
           q36:
             v: 2
             source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-votes-against-bill-funding-ices-unconstitutional-0
             note: Voted against ICE funding twice (Jan. 22 and Feb. 3, 2026), citing the lack of judicial warrants, body cameras, a mask ban and use-of-force rules.
+            verified: true
           q37:
             v: -2
             source: https://patryan.house.gov/media/press-releases/51st-anniversary-roe-v-wade-congressman-pat-ryan-condemns-far-rights
             note: Cosponsor of the Women's Health Protection Act; called on Congress to pass a law guaranteeing abortion rights nationally (Jan. 2024).
+            verified: true
           q38:
             v: 2
             source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
             note: Wants to roll back the federal tax cut for the top 1% and give middle-class relief; says everyone should pay their fair share.
+            verified: true
           q07:
             v: 1
             source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-votes-against-bill-funding-ices-unconstitutional
             note: 'Federal stance: demands judicial warrants before ICE arrests; has not spoken to the state law itself.'
+            verified: true
           q10:
             v: 1
             source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
             note: Opposes data centers in the region; did not address a statewide pause.
+            verified: true
         Jackie Mary Auringer:
           q03:
             v: -2
             source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+            verified: true
           q04:
             v: 1
             source: https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/
             note: lower taxes and less government spending
+            verified: true
           q15:
-            v: 2
+            v: 1
             source: https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/
+            verified: true
+            note: Wants to cut regulations that 'drive up housing and business costs,' but lists fuel, insurance, materials and payroll as cost drivers too. The article says neither candidate names a main cause. Agrees regulation matters, not that it is the main reason, so +1.
           q35:
             v: 2
             source: https://winwithjackie.com/press/auringer-pat-ryan-profits-from-identity-verification-abroad-but-opposes-voter-id-at-home
             note: Supports voter ID and criticized Ryan's vote against it; urged passage of the Stop Insider Trading Act (H.R. 7008).
-          q36:
-            v: -1
-            source: https://winwithjackie.com/press/auringer-statement-newburgh-ice-facility
-            note: Says she 'fully support[s] ICE doing its job'; has not addressed the specific limits. Opposes the proposed Newburgh ICE facility.
+            verified: true
           q37:
             v: 2
-            source: https://westchester.news12.com/meet-jackie-auringer-the-29-year-old-gop-challenger-taking-on-rep-pat-ryan-for-ny-18
+            source: https://brooklyn.news12.com/meet-jackie-auringer-the-29-year-old-gop-challenger-taking-on-rep-pat-ryan-for-ny-18
             note: Would not support a federal ban; respects the Supreme Court's decision that abortion is left to the states.
+            verified: true
           q38:
-            v: -2
+            v: -1
             source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
-            note: Opposes the proposed Ulster County 18.75% top-rate surcharge on high earners; says it would drive people out of state.
+            note: Proxy. She opposes a specific local measure, Ulster County's proposed 18.75% surcharge ('would drive wealthy residents out'). That is a related measure standing in for the general question, so at most -1. smarter.vote likewise found no general high-earner position.
+            verified: true
           q39:
             v: 2
             source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+            verified: true
           q07:
             v: -1
             source: https://winwithjackie.com/press/auringer-stands-with-orange-county-sheriff-paul-arteta-september-2026
             note: Opposes the same 2026 state law's end to county ICE agreements and backs the sheriff's challenge; did not address the warrant provision itself.
+            verified: true
           q09:
             v: 1
             source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
             note: Wants Indian Point reopened; no position found on new plants.
+            verified: true
           q10:
             v: 1
             source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
             note: Opposes data centers in the region; did not address a statewide pause.
+            verified: true
+          q22:
+            v: -2
+            source: https://winwithjackie.com/press/auringer-stands-with-orange-county-sheriff-paul-arteta-september-2026
+            note: '''Governor Hochul''s decision to force Orange County to end its agreement with ICE doesn''t make our communities safer''; ''I support his decision to challenge this law.'''
+            coder: B
         Robert G. Rolison:
           q02:
             v: 2
             source: https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-bill-requiring-public-hearings-utility
+            verified: true
           q10:
             v: 2
             source: https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html
             note: voted for a one-year statewide data-center moratorium
+            verified: true
           q15:
             v: 1
             source: https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html
             note: called for cutting regulatory challenges for small businesses
+            verified: true
           q40:
-            v: 2
-            source: https://www.nysenate.gov/newsroom/press-releases/2023/rob-rolison/sen-rob-rolison-launches-petition-protect-gas-cooking-and
-            note: Petitioned against the gas ban in new buildings (2023); sponsors S1031 (climate-law cost to ratepayers) and S8463 (green-energy tax holiday) in the Senate GOP energy package.
+            v: 1
+            source: https://www.nysenate.gov/affordable-energy-not-albany-mandates
+            note: 'Verified: sponsors S1031 (cost of CLCPA mandates per ratepayer, with a credit) and S8463 (two-year green-energy charge holiday) in the ''Affordable Energy, Not Albany Mandates'' package. These are cost-relief and disclosure measures, not a slowdown of mandates such as the gas ban. A''s 2023 gas-ban pet'
+            verified: true
           q41:
             v: -1
             source: https://www.nysenate.gov/legislation/bills/2023/S108/amendment/A
             note: voted no on the state Equal Rights Amendment (2023), which covers pregnancy outcomes among other things
+            unverified: true
           q43:
             v: 2
             source: https://www.nysenate.gov/newsroom/press-releases/2026/rob-rolison/senator-rolison-urges-energy-committee-advance-utility-tax
             note: 'Sponsor of S8463: one-year holiday on utility-bill taxes and surcharges plus two years on green-energy charges.'
+            verified: true
           q44:
             v: 2
-            source: https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-urges-governor-hochul-include-raise-age
+            source: https://www.aol.com/articles/teens-caught-guns-face-adult-194500923.html
             note: Introduced S.8531 to restore judicial discretion over family-court removal and keep firearm cases from moving automatically (Nov. 2025).
+            verified: true
           q04:
             v: 1
             source: https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/statement-senator-rolisons-response-governor-hochuls-state
             note: Blames 'over-spending, over-taxing' in Albany; no specific trade-off stated.
+            unverified: true
           q06:
             v: 1
             source: https://nysenate.gov/print/pdf/node/12011516
             note: Called the 2023 bail changes 'watered-down'; wants judges to weigh a defendant's dangerousness when setting bail.
+            unverified: true
         Lisa Kaul:
           q01:
             v: 2
             source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+            verified: true
           q08:
             v: 2
             source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+            verified: true
           q18:
             v: 2
             source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
             note: supports the Social Housing Development Act
+            verified: true
           q40:
             v: -1
-            source: https://voterguide.abundanceny.org/questionnaires/lisa-kaul
+            source: https://www.ballotready.org/people/lisa-kaul
             note: Top priority is speeding renewables, transmission and batteries; frames climate action as a cost-lowering measure. Did not address the gas ban specifically.
+            verified: true
           q41:
-            v: 2
-            source: https://highlandscurrent.org/2026/08/07/democrats-target-rolison-in-state-senate-race/
-            note: Lists reproductive freedom among her priorities; sits on the Planned Parenthood Greater NY Action Fund board (DLCC profile).
+            v: 1
+            source: https://www.ballotready.org/people/lisa-kaul
+            note: She will 'defend New Yorkers' reproductive freedom and bodily autonomy,' lists it as a priority, and sits on the Planned Parenthood Greater NY Action Fund board (DLCC). Nothing found on constitutional protection specifically, so this is a proxy capped at +1.
+            verified: true
           q42:
             v: 2
             source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
             note: Supports the REST Act; 'municipalities should have the ability to decide when they're in a housing emergency.'
+            verified: true
           q09:
             v: -1
             source: https://voterguide.abundanceny.org/questionnaires/lisa-kaul
             note: Keep existing nuclear plants running, but opposes taxpayer or ratepayer money for new nuclear.
+            unverified: true
           q10:
             v: 1
             source: https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html
             note: Says communities should decide and that the region lacks grid capacity and water for hyperscale data centers; did not address the statewide moratorium directly.
+            verified: true
+          q20:
+            v: -1
+            source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+            note: Proxy. 'I entered electoral politics because I really wanted to do something about climate change'; wants to cut fossil-fuel dependence. Nothing on the 2019 law itself, so -1.
+            coder: B
