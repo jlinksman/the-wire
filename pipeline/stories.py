@@ -838,7 +838,7 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log, follows: d
     try:
         threads_mod.update(state, data, follows or {}, now, log, standing)
     except Exception as exc:
-        log(f"[threads] failed: {type(exc).__name__}: {exc}")
+        log(f"[threads] failed: {type(exc).__name__}")
         data.setdefault("threads", [])
         data.setdefault("suggest", [])
     followed_threads = {t["id"] for t in data.get("threads", []) if t.get("followed")}
@@ -848,9 +848,9 @@ def run(state, data, src_by_id, session, robots_allows, timeout, log, follows: d
     try:
         moved = threads_mod.apply_signals(stories, data.get("threads", []), follows or {})
         if moved:
-            log(f"[signals] {moved} stories re-ranked by more/less signals")
+            log("[signals] applied")
     except Exception as exc:
-        log(f"[signals] {type(exc).__name__}: {exc}")
+        log(f"[signals] {type(exc).__name__}")
     # Stage 3: verbatim excerpts of public documents on threads.
     try:
         nx = threads_mod.attach_doc_excerpts(state, data)

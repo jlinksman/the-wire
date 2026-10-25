@@ -283,7 +283,7 @@ def update(state: dict, data: dict, follows: dict, now: datetime, log, standing:
     data["threads"] = out
     data["suggest"] = suggest(out, follows or {}, now)
     data["explore"] = explore(out, follows or {}, now)
-    log(f"[threads] {len(out)} active ({sum(1 for t in out if t['followed'])} followed, {sum(1 for t in out if t.get('standing'))} standing), "
+    log(f"[threads] {len(out)} active ({sum(1 for t in out if t.get('standing'))} standing), "
         f"matched {matched}, opened {opened}, revived {revivals}, developments logged {devs}, "
         f"dormant {sum(1 for t in threads.values() if t['status'] == 'dormant')}, suggested {len(data['suggest'])}")
 

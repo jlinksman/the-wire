@@ -12,7 +12,8 @@ about. Older answers fade: only the last PULSE_DAYS count, and for a subject ask
 than once the latest answer wins.
 
 The values questionnaire's statements (values.yaml) ship to the page; his answers are read
-there, through /quiz, and never pass through the build.
+there, through /quiz, and never pass through the build: the workflow strips quiz.json down to
+the pulse and the starting questionnaire before the build sees it (2026-10-25).
 """
 
 from __future__ import annotations
@@ -118,6 +119,5 @@ def run(data: dict, follows: dict, log) -> None:
     bb = baseline_bank()
     if bb:
         data["baseline_bank"] = bb
-    # Counts only: the build log is public.
-    log(f"[pulse] {t['n']} answers in the last {PULSE_DAYS} days (newest {PULSE_LAST} count); starting questionnaire {t['baseline_n']} answers; values questionnaire "
-        f"{'done' if (q.get('values') or {}).get('done_at') else 'not done'}")
+    # The build log is public: nothing about Joe, not even counts (2026-10-25).
+    log("[pulse] reading taste loaded")

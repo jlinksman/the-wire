@@ -50,27 +50,26 @@ jobs:
           key: wire-state-${{ github.run_id }}
           restore-keys: wire-state-
 
-      - name: Fetch follows from Workers KV
+      # Private data (2026-10-25): this log is public, so these steps print nothing about Joe, not
+      # even counts. The build gets only what it uses: followed threads, reading taste (the pulse and
+      # the starting questionnaire), and whether a scorecard exists. His political answers, scores
+      # and proposals never leave Cloudflare. All three files are deleted when the job ends.
+      - name: Fetch what the build needs from Workers KV
         if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
         run: |
-          npx --yes wrangler@4 kv key get follows.json --namespace-id "$WIRE_KV_ID" --remote > follows.json 2>/dev/null \
+          get() { npx --yes wrangler@4.152.0 kv key get "$1" --namespace-id "$WIRE_KV_ID" --remote 2>/dev/null || echo '{}'; }
+          get follows.json > follows.json
+          get ballot.json | python3 -c "import sys,json
+          try: d=json.load(sys.stdin) or {}
+          except ValueError: d={}
+          json.dump({k: d[k] for k in ('election','imported') if k in d} | {'races': {k: 1 for k in (d.get('races') or {})}}, sys.stdout)" > ballot.json
+          get quiz.json | python3 -c "import sys,json
+          try: d=json.load(sys.stdin) or {}
+          except ValueError: d={}
+          json.dump({'pulse': d.get('pulse') or [], 'baseline': {'answers': (d.get('baseline') or {}).get('answers') or {}}}, sys.stdout)" > quiz.json
+          python3 -c "import json; [json.load(open(f)) for f in ('follows.json','ballot.json','quiz.json')]" 2>/dev/null \
             || echo '{"threads":[],"topics":[]}' > follows.json
-          python3 -c "import json;d=json.load(open('follows.json'));print(len(d.get('threads',[])),'followed threads,',len(d.get('topics',[])),'topics')" \
-            || echo '{"threads":[],"topics":[]}' > follows.json
-      - name: Check for your voter-guide scorecard in Workers KV
-        if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
-        run: |
-          # Only whether it's there, which election and how many races reach the (public) log; never its contents.
-          npx --yes wrangler@4 kv key get ballot.json --namespace-id "$WIRE_KV_ID" --remote > ballot.json 2>/dev/null || echo '{}' > ballot.json
-          python3 -c "import json;d=json.load(open('ballot.json'));print('scorecard:', d.get('election') or 'none', len(d.get('races') or {}), 'races')" \
-            || echo '{}' > ballot.json
-      - name: Check for your questionnaire answers in Workers KV
-        if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
-        run: |
-          # Counts only reach the (public) log; never the answers.
-          npx --yes wrangler@4 kv key get quiz.json --namespace-id "$WIRE_KV_ID" --remote > quiz.json 2>/dev/null || echo '{}' > quiz.json
-          python3 -c "import json;d=json.load(open('quiz.json'));print('questionnaires:', len(d.get('elections') or {}), 'election,', len(d.get('pulse') or []), 'pulse answers,', 'values', 'done' if (d.get('values') or {}).get('done_at') else 'not done')" \
-            || echo '{}' > quiz.json
+          echo "Private inputs loaded."
       - name: Build
         run: python pipeline/build.py
 
@@ -86,17 +85,21 @@ jobs:
         run: |
           # The build's timestamp rides along as metadata so the page can ask "anything new?"
           # and get a tiny "not modified" answer between builds.
-          npx --yes wrangler@4 kv key put data.json --path dist/data.json --namespace-id "$WIRE_KV_ID" --remote \
+          npx --yes wrangler@4.152.0 kv key put data.json --path dist/data.json --namespace-id "$WIRE_KV_ID" --remote \
             --metadata "{\"v\":\"$(cat dist/version.txt)\"}"
           # Briefing signal, push-alert candidates and thread evidence: written only when their content changed
           # (or every two hours), per dist/publish.txt from the build.
           for key in brief.json alerts.json evidence.json; do
             if [ -f "dist/$key" ] && ! grep -q "^$key=0" dist/publish.txt 2>/dev/null; then
-              npx --yes wrangler@4 kv key put "$key" --path "dist/$key" --namespace-id "$WIRE_KV_ID" --remote
+              npx --yes wrangler@4.152.0 kv key put "$key" --path "dist/$key" --namespace-id "$WIRE_KV_ID" --remote
             else
               echo "$key unchanged; not written"
             fi
           done
+
+      - name: Delete the private inputs
+        if: always()
+        run: rm -f follows.json ballot.json quiz.json
 
       - name: Note missing Cloudflare setup
         if: env.CLOUDFLARE_API_TOKEN == '' || env.WIRE_KV_ID == ''

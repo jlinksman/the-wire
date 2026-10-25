@@ -1,0 +1,24 @@
+name: Privacy check
+
+# The repository is public: on every push, fail if anything describing Joe's views, priorities,
+# answers or proposals has landed in it (pipeline/privacy_check.py), and lint the questionnaires.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: python pipeline/privacy_check.py
+      - run: python pipeline/quiz_lint.py > /dev/null

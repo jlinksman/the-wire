@@ -4,7 +4,7 @@
 #
 # axis: which scale a statement measures. dir: +1 if agreeing moves toward the scale's right-hand
 # pole, -1 if toward the left. About half are reverse-worded so agreeing isn't always one side.
-# crit: which of the scorecard's criteria the statement's importance informs (suggested weights).
+# Which statements inform the scorecard's criteria is private: it lives with the scorecard in KV.
 # Statements with no axis aren't placed on the map; their importance still counts.
 #
 # Joe's answers live only in Workers KV (quiz.json), never here.

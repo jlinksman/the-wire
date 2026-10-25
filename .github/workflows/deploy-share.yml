@@ -12,6 +12,7 @@ on:
       - "explain.yaml"
       - "pipeline/share_build.py"
       - ".github/workflows/deploy-share.yml"
+      - ".github/scripts/public-kv.sh"
   workflow_dispatch:
 
 permissions:
@@ -27,6 +28,9 @@ jobs:
       WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Privacy check (nothing about Joe in what ships)
+        run: python3 pipeline/privacy_check.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -34,8 +38,10 @@ jobs:
       - name: Build the public data (public information only)
         run: python pipeline/share_build.py
       - name: Create the Pages project (first run only)
-        run: npx --yes wrangler@4 pages project create wire-ballot --production-branch main || echo "Project already exists."
-      - name: Write Pages bindings (the toggle lives in KV)
+        run: npx --yes wrangler@4.152.0 pages project create wire-ballot --production-branch main || echo "Project already exists."
+      - name: Find the public namespace (the switch only; never the private one)
+        run: bash .github/scripts/public-kv.sh
+      - name: Write Pages bindings (the switch lives in the public namespace)
         working-directory: share
         run: |
           cat > wrangler.toml <<TOML
@@ -44,9 +50,19 @@ jobs:
           compatibility_date = "2026-10-01"
 
           [[kv_namespaces]]
-          binding = "WIRE"
-          id = "$WIRE_KV_ID"
+          binding = "PUBLIC"
+          id = "$PUBLIC_KV_ID"
           TOML
       - name: Deploy
         working-directory: share
-        run: npx --yes wrangler@4 pages deploy public --project-name wire-ballot --branch main --commit-dirty=true
+        run: npx --yes wrangler@4.152.0 pages deploy public --project-name wire-ballot --branch main --commit-dirty=true
+      - name: Check the public project can't reach private data
+        run: |
+          curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/wire-ballot" \
+            | python3 -c "
+          import sys, json, os
+          r = json.load(sys.stdin)['result']['deployment_configs']
+          bad = [(env, b) for env, c in r.items() for b, v in (c.get('kv_namespaces') or {}).items() if v.get('namespace_id') == os.environ['WIRE_KV_ID']]
+          print('KV bindings:', {env: list((c.get('kv_namespaces') or {}).keys()) for env, c in r.items()})
+          sys.exit('::error::wire-ballot is bound to the private namespace: ' + str(bad) if bad else 0)"

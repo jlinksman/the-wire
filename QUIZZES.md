@@ -132,6 +132,16 @@ item's `topic` (section 9).
   statement; the order of formats follows what he actually opens and finishes (the engagement
   log), compared with what he says he prefers.
 
+## 10. Privacy
+
+Every instrument's statements, explainers and public figures' sourced positions are public and
+live in the repo. Everything about Joe is private and lives only in Workers KV behind Access:
+answers, importance weights, results, matches, map positions, which statements inform his
+scorecard's criteria, the scorecard itself, the engagement log and his proposals. Processing of
+his data happens in Cloudflare (Pages Functions, Workers AI), never in GitHub Actions; the build
+sees only reading taste. Results never appear in build logs, commit messages, code comments or
+Ballot Match. `pipeline/privacy_check.py` enforces the checkable parts on every push.
+
 ## Sources
 
 Wahl-O-Mat FAQ (bpb); VG Köln 2019 (via jura-online); StemWijzer (ProDemos); Krouwel & Elfrinkhof

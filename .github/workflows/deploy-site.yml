@@ -9,6 +9,7 @@ on:
       - "site/**"
       - "functions/**"
       - ".github/workflows/deploy-site.yml"
+      - ".github/scripts/public-kv.sh"
   workflow_dispatch:
 
 permissions:
@@ -25,6 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Privacy check (nothing about Joe in what ships)
+        run: python3 pipeline/privacy_check.py
+
       - name: Stop if Cloudflare secrets are missing
         if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == ''
         run: |
@@ -32,7 +36,7 @@ jobs:
           exit 1
 
       - name: Create the Pages project (first run only)
-        run: npx --yes wrangler@4 pages project create the-wire --production-branch main || echo "Project already exists."
+        run: npx --yes wrangler@4.152.0 pages project create the-wire --production-branch main || echo "Project already exists."
 
       # Stamp this deploy's version into the page, the service worker and version.json,
       # so every open of the app can tell whether it is running the newest code.
@@ -45,6 +49,9 @@ jobs:
 
       # Bindings for the Pages Functions: the data in KV (WIRE) and Workers AI (AI) for the
       # Brief me button. Written at deploy time so the KV namespace ID stays in secrets.
+      - name: Find the public namespace (Ballot Match's switch only)
+        run: bash .github/scripts/public-kv.sh
+
       - name: Write Pages bindings
         run: |
           cat > wrangler.toml <<EOF
@@ -56,12 +63,16 @@ jobs:
           binding = "WIRE"
           id = "$WIRE_KV_ID"
 
+          [[kv_namespaces]]
+          binding = "PUBLIC"
+          id = "$PUBLIC_KV_ID"
+
           [ai]
           binding = "AI"
           EOF
 
       - name: Deploy
-        run: npx --yes wrangler@4 pages deploy site --project-name the-wire --branch main --commit-dirty=true
+        run: npx --yes wrangler@4.152.0 pages deploy site --project-name the-wire --branch main --commit-dirty=true
 
       - name: Show the live bindings (no secret values)
         run: |

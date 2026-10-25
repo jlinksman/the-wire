@@ -2701,10 +2701,11 @@ async function openStand() {
   const B = await loadBallot();
   const crits = (B && B.criteria) || [];
   const imp = {};
+  const cmap = (B && B.crit_map) || {};          // private: which statements inform which criterion
   for (const it of bank.items) {
-    const a = ans[it.id];
-    if (!it.crit || !a || a.skip) continue;
-    (imp[it.crit] = imp[it.crit] || []).push(a.w || 2);
+    const a = ans[it.id], cr = cmap[it.id];
+    if (!cr || !a || a.skip) continue;
+    (imp[cr] = imp[cr] || []).push(a.w || 2);
   }
   const avg = Object.fromEntries(Object.entries(imp).map(([k, xs]) => [k, xs.reduce((s, x) => s + x, 0) / xs.length]));
   const tot = Object.values(avg).reduce((s, x) => s + x, 0);
@@ -2730,7 +2731,7 @@ async function openStand() {
     el("button", { class: "sbtn wide", text: "Meme map (for fun)", onclick: () => openMemes() }),
     el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Every statement and how it counted" }), el("span", { class: "chev", text: "▾" })),
       el("ul", { class: "cpos" }, ...bank.items.map((it) => { const a = ans[it.id]; return el("li", {},
-        el("b", { text: (it.axis ? ax[it.axis].label + " · agreeing points " + (it.dir > 0 ? ax[it.axis].right : ax[it.axis].left).toLowerCase() : "Not on the map") + (it.crit ? " · informs " + it.crit : "") + ". " }),
+        el("b", { text: (it.axis ? ax[it.axis].label + " · agreeing points " + (it.dir > 0 ? ax[it.axis].right : ax[it.axis].left).toLowerCase() : "Not on the map") + (cmap[it.id] ? " · informs " + cmap[it.id] : "") + ". " }),
         "“" + it.text + "” You: " + (!a ? "not answered" : a.skip ? "skipped" : (SCALE.find(([k]) => k === a.v) || [0, ""])[1] + ", " + (WEIGHT.find(([k]) => k === a.w) || [0, ""])[1].toLowerCase()) + "."); }))),
     el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Close", onclick: closeSheet })),
   ];
@@ -3281,6 +3282,7 @@ function scorecardAdmin() {
       if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
       myBallot = j; box.value = "";
       status.className = "okmsg";
+      if (/"crit_map"/.test(text) && !/"races"/.test(text)) { status.textContent = "✓ Criteria links saved (" + Object.keys(j.crit_map || {}).length + " statements). Private: Cloudflare only."; go.textContent = "Import scorecard"; return; }
       status.textContent = "✓ Imported: " + Object.keys(j.races || {}).length + " races. Opening the voter guide…";
       setTimeout(() => openGuide(), 900);
     } catch (e) { status.className = "errmsg"; status.textContent = "Couldn't import: " + e.message; }
