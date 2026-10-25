@@ -8,7 +8,10 @@ api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storag
 auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
 id=$(curl -sf "${auth[@]}" "$api?per_page=100" | python3 -c "import sys,json; print(next((n['id'] for n in json.load(sys.stdin)['result'] if n['title']=='wire-public'),''))")
 if [ -z "$id" ]; then
-  id=$(curl -sf "${auth[@]}" -H "content-type: application/json" -X POST "$api" -d '{"title":"wire-public"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['result']['id'])")
+  curl -sf "${auth[@]}" -H "content-type: application/json" -X POST "$api" -d '{"title":"wire-public"}' >/dev/null || true
+  # Another deploy may have created it at the same moment: look it up again either way.
+  id=$(curl -sf "${auth[@]}" "$api?per_page=100" | python3 -c "import sys,json; print(next((n['id'] for n in json.load(sys.stdin)['result'] if n['title']=='wire-public'),''))")
+  [ -n "$id" ] || { echo "::error::Couldn't create the public namespace."; exit 1; }
   echo "Created the public namespace."
 fi
 echo "::add-mask::$id"
