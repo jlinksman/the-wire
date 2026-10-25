@@ -1,0 +1,2080 @@
+# Your solutions (2026-10-25): issues Joe can write his own fix for, each with a menu of concrete
+# policy mechanisms and each candidate's or list's sourced position on them. Public information
+# only: Joe's proposals and anything read from them live only in Workers KV (proposals.json).
+#
+# v: 1 proposes/supports, -1 opposes, 0 mixed or conditional. Coded only from the source; missing
+# stays missing; inferred positions say "Proxy" in the note. checked: true = confirmed or corrected
+# by an independent second coder (Oct 25); unverified: true = the second coder couldn't open the
+# source, and it doesn't count. instrument: which questionnaire's statements share the topic.
+version: 2026-10-25.1
+issues:
+  ny_utilities:
+    title: Utility bills
+    prompt: What would you do about Hudson Valley utility bills?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Create a public power authority to buy Central Hudson and run it as a nonprofit utility
+    - id: m2
+      text: Require a public hearing in the affected region before any utility rate increase is decided
+    - id: m3
+      text: Suspend state taxes and surcharges on utility bills for a set period
+    - id: m4
+      text: Cap utility rate increases at inflation, except for safety and reliability work
+    - id: m5
+      text: Send households one-time state rebate checks to offset energy bills
+    - id: m6
+      text: Return unspent state clean-energy program money to ratepayers as bill credits
+    - id: m7
+      text: Bar utilities from charging customers for advertising, lobbying and legal fees
+    - id: m8
+      text: Limit the profit rate utilities may earn on their investments
+    plans:
+      Kathy Hochul:
+        m4:
+          v: 1
+          source: https://www.wbng.com/2026/06/19/ny-budget-targets-rising-utility-bills-with-rebates-rate-reforms-tighter-oversight/
+          note: Her enacted 2026 budget requires budget-constrained rate plans that generally hold increases to inflation, except for safety and reliability needs.
+          checked: true
+        m5:
+          v: 1
+          source: https://insideclimatenews.org/?p=114954
+          note: Touts energy rebate checks of up to $200 for 8.2 million households as her answer on bills (Oct. 2026 debate).
+          checked: true
+        m7:
+          v: 1
+          source: https://www.governor.ny.gov/news/governor-hochul-unveils-ratepayer-protection-plan-hold-energy-companies-accountable-and-ensure
+          note: Her plan has regulators strip corporate advertising, fines and certain legal fees from what ratepayers pay.
+          checked: true
+      Bruce Blakeman:
+        m3:
+          v: 1
+          source: https://wlea.net/?p=44951
+          note: 'Proxy: would permanently end the System Benefit Charge, one bill surcharge; no plan stated for a timed suspension of taxes (June 2026).'
+          checked: true
+        m5:
+          v: 0
+          source: https://www.fingerlakes1.com/2026/09/15/blakeman-criticizes-hochul-utility-rebates-promises-50-bill-cut/
+          note: Calls the one-time $200 checks an election-year measure too small to offset rising bills; does not say he would end them.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.aol.com/news/gop-ny-gov-candidate-blakeman-202858281.html
+          note: Would liquidate about $2.4 billion in unspent NYSERDA climate funds and send it back to ratepayers (April 2026).
+          checked: true
+      Robert G. Rolison:
+        m2:
+          v: 1
+          source: https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-bill-requiring-public-hearings-utility
+          note: Sponsors S980, requiring an in-region public hearing at least 90 days before the PSC rules on a rate increase.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.nysenate.gov/affordable-energy-not-albany-mandates
+          note: 'Sponsors S8463: one-year holiday on utility-bill taxes and surcharges, two years on green-energy charges.'
+          checked: true
+      Lisa Kaul:
+        m1:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+          note: Wants Central Hudson replaced by a nonprofit Hudson Valley Power Authority, citing cheaper public borrowing (Sept. 2026).
+          checked: true
+      Pat Ryan:
+        m2:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/following-recommended-decision-central-hudson-rate-case-congressman-pat-ryan
+          note: Asked the PSC for public hearings before a final vote on Central Hudson's rate case (May 2024, older source).
+          checked: true
+        m8:
+          v: 1
+          source: https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/
+          note: Has backed legislation that would limit utility company profits (Oct. 2026 profile).
+          checked: true
+  ny_climate_law:
+    title: Climate law
+    prompt: What should New York do with its 2019 climate law and its deadlines?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Repeal the 2019 climate law (CLCPA) and its emissions targets
+    - id: m2
+      text: Push back the climate law's deadlines while keeping the law
+    - id: m3
+      text: Delay the ban on gas hookups in new buildings
+    - id: m4
+      text: Start a cap-and-invest program that charges large polluters for their emissions
+    - id: m5
+      text: Lift the ban on fracking for natural gas
+    - id: m6
+      text: Publish what climate-law mandates cost each ratepayer before moving ahead
+    - id: m7
+      text: Spend more state money up front on heat pumps, electric vehicles and solar
+    - id: m8
+      text: Make fossil-fuel companies pay into a climate superfund for past emissions
+    plans:
+      Kathy Hochul:
+        m1:
+          v: -1
+          source: https://policyintegrity.org/publications/detail/new-yorks-climate-law-amendments-usher-in-new-challenges-and-opportunities
+          note: Signed May 2026 amendments that changed the law but kept it and its mandatory 2050 target.
+          checked: true
+        m2:
+          v: 1
+          source: https://policyintegrity.org/publications/detail/new-yorks-climate-law-amendments-usher-in-new-challenges-and-opportunities
+          note: Her 2026 amendments moved the emissions-rule deadline to December 2028 and loosened the 2030 enforcement language.
+          checked: true
+        m3:
+          v: 0
+          source: https://www.canarymedia.com/articles/carbon-free-buildings/new-york-pause-gas-ban-rules
+          note: State agreed in Nov. 2025 not to enforce the gas ban pending appeal; her office says she remains committed to the law.
+          checked: true
+        m4:
+          v: 0
+          source: https://nysfocus.com/2025/12/03/cap-invest-clcpa-lawsuit-hochul-dec-emissions-rules
+          note: Once called cap-and-invest a cornerstone, then shelved it and appealed a court order to issue the rules (Dec. 2025).
+          checked: true
+        m5:
+          v: -1
+          source: https://ny1.com/nyc/all-boroughs/news/2026/10/20/gubernatorial-candidates-come-out-swinging-over-energy-costs
+          note: 'Proxy: mocked Blakeman''s vision of fracking rigs everywhere (Oct. 2026); the source has no explicit statement defending the ban.'
+          checked: true
+        m8:
+          v: 1
+          source: https://www.governor.ny.gov/news/governor-hochul-signs-landmark-legislation-creating-new-climate-superfund
+          note: Signed the Climate Change Superfund Act in Dec. 2024; later joined James in defending it against the federal suit.
+          checked: true
+      Bruce Blakeman:
+        m1:
+          v: 1
+          source: https://www.audacy.com/wben/news/blakeman-backs-fracking-but-not-the-clcpa
+          note: Would repeal the law, calling it a green energy scam; dismissed Hochul's pause as a stunt (March 2026).
+          checked: true
+        m3:
+          v: 1
+          source: https://www.audacy.com/wben/news/blakeman-backs-fracking-but-not-the-clcpa
+          note: 'Proxy: says New Yorkers should choose gas or electric in their homes, implying he would undo the gas-hookup ban (March 2026).'
+          checked: true
+        m4:
+          v: -1
+          source: https://wlea.net/?p=44951
+          note: Would dismantle the state's cap-and-invest carbon mandates (campaign statement, June 2026).
+          checked: true
+        m5:
+          v: 1
+          source: https://www.audacy.com/wben/news/blakeman-backs-fracking-but-not-the-clcpa
+          note: Calls tapping the Marcellus Shale a must for jobs and lower energy costs.
+          checked: true
+      Robert G. Rolison:
+        m6:
+          v: 1
+          source: https://www.nysenate.gov/affordable-energy-not-albany-mandates
+          note: 'Sponsors S1031: PSC and Comptroller would calculate each ratepayer''s climate-law costs and offset them with a credit.'
+          checked: true
+        m3:
+          v: 1
+          source: https://www.nysenate.gov/newsroom/press-releases/2023/rob-rolison/statement-senator-rob-rolison-end-session-accomplishments
+          note: 'Proxy: called the 2023 budget''s gas ban particularly destructive for homeowners and small businesses (2023, older source).'
+          checked: true
+      Lisa Kaul:
+        m7:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+          note: Proposes state upfront investment in EVs and HVAC, easier solar permitting, and clean-energy apprenticeships.
+          checked: true
+      Letitia James:
+        m8:
+          v: 1
+          source: https://stateimpactcenter.org/ag-work/ag-actions/new-york-ag-defended-states-climate-superfund-act
+          note: 'Proxy: defends the Climate Superfund Act in court against the federal government, a duty of her office (2025).'
+          checked: true
+  energy_nuclear_data_centers:
+    title: Power supply and data centers
+    prompt: Where should New York get the power it needs, and what should it do about data centers?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Build new state-backed nuclear power plants upstate
+    - id: m2
+      text: Reopen the Indian Point nuclear plant
+    - id: m3
+      text: Let host communities decide whether a large data center can be built
+    - id: m4
+      text: Pause new large data centers statewide for a year
+    - id: m5
+      text: Make large data centers pay their own grid costs or bring their own power
+    - id: m6
+      text: Approve new interstate gas pipelines into New York
+    - id: m7
+      text: Speed permits for solar, batteries and power lines
+    - id: m8
+      text: Keep building offshore wind farms
+    plans:
+      Kathy Hochul:
+        m1:
+          v: 1
+          source: https://www.wshu.org/2026-01-13/ny-gov-kathy-hochul-to-double-down-on-affordability-in-state-of-the-state-speech
+          note: Wants to more than double the state's nuclear generation as a backbone of reliable power (Jan. 2026).
+          checked: true
+        m2:
+          v: -1
+          source: https://www.cityandstateny.com/policy/2026/03/mike-lawler-and-trump-admin-wants-reopen-indian-point/411964
+          note: Her office says she will not support reopening Indian Point (March 2026).
+          checked: true
+        m4:
+          v: 1
+          source: https://ny1.com/nyc/all-boroughs/politics/2026/07/15/hochul-blakeman-data-center-moratorium
+          note: Ordered a one-year halt on new large data centers, citing unknown effects on bills (July 2026).
+          checked: true
+        m5:
+          v: 1
+          source: https://ny1.com/nyc/all-boroughs/politics/2026/07/15/hochul-blakeman-data-center-moratorium
+          note: Wants large data centers to bring their own power source.
+          checked: true
+        m6:
+          v: 0
+          source: https://www.wamc.org/2025-11-07/gov-hochul-oks-key-permit-for-trump-favored-gas-pipeline-in-nyc-north-jersey
+          note: Her environmental agency reversed earlier denials and approved NESE pipeline permits in Nov. 2025, citing reliability.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.offshorewind.biz/2025/04/17/new-york-governor-i-will-not-allow-this-federal-overreach-to-stand
+          note: Vowed to fight the federal halt of Empire Wind 1 to protect jobs and affordable energy (April 2025).
+          checked: true
+      Bruce Blakeman:
+        m1:
+          v: 1
+          source: https://wlea.net/?p=44951
+          note: Supports expanding nuclear power infrastructure; elsewhere suggests exploring small modular reactors (June 2026).
+          checked: true
+        m2:
+          v: 0
+          source: https://rocklandtimes.com/2026/08/06/bruce-blakeman-the-run-for-ny-governor/
+          note: Blames Indian Point's closure for higher bills but defers to a feasibility study on reopening it.
+          checked: true
+        m4:
+          v: -1
+          source: https://ny1.com/nyc/all-boroughs/politics/2026/07/15/hochul-blakeman-data-center-moratorium
+          note: Vowed to rescind the moratorium, calling it crazy (July 2026).
+          checked: true
+        m8:
+          v: -1
+          source: https://insideclimatenews.org/?p=114954
+          note: Called offshore wind farms and solar panels science projects funded by a slush fund (Oct. 2026 debate).
+          checked: true
+      Thomas DiNapoli:
+        m4:
+          v: 1
+          source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+          note: Backs Hochul's data center moratorium (Oct. 2026 debate).
+          checked: true
+      Joseph Hernandez:
+        m4:
+          v: -1
+          source: https://ny1.com/nyc/all-boroughs/politics/2026/10/02/state-comptroller-dinapoli-fends-off-repeated-attacks-in-ny1-debate-joseph-hernandez
+          note: 'Opposes the moratorium: the state cannot just hit the brakes for a year (Oct. 2026 debate).'
+          checked: true
+      Jackie Mary Auringer:
+        m2:
+          v: 1
+          source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+          note: Says Indian Point should be reopened (Oct. 2026 forum).
+          checked: true
+      Robert G. Rolison:
+        m3:
+          v: 1
+          source: https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html
+          note: Says communities should weigh in on whether they want data centers (Sept. 2026 forum).
+          checked: true
+        m4:
+          v: 1
+          source: https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html
+          note: Voted for the one-year statewide data center moratorium.
+          checked: true
+      Lisa Kaul:
+        m3:
+          v: 1
+          source: https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html
+          note: Agrees communities should decide; says the region lacks grid capacity and water for hyperscale centers.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+          note: Wants solar permitting hurdles cut to expand solar (Sept. 2026).
+          checked: true
+  ny_housing:
+    title: Housing costs
+    prompt: What would you do to bring down housing costs in the Hudson Valley?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Let the state override local zoning to allow apartments near train stations
+    - id: m2
+      text: Exempt more new housing from state environmental review
+    - id: m3
+      text: Let towns outside New York City adopt rent stabilization using local affordability data
+    - id: m4
+      text: Create a state authority that builds and owns permanently affordable housing
+    - id: m5
+      text: Restrict large investors from buying up single-family homes
+    - id: m6
+      text: Give landlords tax breaks for keeping units rent-regulated or affordable
+    - id: m7
+      text: Cut building regulations that raise construction costs
+    - id: m8
+      text: Give extra state or federal money to towns that approve more housing
+    plans:
+      Kathy Hochul:
+        m1:
+          v: 0
+          source: https://www.wshu.org/2026-01-13/ny-gov-kathy-hochul-to-double-down-on-affordability-in-state-of-the-state-speech
+          note: Her 2023 override plan was shelved; her 2026 streamlining covers only projects that comply with local zoning.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.bisnow.com/news/new-york/affordable-housing/hochul-proposes-cutting-red-tape-for-developers-new-tax-incentives-for-rent-stabilized-landlords-132701
+          note: Proposed letting qualifying housing skip SEQRA review, saying it is weaponized to block housing (Jan. 2026).
+          checked: true
+        m5:
+          v: 1
+          source: https://nystateofpolitics.com/state-of-politics/new-york/politics/2025/01/11/hochul-introduces-housing-proposals-
+          note: Proposed a 75-day waiting period and tax-break limits for large investors buying one- and two-family homes (Jan. 2025).
+          checked: true
+        m6:
+          v: 1
+          source: https://www.bisnow.com/news/new-york/affordable-housing/hochul-proposes-cutting-red-tape-for-developers-new-tax-incentives-for-rent-stabilized-landlords-132701
+          note: Proposed overhauling the J-51 abatement rewarding upgrades in rent-regulated buildings (Jan. 2026).
+          checked: true
+        m8:
+          v: 1
+          source: https://www.governor.ny.gov/news/video-audio-photos-rush-transcript-pro-housing-communities-governor-hochul-announces-more-100
+          note: Runs Pro-Housing Communities, steering state funding to certified municipalities that commit to growth (Jan. 2025).
+          checked: true
+      Bruce Blakeman:
+        m1:
+          v: -1
+          source: https://www.wnycstudios.org/podcasts/bl/segments/nassau-county-exec-gov-hochuls-call-more-housing-long-island
+          note: Opposed Albany planning Long Island's growth; wants local, negotiated smart growth (Jan. 2023, older source).
+          checked: true
+      Lisa Kaul:
+        m3:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+          note: Supports the REST Act; says municipalities should decide when they face a housing emergency.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+          note: Backs the Social Housing Development Act and more state money for affordable housing.
+          checked: true
+      Pat Ryan:
+        m5:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-delivers-key-hudson-valley-priorities-lower-housing-costs
+          note: Voted for the ROAD to Housing package barring investors with over 350 homes from buying more (May 2026).
+          checked: true
+        m8:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-delivers-key-hudson-valley-priorities-lower-housing-costs
+          note: His PRO Housing Act would fund municipalities to build or convert housing, especially near transit.
+          checked: true
+      Jackie Mary Auringer:
+        m7:
+          v: 1
+          source: https://highlandscurrent.org/2026/10/19/challenger-faces-high-bar-to-unseat-ryan/
+          note: Wants to reduce regulations she says drive up housing and business costs (Oct. 2026).
+          checked: true
+  ny_bail_justice:
+    title: Bail and public safety
+    prompt: What would you change, if anything, about bail and public safety in New York?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Let judges weigh a defendant's dangerousness when setting bail
+    - id: m2
+      text: Restore cash bail for more charges
+    - id: m3
+      text: Loosen evidence-sharing (discovery) deadlines so fewer cases are dismissed on timing
+    - id: m4
+      text: Give judges more power to keep gun cases against 16- and 17-year-olds in adult court
+    - id: m5
+      text: Make it easier to commit people with severe mental illness to treatment involuntarily
+    - id: m6
+      text: Expand early release and resentencing for people serving long prison terms
+    - id: m7
+      text: Increase state funding for police and prosecutors
+    - id: m8
+      text: Repeal the HALT Act limits on solitary confinement
+    plans:
+      Kathy Hochul:
+        m1:
+          v: -1
+          source: https://www.wxxinews.org/local-news/2026-08-17/blakeman-touts-dangerousness-standard-in-setting-bail-claiming-crime-is-up
+          note: Has said judges already have the tools they need, rather than backing a new dangerousness standard.
+          checked: true
+        m2:
+          v: -1
+          source: https://wnyt.com/top-stories/hochul-pushes-back-against-trumps-comments-on-cashless-bail/
+          note: Says New York no longer has cashless bail and recent changes are working; proposed no further rollback (Aug. 2025).
+          checked: true
+        m3:
+          v: 1
+          source: https://www.governor.ny.gov/news/fighting-recidivism-district-attorneys-endorse-governor-hochuls-plan-streamline-discovery-laws
+          note: Pushed 2025 changes so discovery errors get proportionate remedies instead of dismissal; a narrower version passed.
+          checked: true
+        m4:
+          v: 0
+          source: https://www.btpm.org/2026-01-25/hochul-punts-on-reform-of-youth-criminal-justice-law-dodging-fight-with-fellow-democrats
+          note: Hinted at openness to changes, then left Raise the Age out of her 2026 budget.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.amny.com/news/nyc-nys-budget-involuntary-commitment
+          note: Her 2025 budget widened the danger-to-self standard and expanded court-ordered outpatient treatment.
+          checked: true
+        m7:
+          v: 1
+          source: https://ny1.com/nyc/all-boroughs/politics/2026/09/22/blakeman-end-halt-act-
+          note: Campaign cites nearly $4 billion she has invested in public safety (Sept. 2026).
+          checked: true
+      Bruce Blakeman:
+        m1:
+          v: 1
+          source: https://www.wxxinews.org/local-news/2026-08-17/blakeman-touts-dangerousness-standard-in-setting-bail-claiming-crime-is-up
+          note: Backs a dangerousness standard and would put the PROTECT Act in his first budget (Aug. 2026).
+          checked: true
+        m2:
+          v: 1
+          source: https://rocklandtimes.com/2026/08/06/bruce-blakeman-the-run-for-ny-governor/
+          note: Would repeal cashless bail to support local police.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.fox5ny.com/news/bruce-blakeman-takes-aim-nys-justice-system-a-revolving-door-criminality
+          note: 'Proxy: says gangs exploit a Raise the Age loophole by recruiting teens; names no specific fix (Sept. 2026).'
+          checked: true
+        m6:
+          v: -1
+          source: https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html
+          note: 'Proxy: attacks laws that release inmates and weaken parole; vows to keep violent criminals behind bars (Feb. 2026).'
+          checked: true
+        m7:
+          v: 1
+          source: https://www.fox5ny.com/news/bruce-blakeman-takes-aim-nys-justice-system-a-revolving-door-criminality
+          note: Wants to invest in police; would withhold Democratic priorities in the budget to win justice changes.
+          checked: true
+        m8:
+          v: 1
+          source: https://ny1.com/nyc/all-boroughs/politics/2026/09/22/blakeman-end-halt-act-
+          note: Vowed to end the HALT Act on day one, calling it a complete failure (Sept. 2026).
+          checked: true
+      Saritha Komatireddy:
+        m1:
+          v: 1
+          source: https://thepostmillennial.com/pathetic-gop-challenger-komatireddy-torches-tish-james-in-ny-attorney-general-debate-over-lax-bail-laws-medicaid-fraud
+          note: Wants judges able to weigh dangerousness before setting bail, without repealing the whole bail law (Oct. 2026 debate).
+          checked: true
+        m5:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/08/komatireddys-law-and-order-ag-campaign/415186/
+          note: Would use the AG's office to move dangerous, severely mentally ill people into residential treatment.
+          checked: true
+      Letitia James:
+        m5:
+          v: -1
+          source: https://spectrumlocalnews.com/nys/central-ny/news/2026/09/30/ag-letitia-james-comments-on-cornell-gang-rape-case--shield-challenge-and-her-republican-challenger-saritha-komatireddy
+          note: Says a civil-commitment office would go backwards to locking people away and is not the answer (Sept. 2026).
+          checked: true
+      Robert G. Rolison:
+        m4:
+          v: 1
+          source: https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-urges-governor-hochul-include-raise-age
+          note: S.8531 restores judicial discretion over family-court transfers and stops gun cases moving automatically (Nov. 2025).
+          checked: true
+        m6:
+          v: -1
+          source: https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-raises-concerns-over-legislation
+          note: Objected to Senate bills that would release more incarcerated people, saying they put the convicted over victims (April 2025).
+          checked: true
+        m7:
+          v: 1
+          source: https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/statement-senator-rolisons-response-governor-hochuls-state
+          note: Sponsors a Safer Communities Grant Program funding police to solve and prosecute violent crime (Jan. 2025).
+          checked: true
+        m1:
+          v: 1
+          source: https://www.nysenate.gov/newsroom/press-releases/2023/rob-rolison/statement-senator-rob-rolison-end-session-accomplishments
+          note: Backed giving judges discretion to weigh dangerousness when setting bail; called the 2023 changes watered down (2023, older source).
+          checked: true
+  us_immigration_enforcement:
+    title: Immigration enforcement in New York
+    prompt: What role, if any, should New York's state and local governments play in federal immigration enforcement, and what limits should apply to ICE here?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Bar local police and sheriffs from 287(g) agreements that let them do immigration enforcement for ICE
+    - id: m2
+      text: Bar county jails from renting beds to ICE to hold immigration detainees
+    - id: m3
+      text: Require a judge's warrant before immigration agents enter schools, hospitals or houses of worship
+    - id: m4
+      text: Ban officers, including federal agents, from wearing masks while dealing with the public
+    - id: m5
+      text: Attach judicial-warrant, body-camera and use-of-force rules to any federal ICE funding
+    - id: m6
+      text: Hand people charged with crimes over to ICE before their state case is finished
+    - id: m7
+      text: Block new ICE detention or processing sites in Hudson Valley towns
+    - id: m8
+      text: Abolish ICE and dismantle the agency
+    plans:
+      Kathy Hochul:
+        m1:
+          v: 1
+          source: https://www.wamc.org/2026-08-26/blakeman-bows-to-ny-law-limiting-cooperation-with-ice
+          note: Signed the ban; says the state did not need any 287(g) agreements and they hinder progress.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.wamc.org/2026-08-26/blakeman-bows-to-ny-law-limiting-cooperation-with-ice
+          note: Signed the 2026 law that bars local jails from holding people for ICE.
+          checked: true
+        m3:
+          v: 1
+          source: https://politicsny.com/2026/05/29/new-york-bans-masked-law-enforcement-under-hochul-immigration-package-aimed-at-curbing-ice-tactics-in-state/
+          note: May 2026 budget package she signed limits immigration agents' access to sensitive locations without a judicial warrant.
+          checked: true
+        m4:
+          v: 1
+          source: https://politicsny.com/2026/05/29/new-york-bans-masked-law-enforcement-under-hochul-immigration-package-aimed-at-curbing-ice-tactics-in-state/
+          note: Signed a ban on masked law enforcement, federal agents included; a federal judge later blocked it.
+          checked: true
+        m6:
+          v: -1
+          source: https://www.wamc.org/2026-08-26/blakeman-bows-to-ny-law-limiting-cooperation-with-ice
+          note: Wants people accused of crimes tried in state court before any handover to federal authorities.
+          checked: true
+      Bruce Blakeman:
+        m1:
+          v: -1
+          source: https://www.wamc.org/2026-08-26/blakeman-bows-to-ny-law-limiting-cooperation-with-ice
+          note: Complied in Nassau but calls the ban very dangerous and joined a sheriffs' lawsuit against it.
+          checked: true
+        m2:
+          v: -1
+          source: https://www.wamc.org/2026-08-26/blakeman-bows-to-ny-law-limiting-cooperation-with-ice
+          note: 'Proxy: Nassau''s jail held over 1,000 people for ICE; he is suing over the law that ends this.'
+          checked: true
+        m6:
+          v: 1
+          source: https://www.aol.com/news/bruce-blakeman-reveals-one-issue-195807053.html
+          note: 'Proxy: pledges to rescind the sanctuary-state policy on day one; no stated view on when handovers happen (Dec. 2025).'
+          checked: true
+      Letitia James:
+        m1:
+          v: 1
+          source: https://ag.ny.gov/press-release/2026/attorney-general-james-and-governor-hochul-release-statement-lawsuit-challenging
+          note: Defends the 287(g) ban, calling the sheriffs' suit a frivolous waste of taxpayer money.
+          checked: true
+        m3:
+          v: 1
+          source: https://hoodline.com/2026/07/letitia-james-puts-12-new-york-agencies-on-the-clock-to-ditch-ice-deals-6969013/
+          note: 'Proxy: joined Hochul''s June 2026 suit defending the new laws, which include shielding schools and hospitals from warrantless ICE activity.'
+          checked: true
+      Pat Ryan:
+        m4:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-votes-against-bill-funding-ices-unconstitutional-0
+          note: Lists a mask ban during routine enforcement among safeguards he wanted in ICE funding.
+          checked: true
+        m5:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-votes-against-bill-funding-ices-unconstitutional-0
+          note: Voted against ICE funding in Feb. 2026 because it lacked warrants, body cameras and force rules.
+          checked: true
+        m7:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-launches-hudson-valley-wide-petition-stop-potential-ice
+          note: Launched a petition rejecting any ICE detention facility in the Hudson Valley, including Newburgh and Chester.
+          checked: true
+      Jackie Mary Auringer:
+        m1:
+          v: -1
+          source: https://winwithjackie.com/press/auringer-stands-with-orange-county-sheriff-paul-arteta-september-2026
+          note: Opposes forcing Orange County to end its ICE agreement; backs the sheriff's legal challenge.
+          checked: true
+        m2:
+          v: -1
+          source: https://winwithjackie.com/press/auringer-statement-newburgh-ice-facility
+          note: Says local detention agreements bring jails millions and ending them makes communities less safe.
+          checked: true
+        m7:
+          v: 1
+          source: https://winwithjackie.com/press/auringer-statement-newburgh-ice-facility
+          note: Opposes the possible Newburgh ICE facility, while blaming it on Democratic policies and backing ICE generally.
+          checked: true
+        m8:
+          v: -1
+          source: https://winwithjackie.com/press/auringer-statement-newburgh-ice-facility
+          note: 'Proxy: says she fully supports ICE doing its job removing criminal immigrants, which runs against abolishing the agency.'
+          checked: true
+      Robert G. Rolison:
+        m7:
+          v: 1
+          source: https://www.nysenate.gov/newsroom/press-releases/2026/rob-rolison/senator-rob-rolison-statement-regard-immigration-and
+          note: Strongly opposes converting a Newburgh warehouse for ICE use; wants local input.
+          checked: true
+      Lisa Kaul:
+        m8:
+          v: 1
+          source: https://www.nysenate.gov/sites/default/files/file/2026-07/Abolish%20ICE%20Letter.pdf
+          note: Signed a July 2026 officials' letter urging congressional Democrats to defund and dismantle ICE.
+          checked: true
+  ny_pension:
+    title: State pension fund
+    prompt: How should the Comptroller invest and oversee New York's roughly $300 billion state pension fund?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Keep holding Israel government bonds in the pension fund
+    - id: m2
+      text: Sell fossil-fuel companies judged unprepared for the shift to clean energy
+    - id: m3
+      text: Bring more money management in-house to cut outside Wall Street fees
+    - id: m4
+      text: Commit about $10 billion to technology and AI companies
+    - id: m5
+      text: Steer more pension money into New York companies, especially upstate
+    - id: m6
+      text: Keep cryptocurrency out of the pension fund
+    - id: m7
+      text: Bar campaign donations from firms that seek pension or state business
+    - id: m8
+      text: Replace the Comptroller as sole trustee with a multi-member board
+    plans:
+      Thomas DiNapoli:
+        m1:
+          v: 1
+          source: https://spectrumlocalnews.com/nys/capital-region/news/2026/09/24/comptroller-tom-dinapoli-discusses-his-tenure
+          note: Calls the bonds safe and reliable and has no plans to change strategy.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.esgdive.com/news/new-york-pension-fund-to-divest-from-8-oil-companies-exxonmobil/707993/
+          note: His fund divested eight oil and gas companies in 2024 under a net-zero-by-2040 plan.
+          checked: true
+        m3:
+          v: -1
+          source: https://www.fortune.com/2026/06/22/new-york-comptroller-drew-warshaw-tom-dipapoli-raj-goyle-primary/
+          note: 'Proxy: his office defends outside managers and about $1 billion in fees as in line with peers (June 2026).'
+          checked: true
+        m4:
+          v: -1
+          source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+          note: 'Proxy: wants more diversification against a possible AI bubble rather than faster AI investment (Oct. 2026 debate).'
+          checked: true
+        m5:
+          v: 0
+          source: https://ny1.com/nyc/all-boroughs/politics/2026/10/02/state-comptroller-dinapoli-fends-off-repeated-attacks-in-ny1-debate-joseph-hernandez
+          note: Says the fund already invests in New York companies; no expansion proposed.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+          note: Agreed in the debate that the fund should not invest in cryptocurrency.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+          note: Says the state needs stronger rules barring political donations from vendors seeking state contracts.
+          checked: true
+      Joseph Hernandez:
+        m1:
+          v: 1
+          source: https://www.algemeiner.com/2026/02/11/new-york-democrat-comptroller-candidates-plan-divest-israel-imprudent-republican-opponent-says/
+          note: Calls Israel bonds good investments and pledges to buy $1 billion more.
+          checked: true
+        m2:
+          v: -1
+          source: https://ny1.com/nyc/all-boroughs/politics/2026/10/02/state-comptroller-dinapoli-fends-off-repeated-attacks-in-ny1-debate-joseph-hernandez
+          note: 'Proxy: accuses DiNapoli of running a political agenda on DEI and green energy (Oct. 2026 debate).'
+          checked: true
+        m3:
+          v: 1
+          source: https://www.dailygazette.com/cjfund/political/joseph-hernandez-thomas-dinapoli-comptroller-race/article_758a5c6e-c69a-450a-9d11-5355bbbe8672.html
+          note: Would build an in-house investment team to run the fund.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.dailygazette.com/cjfund/political/joseph-hernandez-thomas-dinapoli-comptroller-race/article_758a5c6e-c69a-450a-9d11-5355bbbe8672.html
+          note: Proposes $10 billion for tech companies, focused on AI and advanced robotics, moving to New York.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.wbng.com/2025/12/18/republican-comptroller-candidate-joseph-hernandez-emphasizes-upstate-investment-2026-campaign/
+          note: Would set aside $10 billion to invest in New York, arguing upstate and western regions have been neglected (Dec. 2025).
+          checked: true
+        m6:
+          v: 1
+          source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+          note: Agreed in the debate that the fund should not invest in cryptocurrency.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+          note: 'Proxy: attacked $850,000 in donations from pension-fund law firms as pay-to-play.'
+          checked: true
+  ny_ag_powers:
+    title: Attorney General's priorities
+    prompt: What should New York's Attorney General spend the office's time and lawyers on, and how?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Move at least half of the office's lawyers to prosecuting crime
+    - id: m2
+      text: Use the new FAIR Business Practices Act to sue over unfair and abusive business practices
+    - id: m3
+      text: Keep suing the federal government over policies that harm New York
+    - id: m4
+      text: Point the Medicaid fraud unit at large organized schemes rather than case volume
+    - id: m5
+      text: Create an Office of Civil Commitment to move people with severe mental illness into treatment
+    - id: m6
+      text: Sue counties and sheriffs that keep cooperating with ICE against state law
+    - id: m7
+      text: Have the Charities Bureau audit every nonprofit that runs homeless shelters
+    - id: m8
+      text: Spend opioid settlement money on addiction treatment instead of harm-reduction supplies
+    plans:
+      Letitia James:
+        m1:
+          v: -1
+          source: https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy
+          note: 'Proxy: says the office mainly handles civil, not criminal, investigations, answering calls to prosecute more crime (Oct. 2026).'
+          checked: true
+        m2:
+          v: 1
+          source: https://jamesforny.com/priorities
+          note: Campaign lists the FAIR Business Practices Act as her tool against predatory lenders and abusive debt collectors.
+          checked: true
+        m3:
+          v: 1
+          source: https://news.bloomberglaw.com/new-york-brief/ex-ags-split-on-suing-trump
+          note: Had filed 17 suits against the second Trump administration by May 2025 and keeps filing.
+          checked: true
+        m4:
+          v: 1
+          source: https://thepostmillennial.com/pathetic-gop-challenger-komatireddy-torches-tish-james-in-ny-attorney-general-debate-over-lax-bail-laws-medicaid-fraud
+          note: Said at the debate her unit shifted to bigger targets such as organized fraud rings.
+          checked: true
+        m5:
+          v: -1
+          source: https://spectrumlocalnews.com/nys/central-ny/news/2026/09/30/ag-letitia-james-comments-on-cornell-gang-rape-case--shield-challenge-and-her-republican-challenger-saritha-komatireddy
+          note: Says the proposed civil-commitment office would go backwards to locking people away and is not the answer (Sept. 2026).
+          checked: true
+        m6:
+          v: 1
+          source: https://governor.ny.gov/news/governor-hochul-and-attorney-general-james-announce-lawsuit-against-rensselaer-county-sheriff
+          note: Her office sued the Rensselaer County sheriff to enforce the 287(g) ban.
+          checked: true
+      Saritha Komatireddy:
+        m1:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/08/komatireddys-law-and-order-ag-campaign/415186/
+          note: Would restructure on day one so at least half of roughly 700 lawyers prosecute crime.
+          checked: true
+        m3:
+          v: 0
+          source: https://www.cityandstateny.com/personality/2026/08/komatireddys-law-and-order-ag-campaign/415186/
+          note: Faults James for federal fights, but says the AG should act against anyone, including a president, who endangers New Yorkers.
+          checked: true
+        m4:
+          v: -1
+          source: https://wjla.com/news/nation-world/ny-republican-attorney-general-candidate-drops-52-count-indictment-against-letitia-james-saritha-komatireddy-president-trump-medicaid-fraud
+          note: 'Proxy: faults the drop in Medicaid fraud indictments from over 100 a year to nine; wants aggressive prosecution (Oct. 2026).'
+          checked: true
+        m5:
+          v: 1
+          source: https://wjla.com/news/nation-world/ny-republican-attorney-general-candidate-drops-52-count-indictment-against-letitia-james-saritha-komatireddy-president-trump-medicaid-fraud
+          note: 'Her proposal: an office under the AG staffed by law enforcement and doctors.'
+          checked: true
+        m7:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/08/komatireddys-law-and-order-ag-campaign/415186/
+          note: Would have the Charities Bureau audit and investigate every homeless shelter in the state.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/08/komatireddys-law-and-order-ag-campaign/415186/
+          note: Would redirect about $3 billion in opioid settlement money from drug-use supplies to treatment.
+          checked: true
+      Kathy Hochul:
+        m2:
+          v: 1
+          source: https://www.arnoldporter.com/en/perspectives/blogs/enforcement-edge/2026/01/new-york-enacts-fair-business-practices-act
+          note: Signed the act on Dec. 19, 2025, giving the AG power over unfair and abusive practices.
+          checked: true
+        m6:
+          v: 1
+          source: https://governor.ny.gov/news/governor-hochul-and-attorney-general-james-announce-lawsuit-against-rensselaer-county-sheriff
+          note: Announced the lawsuit against the Rensselaer County sheriff jointly with James.
+          checked: true
+      Bruce Blakeman:
+        m6:
+          v: -1
+          source: https://www.wamc.org/2026-08-26/blakeman-bows-to-ny-law-limiting-cooperation-with-ice
+          note: Joined the sheriffs' suit against the law; says officers will still cooperate with ICE where possible.
+          checked: true
+  us_health_medicaid:
+    title: Medicaid and health coverage
+    prompt: With federal Medicaid funding being cut, how should New York pay for health coverage and police fraud?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Cut New York's own Medicaid spending beyond the federal cuts
+    - id: m2
+      text: Use state money to keep coverage for the 450,000 people losing the Essential Plan
+    - id: m3
+      text: Adopt single-payer health care for every New Yorker (the New York Health Act)
+    - id: m4
+      text: Send a dedicated team to audit Medicaid spending and claw back fraudulent payments
+    - id: m5
+      text: Reverse the 2025 federal Medicaid and health cuts
+    - id: m6
+      text: Require the Comptroller to review large Medicaid contracts before they are awarded
+    - id: m7
+      text: Step up criminal prosecution of individual Medicaid fraudsters
+    - id: m8
+      text: Require adult Medicaid enrollees to work or volunteer to keep coverage
+    plans:
+      Kathy Hochul:
+        m1:
+          v: -1
+          source: https://nny360.com/top_stories/as-hospitals-face-uncertain-fiscal-future-candidates-for-governor-offer-different-views-on-state-s/article_4b3dc540-db1c-5d77-959a-161c8bf7b799.html
+          note: 'Proxy: warns federal cuts threaten coverage and hospitals; proposes no deeper state Medicaid cuts.'
+          checked: true
+        m2:
+          v: -1
+          source: https://nysfocus.com/2026/05/28/essential-plan-cola-social-services-snap-new-york-final-budget-hochul
+          note: Final budget had no money for those losing coverage; argues no state can afford to backfill.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.governor.ny.gov/news/video-audio-photos-rush-transcript-governor-hochul-joins-us-representative-pat-ryan-sound
+          note: 'Proxy: calls the federal cuts cataclysmic; Medicaid is a lifeline. No explicit repeal call.'
+          checked: true
+        m6:
+          v: -1
+          source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+          note: 'Proxy: she and lawmakers awarded a multibillion-dollar Medicaid contract without Comptroller review.'
+          checked: true
+      Bruce Blakeman:
+        m1:
+          v: 1
+          source: https://www.cityandstateny.com/politics/2026/07/congressional-democrats-blast-trump-blakeman-over-newly-enacted-essential-plan-cuts/414576/
+          note: Told Fox Business he would cut Medicaid in half; frames his plan as removing fraud, waste and abuse (July 2026).
+          checked: true
+        m4:
+          v: 1
+          source: https://nny360.com/top_stories/as-hospitals-face-uncertain-fiscal-future-candidates-for-governor-offer-different-views-on-state-s/article_4b3dc540-db1c-5d77-959a-161c8bf7b799.html
+          note: Pledges a DOGE-style team to review Medicaid spending and claw back every stolen cent.
+          checked: true
+      Thomas DiNapoli:
+        m6:
+          v: 1
+          source: https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+          note: Called awarding the Medicaid contract without his office's oversight a mistake.
+          checked: true
+      Joseph Hernandez:
+        m4:
+          v: 1
+          source: https://www.dailygazette.com/cjfund/political/joseph-hernandez-thomas-dinapoli-comptroller-race/article_758a5c6e-c69a-450a-9d11-5355bbbe8672.html
+          note: 'Proxy: would create a fraud strike team of forensic accountants; the source does not mention Medicaid specifically.'
+          checked: true
+        m6:
+          v: 1
+          source: https://www.wbng.com/2025/12/18/republican-comptroller-candidate-joseph-hernandez-emphasizes-upstate-investment-2026-campaign/
+          note: 'Proxy: would audit every state agency in real time, anything that touches a state dollar.'
+          checked: true
+      Letitia James:
+        m7:
+          v: 0
+          source: https://thepostmillennial.com/pathetic-gop-challenger-komatireddy-torches-tish-james-in-ny-attorney-general-debate-over-lax-bail-laws-medicaid-fraud
+          note: Defends prosecuting fraud but has shifted her unit toward big organized schemes over individual cases.
+          checked: true
+      Saritha Komatireddy:
+        m7:
+          v: 1
+          source: https://wjla.com/news/nation-world/ny-republican-attorney-general-candidate-drops-52-count-indictment-against-letitia-james-saritha-komatireddy-president-trump-medicaid-fraud
+          note: Says James did not aggressively prosecute Medicaid fraud; vows to root it out.
+          checked: true
+      Pat Ryan:
+        m5:
+          v: 1
+          source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+          note: Called for rolling back recent federal health care cuts tied to the tax law (Oct. 2026 forum).
+          checked: true
+      Lisa Kaul:
+        m3:
+          v: 1
+          source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+          note: Supports the New York Health Act and wants it passed this year.
+          checked: true
+  us_abortion:
+    title: Abortion access
+    prompt: How should abortion be governed for New Yorkers, by the state, by Congress, or both, and what protections or limits should apply?
+    instrument: election
+    mechanisms:
+    - id: m1
+      text: Protect abortion in New York's state constitution
+    - id: m2
+      text: Pass a federal law guaranteeing abortion rights nationwide
+    - id: m3
+      text: Pass a national ban or limit on abortion
+    - id: m4
+      text: Leave abortion law to each state, with no national law either way
+    - id: m5
+      text: Shield New York doctors who prescribe abortion pills by telehealth from out-of-state prosecution
+    - id: m6
+      text: Write into federal law that only the FDA, not courts, decides access to abortion pills
+    - id: m7
+      text: Keep abortion legal until fetal viability, not only early in pregnancy
+    - id: m8
+      text: Require federal health programs, including Medicaid, to cover abortion
+    plans:
+      Kathy Hochul:
+        m5:
+          v: 1
+          source: https://www.governor.ny.gov/news/protecting-reproductive-freedom-governor-hochul-signs-legislation-expand-protections-health
+          note: Signed 2025 laws strengthening the shield law, letting prescribers keep their names off pill labels.
+          checked: true
+      Bruce Blakeman:
+        m7:
+          v: 0
+          source: https://spectrumlocalnews.com/nys/rochester/politics/2025/12/11/bruce-blakeman-touts-executive-experience-in-race-for-governor
+          note: Calls himself pro-choice, but says a woman has a right to choose in the early term.
+          checked: true
+      Letitia James:
+        m1:
+          v: 1
+          source: https://newsweek.com/new-york-letitia-james-early-voting-abortion-proposition-1-1975278
+          note: Urged a yes vote on 2024's Prop 1, the amendment covering reproductive autonomy.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.kgou.org/politics-and-government/2025-09-08/attorney-general-letitia-james-takes-step-to-defend-new-yorks-abortion-shield-law
+          note: Took legal steps in Sept. 2025 to defend the shield law against Texas's suit over a New York doctor.
+          checked: true
+        m6:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-attorney-general-letitia-james-planned-parenthood-state
+          note: 'Proxy: thanked Ryan for fighting to protect mifepristone access; did not endorse his FDA bill by name (June 2026).'
+          checked: true
+      Pat Ryan:
+        m2:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/51st-anniversary-roe-v-wade-congressman-pat-ryan-condemns-far-rights
+          note: Cosponsor of the Women's Health Protection Act; urges Congress to restore Roe nationwide.
+          checked: true
+        m3:
+          v: -1
+          source: https://patryan.house.gov/media/press-releases/51st-anniversary-roe-v-wade-congressman-pat-ryan-condemns-far-rights
+          note: Criticizes House Republicans for sponsoring a national abortion ban (Jan. 2024, older source).
+          checked: true
+        m4:
+          v: -1
+          source: https://patryan.house.gov/media/press-releases/51st-anniversary-roe-v-wade-congressman-pat-ryan-condemns-far-rights
+          note: 'Proxy: seeks a federal law restoring Roe, which rules out leaving abortion to the states alone (Jan. 2024).'
+          checked: true
+        m5:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-reintroduces-his-protecting-reproductive-freedom-act-amid
+          note: His 2026 bill would protect doctors prescribing medication abortion via telehealth.
+          checked: true
+        m6:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-reintroduces-his-protecting-reproductive-freedom-act-amid
+          note: Reintroduced the Protecting Reproductive Freedom Act in May 2026, affirming FDA authority over mifepristone.
+          checked: true
+        m8:
+          v: 1
+          source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-attorney-general-letitia-james-planned-parenthood-state
+          note: Cosponsors the EACH Act, requiring federal health programs to cover abortion.
+          checked: true
+      Jackie Mary Auringer:
+        m2:
+          v: -1
+          source: https://brooklyn.news12.com/meet-jackie-auringer-the-29-year-old-gop-challenger-taking-on-rep-pat-ryan-for-ny-18
+          note: 'Proxy: Says abortion should be left up to the states, which excludes a national guarantee.'
+          checked: true
+        m3:
+          v: -1
+          source: https://brooklyn.news12.com/meet-jackie-auringer-the-29-year-old-gop-challenger-taking-on-rep-pat-ryan-for-ny-18
+          note: Would not support a federal abortion ban.
+          checked: true
+        m4:
+          v: 1
+          source: https://brooklyn.news12.com/meet-jackie-auringer-the-29-year-old-gop-challenger-taking-on-rep-pat-ryan-for-ny-18
+          note: Respects the Supreme Court's decision leaving abortion to the states.
+          checked: true
+      Robert G. Rolison:
+        m1:
+          v: -1
+          source: https://www.nysenate.gov/legislation/bills/2023/S108/amendment/A
+          note: Voted no on the 2023 Equal Rights Amendment covering reproductive autonomy.
+          unverified: true
+      Lisa Kaul:
+        m1:
+          v: 1
+          source: https://www.ballotready.org/people/lisa-kaul
+          note: 'Proxy: pledges to defend reproductive freedom and bodily autonomy; nothing on the constitution specifically.'
+          checked: true
+  il_palestinian_state:
+    title: The Palestinians, Gaza and the West Bank
+    prompt: What should Israel do about Gaza after the war and about the West Bank and the Palestinians in the long run?
+    instrument: israel
+    mechanisms:
+    - id: m1
+      text: Negotiate a two-state agreement that creates a demilitarized Palestinian state
+    - id: m2
+      text: Apply Israeli sovereignty (annexation) to Area C of the West Bank
+    - id: m3
+      text: Expand settlement construction in the West Bank
+    - id: m4
+      text: Evacuate settlements outside the main blocs as part of separating from the Palestinians
+    - id: m5
+      text: Keep Israeli troops in a security zone inside Gaza until Hamas is disarmed
+    - id: m6
+      text: Hand Gaza's civil administration to PA-linked Palestinian technocrats under international supervision
+    - id: m7
+      text: Organize 'voluntary emigration' of Gazans to other countries
+    - id: m8
+      text: Strengthen the Palestinian Authority and expand security coordination with it
+    plans:
+      likud:
+        m1:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-likud
+          note: Likud makes opposition to a Palestinian state a hallmark of its security policy.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.jns.org/israel-news/no-palestinian-state-says-netanyahu-at-celebratory-signing-of-key-e1-initiative
+          note: 'Netanyahu signed the Ma''ale Adumim umbrella deal funding E1 in Sept 2025: ''There will be no Palestinian state.'''
+          checked: true
+        m5:
+          v: 1
+          source: https://www.jpost.com/israel-news/defense-news/article-912193
+          note: IDF holds 60-75% of Gaza; Netanyahu would keep Gaza unrebuilt until Hamas fully disarms.
+          checked: true
+        m6:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-911432
+          note: Netanyahu rejects the Palestinian Authority as a postwar governing body in Gaza.
+          checked: true
+        m7:
+          v: 1
+          source: https://al-monitor.com/originals/2026/09/netanyahu-partners-renew-calls-removal-gazans-israeli-election-nears
+          note: Netanyahu supports 'voluntary emigration' from Gaza; Likud Defense Minister Katz says there is no solution without it.
+          checked: true
+      together:
+        m1:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Opposes a Palestinian state and transfer of territory; Lapid backs two states only in the long term (JNS).
+          checked: true
+        m2:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-together
+          note: Bennett envisages Israeli sovereignty over Area C with Palestinian autonomy in Areas A and B.
+          checked: true
+        m3:
+          v: 1
+          source: https://jpost.com/israel-election-2026/article-906999
+          note: 'Bennett backs E1 construction: anyone opposing a Palestinian state should support it.'
+          checked: true
+        m4:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Opposes evacuating legally built communities; would remove only outposts on private Palestinian land.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-910703
+          note: Platform keeps security zones in Gaza while dismantling and disarming Hamas.
+          checked: true
+        m6:
+          v: 0
+          source: https://www.jpost.com/israel-news/article-906838
+          note: Bennett would give the PA some role in Gaza but rejects the full Trump-plan PA return; Egypt central.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jpost.com/israel-news/article-906838
+          note: Bennett is willing to strengthen the PA in the West Bank to build goodwill with the US and Egypt.
+          checked: true
+      rzp:
+        m1:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Says its settlement policy has eliminated the idea of a Palestinian state.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Seeks full sovereignty over all of Judea and Samaria, which goes beyond Area C.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-religious-zionism-zehut
+          note: Smotrich advanced E1 and over 100 settlements, aiming to prevent a Palestinian state.
+          checked: true
+        m4:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-religious-zionism-zehut
+          note: Opposes territorial concessions; seeks full regularization of outposts without exception (Ynet).
+          checked: true
+        m5:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-religious-zionism-zehut
+          note: 'Goes further: Zehut''s Feiglin would annex Gaza and rebuild Israeli settlements there.'
+          checked: true
+        m7:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-religious-zionism-zehut
+          note: 'Goes further: Feiglin advocates removing Gaza''s Palestinian population; partner Zaga makes expulsion a coalition condition.'
+          checked: true
+      otzma:
+        m1:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-otzma-yehudit
+          note: Opposes Palestinian statehood.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Will work to apply full Israeli sovereignty, beyond Area C.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Supports new communities across Judea and Samaria and regularizing outposts.
+          checked: true
+        m4:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Opposes evacuating any communities or farms.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-otzma-yehudit
+          note: 'Goes further: Ben-Gvir advocates renewed Jewish settlement in Gaza.'
+          checked: true
+        m6:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: 'Proxy: would dismantle the Palestinian Authority and strip its assets and weapons, which rules out a PA-linked role in Gaza.'
+          checked: true
+        m7:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-otzma-yehudit
+          note: Plan with a dedicated ministry targeting about 1.86 million Gaza departures over seven years.
+          checked: true
+        m8:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-otzma-yehudit
+          note: September program calls for disarming the Palestinian Authority.
+          checked: true
+      shas:
+        m1:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: Shas opposes Palestinian statehood.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: Shas has backed settlement expansion in Judea and Samaria; not a central issue.
+          checked: true
+        m5:
+          v: 0
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Backs dismantling Hamas and demilitarizing Gaza but opposes indefinite Israeli control of the Strip.
+          checked: true
+      utj: {}
+      yb:
+        m2:
+          v: 1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: '''We support applying Israeli sovereignty to Area C.'''
+          checked: true
+        m3:
+          v: 1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Supports strengthening settlement, including construction in E1.
+          checked: true
+        m6:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: 'Proxy: would dismantle the PA and hand Gaza, after Hamas is removed, to an unspecified outside actor.'
+          checked: true
+        m8:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Liberman's Oct 4 plan dismantles the Palestinian Authority and cancels the Oslo Accords.
+          checked: true
+      raam:
+        m1:
+          v: 1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Supports a negotiated two-state solution; Abbas reaffirmed statehood in August (JNS).
+          checked: true
+        m2:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Opposes extending Israeli sovereignty over the West Bank.
+          checked: true
+        m4:
+          v: 1
+          source: https://jns.org/feature/israels-political-parties-explained-raam-and-the-joint-list
+          note: Longstanding positions include settlement evacuation; outposts to be settled in a future agreement (Ynet).
+          checked: true
+      joint:
+        m1:
+          v: 1
+          source: https://jns.org/feature/israels-political-parties-explained-raam-and-the-joint-list
+          note: Jabareen seeks a Palestinian state on the pre-1967 lines and renewed negotiations.
+          checked: true
+        m2:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Rejects sovereignty and regularization moves as institutionalized apartheid.
+          checked: true
+        m3:
+          v: -1
+          source: https://jns.org/feature/israels-political-parties-explained-raam-and-the-joint-list
+          note: Economic program ends state funding for settlement in Judea and Samaria.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: 'Goes further: all settlements must be evacuated immediately.'
+          checked: true
+        m5:
+          v: -1
+          source: https://jns.org/feature/israels-political-parties-explained-raam-and-the-joint-list
+          note: 'Proxy: demands a permanent halt to fighting in Gaza and an end to funding the war.'
+          checked: true
+      dems:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: 'Golan: ''My vision is two states for two peoples''; Kariv backs a demilitarized state in a regional deal (JPost).'
+          checked: true
+        m2:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Opposes annexation in Judea and Samaria.
+          checked: true
+        m3:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-910100
+          note: Fights settlement expansion; would stop state funding for new outposts and farms.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Golan says long-term separation could mean evicting up to 100,000 Israelis; would dismantle illegal outposts.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Replace Hamas with a Palestinian technocratic administration, international supervision and Gulf-funded reconstruction.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Seeks expanded security coordination with the Palestinian Authority.
+          checked: true
+      yashar:
+        m1:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yashar
+          note: 'Eisenkot: ''The two-state solution is a grave mistake''; no state in a first term (JPost).'
+          checked: true
+        m2:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Opposes moves endangering the Jewish majority; No. 2 Cohen rejects full annexation (Ynet). Supports strengthening blocs.
+          checked: true
+        m3:
+          v: 0
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Backs strengthening the blocs and legal new communities, but Eisenkot opposes E1 construction; a freeze or natural growth expected.
+          checked: true
+        m4:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: No plan to evacuate communities under any diplomatic arrangement.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.jpost.com/israel-news/defense-news/article-912193
+          note: Would proceed with Trump's plan, including PA-linked technocrats, police and international peacekeepers.
+          checked: true
+      reservists:
+        m1:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-reservists-and-the-new-economic-party
+          note: Both parties oppose Palestinian statehood.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Supports sovereignty through action, such as in the Jordan Valley and the blocs.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: Settle throughout the land and seize strategic terrain and farmland.
+          checked: true
+        m4:
+          v: -1
+          source: https://www.ynetnews.com/article/h1dpvu9cgl
+          note: State-approved settlements will remain.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-reservists-and-the-new-economic-party
+          note: Israeli control of Gaza's perimeter and Philadelphi Corridor with continued military freedom of action.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-reservists-and-the-new-economic-party
+          note: Proposes an agency facilitating voluntary emigration of Gazans.
+          checked: true
+  il_religion_state:
+    title: Religion and state
+    prompt: How should Israel handle Haredi military service and the place of religion in public life, such as Shabbat, marriage and conversion?
+    instrument: israel
+    mechanisms:
+    - id: m1
+      text: Cut state benefits and yeshiva stipends for Haredi men who evade the draft
+    - id: m2
+      text: Arrest and prosecute draft evaders who ignore call-up orders
+    - id: m3
+      text: Write a draft exemption for full-time yeshiva students into law
+    - id: m4
+      text: Fund only schools that teach the full core curriculum, including math and English
+    - id: m5
+      text: Let each city decide whether public transport runs on Shabbat
+    - id: m6
+      text: Create civil marriage or civil unions outside the Chief Rabbinate
+    - id: m7
+      text: Recognize conversions performed outside the Orthodox establishment
+    - id: m8
+      text: Let private bodies compete with the Rabbinate to issue official kosher certificates
+    plans:
+      likud:
+        m2:
+          v: 0
+          source: https://www.jns.org/feature/israels-political-parties-explained-likud
+          note: Netanyahu says refusers 'should go straight to prison', yet Likud ministers backed freezing evader arrests (JPost 911432).
+          checked: true
+        m3:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-likud
+          note: Likud still supports exemptions for full-time Haredi yeshiva students.
+          checked: true
+        m5:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-911432
+          note: Record on Shabbat transport points to preserving the status quo, not liberalization.
+          checked: true
+        m6:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-911432
+          note: 'Record, not platform: Likud''s record on marriage preserves existing religious arrangements rather than liberalizing.'
+          checked: true
+        m7:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-911432
+          note: Record on conversion favors preserving the existing Orthodox arrangement.
+          checked: true
+      together:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-together
+          note: 'Would withdraw yeshiva stipends, municipal-tax discounts and childcare subsidies from refusers: ''not a shekel from the state''.'
+          checked: true
+        m2:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-together
+          note: 'Bennett: ''I will not put them in prison,'' relying on financial pressure instead.'
+          checked: true
+        m3:
+          v: -1
+          source: https://jpost.com/israel-election-2026/article-906999
+          note: Bennett proposes 0% exemption from conscription.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-together
+          note: Schools must teach the full core curriculum, including mathematics and English.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-together
+          note: Proposes local decisions over Shabbat public transportation.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-910703
+          note: Supports civil marriage outside the Rabbinate; JNS describes civil-union registration with marriage-equivalent rights.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-910703
+          note: Calls for greater competition in kosher certification and recognizing international certification (JNS).
+          checked: true
+      rzp:
+        m3:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-religious-zionism-zehut
+          note: Smotrich supports exemptions for full-time yeshiva students while requiring other Haredi men to enlist.
+          checked: true
+        m4:
+          v: 0
+          source: https://www.jns.org/feature/israels-political-parties-explained-religious-zionism-zehut
+          note: Zehut would cut core requirements but deny vouchers to schools skipping core studies entirely.
+          checked: true
+        m8:
+          v: -1
+          source: https://www.jpost.com/israel-news/politics-and-diplomacy/article-902584
+          note: 'Vote, not platform: RZP MK Ohad Tal steered and defended the July 2026 law returning kashrut certification to the Rabbinate.'
+          checked: true
+      otzma:
+        m1:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-otzma-yehudit
+          note: 'Proxy: Ben-Gvir prefers encouraging Haredi enlistment through benefits rather than coercion.'
+          checked: true
+      shas:
+        m1:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Deri attacks court-ordered revocation of evaders' financial benefits.
+          checked: true
+        m2:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Deri visited jailed evaders, said Shas stood behind them, and opposes moves to criminal enforcement.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: A draft law shielding yeshiva students is its central demand.
+          checked: true
+        m4:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: Seeks funding for schools that skip the full core curriculum.
+          checked: true
+        m5:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: Resists expanded public transportation on Shabbat.
+          checked: true
+        m6:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Firmly opposes civil marriage; marriages stay with the Rabbinate.
+          checked: true
+        m7:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Keeps conversion within the Orthodox establishment and rejects Reform conversions.
+          checked: true
+        m8:
+          v: -1
+          source: https://www.jpost.com/israel-news/politics-and-diplomacy/article-902584
+          note: 'Deri on repealing the kashrut reform: ''Kashrut is not a business. Kashrut is a state responsibility.'''
+          checked: true
+      utj:
+        m1:
+          v: -1
+          source: https://www.calcalistech.com/ctechnews/article/ad4q154wc
+          note: Agudat Yisrael and Degel HaTorah seek exemptions 'without sanctions', keeping stipends and daycare subsidies.
+          checked: true
+        m2:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: Agudat Yisrael takes a hard line against targets and sanctions; all factions oppose drafting full-time students.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: A draft law shielding yeshiva students is its central demand; won't support coalition bills until passed.
+          checked: true
+        m4:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: Seeks funding for schools that skip the full core curriculum.
+          checked: true
+        m5:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Opposes Shabbat public transport and even infrastructure work on Shabbat.
+          checked: true
+        m6:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Firmly opposes civil marriage; marriages stay with the Rabbinate.
+          checked: true
+        m7:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Keeps conversion within the Orthodox establishment and rejects Reform conversions.
+          checked: true
+        m8:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Haredi parties sponsored the 2026 repeal of the private kashrut reform.
+          checked: true
+      yb:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Penalties include withdrawing state benefits and barring public-sector jobs, plus travel and voting restrictions.
+          checked: true
+        m3:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Requires Haredim to enter military or civilian service tracks.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Full core studies would be a condition for state funding.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Allows Shabbat transportation according to local circumstances.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Would introduce civil marriage and divorce.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-906447
+          note: Has repeatedly sponsored or backed legislation expanding conversion options.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Would restore competition in kosher certification.
+          checked: true
+      raam: {}
+      joint: {}
+      dems:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Would withdraw benefits from draft evaders under universal military or civilian service.
+          checked: true
+        m3:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-910100
+          note: Agenda stresses opposition to Haredi draft exemptions.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Would end special funding for Haredi school networks that fail to teach core subjects.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Public transportation on Shabbat with local discretion over services.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Seeks civil marriage and divorce, including equal marriage for same-sex couples.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Would recognize non-Orthodox conversions.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Would end the Chief Rabbinate's monopoly over kosher certification.
+          checked: true
+      yashar:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yashar
+          note: Evaders without an exemption would lose benefits.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yashar
+          note: Evaders without an exemption would face criminal sanctions.
+          checked: true
+        m3:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yashar
+          note: Only renewable one-year Torah deferments, capped at 3% of each cohort, with basic training.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yashar
+          note: 'Proposes compulsory core studies: math, English and Hebrew.'
+          checked: true
+      reservists:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-reservists-and-the-new-economic-party
+          note: 'Hendel: ''Anyone who chooses not to serve ... gets nothing from the state''; also license and travel penalties.'
+          checked: true
+        m3:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-reservists-and-the-new-economic-party
+          note: Service from 18 for all; NEP allows only up to 2,000 exam-selected scholars.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-912595
+          note: Core curriculum required in publicly funded classrooms; rejecting families pay for schooling themselves.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-reservists-and-the-new-economic-party
+          note: Open kosher certification to competing qualified rabbis under government supervision.
+          checked: true
+  il_judicial_overhaul:
+    title: Courts, judges and the Attorney General
+    prompt: How should Israel balance the powers of the courts, the Knesset, the government and the Attorney General?
+    instrument: israel
+    mechanisms:
+    - id: m1
+      text: Give elected politicians more say in choosing Supreme Court justices
+    - id: m2
+      text: Let 61 Knesset members re-pass a law the Supreme Court strikes down
+    - id: m3
+      text: Split the Attorney General's job into a government legal adviser and a separate chief prosecutor
+    - id: m4
+      text: Dismiss Attorney General Gali Baharav-Miara
+    - id: m5
+      text: Pass a Basic Law setting how Basic Laws are made and when courts may strike down laws
+    - id: m6
+      text: Limit who may petition the High Court
+    - id: m7
+      text: Bar a Knesset member under criminal indictment from forming a government
+    - id: m8
+      text: Limit prime ministers to two terms or eight years
+    plans:
+      likud:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-likud
+          note: Levin focused on weakening courts' influence over nominations; continuing this is very likely if Likud wins.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.ynetnews.com/article/jhzih8ndd
+          note: Split bill (May 2025) by MK Buskila, built on Sa'ar's framework; Sa'ar now runs on Likud's list.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-911432
+          note: Cabinet approved Levin's dismissal proposal in Aug 2025; Likud candidates still call for her dismissal.
+          checked: true
+      together:
+        m1:
+          v: -1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: Would repeal the new law governing judicial appointments.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: 'Proposes a Basic Law: Legislation setting enactment majorities and when courts may intervene.'
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-910703
+          note: Proposes an eight-year limit on a prime minister's term.
+          checked: true
+      rzp:
+        m1:
+          v: 1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: Public hearings for nominees; Zehut would abolish the selection committee and have voters elect justices.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: Knesset could re-enact struck-down laws with 61 votes, plus extra procedures and post-election reapproval.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: Split into legal adviser and chief prosecutor; AG and ministry advisers become political appointees.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-religious-zionism-zehut
+          note: September program restricts who can petition the High Court.
+          checked: true
+      otzma:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-otzma-yehudit
+          note: Supreme Court nominees would need Knesset hearings and two-thirds approval.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-otzma-yehudit
+          note: Program calls for immediately dismissing Attorney General Baharav-Miara.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-otzma-yehudit
+          note: Would restrict who can petition the High Court and define subjects beyond judicial review.
+          checked: true
+      shas:
+        m1:
+          v: 1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: 'Proxy: no detailed plan; Deri vows to reform the judiciary and return power to the people''s elected representatives.'
+          checked: true
+        m2:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: 'Proxy: backs limits on the High Court''s power to overturn legislation; mechanism unspecified.'
+          checked: true
+        m3:
+          v: 1
+          source: https://www.ynetnews.com/article/s1h0byjjwe
+          note: 'Vote, not platform: Haredi MKs backed the split bill''s preliminary reading (Oct 2025) for rabbinical-court powers.'
+          checked: true
+      utj:
+        m2:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-shas-and-united-torah-judaism
+          note: 'Proxy: backs limits on the High Court''s power to overturn legislation; mechanism unspecified.'
+          checked: true
+        m3:
+          v: 1
+          source: https://www.ynetnews.com/article/s1h0byjjwe
+          note: 'Vote, not platform: Haredi MKs backed the split bill''s preliminary reading (Oct 2025) for rabbinical-court powers.'
+          checked: true
+      yb:
+        m7:
+          v: 1
+          source: https://www.ynetnews.com/article/h1jtvqw3fl
+          note: Liberman vows to pass the 'defendant law' in three readings right after the Knesset is sworn in.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Proposes limiting prime ministers to two terms.
+          checked: true
+      joint:
+        m1:
+          v: -1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: 'Proxy: favors a ''balanced'' appointment mechanism that preserves judicial independence.'
+          checked: true
+      dems:
+        m1:
+          v: -1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Would reverse the judicial-reform legislation, including changes to judicial appointments.
+          checked: true
+        m2:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-910100
+          note: 'Proxy: seeks to preserve the judiciary as an institutional check on government.'
+          checked: true
+        m4:
+          v: -1
+          source: https://www.jpost.com/israel-election-2026/article-910100
+          note: Golan gave 'full backing' to the Attorney General against attempts to fire her.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-910100
+          note: 'Golan: anyone under indictment cannot serve as prime minister or minister.'
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Would limit prime ministers to eight years in office.
+          checked: true
+      yashar:
+        m1:
+          v: -1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: Would repeal the committee-composition law and set selection in a Basic Law.
+          checked: true
+        m2:
+          v: -1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: Opposes an override mechanism.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: Pairs a Basic Law on the judiciary with a Basic Law on legislation.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.ynetnews.com/article/hkqhy5hife
+          note: No. 2 Yoram Cohen hopes to pass the 'defendant law'; not a formal platform item.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yashar
+          note: Proposes limiting prime ministers to two terms.
+          checked: true
+      reservists:
+        m1:
+          v: 0
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: Lawmakers would set a new 'balanced' committee composition, by broad agreement (JNS).
+          checked: true
+        m2:
+          v: 0
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: Supports an override only with more than 72 MKs, not 61.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-reservists-and-the-new-economic-party
+          note: Would separate the Attorney General's advisory and prosecutorial functions.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.ynetnews.com/article/hkcjtk1cme
+          note: 'Would enact Basic Law: Legislation first, requiring at least 61 MKs for Basic Laws.'
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-reservists-and-the-new-economic-party
+          note: Would limit prime ministers to eight years or two terms.
+          checked: true
+  il_economy:
+    title: Cost of living, taxes and housing
+    prompt: What should Israel's next government do about the cost of living, taxes, housing and the budget?
+    instrument: israel
+    mechanisms:
+    - id: m1
+      text: Abolish tariffs and quotas on imported food
+    - id: m2
+      text: Break up monopolies in the food and consumer-goods sectors
+    - id: m3
+      text: Cut VAT below its current 18%
+    - id: m4
+      text: Cut income tax rates
+    - id: m5
+      text: Abolish coalition discretionary funds in the state budget
+    - id: m6
+      text: Build more state-owned and subsidized public housing
+    - id: m7
+      text: Give soldiers and reservists free land or large discounts on a first home
+    - id: m8
+      text: Expand state childcare subsidies
+    plans:
+      likud:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-likud
+          note: 'Proxy: favors cutting import barriers (EU-standards reform); Netanyahu''s 2022 plan proposed lowering, not abolishing, food import duties.'
+          checked: true
+        m4:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-911432
+          note: Platform emphasizes lower taxes; Netanyahu's 2022 plan proposed cutting income and corporate taxes. No 2026 economic platform (Calcalist).
+          checked: true
+        m7:
+          v: 1
+          source: https://www.israelnationalnews.com/news/431459
+          note: 'Government program, not platform: Netanyahu announced free land in priority areas or NIS 500,000+ home discounts for reservists (Aug 2026).'
+          checked: true
+      together:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-together
+          note: Gradually cut agricultural tariffs with direct farm subsidies; accept European standards for imports.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-910703
+          note: Break up monopolies, bar exclusive importers from adding brands, force Shufersal to sell some stores.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-together
+          note: Homeless active reservists get a million-shekel discount on a first apartment in state projects.
+          checked: true
+      rzp:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-religious-zionism-zehut
+          note: Zehut would remove import barriers and end agricultural production quotas.
+          checked: true
+        m2:
+          v: 1
+          source: https://en.globes.co.il/en/article-1001528382
+          note: Smotrich's Dec 2025 budget proposed a milk reform against monopolies and opening banking to competition; the milk reform was later shelved.
+          checked: true
+        m4:
+          v: 1
+          source: https://en.globes.co.il/en/article-1001528382
+          note: 'Smotrich: ''The third step is cutting taxes. You will pay less income tax.'' Zehut wants a flat rate (JNS).'
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-religious-zionism-zehut
+          note: RZP's approach includes childcare subsidies alongside market reforms.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.israelnationalnews.com/news/431459
+          note: 'Government program, not platform: Finance Minister Smotrich co-announced free land and NIS 500,000+ home discounts for reservists (Aug 2026).'
+          checked: true
+      otzma:
+        m7:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-otzma-yehudit
+          note: Platform promises free land for combat soldiers, without a budget. No economic platform otherwise (Calcalist).
+          checked: true
+      shas:
+        m8:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Froze coalition votes when a daycare-subsidy bill was pulled; fights for daycare funding.
+          checked: true
+      utj:
+        m8:
+          v: 1
+          source: https://www.jpost.com/israel-election-2026/article-907982
+          note: Froze coalition votes when a daycare-subsidy bill was pulled; fights for daycare funding.
+          checked: true
+      yb:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Advocates reducing regulatory barriers and expanding import competition.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Program includes challenging monopolies.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.calcalistech.com/ctechnews/article/ad4q154wc
+          note: Only party explicitly pledging to abolish coalition funds, about NIS 5 billion in 2026.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Program includes expanded subsidized housing.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yisrael-beiteinu
+          note: Childcare support tied to parental employment.
+          checked: true
+      raam: {}
+      joint:
+        m3:
+          v: 1
+          source: https://jns.org/feature/israels-political-parties-explained-raam-and-the-joint-list
+          note: Cut VAT from 18% to 10%, paired with a 30% capital-gains tax.
+          checked: true
+        m4:
+          v: 1
+          source: https://jns.org/feature/israels-political-parties-explained-raam-and-the-joint-list
+          note: Exempt earnings up to the average wage from income tax; remove corporate tax benefits.
+          checked: true
+        m6:
+          v: 1
+          source: https://jns.org/feature/israels-political-parties-explained-raam-and-the-joint-list
+          note: More government-built housing, interest-free state mortgages for first buyers, rent capped at 20% of income.
+          checked: true
+        m8:
+          v: 1
+          source: https://jns.org/feature/israels-political-parties-explained-raam-and-the-joint-list
+          note: Free education from birth through university, which goes beyond subsidies.
+          checked: true
+      dems:
+        m2:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Action against monopolies plus more products under price supervision.
+          checked: true
+        m6:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Program includes expanded public housing.
+          checked: true
+        m8:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-democrats
+          note: Program includes expanded childcare.
+          checked: true
+      yashar:
+        m1:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yashar
+          note: Would remove import barriers and Israel-specific regulation and expand parallel imports.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-yashar
+          note: Proposes reducing market monopolies.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.calcalistech.com/ctechnews/article/ad4q154wc
+          note: Cut income tax for workers, funded by enforcement against the black economy.
+          checked: true
+      reservists:
+        m1:
+          v: 1
+          source: https://www.israelnationalnews.com/news/434699
+          note: Zelekha would abolish all import tariffs and quotas and dismantle dairy, honey and egg boards.
+          checked: true
+        m2:
+          v: 1
+          source: https://www.israelnationalnews.com/news/434699
+          note: Ban exclusive manufacturer-importer deals and reinstate the law against excessive monopoly pricing.
+          checked: true
+        m3:
+          v: 1
+          source: https://www.israelnationalnews.com/news/434699
+          note: Cut VAT one point a year until it reaches 12%.
+          checked: true
+        m4:
+          v: 1
+          source: https://www.israelnationalnews.com/news/434699
+          note: Lower the top income tax rate to 40% and repeal the high-income surtax.
+          checked: true
+        m5:
+          v: 1
+          source: https://www.israelnationalnews.com/news/434699
+          note: Would eliminate coalition discretionary funds and freeze budgetary pensions.
+          checked: true
+        m7:
+          v: 1
+          source: https://www.jns.org/feature/israels-political-parties-explained-the-reservists-and-the-new-economic-party
+          note: 'Proxy: promises housing assistance, tax credits and childcare for those who serve; no land grant or home discount specified.'
+          checked: true

@@ -2487,7 +2487,7 @@ function planMatch(S, mine) {
     const rows = [];
     for (const [m, x] of Object.entries(cells)) {
       const y = mine[m];
-      if (!y || y.v == null) continue;
+      if (!y || y.v == null || x.unverified) continue;
       const agree = 1 - Math.abs(y.v - x.v) / 2;
       num += agree; n += 1;
       rows.push({ m, you: y.v, them: x.v, agree, note: x.note, source: x.source });

@@ -132,6 +132,16 @@ item's `topic` (section 9).
   statement; the order of formats follows what he actually opens and finishes (the engagement
   log), compared with what he says he prefers.
 
+## 9b. Proposals (Your solutions)
+
+An issue file (solutions.yaml) lists 6 to 8 mechanisms: single concrete actions spanning the
+realistic menu, including ones no actor proposes. Actors are coded on mechanisms like statements
+(rule 9 sourcing, proxies labeled, second coder, missing stays missing) on a 3-point scale. A
+model may read the person's free text, but a reading counts only if it quotes the text and the
+person confirms it; his own tapped answer always outranks a proposal-derived code, and a gap of
+two or more steps between them is shown, never silently resolved. Plan agreement needs two shared
+mechanisms. Ideas no mechanism covers become candidate statements, written neutrally.
+
 ## 10. Privacy
 
 Every instrument's statements, explainers and public figures' sourced positions are public and
