@@ -645,6 +645,7 @@ const BRIEF_STYLES = [["newscast", "Newscast", "About 90 seconds, story by story
 // Brief me opens a chooser first: nothing is written (and no free AI allowance is spent)
 // until you pick a category and a style and tap Write.
 function openBrief() {
+  engage({ k: "brief", d: tab });
   let beat = briefBeats.some(([id]) => id === prefs.briefBeat) ? prefs.briefBeat : "all";
   let style = prefs.briefStyle === "narrative" ? "narrative" : "newscast";
   const desc = el("p", { class: "fine", text: BRIEF_STYLES.find((x) => x[0] === style)[2] });
@@ -716,9 +717,50 @@ async function writeBrief(beat, style) {
   if (prefs.speak) speak(texts, listen);
 }
 
+// --------------------------------------------------------------- engagement log (2026-10-25)
+// Joe: "see what I actually engage with versus what I think I engage with." Private: events go to
+// /engage (KV, behind Access), batched: sent when 25 pile up or the page is hidden.
+// Event: k kind, f format (article|video|podcast|audio|doc), t title, d desk, s seconds, h host.
+const engageQ = [];
+function engage(e) {
+  engageQ.push(Object.assign({ at: new Date().toISOString() }, e));
+  if (engageQ.length >= 25) flushEngage();
+}
+function flushEngage(keepalive) {
+  if (!engageQ.length) return;
+  const events = engageQ.splice(0);
+  try { fetch("engage", { method: "POST", credentials: "same-origin", keepalive: Boolean(keepalive), headers: { "content-type": "application/json" }, body: JSON.stringify({ events }) }); } catch (e) { /* best effort */ }
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") { closeSheetTimer(); flushEngage(true); } });
+window.addEventListener("pagehide", () => flushEngage(true));
+function linkFormat(href) {
+  const u = String(href || "").toLowerCase();
+  if (/youtube\.com|youtu\.be|vimeo\.com|c-span\.org|\/video\//.test(u)) return "video";
+  if (/podcast|megaphone|simplecast|libsyn|acast|anchor\.fm|spotify\.com\/(episode|show)|apple\.com\/.*podcast|\.mp3/.test(u)) return "podcast";
+  if (/\.pdf($|\?)|courtlistener|legislation|nysenate\.gov|congress\.gov|gov\/.*(press|release)/.test(u)) return "doc";
+  return "article";
+}
+// Every outbound link click, wherever it is on the page.
+document.addEventListener("click", (ev) => {
+  const a = ev.target.closest && ev.target.closest("a[href^='http']");
+  if (!a) return;
+  let host = ""; try { host = new URL(a.href).hostname.replace(/^www\./, ""); } catch (x) { /* ignore */ }
+  engage({ k: "link", f: linkFormat(a.href), t: (a.textContent || "").trim().slice(0, 140) || $("sheet-title")?.textContent || "", h: host, d: tab });
+}, true);
+// Time spent on each sheet (stories, threads, explainers, quizzes).
+let sheetOpen = null;
+function closeSheetTimer() {
+  if (!sheetOpen) return;
+  const s = (Date.now() - sheetOpen.at) / 1000;
+  if (s >= 3) engage({ k: "sheet", t: sheetOpen.title, s, d: tab });
+  sheetOpen = null;
+}
+
 // --------------------------------------------------------------- detail sheet
 let sheetReturn = null;
 function openSheet(nodes, title) {
+  closeSheetTimer();
+  sheetOpen = { title: String(title || "").slice(0, 140), at: Date.now() };
   sheetReturn = document.activeElement;
   $("sheet-body").replaceChildren(...nodes);
   $("sheet").setAttribute("aria-label", title || "Details");
@@ -730,6 +772,7 @@ function openSheet(nodes, title) {
   $("sheet-close").focus({ preventScroll: true });
 }
 function closeSheet() {
+  closeSheetTimer();
   stopSpeech();
   $("sheet").classList.remove("up");
   $("scrim").hidden = true;
@@ -2163,6 +2206,7 @@ function explainBtn(id, back) {
 }
 function openExplain(id, back) {
   const e = data.explain[id];
+  engage({ k: "explain", t: id + " " + String((document.getElementById("sheet-title") || {}).textContent || "").slice(0, 120) });
   const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (x) { return u; } };
   openSheet([
     el("button", { class: "linkbtn", text: "‹ Back to the question", onclick: () => back() }),
@@ -2658,6 +2702,7 @@ function readingRow(k, x) {
     el("span", { class: "sgrow" }, el("button", { class: "chip", text: has ? "Key takeaways" : k === "book" ? "Reviews" : "Read it ↗", onclick: () => has || k === "book" ? openReading(k, x) : window.open(x.link, "_blank", "noopener") })));
 }
 function openReading(k, x) {
+  engage({ k: "takeaways", f: k, t: x.title });
   const nodes = [el("span", { class: "mlabel", text: k === "book" ? "Book being talked about" : "Essay · " + x.source }),
     el("h2", { id: "sheet-title", class: "stitle", text: x.title }),
     x.author ? el("p", { class: "sdesc", text: (k === "book" ? "by " : "") + x.author }) : null];
