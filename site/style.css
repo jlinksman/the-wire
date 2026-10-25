@@ -736,3 +736,5 @@ p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
 .mmap .bloc-gov { fill: #4a78c2; }
 .mmap .bloc-opp { fill: #c28a3a; }
 .mmap .bloc-arab { fill: #3aa37a; }
+.warnbox { border-left: 3px solid var(--live); padding: 6px 10px; margin: 8px 0; font-size: 0.9rem; }
+.warnbox p { margin: 4px 0; }

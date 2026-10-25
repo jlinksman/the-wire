@@ -155,30 +155,39 @@ items:
   axis: security
   dir: -1
   text: Israel should agree to a Palestinian state alongside it if security arrangements are guaranteed.
+  topic: il_palestinian_state
 - id: il02
   axis: security
   dir: 1
   text: Israel should apply sovereignty to (annex) parts of the West Bank.
+  topic: il_palestinian_state
 - id: il03
   axis: security
   dir: -1
   text: New settlement construction should be frozen.
+  topic: il_palestinian_state
 - id: il04
   axis: security
   dir: 1
-  text: Israel should keep military control of Gaza until Hamas is fully dismantled, even at a high cost.
+  text: Israel should keep military control of Gaza until Hamas is fully dismantled.
+  changed: '2026-10-25'
+  topic: il_palestinian_state
 - id: il05
   axis: security
   dir: -1
   text: The Palestinian Authority should have a role in governing Gaza after the war.
+  topic: il_palestinian_state
 - id: il06
   axis: security
   dir: 1
-  text: Israel should strike Iran's nuclear program again if diplomacy fails, even without US backing.
+  text: Israel should strike Iran's nuclear program again even without US backing.
+  changed: '2026-10-25'
+  topic: il_iran
 - id: il07
   axis: courts
   dir: -1
   text: A state commission of inquiry should investigate the failures of October 7.
+  topic: il_judicial_overhaul
 - id: il08
   axis: security
   dir: 1
@@ -187,62 +196,108 @@ items:
   axis: security
   dir: -1
   text: Normalizing relations with Saudi Arabia is worth concessions toward Palestinian statehood.
+  topic: il_palestinian_state
 - id: il10
   axis: security
   dir: -1
   text: Arab parties should be legitimate partners in a governing coalition.
+  topic: israel_parties_2026
 - id: il11
   axis: religion
   dir: -1
   text: Haredi yeshiva students should be drafted like everyone else, with sanctions for those who refuse.
+  topic: il_haredi_draft
 - id: il12
   axis: religion
   dir: -1
   text: Public transportation should run on Shabbat.
+  topic: il_religion_state
 - id: il13
   axis: religion
   dir: -1
   text: Israel should allow civil marriage, including between people of different religions.
+  topic: il_religion_state
 - id: il14
   axis: religion
   dir: 1
   text: State funding for yeshivas should continue even for students who don't serve in the army.
+  topic: il_haredi_draft
 - id: il15
   axis: religion
   dir: 1
   text: The Chief Rabbinate should keep its control over conversion and kashrut.
+  topic: il_religion_state
 - id: il16
   axis: religion
   dir: -1
   text: Same-sex couples should be able to marry or register as couples in Israel.
+  topic: il_religion_state
 - id: il17
   axis: religion
   dir: -1
   text: Haredi schools that get state funding should have to teach core subjects like math and English.
+  topic: il_haredi_draft
 - id: il18
   axis: courts
   dir: 1
   text: The government should have more control over choosing judges.
+  topic: il_judicial_overhaul
 - id: il19
   axis: courts
   dir: -1
   text: The Supreme Court should be able to strike down laws passed by the Knesset.
+  topic: il_judicial_overhaul
 - id: il20
   axis: courts
   dir: 1
   text: The government should be able to choose its own legal adviser instead of an independent Attorney General.
+  topic: il_judicial_overhaul
 - id: il21
   axis: courts
   dir: -1
   text: A prime minister under criminal indictment should not serve.
+  topic: il_judicial_overhaul
 - id: il23
   axis: econ
   dir: -1
-  text: The state should expand subsidized childcare and public housing even if taxes rise.
+  text: The state should expand subsidized childcare, even if taxes rise.
+  changed: '2026-10-25'
+  topic: il_economy
 - id: il24
   axis: econ
   dir: -1
   text: Israel's big food companies and banks need much tougher regulation to bring down the cost of living.
+  topic: il_economy
+- id: il25
+  axis: religion
+  dir: 1
+  text: Jewish law should play a larger role in Israel's laws.
+  added: '2026-10-25'
+  topic: il_religion_state
+- id: il26
+  axis: religion
+  dir: 1
+  text: Shops and businesses in Jewish cities should stay closed on Shabbat.
+  added: '2026-10-25'
+  topic: il_religion_state
+- id: il27
+  axis: econ
+  dir: 1
+  text: Israel should cut taxes and government spending.
+  added: '2026-10-25'
+  topic: il_economy
+- id: il28
+  axis: econ
+  dir: 1
+  text: Israel should privatize more state-owned companies and services.
+  added: '2026-10-25'
+  topic: il_economy
+- id: il29
+  axis: econ
+  dir: -1
+  text: Israel's minimum wage should be raised substantially.
+  added: '2026-10-25'
+  topic: il_economy
 stances:
   likud:
     il01:

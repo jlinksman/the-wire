@@ -154,6 +154,11 @@ function bestLine(c, me) {
 }
 const label = (v) => (SCALE.find(([k]) => k === v) || [0, "–"])[1];
 
+function softWarning() {
+  const given = Object.values(S.answers || {});
+  const soft = given.filter((a) => a.skip || a.v === 0).length;
+  return given.length && soft / given.length > 1 / 3 ? el("p", { class: "card fine", text: "More than a third of your answers are Neutral or Skip (" + soft + " of " + given.length + "), so these matches rest on fewer real differences." }) : null;
+}
 function results() {
   const byId = Object.fromEntries(D.items.map((it) => [it.id, it]));
   const me = lean();
@@ -165,7 +170,7 @@ function results() {
     if (top) plan.push({ r, c: top.c, pct: top.m.pct, line: bestLine(top.c, me) });
     return el("details", { class: "card race" },
       el("summary", {}, el("b", { text: r.office + (r.district ? " · " + r.district : "") }), el("br"),
-        el("span", { class: "fine", text: ms.length ? ms.map((x) => x.c.name.split(" ").slice(-1)[0] + " " + (x.m.n >= 2 ? x.m.pct + "%" : "—")).join(" · ") : "Not enough answers on this race" })),
+        el("span", { class: "fine", text: ms.length ? ms.map((x) => x.c.name.split(" ").slice(-1)[0] + " " + (x.m.n >= 2 ? x.m.pct + "%" : "—")).join(" · ") + (ms.filter((x) => x.m.n >= 2).length > 1 && new Set(ms.filter((x) => x.m.n >= 2).map((x) => x.m.pct)).size < ms.filter((x) => x.m.n >= 2).length ? " (tied)" : "") : "Not enough answers on this race" })),
       ...r.candidates.map((c) => {
         const m = match(c.name), best = bestLine(c, me);
         return el("div", {},
@@ -182,6 +187,9 @@ function results() {
   show(
     el("h1", { text: "Your ballot match" }),
     el("p", { class: "fine", text: "How closely your answers match each candidate's public positions, weighted by how much each statement matters to you. A candidate needs at least two statements in common to be scored. It's one input for your own decision, not a recommendation." }),
+    softWarning(),
+    el("details", { class: "card" }, el("summary", {}, el("b", { text: "How this works" })),
+      el("p", { class: "fine", text: "Statements are shuffled and unlabeled. Each candidate's position is coded only from a source (platform, votes, their own statements, or reliable reporting), checked by a second coder, and linked; a missing position stays missing. Agreement = 1 − weighted distance ÷ largest possible distance (city-block), over the statements you both have a position on, weighted by how much each matters to you. Neutral counts as a middle answer; Skip is left out. Ties are shown as ties. It measures agreement on these statements only, positions can shift, and it isn't advice." })),
     ...blocks,
     plan.length ? el("h3", { text: "Your notes for the booth" }) : null,
     plan.length ? el("ul", { class: "plan" }, ...plan.map((p) => el("li", {}, el("b", { text: p.r.office + ": " }), "closest match " + p.c.name + " (" + p.pct + "%)" + (p.line ? "; of the lines, closest to " + p.line : "")))) : null,

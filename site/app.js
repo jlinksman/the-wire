@@ -2059,13 +2059,15 @@ async function openMatch(g) {
   const nodes = [
     el("h2", { id: "sheet-title", class: "stitle", text: "Your election check" }),
     el("p", { class: "sdesc", text: "How closely your answers match each candidate's stated positions, weighted by how much each statement matters to you. Only statements a candidate has a sourced position on count for them; a candidate with fewer than two isn't scored. Agreement on stated positions is one input, not a recommendation." }),
-  ];
+    answerWarnings(g.quiz.items, a),
+    el("button", { class: "linkbtn", text: "How this works ›", onclick: () => methodSheet("the election check", { statements: g.quiz.items.length, actor: "candidate", min: 2 }, () => openMatch(g)) }),
+  ].filter(Boolean);
   for (const r of g.races || []) {
     const ms = (r.candidates || []).map((c) => ({ c, m: matchFor(g, c.name, a) })).filter((x) => x.m.n > 0);
     if (!ms.length) continue;
     nodes.push(el("section", { class: "ssec" }, el("h3", { class: "sh3", text: r.office + (r.district ? " · " + r.district : "") }),
       ...ms.map(({ c, m }) => el("details", { class: "race" },
-        el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: c.name }), m.n >= 2 ? " · " + m.pct + "% agreement" : " · too few stated positions"),
+        el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: c.name }), m.n >= 2 ? " · " + m.pct + "% agreement" + (ms.some((y) => y !== ms.find((z) => z.c === c) && y.m.n >= 2 && y.m.pct === m.pct) ? " · tied" : "") : " · too few stated positions"),
           el("span", { class: "rsub", text: m.n + " statement" + (m.n === 1 ? "" : "s") + " in common" }), el("span", { class: "chev", text: "▾" })),
         el("ul", { class: "cpos" }, ...m.rows.map((x) => el("li", {}, el("b", { text: x.agree >= 0.75 ? "Agree · " : x.agree <= 0.25 ? "Differ · " : "Partly · " }),
           "“" + text[x.q] + "” You: " + label(x.you) + (x.w === 3 ? " (matters a lot)" : "") + ". " + c.name.split(" ").slice(-1)[0] + ": " + label(x.them) + (x.note ? " (" + x.note + ")" : "") + " ",
@@ -2222,6 +2224,35 @@ function openExplain(id, back) {
   ].filter(Boolean), "What's this about?");
 }
 
+// Results-page standards (QUIZZES.md rules 19–25, 2026-10-25): warnings when answers are thin,
+// ties shown as ties, and a "How this works" page with the method, version and limits.
+function answerWarnings(items, answers) {
+  const ids = items.map((it) => it.id);
+  const given = ids.filter((id) => answers[id]);
+  const soft = given.filter((id) => answers[id].skip || answers[id].v === 0).length;
+  const out = [];
+  if (given.length && soft / given.length > 1 / 3) out.push("More than a third of your answers are Neutral or Skip (" + soft + " of " + given.length + "), so these matches rest on fewer real differences. Answering more of them firmly, where you have a view, makes the result more meaningful.");
+  if (given.length < ids.length) out.push((ids.length - given.length) + " statement" + (ids.length - given.length === 1 ? " is" : "s are") + " still unanswered.");
+  return out.length ? el("div", { class: "warnbox" }, ...out.map((t) => el("p", { text: t }))) : null;
+}
+const tieTag = (list, i, key) => (list.some((x, j) => j !== i && x[key] === list[i][key]) ? " · tied" : "");
+function methodSheet(name, opts, back) {
+  openSheet([
+    back ? el("button", { class: "linkbtn", text: "‹ Back to results", onclick: back }) : null,
+    el("h2", { id: "sheet-title", class: "stitle", text: "How this works: " + name }),
+    el("ul", { class: "cpos" },
+      el("li", { text: opts.statements + " statements, shuffled, with what each measures hidden until the results. Each was written to be one concrete proposal in neutral words, and checked for joined claims, conditions and negations." }),
+      el("li", { text: "You answer on five points (strongly agree to strongly disagree) or skip, and set how much each statement matters (1 to 3). Neutral counts as a middle position; a skip is left out." }),
+      el("li", { text: "Each " + opts.actor + "'s position on a statement is coded only from a source (platform, votes, their own statements, or reliable reporting), never from party or bloc. A first coder codes it with a citation; a second checks it independently, and disagreements are settled with evidence. A related vote standing in for the exact question counts at most halfway, with a note. A missing position stays missing." }),
+      el("li", { text: "Agreement = 1 − (weighted distance ÷ largest possible weighted distance), using city-block distance over the statements where both of you have a position. That's the method Vote Compass and the research recommend; it doesn't reward middle answers the way Euclidean distance does." }),
+      el("li", { text: "A " + opts.actor + " is ranked only with at least " + opts.min + " statements in common. Equal scores are shown as tied, never ordered alphabetically. Every " + opts.actor + " is listed, not just a top pick." }),
+      opts.map ? el("li", { text: opts.map }) : null),
+    el("h3", { class: "sh3", text: "Limits" }),
+    el("p", { text: "It measures agreement on these statements only: they cover part of what the race is about, positions can shift during a campaign, and a match is one input for your own decision, not advice." }),
+    el("p", { class: "fine", text: "Standard: QUIZZES.md in the repository, based on Wahl-O-Mat, StemWijzer, Kieskompas, Vote Compass, smartvote and the research on them. Version " + (opts.version || "2026-10-25") + "." }),
+  ].filter(Boolean), "How this works");
+}
+
 // --------------------------------------------------------------- Israel match (2026-10-24)
 // Joe: "a questionnaire to help determine my political leanings in the Israeli electorate."
 // 24 blind statements on four scales (security, religion and state, the courts, the economy),
@@ -2238,16 +2269,22 @@ function ilEntry(Q) {
   const box = el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: B.title }));
   if (!mine.done_at) box.append(el("p", { class: "rjob", text: n + " statements, about " + Math.ceil(n / 4) + " minutes. Which of the " + B.lists.length + " lists your views sit closest to; what each statement measures is shown only afterwards." }),
     el("button", { class: "sbtn primary wide", text: answered ? "Continue (" + answered + " of " + n + ")" : "Start", onclick: () => openIlQuiz() }));
-  else box.append(el("p", { class: "rjob", text: "Done " + fmtDate.format(new Date(Date.parse(mine.done_at))) + "." }),
+  else {
+    const fresh = B.items.filter((it) => !mine.answers[it.id]).map((it) => it.id);
+    const stale = B.items.filter((it) => it.changed && mine.answers[it.id] && Date.parse(mine.updated || mine.done_at) < Date.parse(it.changed + "T04:00:00Z")).map((it) => it.id);
+    const ids = [...new Set([...fresh, ...stale])];
+    if (ids.length) box.append(el("button", { class: "sbtn primary wide", text: "Answer " + ids.length + " new or reworded statement" + (ids.length === 1 ? "" : "s"), onclick: () => openIlQuiz(ids) }));
+  }
+  if (mine.done_at) box.append(el("p", { class: "rjob", text: "Done " + fmtDate.format(new Date(Date.parse(mine.done_at))) + "." }),
     el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openIlMatch() }),
       el("button", { class: "sbtn", text: "Retake", onclick: async () => { store.set("wire.quizSeed." + IL_ID, ""); await saveQuiz({ kind: "clear", id: IL_ID }); openIlQuiz(); } })));
   return box;
 }
-async function openIlQuiz() {
+async function openIlQuiz(only) {
   const Q = await loadQuiz(true);
   const B = data.il_quiz;
   runStatements({
-    title: B.title, items: B.items, seedKey: "wire.quizSeed." + IL_ID, prior: ((Q.elections || {})[IL_ID] || {}).answers || {},
+    title: B.title, items: only ? B.items.filter((it) => only.includes(it.id)) : B.items, redo: Boolean(only), seedKey: "wire.quizSeed." + IL_ID, prior: ((Q.elections || {})[IL_ID] || {}).answers || {},
     save: (partial) => saveQuiz({ kind: "election", id: IL_ID, answers: partial }),
     later: () => { closeSheet(); render(); },
     done: async () => {
@@ -2307,7 +2344,7 @@ async function openIlMatch() {
   const polls = data.il_polls && data.il_polls.latest ? data.il_polls.latest : [];
   const seatRange = (l) => { const v = polls.map((p) => p.seats[l.poll_name]).filter((x) => x != null); return v.length ? (Math.min(...v) === Math.max(...v) ? Math.min(...v) : Math.min(...v) + "–" + Math.max(...v)) + " seats in the latest polls" : ""; };
   const listRow = (m) => el("details", { class: "race" },
-    el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: m.l.name }), " · " + m.pct + "% agreement"),
+    el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: m.l.name }), " · " + m.pct + "% agreement" + (scored.some((y) => y !== m && y.pct === m.pct) ? " · tied" : "")),
       el("span", { class: "rsub", text: [m.l.leader, B.bloc_names[m.l.bloc], seatRange(m.l), m.n + " statements in common"].filter(Boolean).join(" · ") }), el("span", { class: "chev", text: "▾" })),
     m.l.what ? el("p", { class: "rjob", text: m.l.what }) : null,
     el("ul", { class: "cpos" }, ...m.rows.map((x) => el("li", {}, el("b", { text: x.agree >= 0.75 ? "Agree · " : x.agree <= 0.25 ? "Differ · " : "Partly · " }),
@@ -2315,6 +2352,8 @@ async function openIlMatch() {
   const nodes = [
     el("h2", { id: "sheet-title", class: "stitle", text: "Your Israel match" }),
     el("p", { class: "sdesc", text: "How closely your answers match each list's stated positions, weighted by how much each statement matters to you. Lists are coded only where a source shows their position, and a list needs three statements in common to be ranked. Agreement on stated positions is a guide to where you sit, not a verdict." }),
+    answerWarnings(B.items, a),
+    el("button", { class: "linkbtn", text: "How this works ›", onclick: () => methodSheet("the Israel match", { statements: B.items.length, actor: "list", min: 3, map: "The map places you and each list on security (Israel's main left-right divide, per expert surveys) and religion and state, each built from several statements; the courts and the economy are shown separately because in Israel they don't line up with left and right. Approximate.", version: B.version }, () => openIlMatch()) }),
     scored.length ? el("h3", { class: "sh3", text: "Closest lists" }) : null,
     ...scored.map(listRow),
     el("h3", { class: "sh3", text: "By bloc" }),
@@ -2328,6 +2367,145 @@ async function openIlMatch() {
     el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Close", onclick: closeSheet })),
   ];
   openSheet(nodes.filter(Boolean), "Your Israel match");
+}
+
+// --------------------------------------------------------------- Get up to speed (2026-10-25)
+// Joe: "learn how I like to learn … see what I actually engage with versus what I think I engage
+// with, then help me get up to speed on issues I don't yet have a full grasp of."
+// learn.yaml (data.learn): topics, each with curated resources in four formats. A topic surfaces
+// when Joe answers a statement on it Neutral or Skip, or opens its explainer. Resources are
+// ordered by the formats he actually opens (the engagement log), or by what he says he prefers
+// until there's enough of a log. Statements carry `topic` in their questionnaire files.
+const FORMATS = [["video", "Videos", "▶"], ["article", "Articles", "¶"], ["podcast", "Podcasts", "🎧"], ["deep", "Deep dives", "📚"]];
+let engageData = null;
+async function loadEngage(force) {
+  if (engageData && !force) return engageData;
+  try { const r = await fetch("engage", { credentials: "same-origin" }); engageData = r.ok ? await r.json() : { events: [] }; } catch (e) { engageData = { events: [] }; }
+  return engageData;
+}
+function allQuizItems() {
+  const out = [];
+  const g = data.voter_guide;
+  if (g && g.quiz) for (const it of g.quiz.items) out.push({ ...it, quiz: "election", answers: () => (((myQuiz || {}).elections || {})[g.id] || {}).answers || {} });
+  if (data.il_quiz) for (const it of data.il_quiz.items) out.push({ ...it, quiz: "israel", answers: () => (((myQuiz || {}).elections || {})[IL_ID] || {}).answers || {} });
+  if (data.values_bank) for (const it of data.values_bank.items) out.push({ ...it, quiz: "values", answers: () => ((myQuiz || {}).values || {}).answers || {} });
+  return out.filter((it) => it.topic);
+}
+// Which topics need attention, and why.
+function flaggedTopics(E) {
+  const flags = {};
+  const add = (t, why) => { (flags[t] = flags[t] || new Set()).add(why); };
+  for (const it of allQuizItems()) {
+    const a = it.answers()[it.id];
+    if (a && a.skip) add(it.topic, "skipped");
+    else if (a && a.v === 0) add(it.topic, "answered Neutral");
+  }
+  const byId = Object.fromEntries(allQuizItems().map((it) => [it.id, it]));
+  for (const e of (E && E.events) || []) if (e.k === "explain") { const id = String(e.t || "").split(" ")[0]; if (byId[id]) add(byId[id].topic, "opened the explainer"); }
+  return flags;
+}
+// Formats by what he actually opens: link clicks in the last 60 days, by format.
+function actualFormats(E) {
+  const cut = Date.now() - 60 * 86400e3;
+  const n = { video: 0, article: 0, podcast: 0, doc: 0 };
+  let sheetSec = 0, sheets = 0;
+  for (const e of (E && E.events) || []) {
+    if (Date.parse(e.at) < cut) continue;
+    if (e.k === "link" && n[e.f] != null) n[e.f] += 1;
+    if (e.k === "sheet" && e.s) { sheetSec += e.s; sheets += 1; }
+  }
+  const links = n.video + n.article + n.podcast + n.doc;
+  return { n, links, avgSheet: sheets ? Math.round(sheetSec / sheets) : null, sheets };
+}
+function formatOrder(E) {
+  const A = actualFormats(E);
+  if (A.links >= 15) {
+    const deep = A.n.doc;
+    return [["video", A.n.video], ["article", A.n.article], ["podcast", A.n.podcast], ["deep", deep]].sort((a, b) => b[1] - a[1]).map(([f]) => f);
+  }
+  const st = (E && E.stated) || {};
+  const rank = { often: 0, sometimes: 1, rarely: 2 };
+  return FORMATS.map(([f]) => f).sort((a, b) => (rank[st[a]] ?? 1) - (rank[st[b]] ?? 1));
+}
+function learnEntry() {
+  if (!data.learn) return null;
+  const box = el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Get up to speed" }),
+    el("p", { class: "rjob", text: "Topics from your questionnaires you're less sure about, with a short video, an article, a podcast and a deep dive on each, in the formats you actually use." }),
+    el("button", { class: "sbtn primary wide", text: "Open", onclick: () => openLearn() }));
+  return box;
+}
+async function openLearn() {
+  const [E] = await Promise.all([loadEngage(true), loadQuiz(true)]);
+  const L = data.learn.topics;
+  const flags = flaggedTopics(E);
+  const flagged = Object.keys(flags).filter((t) => L[t]).sort((a, b) => flags[b].size - flags[a].size);
+  const rest = Object.keys(L).filter((t) => !flags[t]);
+  const A = actualFormats(E);
+  const st = E.stated || null;
+  const topicRow = (t) => el("li", {}, el("button", { class: "doclink", text: L[t].title, onclick: () => openTopic(t) }),
+    flags[t] ? el("span", { class: "asrc", text: " · you " + [...flags[t]].join(", ") }) : null);
+  const label = { video: "videos", article: "articles", podcast: "podcasts", doc: "documents" };
+  const actualLine = A.links ? "In the last 60 days you opened " + Object.entries(A.n).filter(([, v]) => v).map(([f, v]) => v + " " + label[f]).join(", ") + (A.avgSheet ? "; you spend about " + A.avgSheet + " seconds on a story or explainer." : ".") : "Nothing logged yet: the log started Oct 25 and fills in as you read.";
+  const statedLine = st ? "You said: " + FORMATS.map(([f, name]) => name.toLowerCase() + " " + (st[f] || "—")).join(", ") + (st.minutes ? "; usually " + st.minutes + " to get the gist." : ".") : null;
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "Get up to speed" }),
+    el("h3", { class: "sh3", text: "How you learn" }),
+    statedLine ? el("p", { text: statedLine }) : el("p", { class: "fine", text: "Tell The Wire how you like to learn; it compares that with what you actually open." }),
+    el("p", { text: actualLine }),
+    A.links >= 15 && st ? el("p", { class: "fine", text: "Resources are ordered by what you actually open." }) : el("p", { class: "fine", text: "Until there are 15 or more opens to go on, resources are ordered by what you say you prefer." }),
+    el("button", { class: "sbtn", text: st ? "Change how you like to learn" : "How do you like to learn?", onclick: () => openStated(E) }),
+    flagged.length ? el("h3", { class: "sh3", text: "Worth getting up to speed on · " + flagged.length }) : null,
+    flagged.length ? el("ul", { class: "admin" }, ...flagged.map(topicRow)) : el("p", { class: "fine", text: "No topics flagged yet. They appear when you answer a statement Neutral or Skip, or open its explainer." }),
+    el("h3", { class: "sh3", text: "All topics" }),
+    el("ul", { class: "admin" }, ...rest.map(topicRow)),
+  ].filter(Boolean), "Get up to speed");
+}
+function openStated(E) {
+  const st = Object.assign({}, E.stated || {});
+  const rows = FORMATS.map(([f, name, icon]) => el("div", { class: "vbar" }, el("div", { class: "vbl" }, el("b", { text: icon + " " + name })),
+    el("div", { class: "wrow" }, ...["often", "sometimes", "rarely"].map((v) => { const b = el("button", { class: "chip" + (st[f] === v ? " on" : ""), text: v });
+      b.onclick = () => { st[f] = v; [...b.parentNode.children].forEach((c) => c.classList.toggle("on", c === b)); }; return b; }))));
+  const mins = el("div", { class: "wrow" }, ...["5 minutes", "20 minutes", "an hour or more"].map((v) => { const b = el("button", { class: "chip" + (st.minutes === v ? " on" : ""), text: v });
+    b.onclick = () => { st.minutes = v; [...mins.children].forEach((c) => c.classList.toggle("on", c === b)); }; return b; }));
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Back", onclick: () => openLearn() }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "How do you like to learn?" }),
+    el("p", { class: "sdesc", text: "When you want to understand something new, how often would you reach for each of these?" }),
+    ...rows,
+    el("p", { class: "fine", text: "How long would you usually give it, to get the gist?" }), mins,
+    el("button", { class: "sbtn primary wide", text: "Save", onclick: async () => {
+      try { await fetch("engage", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ stated: st }) }); } catch (e) { /* best effort */ }
+      await loadEngage(true); openLearn(); } }),
+  ], "How do you like to learn?");
+}
+async function openTopic(t) {
+  const E = await loadEngage();
+  const T = data.learn.topics[t];
+  const order = formatOrder(E);
+  const res = (T.resources || []).slice().sort((a, b) => order.indexOf(a.format) - order.indexOf(b.format));
+  const items = allQuizItems().filter((it) => it.topic === t);
+  const icon = Object.fromEntries(FORMATS.map(([f, , i]) => [f, i]));
+  const reanswer = () => {
+    const el1 = items.filter((it) => it.quiz === "election").map((it) => it.id);
+    const il = items.filter((it) => it.quiz === "israel").map((it) => it.id);
+    if (il.length) openIlQuiz(il); else if (el1.length && data.voter_guide) openQuiz(data.voter_guide, el1);
+  };
+  engage({ k: "story", t: "learn:" + t });
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ All topics", onclick: () => openLearn() }),
+    el("span", { class: "mlabel", text: "Get up to speed" }),
+    el("h2", { id: "sheet-title", class: "stitle", text: T.title }),
+    T.intro ? el("p", { class: "sdesc", text: T.intro }) : null,
+    items.length ? el("h3", { class: "sh3", text: "Start here: the statements on this" }) : null,
+    items.length ? el("ul", { class: "admin" }, ...items.map((it) => el("li", {}, (data.explain || {})[it.id] ? el("button", { class: "doclink", text: it.text, onclick: () => openExplain(it.id, () => openTopic(t)) }) : el("span", { text: it.text })))) : null,
+    el("h3", { class: "sh3", text: "Go further" }),
+    el("ul", { class: "suggest" }, ...res.map((r) => el("li", {},
+      el("span", { class: "asrc", text: (icon[r.format] || "") + " " + (r.format === "deep" ? "Deep dive" : r.format[0].toUpperCase() + r.format.slice(1)) + " · " + r.outlet + (r.minutes ? " · " + r.minutes + " min" : "") + (r.perspective ? " · " + r.perspective : "") + (r.paywall ? " · paywall" : "") + (r.date ? " · " + r.date : "") }),
+      link(r.url, r.title, "doclink"),
+      r.why ? el("span", { class: "rdline", text: r.why }) : null))),
+    items.some((it) => it.quiz !== "values") ? el("button", { class: "sbtn wide", text: "Re-answer these statements", onclick: reanswer }) : null,
+    el("p", { class: "fine", text: "Resources picked for quality and balance from reputable outlets; perspective labels are The Wire's." }),
+  ].filter(Boolean), T.title);
 }
 
 // --------------------------------------------------------------- the starting questionnaire
@@ -2409,7 +2587,7 @@ function runStatements(cfg) {
   store.set(cfg.seedKey, seed);
   const order = shuffled(cfg.items, seed);
   const answers = Object.assign({}, cfg.prior);
-  let i = order.findIndex((it) => !answers[it.id]);
+  let i = cfg.redo ? 0 : order.findIndex((it) => !answers[it.id]);
   if (i < 0) i = order.length;
   const render1 = () => {
     if (i >= order.length) { cfg.done(answers); return; }
@@ -2547,6 +2725,7 @@ async function openStand() {
     heavy.length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "What you said matters a lot" }), el("ul", { class: "cpos" }, ...heavy.map((it) => el("li", { text: "“" + it.text + "” " + (SCALE.find(([k]) => k === ans[it.id].v) || [0, ""])[1] + "." })))) : null,
     weights ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Your scorecard's weights" }),
       el("p", { class: "fine", text: "From how much the statements tied to each criterion matter to you. Shown only: your scorecard keeps its weights until you change them." }), weights) : null,
+    selfLabels(Q),
     el("button", { class: "sbtn primary wide", text: "Undercurrents", onclick: () => openLens(sc, past) }),
     el("button", { class: "sbtn wide", text: "Meme map (for fun)", onclick: () => openMemes() }),
     el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Every statement and how it counted" }), el("span", { class: "chev", text: "▾" })),
@@ -2556,6 +2735,30 @@ async function openStand() {
     el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Close", onclick: closeSheet })),
   ];
   openSheet(nodes.filter(Boolean), "Where you stand");
+}
+
+// Your own labels (2026-10-25): established instruments rather than home-made ones (QUIZZES.md
+// rule 19): the American National Election Studies' 7-point self-placement, with its "haven't
+// thought much about this" option, and Pew's 2026 Political Typology (taken on Pew's own site).
+const ANES = [[-3, "Extremely liberal"], [-2, "Liberal"], [-1, "Slightly liberal"], [0, "Moderate; middle of the road"], [1, "Slightly conservative"], [2, "Conservative"], [3, "Extremely conservative"], ["unsure", "Haven't thought much about this"]];
+const PEW_GROUPS = ["No Apologies Right", "Faith First Conservatives", "Unconventional Right", "Pragmatic and Polite Right", "Tuned-Out Middle", "Order and Opportunity Left", "Left-Out Left", "Loyal Liberals", "Leftward Progressives"];
+const PEW_QUIZ = "https://www.pewresearch.org/politics/quiz/political-typology/";
+function selfLabels(Q) {
+  const me = (Q && Q.self) || {};
+  const box = el("section", { class: "ssec" });
+  const draw = () => {
+    box.replaceChildren(
+      el("h3", { class: "sh3", text: "Your own labels" }),
+      el("p", { class: "fine", text: "Two established measures, to set beside the map above. The first is the American National Election Studies' self-placement question, asked of voters since 1972: “Where would you place yourself on this scale?”" }),
+      el("div", { class: "qscale" }, ...ANES.map(([v, label]) => el("button", { class: "qopt" + (me.anes === v ? " on" : ""), text: label,
+        onclick: async () => { me.anes = v; draw(); await saveQuiz({ kind: "self", anes: v }); } }))),
+      el("p", { class: "fine" }, "The second is Pew Research Center's 2026 Political Typology, which sorts Americans into nine groups from their values. Take it on ", link(PEW_QUIZ, "Pew's site"), " (about 5 minutes; Pew keeps the answers), then record your group here:"),
+      el("select", { class: "tin", onchange: async (e) => { me.pew = e.target.value; await saveQuiz({ kind: "self", pew: e.target.value }); draw(); } },
+        el("option", { value: "", text: me.pew ? "Change your group…" : "Choose your group…" }), ...PEW_GROUPS.map((g) => el("option", { value: g, text: g, selected: me.pew === g ? true : null }))),
+      me.pew ? el("p", { class: "rjob" }, el("b", { text: "Pew typology: " }), me.pew + " ", link("https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/", "what that group believes ↗")) : null);
+  };
+  draw();
+  return box;
 }
 
 // --------------------------------------------------------------- Undercurrents (frameworks from Joshua Citarella, cited)
@@ -2666,6 +2869,7 @@ function questionnairesSection(Q) {
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Answer now", onclick: () => openPulse() }), lp ? el("button", { class: "sbtn", text: "What it changed", onclick: () => pulseEffect() }) : null)),
     valuesEntry(Q),
     ilEntry(Q),
+    learnEntry(),
     el("div", { class: "rbox quizbox memeentry" }, el("span", { class: "mlabel", text: "For fun" }),
       el("p", { class: "rjob", text: (Q.memes || {}).done_at ? "Your meme map is ready." : "Twelve rounds of picture cards from online political subcultures. Pick on instinct; get placed among them." }),
       el("button", { class: "sbtn primary wide", text: (Q.memes || {}).done_at ? "See my meme map" : "Start the meme map", onclick: () => ((Q.memes || {}).done_at ? openMemeMap() : openMemes()) })),

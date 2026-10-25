@@ -286,50 +286,50 @@ elections:
     quiz:
       title: "Election check"
       items:
-        - {id: q01, axis: econ, dir: -1, text: "New York should replace Central Hudson with a public, nonprofit power authority."}
-        - {id: q02, text: "A utility rate increase should never be decided without a public hearing in the region that pays it."}
-        - {id: q03, axis: econ, dir: -1, text: "New York's Scaffold Law, which holds owners and contractors fully liable for workers' falls, should stay as it is."}
+        - {id: q01, topic: ny_utilities, axis: econ, dir: -1, text: "New York should replace Central Hudson with a public, nonprofit power authority."}
+        - {id: q02, topic: ny_utilities, changed: "2026-10-25", text: Every utility rate increase should require a public hearing in the region that pays it.}
+        - {id: q03, topic: ny_scaffold_law, axis: econ, dir: -1, text: "New York's Scaffold Law, which holds owners and contractors fully liable for workers' falls, should stay as it is."}
         - {id: q04, axis: econ, dir: 1, text: "Cutting state income taxes is worth cutting state programs to pay for it."}
-        - {id: q05, axis: growth, dir: 1, changed: "2026-10-24", text: "New York should widen this year's environmental-review exemptions for new housing to cover more projects."}
-        - {id: q06, axis: culture, dir: 1, text: "New York should roll back cashless bail."}
-        - {id: q07, axis: culture, dir: -1, changed: "2026-10-24", text: "New York should keep its new rule requiring a judge's warrant for ICE to enter schools and hospitals."}
-        - {id: q08, axis: econ, dir: -1, text: "New York should adopt single-payer health care for everyone in the state."}
-        - {id: q09, text: "New York should build more nuclear power."}
-        - {id: q10, axis: growth, dir: -1, text: "New data centers in New York should be paused until their effect on power bills is understood."}
-        - {id: q11, text: "The Attorney General's office should put more of its effort into criminal prosecution and less into civil cases."}
+        - {id: q05, topic: ny_housing, axis: growth, dir: 1, changed: "2026-10-24", text: "New York should widen this year's environmental-review exemptions for new housing to cover more projects."}
+        - {id: q06, topic: ny_bail_justice, axis: culture, dir: 1, text: "New York should roll back cashless bail."}
+        - {id: q07, topic: us_immigration_enforcement, axis: culture, dir: -1, changed: "2026-10-24", text: "New York should keep its new rule requiring a judge's warrant for ICE to enter schools and hospitals."}
+        - {id: q08, topic: us_health_medicaid, axis: econ, dir: -1, text: "New York should adopt single-payer health care for everyone in the state."}
+        - {id: q09, topic: energy_nuclear_data_centers, text: "New York should build more nuclear power."}
+        - {id: q10, topic: energy_nuclear_data_centers, axis: growth, dir: -1, changed: "2026-10-25", text: New data centers in New York should be paused.}
+        - {id: q11, topic: ny_ag_powers, changed: "2026-10-25", text: The Attorney General's office should focus more on criminal prosecution.}
         - {id: q12, axis: world, dir: 1, text: "US military aid to Israel should continue at current levels."}
-        - {id: q13, text: "The state pension fund should keep investing in Israel bonds."}
-        - {id: q14, axis: econ, dir: 1, changed: "2026-10-24", text: "The new federal tariffs that replaced the ones the Supreme Court struck down are raising prices and should be lifted."}
+        - {id: q13, topic: ny_pension, text: "The state pension fund should keep investing in Israel bonds."}
+        - {id: q14, topic: us_tariffs, axis: econ, dir: 1, changed: "2026-10-25", text: The new federal tariffs should be lifted.}
         - {id: q15, axis: econ, dir: 1, text: "Government regulation is the main reason housing and business costs are so high."}
-        - {id: q16, axis: econ, dir: -1, changed: "2026-10-24", text: "New York should keep the new law letting the Attorney General go after business practices that are unfair, not only deceptive ones."}
-        - {id: q17, text: "The state pension fund should put more of its money into companies that grow in New York."}
-        - {id: q18, axis: econ, dir: -1, text: "The state should build and own housing directly, not only subsidize private developers."}
+        - {id: q16, topic: ny_ag_powers, axis: econ, dir: -1, changed: "2026-10-25", text: New York should keep the new law letting the Attorney General go after unfair business practices.}
+        - {id: q17, topic: ny_pension, text: "The state pension fund should put more of its money into companies that grow in New York."}
+        - {id: q18, topic: ny_housing, axis: econ, dir: -1, changed: "2026-10-25", text: The state should build and own housing directly.}
         - {id: q19, text: New York should end the $9 congestion toll for driving into lower Manhattan.}
-        - {id: q20, axis: green, dir: -1, text: New York should repeal its 2019 climate law and the emissions targets it sets.}
-        - {id: q21, axis: green, dir: -1, text: New York should lift its ban on fracking for natural gas.}
-        - {id: q22, axis: culture, dir: -1, text: New York should keep its 2026 law barring local police and jails from formal partnerships with ICE.}
-        - {id: q23, axis: culture, dir: -1, text: New York should keep its Raise the Age law, which sends most cases against 16- and 17-year-olds to family court.}
-        - {id: q24, axis: growth, dir: 1, text: The state should be able to override local zoning to allow more apartments near train stations.}
-        - {id: q25, axis: econ, dir: 1, text: New York should cut its own Medicaid spending substantially, beyond the federal cuts already coming.}
-        - {id: q26, axis: culture, dir: -1, text: Transgender women and girls should be allowed to play on women's and girls' sports teams.}
-        - {id: q27, text: The Attorney General's office has spent too much of its effort suing President Trump and his administration.}
+        - {id: q20, topic: ny_climate_law, axis: green, dir: -1, text: New York should repeal its 2019 climate law and the emissions targets it sets.}
+        - {id: q21, topic: ny_climate_law, axis: green, dir: -1, text: New York should lift its ban on fracking for natural gas.}
+        - {id: q22, topic: us_immigration_enforcement, axis: culture, dir: -1, text: New York should keep its 2026 law barring local police and jails from formal partnerships with ICE.}
+        - {id: q23, topic: ny_bail_justice, axis: culture, dir: -1, text: New York should keep its Raise the Age law, which sends most cases against 16- and 17-year-olds to family court.}
+        - {id: q24, topic: ny_housing, axis: growth, dir: 1, text: The state should be able to override local zoning to allow more apartments near train stations.}
+        - {id: q25, topic: us_health_medicaid, axis: econ, dir: 1, text: New York should cut its own Medicaid spending substantially, beyond the federal cuts already coming.}
+        - {id: q26, topic: us_trans_athletes, axis: culture, dir: -1, text: Transgender women and girls should be allowed to play on women's and girls' sports teams.}
+        - {id: q27, topic: ny_ag_powers, text: The Attorney General's office has spent too much of its effort suing President Trump and his administration.}
         - {id: q28, text: The Attorney General's office should run a new Office of Civil Commitment to move people with severe mental illness off the streets and into treatment, even against their will.}
-        - {id: q29, text: The Attorney General's Medicaid fraud unit is right to focus on large organized schemes rather than many smaller individual prosecutions.}
+        - {id: q29, topic: ny_ag_powers, text: The Attorney General's Medicaid fraud unit is right to focus on large organized schemes rather than many smaller individual prosecutions.}
         - {id: q30, text: The State Comptroller's office has been too soft as a watchdog over Albany and state agencies.}
-        - {id: q31, text: The state pension fund should put much more money into AI and technology companies, even if that adds risk.}
+        - {id: q31, topic: ny_pension, text: The state pension fund should put much more money into AI and technology companies, even if that adds risk.}
         - {id: q32, text: The State Comptroller's office has done a good job of catching Medicaid fraud.}
-        - {id: q33, text: The state pension fund should keep selling off fossil-fuel companies it judges unprepared for the shift to clean energy.}
-        - {id: q34, text: The state pension fund should bring more of its money management in-house instead of paying outside Wall Street managers.}
+        - {id: q33, topic: ny_pension, text: The state pension fund should keep selling off fossil-fuel companies it judges unprepared for the shift to clean energy.}
+        - {id: q34, topic: ny_pension, text: The state pension fund should bring more of its money management in-house instead of paying outside Wall Street managers.}
         - {id: q35, axis: culture, dir: 1, text: Voters should have to show photo ID to vote in federal elections, in person or by mail.}
-        - {id: q36, axis: culture, dir: -1, text: Congress should not give ICE more money unless it requires judicial warrants for arrests, body cameras and a ban on masks during routine enforcement.}
-        - {id: q37, axis: culture, dir: 1, text: Abortion law should be left to each state rather than set nationally by Congress.}
+        - {id: q36, topic: us_immigration_enforcement, axis: culture, dir: -1, changed: "2026-10-25", text: ICE agents should need a judge's warrant to make arrests.}
+        - {id: q37, topic: us_abortion, axis: culture, dir: 1, text: Abortion law should be left to each state rather than set nationally by Congress.}
         - {id: q38, axis: econ, dir: -1, text: Taxes on the highest earners should go up.}
-        - {id: q39, text: The Indian Point nuclear plant should be reopened.}
-        - {id: q40, axis: green, dir: -1, text: New York should slow its climate-law mandates, such as the ban on gas hookups in new buildings, to hold down energy costs.}
-        - {id: q41, axis: culture, dir: -1, text: Abortion rights should be protected in New York's state constitution.}
-        - {id: q42, axis: econ, dir: -1, text: Towns and cities outside New York City should be able to adopt rent stabilization by declaring a housing emergency based on local affordability data.}
-        - {id: q43, axis: green, dir: -1, text: New York should suspend state taxes and clean-energy surcharges on utility bills for a year or two to cut costs.}
-        - {id: q44, axis: culture, dir: 1, text: New York should change Raise the Age so gun cases against 16- and 17-year-olds are not routinely moved to family court.}
+        - {id: q39, topic: energy_nuclear_data_centers, text: The Indian Point nuclear plant should be reopened.}
+        - {id: q40, topic: ny_climate_law, axis: green, dir: -1, text: New York should slow its climate-law mandates, such as the ban on gas hookups in new buildings, to hold down energy costs.}
+        - {id: q41, topic: us_abortion, axis: culture, dir: -1, text: Abortion rights should be protected in New York's state constitution.}
+        - {id: q42, topic: ny_housing, axis: econ, dir: -1, text: Towns and cities outside New York City should be able to adopt rent stabilization by declaring a housing emergency based on local affordability data.}
+        - {id: q43, topic: ny_utilities, axis: green, dir: -1, text: New York should suspend state taxes and clean-energy surcharges on utility bills for a year or two to cut costs.}
+        - {id: q44, topic: ny_bail_justice, axis: culture, dir: 1, changed: "2026-10-25", text: Gun cases against 16- and 17-year-olds should stay in adult court.}
       stances:
         Kathy Hochul:
           q05:

@@ -77,6 +77,12 @@ export async function onRequestPost({ request, env }) {
     for (const [k, v] of Object.entries(b.answers || {})) if (/^[a-z]\d{2}$/.test(k) && [0, 1, 2, 3].includes(v)) ok[k] = v;
     q.memes.answers = Object.assign(q.memes.answers || {}, ok);
     if (b.done) q.memes.done_at = now;
+  } else if (b.kind === "self") {
+    // Joe's own labels (2026-10-25): the ANES 7-point self-placement (-3 extremely liberal ..
+    // +3 extremely conservative, or "unsure" = haven't thought much) and his Pew typology group.
+    q.self = q.self || {};
+    if ([-3, -2, -1, 0, 1, 2, 3, "unsure"].includes(b.anes)) { q.self.anes = b.anes; q.self.anes_at = now; }
+    if (typeof b.pew === "string") { q.self.pew = b.pew.slice(0, 60); q.self.pew_at = now; }
   } else if (b.kind === "pulse" && Array.isArray(b.answers)) {
     q.pulse = [...q.pulse, ...b.answers.slice(0, 20).map(pulseOne).filter(Boolean).map((a) => ({ ...a, at: now }))].slice(-200);
   } else if (b.kind === "clear") {

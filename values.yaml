@@ -22,13 +22,13 @@ items:
   - {id: v01, axis: econ, dir: -1, text: "The government should guarantee a job to anyone who wants one and can't find one."}
   - {id: v02, axis: econ, dir: 1, text: "Most regulations on small businesses cost more than they're worth."}
   - {id: v03, axis: econ, dir: -1, text: "Higher taxes on people earning over $1 million a year are fair."}
-  - {id: v04, axis: econ, dir: 1, text: "Free trade has been good for most Americans."}
+  - {id: v04, topic: us_tariffs, axis: econ, dir: 1, text: "Free trade has been good for most Americans."}
   - {id: v05, axis: econ, dir: -1, text: "It should be easier for workers to form a union."}
   - {id: v06, axis: econ, dir: 1, text: "A private company usually delivers a service better than a government agency would."}
-  - {id: v07, axis: econ, dir: -1, text: "The federal government should cancel more student debt."}
+  - {id: v07, topic: us_student_loans, axis: econ, dir: -1, text: "The federal government should cancel more student debt."}
   - {id: v08, axis: culture, dir: 1, text: "Public schools should stay out of teaching about gender identity."}
   - {id: v09, axis: culture, dir: 1, text: "Religious faith is important to a healthy society."}
-  - {id: v10, axis: culture, dir: -1, text: "Abortion should be legal in most or all cases."}
+  - {id: v10, topic: us_abortion, axis: culture, dir: -1, text: "Abortion should be legal in most or all cases."}
   - {id: v11, axis: culture, dir: 1, text: "The country has changed too much, too fast, in the last twenty years."}
   - {id: v12, axis: culture, dir: -1, text: "Immigration makes American culture stronger."}
   - {id: v13, axis: culture, dir: -1, text: "Legalizing recreational marijuana has been good for New York."}
@@ -41,11 +41,11 @@ items:
   - {id: v20, axis: world, dir: 1, text: "The US should keep providing military aid to Israel."}
   - {id: v21, axis: world, dir: -1, text: "The US should press Ukraine to accept a negotiated settlement, even one that gives up territory."}
   - {id: v22, text: "Antisemitism in America is a bigger problem than most people realize."}
-  - {id: v23, axis: growth, dir: 1, text: "Beacon and the river towns should allow more apartment buildings, especially near the train stations."}
+  - {id: v23, topic: ny_housing, axis: growth, dir: 1, text: "Beacon and the river towns should allow more apartment buildings, especially near the train stations."}
   - {id: v24, axis: growth, dir: -1, text: "New development is changing the Hudson Valley too fast."}
   - {id: v25, axis: growth, dir: 1, text: "Big infrastructure projects should be allowed to skip some environmental reviews to get built faster."}
   - {id: v26, axis: growth, dir: -1, text: "Residents should have the final say over large projects in their town."}
-  - {id: v27, axis: green, dir: 1, text: "New York should keep its climate law's deadlines even if energy bills rise."}
+  - {id: v27, topic: ny_climate_law, axis: green, dir: 1, text: "New York should keep its climate law's deadlines even if energy bills rise."}
   - {id: v28, axis: green, dir: 1, text: "Environmental rules should be enforced strictly, even when compliance is costly for small firms."}
-  - {id: v29, axis: green, dir: -1, text: "Right now, energy costs matter more than emissions targets."}
-  - {id: v30, axis: green, dir: -1, text: "Natural gas should stay part of New York's energy supply for decades."}
+  - {id: v29, topic: ny_climate_law, axis: green, dir: -1, text: "Right now, energy costs matter more than emissions targets."}
+  - {id: v30, topic: ny_climate_law, axis: green, dir: -1, text: "Natural gas should stay part of New York's energy supply for decades."}

@@ -109,6 +109,9 @@ def run(data: dict, follows: dict, log) -> None:
     bank = values_bank()
     if bank:
         data["values_bank"] = bank
+    lf = ROOT / "learn.yaml"
+    if lf.exists():
+        data["learn"] = yaml.safe_load(lf.read_text())
     f = ROOT / "israel_quiz.yaml"
     if f.exists():
         data["il_quiz"] = yaml.safe_load(f.read_text())
