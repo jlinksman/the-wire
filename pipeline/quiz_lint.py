@@ -115,6 +115,12 @@ def main():
     if il.exists():
         b = yaml.safe_load(il.read_text())
         errs += lint("Israel match", b["items"], stances=b.get("stances") or {}, explain=explain)
+    sf = ROOT / "solutions.yaml"
+    if sf.exists():
+        for k, S in ((yaml.safe_load(sf.read_text()) or {}).get("issues") or {}).items():
+            mech = S.get("mechanisms") or []
+            stances = {a: {m: {"v": x["v"], "source": x.get("source")} for m, x in cells.items()} for a, cells in (S.get("plans") or {}).items()}
+            errs += lint(f"Your solutions {k}", mech, stances=stances, min_shared=2)
     v = yaml.safe_load((ROOT / "values.yaml").read_text())
     errs += lint("Where you stand", v["items"], explain=explain, kind="scale")
     sys.exit(1 if errs else 0)

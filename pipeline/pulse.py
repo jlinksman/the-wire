@@ -116,6 +116,9 @@ def run(data: dict, follows: dict, log) -> None:
     f = ROOT / "israel_quiz.yaml"
     if f.exists():
         data["il_quiz"] = yaml.safe_load(f.read_text())
+    sf = ROOT / "solutions.yaml"     # Your solutions: issues, mechanisms and sourced plans (public)
+    if sf.exists():
+        data["solutions"] = (yaml.safe_load(sf.read_text()) or {}).get("issues") or {}
     bb = baseline_bank()
     if bb:
         data["baseline_bank"] = bb

@@ -2039,27 +2039,30 @@ function matchFor(g, name, answers) {
     if (!a || a.skip || a.v == null) continue;
     const agree = 1 - Math.abs(a.v - x.v) / 4;
     num += a.w * agree; den += a.w; n += 1;
-    rows.push({ q, you: a.v, them: x.v, w: a.w, agree, source: x.source, note: x.note });
+    rows.push({ q, you: a.v, them: x.v, w: a.w, agree, source: x.source, note: x.note, from: a.from });
   }
   return { pct: den ? Math.round(100 * num / den) : null, n, rows: rows.sort((a, b) => b.agree - a.agree) };
 }
 function matchLine(r) {
   const g = data.voter_guide;
   if (!g || !g.quiz || !prefs.showMatch || !myQuiz) return "";
-  const a = ((myQuiz.elections || {})[g.id] || {}).answers;
-  if (!a) return "";
+  const own = ((myQuiz.elections || {})[g.id] || {}).answers;
+  if (!own && !myProps) return "";
+  const a = withProposals("election", own || {});
   const parts = (r.candidates || []).map((c) => { const m = matchFor(g, c.name, a); return m.n >= 2 ? c.name.split(" ").slice(-1)[0] + " " + m.pct + "%" : null; }).filter(Boolean);
   return parts.length ? " · your match: " + parts.join(", ") : "";
 }
 async function openMatch(g) {
-  const Q = await loadQuiz(true);
-  const a = ((Q.elections || {})[g.id] || {}).answers || {};
+  const [Q] = await Promise.all([loadQuiz(true), loadProps()]);
+  const own = ((Q.elections || {})[g.id] || {}).answers || {};
+  const a = withProposals("election", own), fromProps = propCount("election", own);
   const text = Object.fromEntries(g.quiz.items.map((x) => [x.id, x.text]));
   const label = (v) => (SCALE.find(([k]) => k === v) || [0, "–"])[1];
   const nodes = [
     el("h2", { id: "sheet-title", class: "stitle", text: "Your election check" }),
     el("p", { class: "sdesc", text: "How closely your answers match each candidate's stated positions, weighted by how much each statement matters to you. Only statements a candidate has a sourced position on count for them; a candidate with fewer than two isn't scored. Agreement on stated positions is one input, not a recommendation." }),
     answerWarnings(g.quiz.items, a),
+    fromProps ? el("p", { class: "fine", text: fromProps + " statement" + (fromProps > 1 ? "s" : "") + " you haven't answered count from Your solutions (marked “from your proposal”)." }) : null,
     el("button", { class: "linkbtn", text: "How this works ›", onclick: () => methodSheet("the election check", { statements: g.quiz.items.length, actor: "candidate", min: 2 }, () => openMatch(g)) }),
   ].filter(Boolean);
   for (const r of g.races || []) {
@@ -2070,7 +2073,7 @@ async function openMatch(g) {
         el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: c.name }), m.n >= 2 ? " · " + m.pct + "% agreement" + (ms.some((y) => y !== ms.find((z) => z.c === c) && y.m.n >= 2 && y.m.pct === m.pct) ? " · tied" : "") : " · too few stated positions"),
           el("span", { class: "rsub", text: m.n + " statement" + (m.n === 1 ? "" : "s") + " in common" }), el("span", { class: "chev", text: "▾" })),
         el("ul", { class: "cpos" }, ...m.rows.map((x) => el("li", {}, el("b", { text: x.agree >= 0.75 ? "Agree · " : x.agree <= 0.25 ? "Differ · " : "Partly · " }),
-          "“" + text[x.q] + "” You: " + label(x.you) + (x.w === 3 ? " (matters a lot)" : "") + ". " + c.name.split(" ").slice(-1)[0] + ": " + label(x.them) + (x.note ? " (" + x.note + ")" : "") + " ",
+          "“" + text[x.q] + "” You: " + label(x.you) + (x.from ? " (from your proposal)" : "") + (x.w === 3 ? " (matters a lot)" : "") + ". " + c.name.split(" ").slice(-1)[0] + ": " + label(x.them) + (x.note ? " (" + x.note + ")" : "") + " ",
           x.source ? link(x.source, "↗", "srcl") : null)))))));
   }
   const show = el("label", { class: "trow" }, el("span", { text: "Show my match on each race in the guide" }),
@@ -2306,9 +2309,9 @@ function ilAxis(B, pick) {
   return out;
 }
 async function openIlMatch() {
-  const Q = await loadQuiz(true);
+  const [Q] = await Promise.all([loadQuiz(true), loadProps()]);
   const B = data.il_quiz;
-  const a = ((Q.elections || {})[IL_ID] || {}).answers || {};
+  const a = withProposals("israel", ((Q.elections || {})[IL_ID] || {}).answers || {});
   const text = Object.fromEntries(B.items.map((x) => [x.id, x.text]));
   const label = (v) => (SCALE.find(([k]) => k === v) || [0, "–"])[1];
   const ms = B.lists.map((l) => {
@@ -2427,6 +2430,201 @@ function formatOrder(E) {
   const rank = { often: 0, sometimes: 1, rarely: 2 };
   return FORMATS.map(([f]) => f).sort((a, b) => (rank[st[a]] ?? 1) - (rank[st[b]] ?? 1));
 }
+// --------------------------------------------------------------- Your solutions (2026-10-25)
+// Joe writes his own fix for an issue. /solve sends it to Workers AI with the statements and
+// policy mechanisms on that issue (solutions.yaml, public: mechanisms and each candidate's or
+// list's sourced plan), and returns codes, each tied to a quote from his text. Nothing counts
+// until he confirms it. Confirmed statement codes fill in the election check and the Israel match
+// where he hasn't answered that statement himself (his own answer always wins, and a clash is
+// flagged); confirmed mechanism codes are compared plan to plan with the candidates. All of it
+// lives only in KV (proposals.json) and is processed only in Cloudflare.
+let myProps = null;
+async function loadProps(force) {
+  if (myProps && !force) return myProps;
+  try { const r = await fetch("solve", { credentials: "same-origin" }); myProps = r.ok ? await r.json() : { issues: {} }; } catch (e) { myProps = myProps || { issues: {} }; }
+  return myProps;
+}
+function solvePost(body) {
+  return fetch("solve", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+    .then(async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || "HTTP " + r.status); return j; });
+}
+// Statement answers implied by confirmed proposals, for one instrument ("election" or "israel").
+function proposalAnswers(kind) {
+  const out = {};
+  const items = Object.fromEntries(allQuizItems().filter((it) => it.quiz === kind).map((it) => [it.id, it]));
+  for (const [iss, p] of Object.entries((myProps || {}).issues || {})) {
+    for (const [q, c] of Object.entries(p.codes || {})) if (items[q] && out[q] == null) out[q] = { v: c.v, w: p.w || 2, from: "proposal", issue: iss };
+  }
+  return out;
+}
+// His own answers win; proposals fill the gaps.
+function withProposals(kind, answers) {
+  const P = proposalAnswers(kind);
+  const merged = Object.assign({}, P);
+  for (const [k, a] of Object.entries(answers || {})) if (a && !a.skip && a.v != null) merged[k] = a; else if (a && a.skip && !P[k]) merged[k] = a;
+  return merged;
+}
+function propCount(kind, answers) { return Object.keys(proposalAnswers(kind)).filter((k) => !(answers || {})[k] || (answers[k].skip)).length; }
+// Clashes: a proposal and his own answer two or more steps apart.
+function propClashes(issue) {
+  const p = ((myProps || {}).issues || {})[issue];
+  if (!p) return [];
+  const out = [];
+  for (const it of allQuizItems()) {
+    const c = (p.codes || {})[it.id], a = it.answers()[it.id];
+    if (c && a && !a.skip && a.v != null && Math.abs(c.v - a.v) >= 2) out.push({ it, c, a });
+  }
+  return out;
+}
+function solveActors(S) {
+  if (S.instrument === "israel" && data.il_quiz) return Object.fromEntries(data.il_quiz.lists.map((l) => [l.id, l.name]));
+  return Object.fromEntries(Object.keys(S.plans || {}).map((n) => [n, n]));
+}
+function planMatch(S, mine) {
+  const names = solveActors(S);
+  return Object.entries(S.plans || {}).map(([k, cells]) => {
+    let num = 0, n = 0;
+    const rows = [];
+    for (const [m, x] of Object.entries(cells)) {
+      const y = mine[m];
+      if (!y || y.v == null) continue;
+      const agree = 1 - Math.abs(y.v - x.v) / 2;
+      num += agree; n += 1;
+      rows.push({ m, you: y.v, them: x.v, agree, note: x.note, source: x.source });
+    }
+    return { k, name: names[k] || k, n, pct: n ? Math.round(100 * num / n) : null, rows: rows.sort((a, b) => b.agree - a.agree) };
+  }).filter((x) => x.n > 0).sort((a, b) => (b.n >= 2) - (a.n >= 2) || (b.pct ?? -1) - (a.pct ?? -1));
+}
+const MECH = [[1, "Propose"], [0, "Mixed"], [-1, "Reject"]];
+const mechWord = (v) => (MECH.find(([k]) => k === v) || [0, "–"])[1];
+function solveEntry() {
+  const S = data.solutions;
+  if (!S || !Object.keys(S).length) return null;
+  const done = Object.keys(((myProps || {}).issues) || {}).filter((k) => S[k]).length;
+  if (!myProps) loadProps().then(() => { const t = document.querySelector(".solveentry .rjob"); if (t) t.textContent = solveLine(); });
+  function solveLine() { const n = Object.keys(((myProps || {}).issues) || {}).filter((k) => S[k]).length; return n ? n + " of " + Object.keys(S).length + " issues written." : "Write your own fix for an issue; see whose plans come closest to it."; }
+  return el("div", { class: "rbox quizbox solveentry" }, el("span", { class: "mlabel", text: "Your solutions" }),
+    el("p", { class: "rjob", text: myProps ? solveLine() : (done ? "" : "Write your own fix for an issue; see whose plans come closest to it.") }),
+    el("button", { class: "sbtn primary wide", text: "Open", onclick: () => openSolutions() }));
+}
+async function openSolutions() {
+  await Promise.all([loadProps(true), loadQuiz(true)]);
+  const S = data.solutions || {};
+  const P = myProps.issues || {};
+  const row = (k) => { const p = P[k], cl = propClashes(k).length;
+    return el("li", {}, el("button", { class: "doclink", text: S[k].title, onclick: () => openIssue(k) }),
+      el("span", { class: "asrc", text: p ? " · written " + fmtDate.format(new Date(p.saved_at)) + (cl ? " · " + cl + " clash" + (cl > 1 ? "es" : "") + " with your answers" : "") : "" })); };
+  const groups = [["election", "On your ballot"], ["israel", "Israel"]];
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "Your solutions" }),
+    el("p", { class: "sdesc", text: "Say what you'd do about an issue, in your own words. The Wire reads it against the statements and the concrete plans on that issue, and shows you what it understood, quoting you. Nothing counts until you confirm it." }),
+    ...groups.flatMap(([g, label]) => { const ks = Object.keys(S).filter((k) => (S[k].instrument || "election") === g); return ks.length ? [el("h3", { class: "sh3", text: label }), el("ul", { class: "admin" }, ...ks.map(row))] : []; }),
+    el("button", { class: "linkbtn", text: "How this works ›", onclick: () => solveMethod() }),
+    el("p", { class: "fine", text: "Private: your text and everything read from it are stored only in your Cloudflare storage behind your login, read by Cloudflare's AI (which doesn't keep or train on it), and never reach the code repository, its logs or Ballot Match." }),
+  ], "Your solutions");
+}
+function solveMethod() {
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Your solutions", onclick: () => openSolutions() }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "How Your solutions works" }),
+    el("p", { text: "Each issue has the statements from your questionnaires on that subject, and a menu of concrete mechanisms: the specific things a government could do, including ones no candidate proposes. Each candidate or list is coded on a mechanism only where a source shows their position; the source is linked on every row, and a second researcher checked the codes." }),
+    el("p", { text: "When you ask The Wire to read your proposal, a language model codes it against those statements and mechanisms. Every code must quote your own words: if the quote isn't in your text, the code is thrown out. You then accept, change or drop each one, and can set mechanisms your text didn't mention." }),
+    el("p", { text: "Confirmed statement codes count in the election check and the Israel match only where you haven't answered that statement yourself, at the importance you gave the issue. Your own answer always wins, and when a proposal and an answer are two or more steps apart, both are shown so you can decide which is you." }),
+    el("p", { text: "Closest plans: agreement on each mechanism you and they both have a position on (same = 100%, one step apart = 50%, opposite = 0%), averaged. Two shared mechanisms are needed for a percentage. It compares what you'd do with what they say they'd do; it isn't a recommendation." }),
+    el("p", { text: "Ideas in your text that no statement or mechanism covers are listed as gaps. If you send them to Claude, they can become new statements, written neutrally and mixed into the bank, so nothing in the public code shows which ideas were yours." }),
+  ], "How Your solutions works");
+}
+async function openIssue(k, notice) {
+  await loadProps();
+  const S = data.solutions[k], p = (myProps.issues || {})[k];
+  const items = allQuizItems().filter((it) => it.topic === k);
+  const box = el("textarea", { class: "tin", rows: "7", placeholder: "In your own words: what would you do, how would you pay for it, what would you leave alone?" });
+  box.value = p ? p.text : "";
+  let w = p ? p.w || 2 : 2;
+  const wrow = el("div", { class: "wrow" }, ...[[1, "Matters a little"], [2, "Matters"], [3, "Matters a lot"]].map(([v, t]) => { const b = el("button", { class: "chip" + (w === v ? " on" : ""), text: t });
+    b.onclick = () => { w = v; [...wrow.children].forEach((c) => c.classList.toggle("on", c === b)); }; return b; }));
+  const status = el("p", { class: notice ? "okmsg" : "fine", text: notice || "" });
+  const go = el("button", { class: "sbtn primary wide", text: p ? "Read my proposal again" : "Read my proposal" });
+  go.onclick = async () => {
+    const text = box.value.trim();
+    if (text.split(/\s+/).length < 8) { status.className = "errmsg"; status.textContent = "Write a little more first: a sentence or two about what you'd do."; return; }
+    go.textContent = "Reading…"; go.disabled = true;
+    try {
+      const R = await solvePost({ action: "read", issue: k, title: S.title, text, statements: items.map((it) => ({ id: it.id, text: it.text })), mechanisms: S.mechanisms });
+      engage({ k: "quiz", t: "solve:" + k });
+      openConfirm(k, text, w, R);
+    } catch (e) { status.className = "errmsg"; status.textContent = "Couldn't read it: " + e.message; go.textContent = "Read my proposal"; go.disabled = false; }
+  };
+  const mine = p ? p.mech || {} : {};
+  const pm = p ? planMatch(S, mine) : [];
+  const mtext = Object.fromEntries((S.mechanisms || []).map((m) => [m.id, m.text]));
+  const clashes = propClashes(k);
+  const label = (v) => (SCALE.find(([x]) => x === v) || [0, "–"])[1];
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Your solutions", onclick: () => openSolutions() }),
+    el("span", { class: "mlabel", text: "Your solutions" }),
+    el("h2", { id: "sheet-title", class: "stitle", text: S.title }),
+    el("p", { class: "sdesc", text: S.prompt }),
+    items.length ? el("details", { class: "rest" }, el("summary", {}, el("span", { text: "Background: the statements on this" }), el("span", { class: "chev", text: "▾" })),
+      el("ul", { class: "admin" }, ...items.map((it) => el("li", {}, (data.explain || {})[it.id] ? el("button", { class: "doclink", text: it.text, onclick: () => openExplain(it.id, () => openIssue(k)) }) : el("span", { text: it.text })))),
+      data.learn && data.learn.topics[k] ? el("button", { class: "linkbtn", text: "Get up to speed on this ›", onclick: () => openTopic(k) }) : null) : null,
+    box,
+    el("p", { class: "fine", text: "How much does this issue matter to you?" }), wrow,
+    go, status,
+    el("p", { class: "fine", text: "Reading sends your text to Cloudflare's AI and back to you. Nothing is saved until you confirm." }),
+    p && clashes.length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Your proposal and your answers disagree" }),
+      el("ul", { class: "cpos" }, ...clashes.map(({ it, c, a }) => el("li", {}, "“" + it.text + "” Your proposal reads as " + label(c.v) + (c.quote ? " (“" + c.quote + "”)" : "") + "; you answered " + label(a.v) + ". Your answer is the one that counts."))),
+      el("p", { class: "fine", text: "Either can be right: proposals are concrete, statements are general. Re-answer the statement if your answer no longer fits." })) : null,
+    p ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Closest plans" }),
+      pm.length ? el("div", {}, ...pm.map((x) => el("details", { class: "race" },
+        el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: x.name }), x.n >= 2 ? " · " + x.pct + "% alike" + (pm.some((y) => y !== x && y.n >= 2 && y.pct === x.pct) ? " · tied" : "") : " · one shared mechanism"),
+          el("span", { class: "rsub", text: x.n + " mechanism" + (x.n === 1 ? "" : "s") + " in common" }), el("span", { class: "chev", text: "▾" })),
+        el("ul", { class: "cpos" }, ...x.rows.map((r) => el("li", {}, el("b", { text: r.agree === 1 ? "Same · " : r.agree === 0 ? "Opposite · " : "Partly · " }),
+          mtext[r.m] + ". You: " + mechWord(r.you) + ". " + x.name.split(" ").slice(-1)[0] + ": " + mechWord(r.them) + (r.note ? " (" + r.note + ")" : "") + " ", r.source ? link(r.source, "↗", "srcl") : null)))))) 
+        : el("p", { class: "fine", text: "None of your confirmed mechanisms overlaps a coded plan yet. Set a few in the reading, or write more about how you'd do it." }),
+      (p.goals || []).length ? el("p", { class: "fine", text: "What your proposal is after: " + p.goals.join("; ") + "." }) : null,
+      (p.gaps || []).length ? el("p", { class: "fine", text: "Not covered by any statement or plan yet: " + p.gaps.join("; ") + ". Send these to Claude if you'd like them added as statements." }) : null,
+      el("p", { class: "fine", text: "Agreement on stated plans is one input, not a recommendation. Last saved " + fmtDate.format(new Date(p.saved_at)) + "." }),
+      el("p", { class: "fine" }, el("button", { class: "unsave", text: "Delete this proposal", onclick: async () => { await solvePost({ action: "delete", issue: k }); await loadProps(true); openSolutions(); } }))) : null,
+  ].filter(Boolean), S.title);
+}
+function openConfirm(k, text, w, R) {
+  const S = data.solutions[k];
+  const items = Object.fromEntries(allQuizItems().filter((it) => it.topic === k).map((it) => [it.id, it]));
+  const codes = {}, mech = {};
+  for (const x of R.statements || []) codes[x.id] = { v: x.v, quote: x.quote, by: "read" };
+  for (const x of R.mechanisms || []) mech[x.id] = { v: x.v, quote: x.quote, by: "read" };
+  const chips = (opts, get, set) => { const row = el("div", { class: "wrow" });
+    const draw = () => { row.replaceChildren(...opts.map(([v, t]) => { const b = el("button", { class: "chip" + (get() === v ? " on" : ""), text: t }); b.onclick = () => { set(v); draw(); }; return b; })); };
+    draw(); return row; };
+  const stRows = (R.statements || []).map((x) => el("div", { class: "vbar" },
+    el("p", {}, el("b", { text: items[x.id] ? items[x.id].text : x.id })), el("p", { class: "fine", text: "From your words: “" + x.quote + "”" }),
+    chips([...SCALE, [null, "Drop"]], () => (codes[x.id] ? codes[x.id].v : null), (v) => { if (v == null) delete codes[x.id]; else codes[x.id] = { v, quote: x.quote, by: v === x.v ? "read" : "you" }; })));
+  const mRows = (S.mechanisms || []).map((m) => { const r = (R.mechanisms || []).find((x) => x.id === m.id);
+    return el("div", { class: "vbar" }, el("p", {}, el("b", { text: m.text })),
+      r ? el("p", { class: "fine", text: "From your words: “" + r.quote + "”" }) : el("p", { class: "fine", text: "Your text doesn't say. Set it only if you want it to count." }),
+      chips([...MECH, [null, r ? "Drop" : "Leave out"]], () => (mech[m.id] ? mech[m.id].v : null), (v) => { if (v == null) delete mech[m.id]; else mech[m.id] = { v, quote: r ? r.quote : null, by: r && v === r.v ? "read" : "you" }; })); });
+  const status = el("p", { class: "fine" });
+  const save = el("button", { class: "sbtn primary wide", text: "Save what's confirmed" });
+  save.onclick = async () => {
+    save.textContent = "Saving…"; save.disabled = true;
+    try { myProps = await solvePost({ action: "save", issue: k, text, w, codes, mech, gaps: R.gaps, goals: R.goals }); openIssue(k, "✓ Saved. Private: Cloudflare only."); }
+    catch (e) { status.className = "errmsg"; status.textContent = "Couldn't save: " + e.message; save.textContent = "Save what's confirmed"; save.disabled = false; }
+  };
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Back to your text", onclick: () => openIssue(k) }),
+    el("span", { class: "mlabel", text: "Check the reading" }),
+    el("h2", { id: "sheet-title", class: "stitle", text: S.title }),
+    el("p", { class: "sdesc", text: "This is what The Wire understood, each point tied to your own words. Keep, change or drop each one. Only what you save counts." }),
+    R.dropped ? el("p", { class: "fine", text: R.dropped + " reading" + (R.dropped > 1 ? "s were" : " was") + " thrown out because the quote wasn't in your text." }) : null,
+    el("h3", { class: "sh3", text: "Statements · " + stRows.length }),
+    stRows.length ? el("div", {}, ...stRows) : el("p", { class: "fine", text: "Your text doesn't take a clear position on any of the statements." }),
+    el("h3", { class: "sh3", text: "Plans: what you'd do" }), ...mRows,
+    (R.goals || []).length ? el("p", { class: "fine", text: "What it's after: " + R.goals.join("; ") + "." }) : null,
+    (R.gaps || []).length ? el("p", { class: "fine", text: "Ideas nothing here covers yet: " + R.gaps.join("; ") + "." }) : null,
+    save, status,
+  ].filter(Boolean), "Check the reading");
+}
 function learnEntry() {
   if (!data.learn) return null;
   const box = el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Get up to speed" }),
@@ -2504,6 +2702,7 @@ async function openTopic(t) {
       link(r.url, r.title, "doclink"),
       r.why ? el("span", { class: "rdline", text: r.why }) : null))),
     items.some((it) => it.quiz !== "values") ? el("button", { class: "sbtn wide", text: "Re-answer these statements", onclick: reanswer }) : null,
+    data.solutions && data.solutions[t] ? el("button", { class: "sbtn wide", text: "Write your own fix", onclick: () => openIssue(t) }) : null,
     el("p", { class: "fine", text: "Resources picked for quality and balance from reputable outlets; perspective labels are The Wire's." }),
   ].filter(Boolean), T.title);
 }
@@ -2862,7 +3061,7 @@ function questionnairesSection(Q) {
   const g = data.voter_guide;
   return [
     el("h2", { class: "sh2", text: "Questionnaires" }),
-    el("p", { class: "fine", text: "Your answers are stored only on Cloudflare (quiz.json), never in the code repository. Results show only when you open them." }),
+    el("p", { class: "fine", text: "Private: your answers, results and proposals are stored only on Cloudflare behind your login, never in the code repository, its logs or Ballot Match. Results show only when you open them." }),
     baselineEntry(Q),
     el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Five quick questions" }),
       el("p", { class: "rjob", text: lp ? "Last answered " + fmtDate.format(new Date(lp)) + "." : "Not answered yet." }),
@@ -2870,6 +3069,7 @@ function questionnairesSection(Q) {
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Answer now", onclick: () => openPulse() }), lp ? el("button", { class: "sbtn", text: "What it changed", onclick: () => pulseEffect() }) : null)),
     valuesEntry(Q),
     ilEntry(Q),
+    solveEntry(),
     learnEntry(),
     el("div", { class: "rbox quizbox memeentry" }, el("span", { class: "mlabel", text: "For fun" }),
       el("p", { class: "rjob", text: (Q.memes || {}).done_at ? "Your meme map is ready." : "Twelve rounds of picture cards from online political subcultures. Pick on instinct; get placed among them." }),
