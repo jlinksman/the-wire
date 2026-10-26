@@ -1335,7 +1335,7 @@ function ilFit(Q) {
     return { l, n, pct: den ? Math.round(100 * num / den) : null };
   }).filter((x) => x.n >= 3).sort((x, y) => y.pct - x.pct);
 }
-async function openProfile() {
+async function openProfile(notice) {
   const [Q] = await Promise.all([loadQuiz(true), loadProps(), loadDebate(), loadBallot()]);
   const me = Q.self || {};
   const bank = data.values_bank;
@@ -1350,7 +1350,9 @@ async function openProfile() {
   const sec = (title, ...kids) => el("section", { class: "ssec" }, el("h3", { class: "sh3", text: title }), ...kids.filter(Boolean));
   const row = (label, value, onclick) => el("li", { class: "aqrow" }, el("span", {}, el("b", { text: label + ": " }), value || el("span", { class: "fine", text: "not yet" })), onclick ? el("button", { class: "linkbtn", text: value ? "Change" : "Add", onclick }) : null);
   // 1. Where you sit
-  const sit = sc ? el("ul", { class: "admin" }, ...bank.axes.map((a) => el("li", {}, el("b", { text: a.label + ": " }), lean(sc[a.id].s, a) + (sc[a.id].n ? " · " + sc[a.id].n + " answers" : "")))) : el("p", { class: "fine", text: "Take Where you stand to see this." });
+  const conf = bank ? axisConfidence(Q) : {};
+  const sit = sc ? el("ul", { class: "admin" }, ...bank.axes.map((a) => el("li", {}, el("b", { text: a.label + ": " }), lean(sc[a.id].s, a) + (sc[a.id].n ? " · " + sc[a.id].n + " answers · confidence " + conf[a.id].level.toLowerCase() + (conf[a.id].cons && conf[a.id].level !== "High" && conf[a.id].cons < 0.75 ? " (mixed answers)" : "") : "")))) : el("p", { class: "fine", text: "Take Where you stand to see this." });
+  const sharpen = bank && (bank.topup || []).length ? el("button", { class: "sbtn primary wide", text: "Sharpen my profile", onclick: () => sharpenProfile() }) : null;
   // 2. Labels
   const mfTop = me.mf ? Object.entries(me.mf).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k]) => (MF.find(([id]) => id === k) || [k, k])[1]).join(" and ") : null;
   const memeAns = (Q.memes || {}).answers;
@@ -1400,7 +1402,8 @@ async function openProfile() {
     el("span", { class: "mlabel", text: "Private · Cloudflare only" }),
     el("h2", { id: "sheet-title", class: "stitle", text: "Your profile" }),
     el("p", { class: "sdesc", text: nAnswers + " questionnaire answers, " + props.length + " proposals, " + pos.length + " debate positions (" + firm.length + " firm). Everything here comes from those; nothing is guessed from what you read." }),
-    sec("Where you sit", sit, el("button", { class: "linkbtn", text: "The map and readings ›", onclick: () => openStand() })),
+    notice ? el("p", { class: "okmsg", text: notice }) : null,
+    sec("Where you sit", sit, sharpen, el("p", { class: "fine", text: "Sharpen asks 4 to 6 new statements on the two scales where your profile is thinnest or most mixed. Your core 30 stay fixed so yearly retakes still measure how you've moved." }), el("button", { class: "linkbtn", text: "The map and readings ›", onclick: () => openStand() })),
     sec("Your labels", labels, el("p", { class: "fine", text: "Your own placement and outside tools beside The Wire's reading. They measure different things, so they won't always agree; that's useful." })),
     sec("New York · which party fits", partyFit(Q, "ny").length ? partyList(partyFit(Q, "ny")) : null,
       el("p", { class: "fine", text: partyFit(Q, "ny").length ? "Above: each party's own platform and agenda, coded on the statements. Below: the candidates on each line this year." : "Party platforms are being coded; for now, from the candidates on each line and The Wire's rough placement of each line." }), ny),
@@ -2686,7 +2689,7 @@ async function flushQuiz(keepalive) {
   }
 }
 async function saveQuiz(body) {
-  const plain = body.answers && !Array.isArray(body.answers) && !body.done && !body.take && !body.restart && ["election", "values", "baseline", "memes"].includes(body.kind);
+  const plain = body.answers && !Array.isArray(body.answers) && !body.done && !body.take && !body.restart && !body.round && ["election", "values", "baseline", "memes", "topup"].includes(body.kind);
   if (plain) {
     const k = body.kind + ":" + (body.id || "");
     const p = quizPending[k] || (quizPending[k] = { kind: body.kind, id: body.id, answers: {} });
@@ -3607,9 +3610,54 @@ function standScores(answers, extra) {
 }
 function electionExtra(Q) {
   const g = data.voter_guide;
-  if (!g || !g.quiz) return [];
-  const a = ((Q.elections || {})[g.id] || {}).answers;
-  return a ? g.quiz.items.filter((it) => it.axis).map((it) => [it, a]) : [];
+  const out = [];
+  const a = g && g.quiz ? ((Q.elections || {})[g.id] || {}).answers : null;
+  if (a) out.push(...g.quiz.items.filter((it) => it.axis).map((it) => [it, a]));
+  // Top-up statements from "Sharpen my profile" count on the same scales (2026-10-26).
+  const t = ((Q && Q.topup) || {}).answers;
+  if (t && data.values_bank && data.values_bank.topup) out.push(...data.values_bank.topup.map((it) => [it, t]));
+  return out;
+}
+// How sure the profile is on each scale: how many answers, and how consistently they point one way.
+function axisConfidence(Q) {
+  const bank = data.values_bank;
+  const pairs = [...bank.items.map((it) => [it, ((Q.values || {}).answers) || {}]), ...electionExtra(Q)];
+  const out = {};
+  for (const ax of bank.axes) out[ax.id] = { n: 0, signs: [] };
+  for (const [it, ans] of pairs) {
+    const x = ans && ans[it.id];
+    if (!it.axis || !out[it.axis] || !x || x.skip || x.v == null) continue;
+    out[it.axis].n += 1;
+    if (x.v !== 0) out[it.axis].signs.push(Math.sign(x.v * it.dir));
+  }
+  for (const [k, o] of Object.entries(out)) {
+    const pos = o.signs.filter((v) => v > 0).length, neg = o.signs.length - pos;
+    o.cons = o.signs.length ? Math.max(pos, neg) / o.signs.length : 0;
+    o.level = o.n >= 10 && o.cons >= 0.75 ? "High" : o.n >= 6 && o.cons >= 0.6 ? "Medium" : "Low";
+    o.need = Math.max(0, 10 - o.n) + (o.cons < 0.75 ? (0.75 - o.cons) * 12 : 0);
+  }
+  return out;
+}
+async function sharpenProfile() {
+  const Q = await loadQuiz(true);
+  const bank = data.values_bank;
+  const pool = (bank.topup || []).filter((it) => !(((Q.topup || {}).answers || {})[it.id]));
+  const conf = axisConfidence(Q);
+  const axes = Object.entries(conf).filter(([k]) => pool.some((it) => it.axis === k)).sort((a, b) => b[1].need - a[1].need).slice(0, 2).map(([k]) => k);
+  const items = axes.flatMap((k) => pool.filter((it) => it.axis === k).slice(0, 3));
+  if (!items.length) {
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Nothing to sharpen" }), el("p", { class: "sdesc", text: "You've answered every top-up statement. New ones are added in small, checked batches; ask Claude for more." }),
+      el("button", { class: "sbtn wide", text: "‹ Your profile", onclick: () => openProfile() })], "Sharpen");
+    return;
+  }
+  const names = Object.fromEntries(bank.axes.map((a) => [a.id, a.label.toLowerCase()]));
+  runStatements({
+    title: "Sharpen my profile", items, seedKey: "wire.quizSeed.topup", prior: {}, redo: true,
+    save: (partial) => saveQuiz({ kind: "topup", answers: partial }),
+    later: () => openProfile(),
+    done: async () => { await saveQuiz({ kind: "topup", answers: {}, round: axes }); await loadQuiz(true);
+      openProfile("✓ " + items.length + " more answers on " + axes.map((k) => names[k]).join(" and ") + "."); },
+  });
 }
 const lean = (s, ax) => s == null ? "not enough answers" : Math.abs(s) < 0.15 ? "near the middle" : (Math.abs(s) < 0.45 ? "leans " : "firmly ") + (s < 0 ? ax.left : ax.right).toLowerCase();
 const fmtS = (s) => (s > 0 ? "+" : s < 0 ? "−" : "") + Math.abs(s).toFixed(2);

@@ -132,6 +132,15 @@ item's `topic` (section 9).
   statement; the order of formats follows what he actually opens and finishes (the engagement
   log), compared with what he says he prefers.
 
+## 9a. Core and top-ups
+
+A standing instrument keeps a frozen core so retakes measure drift; it is never regenerated. It grows
+through top-up banks (values_topup.yaml) asked a few at a time where the profile is thinnest or most
+mixed (fewer than 10 answers on a scale, or under 75% pointing one way), the adaptive-testing idea.
+Top-up answers are stored apart from the core and count on the same scales. New top-ups come in
+small batches that pass the same writing and lint rules. Election instruments retire after their
+election but keep their answers as a record, and their strongest statements are reused next cycle.
+
 ## 9b. Proposals (Your solutions)
 
 An issue file (solutions.yaml) lists 6 to 8 mechanisms: single concrete actions spanning the

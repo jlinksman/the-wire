@@ -59,6 +59,13 @@ export async function onRequestPost({ request, env }) {
     q.values.answers = Object.assign(q.values.answers || {}, clean(b.answers));
     q.values.updated = now;
     if (b.done) q.values.done_at = now;
+  } else if (b.kind === "topup") {
+    // "Sharpen my profile" (2026-10-26): top-up statements for Where you stand, kept apart from the
+    // frozen core so yearly retakes stay comparable.
+    q.topup = q.topup || {};
+    q.topup.answers = Object.assign(q.topup.answers || {}, clean(b.answers));
+    q.topup.updated = now;
+    if (b.round) q.topup.rounds = [...(q.topup.rounds || []), { at: now, axes: (b.round || []).filter((x) => /^[a-z]{2,10}$/.test(x)).slice(0, 3) }].slice(-40);
   } else if (b.kind === "baseline") {
     q.baseline = q.baseline || {};
     q.baseline.answers = Object.assign(q.baseline.answers || {}, clean(b.answers));

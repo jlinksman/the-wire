@@ -1,0 +1,44 @@
+# Top-up statements for "Where you stand" (2026-10-26). The 30 core statements in values.yaml stay
+# frozen so yearly retakes measure drift; these are asked a few at a time by "Sharpen my profile",
+# aimed at the scales with the fewest answers or the most mixed ones. Same rules as the core
+# (QUIZZES.md): one claim each, about half keyed each way, no labels while answering.
+# axis/dir as in values.yaml: dir +1 means agreeing points to the scale's right-hand pole.
+# Joe's answers live only in Workers KV (quiz.json, kind "topup"), never here.
+version: 2026-10-26.1
+items:
+  - {id: t01, axis: econ, dir: 1, topic: ny_housing, text: "Rent control does more harm than good over time."}
+  - {id: t02, axis: econ, dir: -1, topic: us_health_medicaid, text: "The government should provide health insurance for everyone."}
+  - {id: t03, axis: econ, dir: 1, text: "Lowering business taxes is a good way to raise wages."}
+  - {id: t04, axis: econ, dir: -1, text: "New York's minimum wage should keep rising faster than inflation."}
+  - {id: t05, axis: econ, dir: 1, text: "Most people who work hard can get ahead in this country."}
+  - {id: t06, axis: econ, dir: -1, text: "Large corporations have too much power in American life."}
+  - {id: t07, axis: culture, dir: 1, text: "Children are better off when raised by married parents."}
+  - {id: t08, axis: culture, dir: -1, topic: us_trans_athletes, text: "Transgender people should be able to use the bathroom that matches their gender identity."}
+  - {id: t09, axis: culture, dir: 1, text: "Public schools should teach patriotism."}
+  - {id: t10, axis: culture, dir: -1, text: "Discrimination is a bigger obstacle for Black Americans than most white Americans realize."}
+  - {id: t11, axis: culture, dir: 1, text: "New York's gun laws go too far."}
+  - {id: t12, axis: culture, dir: -1, text: "Religious institutions should pay property taxes."}
+  - {id: t13, axis: trust, dir: 1, text: "Elections in the United States are run fairly."}
+  - {id: t14, axis: trust, dir: -1, text: "The FBI has been used as a political weapon."}
+  - {id: t15, axis: trust, dir: 1, text: "Scientists generally act in the public's best interest."}
+  - {id: t16, axis: trust, dir: -1, text: "Polls are usually wrong about what Americans think."}
+  - {id: t17, axis: trust, dir: 1, text: "Courts mostly decide cases on the law, not politics."}
+  - {id: t18, axis: trust, dir: -1, text: "Local government around here mostly serves insiders."}
+  - {id: t19, axis: world, dir: 1, text: "The US should defend Taiwan if China invades."}
+  - {id: t20, axis: world, dir: -1, text: "The US should leave NATO."}
+  - {id: t21, axis: world, dir: 1, text: "Foreign aid serves America's own interests."}
+  - {id: t22, axis: world, dir: -1, text: "The US should stay out of conflicts that don't directly threaten it."}
+  - {id: t23, axis: world, dir: 1, text: "The United Nations is worth America's support."}
+  - {id: t24, axis: world, dir: -1, text: "Military spending should be cut."}
+  - {id: t25, axis: growth, dir: 1, text: "New York's suburbs should end single-family-only zoning."}
+  - {id: t26, axis: growth, dir: -1, text: "Historic districts should be expanded to protect older neighborhoods."}
+  - {id: t27, axis: growth, dir: 1, topic: ny_housing, text: "Building more housing lowers rents in the area over time."}
+  - {id: t28, axis: growth, dir: -1, text: "New apartment buildings should be required to include parking."}
+  - {id: t29, axis: growth, dir: 1, topic: energy_nuclear_data_centers, text: "Data centers should be welcomed in the Hudson Valley."}
+  - {id: t30, axis: growth, dir: -1, text: "Keeping Beacon's character matters more than adding housing."}
+  - {id: t31, axis: green, dir: 1, topic: ny_climate_law, text: "New York should ban gas hookups in new buildings."}
+  - {id: t32, axis: green, dir: -1, text: "Electric vehicle mandates are moving too fast."}
+  - {id: t33, axis: green, dir: 1, topic: ny_climate_law, text: "Fossil fuel companies should pay for climate damage through New York's climate superfund."}
+  - {id: t34, axis: green, dir: -1, text: "Offshore wind costs too much for what it delivers."}
+  - {id: t35, axis: green, dir: 1, topic: energy_nuclear_data_centers, text: "New York should build more nuclear power to cut emissions."}
+  - {id: t36, axis: green, dir: -1, text: "The media exaggerates climate change."}

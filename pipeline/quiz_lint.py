@@ -60,6 +60,9 @@ CLEARED = {
     "il26": "one Shabbat-closure policy",
     "il27": "one fiscal direction",
     "il28": "one policy direction",
+    "t30": "the trade-off is the issue",
+    "t17": "the contrast is the claim",
+    "t22": "the condition is the restraint position",
 }
 
 
@@ -123,6 +126,9 @@ def main():
             errs += lint(f"Your solutions {k}", mech, stances=stances, min_shared=2)
     v = yaml.safe_load((ROOT / "values.yaml").read_text())
     errs += lint("Where you stand", v["items"], explain=explain, kind="scale")
+    tf = ROOT / "values_topup.yaml"
+    if tf.exists():
+        errs += lint("Where you stand · top-ups", yaml.safe_load(tf.read_text())["items"], kind="scale")
     sys.exit(1 if errs else 0)
 
 

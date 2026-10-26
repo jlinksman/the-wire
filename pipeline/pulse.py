@@ -109,6 +109,9 @@ def run(data: dict, follows: dict, log) -> None:
     data.setdefault("follows", {})["pulse_n"] = t["n"]
     bank = values_bank()
     if bank:
+        tf = ROOT / "values_topup.yaml"
+        if tf.exists():
+            bank = dict(bank, topup=(yaml.safe_load(tf.read_text()) or {}).get("items") or [])
         data["values_bank"] = bank
     lf = ROOT / "learn.yaml"
     if lf.exists():
