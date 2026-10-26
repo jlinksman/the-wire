@@ -5,7 +5,7 @@
 // GET -> {events:[...], stated:{...}}   POST {events:[...]} | {stated:{...}} | {clear:true}
 const KEY = "engage.json";
 const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
-const KINDS = new Set(["sheet", "link", "explain", "takeaways", "brief", "story", "thread", "quiz"]);
+const KINDS = new Set(["sheet", "link", "explain", "takeaways", "brief", "story", "thread", "quiz", "listen"]);
 
 export async function onRequestGet({ env }) {
   return new Response(JSON.stringify((await env.WIRE.get(KEY, "json")) || { events: [], stated: null }), { headers });
@@ -22,6 +22,7 @@ export async function onRequestPost({ request, env }) {
       k: e.k, at: String(e.at || "").slice(0, 24), f: e.f ? String(e.f).slice(0, 12) : undefined,
       t: e.t ? String(e.t).slice(0, 140) : undefined, d: e.d ? String(e.d).slice(0, 16) : undefined,
       s: Number.isFinite(e.s) ? Math.min(3600, Math.max(0, Math.round(e.s))) : undefined, h: e.h ? String(e.h).slice(0, 60) : undefined,
+      p: Number.isFinite(e.p) ? Math.min(100, Math.max(0, Math.round(e.p))) : undefined,
     }));
     const cutoff = Date.now() - 180 * 86400e3;
     cur.events = [...cur.events, ...clean].filter((e) => Date.parse(e.at) > cutoff).slice(-3000);

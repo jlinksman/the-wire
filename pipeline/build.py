@@ -122,7 +122,8 @@ def load_people() -> list[dict]:
         for i, f in enumerate(chans):
             kind = f["type"]
             out.append({
-                "id": f"p_{p['id']}_{i}", "name": f"{p['name']} · {KIND_LABEL.get(kind, kind)}", "short": p["name"],
+                "id": f"p_{p['id']}_{i}", "name": f"{p['name']} · {f.get('show') or KIND_LABEL.get(kind, kind)}", "short": p["name"],
+                **({"show": f["show"]} if f.get("show") else {}),
                 "type": "api" if kind == "nws_afd" else "rss", "feed_kind": kind, "url": f["url"], "status": "OK",
                 "enabled": True, "desk": p.get("desk", "WORLD"), "person": p["id"], "person_feed": True,
                 "poll": 180 if kind == "search" else 60, "max_items": PERSON_MAX_ITEMS, "max_age_days": PERSON_MAX_AGE_DAYS,
@@ -345,6 +346,33 @@ def episode_chapters(e) -> list[dict]:
     return out[:40]
 
 
+# Podcast entries that aren't episodes (2026-10-26): trailers, previews of paid or other shows
+# ("[PREVIEW] DS 57.5" in Doomscroll's feed), teasers and cross-promos, and very short clips.
+NOT_EPISODE = re.compile(r"^\W*(preview|trailer|teaser|sneak peek|introducing|presenting|coming soon|announcement)\b|[\[(]\s*(preview|trailer|teaser|bonus preview)\s*[\])]", re.I)
+MIN_EPISODE_S = 150
+
+
+def duration_s(e) -> int | None:
+    raw = str(e.get("itunes_duration") or "").strip()
+    if not raw:
+        return None
+    try:
+        parts = [float(x) for x in raw.split(":")]
+    except ValueError:
+        return None
+    sec = 0.0
+    for x in parts:
+        sec = sec * 60 + x
+    return int(sec)
+
+
+def not_an_episode(src: dict, e, title: str) -> bool:
+    if str(e.get("itunes_episodetype") or "").lower() == "trailer" or NOT_EPISODE.search(title or ""):
+        return True
+    d = duration_s(e)
+    return bool(d is not None and d < MIN_EPISODE_S and not src.get("newscast"))
+
+
 def parse_rss(src: dict, content: bytes) -> list[dict]:
     feed = feedparser.parse(content)
     if not feed.entries:
@@ -369,6 +397,8 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
         if not title and src.get("feed_kind") == "bluesky":
             title = clean_text(e.get("summary") or e.get("description"), 160)   # posts have no title
         if not link or not title:
+            continue
+        if src.get("feed_kind") == "podcast" and not_an_episode(src, e, title):
             continue
         author = e.get("author") or ", ".join(a.get("name", "") for a in e.get("authors", []) if isinstance(a, dict))
         author = re.sub(r"^\s*by\s+", "", clean_text(author, 200), flags=re.IGNORECASE)
@@ -399,6 +429,7 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
             **({"outlet": outlet} if outlet and not src.get("site_feed") else {}),
             **({"author": author} if author else {}),
             **({"audio": enc[0]} if enc and src.get("feed_kind") == "podcast" else {}),
+            **({"dur": d} if src.get("feed_kind") == "podcast" and (d := duration_s(e)) else {}),
             **({"chapters": ch} if src.get("feed_kind") == "podcast" and (ch := episode_chapters(e)) else {}),
         })
     return items
@@ -1091,6 +1122,7 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             **({"author": it["author"]} if it.get("author") else {}),
             **({"doc_text": it["doc_text"]} if it.get("doc_text") else {}),
             **({"audio": it["audio"]} if it.get("audio") else {}),
+            **({"dur": it["dur"]} if it.get("dur") else {}),
             **({"video": it["video"]} if it.get("video") else {}),
             **({"meeting_video": True} if src.get("meeting_video") else {}),
             **({"clip": True} if src.get("clip") else {}),

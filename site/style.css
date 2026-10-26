@@ -820,3 +820,9 @@ select.tin { width: 100%; }
 .reelclip { padding: 10px 0; border-bottom: 1px solid var(--hair); }
 .reelclip p { margin: 4px 0; }
 .reelaudio { margin: 10px 0; }
+
+/* Listen: undo a skip, Your shows (2026-10-26) */
+.apundo { display: block; width: 100%; text-align: left; padding: 6px var(--gutter-r) 8px var(--gutter-l); color: var(--accent, #6cf); font-size: 0.8rem; font-family: var(--mono, ui-monospace, monospace); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top: 1px solid var(--line, #333); }
+.showrow { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }
+.showrow .wrow { margin-top: 2px; }
+@media (max-width: 400px) { .apbtn { min-width: 34px; } }

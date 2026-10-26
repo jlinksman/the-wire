@@ -734,30 +734,144 @@ try { lq = Object.assign(lq, JSON.parse(store.get(LQ_KEY) || "{}")); } catch (e)
 const aud = new Audio();
 aud.preload = "metadata";
 let lqHeard = 0, lqTick = 0;
-function lqSave() { try { store.set(LQ_KEY, JSON.stringify({ items: lq.items.slice(0, 30), i: lq.i, pos: lq.pos, speed: lq.speed, intro: lq.intro || {}, noAdSkip: !!lq.noAdSkip })); } catch (e) { /* ignore */ } }
+lq.show = lq.show || {};      // per show: "first" (queue first) or "never" (don't queue)
+lq.done = lq.done || {};      // episodes heard to the end, so they aren't queued again
+function lqSave() {
+  const done = Object.fromEntries(Object.entries(lq.done).sort((a, b) => b[1] - a[1]).slice(0, 300));
+  try { store.set(LQ_KEY, JSON.stringify({ items: lq.items.slice(0, 40), i: lq.i, pos: lq.pos, speed: lq.speed, intro: lq.intro || {}, noAdSkip: !!lq.noAdSkip, show: lq.show, done })); } catch (e) { /* ignore */ }
+}
 function editionItem() {
   const L = data.listen;
   if (!L || !L.v) return null;
   return { id: "ed:" + L.v, kind: "edition", title: "The Wire · audio edition", sub: Math.round((L.seconds || 0) / 60) + " min · " + fmtTime.format(new Date(Date.parse(L.at))), src: "listen.mp3?v=" + L.v, chapters: L.chapters || [] };
 }
 function podItem(it) { return { id: "pod:" + it.id, kind: "podcast", title: it.title, sub: byline(it), src: it.audio, item: it.id, show: it.source_id, chapters: (it.chapters || []).filter((c) => !c.marker), breaks: (it.chapters || []).filter((c) => c.marker).map((c) => c.t), ads: (it.chapters || []).some((c) => c.ad) }; }
-// Episodes from people you follow that touch a thread you follow, then the newest; last 7 days.
-function podcastPicks(n) {
-  const cut = Date.now() - 7 * 86400e3;
+// Not an episode (2026-10-26): trailers, "[PREVIEW]" posts for paid or other shows, teasers and
+// cross-promos, and very short clips. The build drops these too; this catches what's already stored.
+const NOT_EP = /^\W*(preview|trailer|teaser|sneak peek|introducing|presenting|coming soon|announcement)\b|[\[(]\s*(preview|trailer|teaser|bonus preview)\s*[\])]/i;
+function isEpisode(it) { return it.audio && it.source_id !== "npr_news_now" && !NOT_EP.test(it.title || "") && !(it.dur && it.dur < 150); }
+// Episodes ranked by: shows you've marked "queue first", shows you actually finish (your listening
+// log), people you follow on threads you follow, then the newest. One per show per batch where
+// possible; shows you've marked "don't queue", finished episodes and anything already queued are left out.
+function podcastPicks(n, skip) {
+  const cut = Date.now() - 14 * 86400e3;
   const followed = (data.threads || []).filter((t) => t.followed);
   const words = new Set(followed.flatMap((t) => String(t.title || "").toLowerCase().match(/[a-z]{5,}/g) || []));
-  const eps = (data.items || []).filter((it) => it.audio && it.source_id !== "npr_news_now" && it.ms >= cut);
+  const verdicts = showVerdicts();
+  const eps = (data.items || []).filter((it) => isEpisode(it) && it.ms >= cut && lq.show[it.source_id] !== "never" && !lq.done[it.id] && !(skip && skip.has("pod:" + it.id)));
   const ms = memberStories();
-  const score = (it) => { const st = ms.get(it.id); let s = st && st.followed ? 3 : 0;
+  const score = (it) => {
+    const st = ms.get(it.id); let s = st && st.followed ? 3 : 0;
     for (const w of String(it.title + " " + (it.summary || "")).toLowerCase().match(/[a-z]{5,}/g) || []) if (words.has(w)) s += 1;
-    return s; };
-  return eps.map((it) => ({ it, s: score(it) })).sort((a, b) => b.s - a.s || b.it.ms - a.it.ms).slice(0, n).map((x) => x.it);
+    if (lq.show[it.source_id] === "first") s += 6;
+    const v = verdicts[it.source_id];
+    if (v === "keeper") s += 2; else if (v === "skipper") s -= 3;
+    if (Date.now() - it.ms < 3 * 86400e3) s += 1;
+    return s;
+  };
+  const ranked = eps.map((it) => ({ it, s: score(it) })).sort((a, b) => b.s - a.s || b.it.ms - a.it.ms).map((x) => x.it);
+  const out = [], seen = new Set();
+  for (const it of ranked) if (out.length < n && !seen.has(it.source_id)) { out.push(it); seen.add(it.source_id); }
+  for (const it of ranked) if (out.length < n && !out.includes(it)) out.push(it);
+  return out;
 }
 function newscastItem() {
   const it = (data.items || []).filter((x) => x.source_id === "npr_news_now" && x.audio).sort((a, b) => b.ms - a.ms)[0];
-  return it ? { id: "nc:" + it.id, kind: "newscast", title: "NPR News Now · " + it.title.split("|")[0].trim(), sub: "hourly newscast", src: it.audio } : null;
+  return it ? { id: "nc:" + it.id, kind: "newscast", title: "NPR News Now · " + it.title.split("|")[0].trim(), sub: "hourly newscast", src: it.audio, show: "npr_news_now" } : null;
 }
-function buildQueue() { return [editionItem(), ...podcastPicks(3).map(podItem), newscastItem()].filter(Boolean); }
+// The newscast goes right after the edition (it's stale within the hour); podcasts follow, and the
+// queue tops itself up with more episodes when it runs low, so it doesn't just stop.
+function buildQueue() { return [editionItem(), newscastItem(), ...podcastPicks(4).map(podItem)].filter(Boolean); }
+function extendQueue() {
+  const more = podcastPicks(4, new Set(lq.items.map((x) => x.id))).map(podItem);
+  lq.items.push(...more);
+  lqSave();
+  return more.length;
+}
+
+// ---- What you actually listen to (2026-10-26). Each time an item stops (finished, skipped, switched,
+// stopped) one event goes to the private engagement log in KV: show, seconds heard, percent heard, why.
+// "Your shows" reads it back: shows you finish vs. shows you start and skip.
+let listenLog = null;
+async function loadListenLog(force) {
+  if (listenLog && !force) return listenLog;
+  try {
+    const r = await fetch("engage", { credentials: "same-origin" });
+    const j = r.ok ? await r.json() : { events: [] };
+    listenLog = (j.events || []).filter((e) => e.k === "listen" && e.h);
+  } catch (e) { listenLog = listenLog || []; }
+  listenLog.push(...engageQ.filter((e) => e.k === "listen" && e.h));
+  return listenLog;
+}
+function showStats() {
+  const by = {};
+  for (const e of listenLog || []) {
+    if (e.f !== "podcast") continue;
+    const sh = (by[e.h] = by[e.h] || { eps: {}, secs: 0 });
+    const ep = (sh.eps[e.t] = sh.eps[e.t] || { p: 0, skip: false, undo: false, end: false, last: "" });
+    ep.p = Math.max(ep.p, e.p || 0);
+    if (e.d === "skip") ep.skip = true;
+    if (e.d === "undo") ep.undo = true;
+    if (e.d === "end") ep.end = true;
+    if (e.at > ep.last) ep.last = e.at;
+    sh.secs += e.s || 0;
+  }
+  const out = {};
+  for (const [id, sh] of Object.entries(by)) {
+    const eps = Object.values(sh.eps);
+    const touched = eps.length;
+    const played = eps.filter((x) => x.p >= 5).length;
+    const finished = eps.filter((x) => x.end || x.p >= 85).length;
+    const early = eps.filter((x) => x.skip && !x.undo && x.p < 20).length;
+    const avg = played ? Math.round(eps.filter((x) => x.p >= 5).reduce((a, x) => a + x.p, 0) / played) : 0;
+    let verdict = "new";
+    if (touched >= 2 && finished / touched >= 0.5) verdict = "keeper";
+    else if (early >= 2 && early >= touched / 2) verdict = "skipper";
+    else if (touched >= 2) verdict = "mixed";
+    out[id] = { touched, played, finished, early, avg, secs: sh.secs, verdict, last: eps.reduce((a, x) => (x.last > a ? x.last : a), "") };
+  }
+  return out;
+}
+function showVerdicts() { const st = listenLog ? showStats() : {}; return Object.fromEntries(Object.entries(st).map(([k, v]) => [k, v.verdict])); }
+function showName(id) { const s = (data.sources || []).find((x) => x.id === id); return s ? s.name.replace(/ · podcast$/, "") : id; }
+async function openShows() {
+  await loadListenLog(true);
+  const st = showStats();
+  const cut = Date.now() - 21 * 86400e3;
+  const offered = {};
+  for (const it of data.items || []) if (isEpisode(it) && it.ms >= cut) offered[it.source_id] = (offered[it.source_id] || 0) + 1;
+  const ids = [...new Set([...Object.keys(offered), ...Object.keys(st)])].filter((id) => id !== "npr_news_now");
+  const groups = { keeper: [], mixed: [], skipper: [], never: [], new: [] };
+  for (const id of ids) {
+    const x = st[id];
+    groups[x ? x.verdict : "never"].push(id);
+  }
+  const hm = (s) => { const m = Math.round(s / 60); return m >= 60 ? Math.floor(m / 60) + "h " + (m % 60) + "m" : m + "m"; };
+  const row = (id) => {
+    const x = st[id], pref = lq.show[id];
+    const facts = x ? [x.touched + " episode" + (x.touched === 1 ? "" : "s"), x.finished + " finished", x.played ? "avg " + x.avg + "% heard" : null, x.early ? x.early + " skipped early" : null, x.secs >= 60 ? hm(x.secs) + " total" : null].filter(Boolean).join(" · ")
+      : (offered[id] || 0) + " new episode" + (offered[id] === 1 ? "" : "s") + " in 3 weeks, none played";
+    const set = (v) => { if (lq.show[id] === v) delete lq.show[id]; else lq.show[id] = v; lqSave(); openShows(); };
+    return el("li", { class: "showrow" },
+      el("span", { class: "doclink", text: showName(id) }),
+      el("span", { class: "asrc", text: facts }),
+      el("div", { class: "wrow" },
+        el("button", { class: "chip" + (pref === "first" ? " on" : ""), text: "Queue first", onclick: () => set("first") }),
+        el("button", { class: "chip" + (pref === "never" ? " on" : ""), text: "Don't queue", onclick: () => set("never") })));
+  };
+  const sec = (key, title, note) => groups[key].length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: title + " · " + groups[key].length }), note ? el("p", { class: "fine", text: note }) : null,
+    el("ul", { class: "admin" }, ...groups[key].sort((a, b) => ((st[b] || {}).secs || 0) - ((st[a] || {}).secs || 0)).map(row))) : null;
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "Your shows" }),
+    el("p", { class: "fine", text: "What you actually finish versus what you start and skip, from your listening in The Wire (private: your engagement log in KV, never the repository). Listening in Spotify or Apple isn't visible here. The queue already leans on this: shows you finish move up, shows you skip move down." }),
+    sec("keeper", "You finish these", null),
+    sec("mixed", "Sometimes", null),
+    sec("skipper", "You start and skip", "Two or more episodes skipped in the first fifth. Candidates to drop."),
+    sec("never", "Never played here", "Episodes were in your queue pool but you never started one."),
+    sec("new", "Not enough yet", "Fewer than two episodes heard."),
+    el("button", { class: "sbtn wide", text: "‹ Back to the queue", onclick: () => openQueue() }),
+  ].filter(Boolean), "Your shows");
+}
 function listenCard() {
   const ed = editionItem();
   if (!ed) return null;
@@ -766,8 +880,9 @@ function listenCard() {
     el("span", { class: "bc-ico", "aria-hidden": "true", text: "🎧" }),
     el("span", { class: "bc-txt" },
       el("span", { class: "bc-t", text: "Listen" }),
-      el("span", { class: "bc-s", text: "Today's stories read aloud · " + ed.sub + (eps || nc ? " · then " + [eps ? eps + " episode" + (eps > 1 ? "s" : "") : "", nc ? "the newscast" : ""].filter(Boolean).join(" and ") : "") })));
+      el("span", { class: "bc-s", text: "Today's stories read aloud · " + ed.sub + (eps || nc ? " · then " + [nc ? "the newscast" : "", eps ? "your shows" : ""].filter(Boolean).join(" and ") : "") })));
 }
+setTimeout(() => { try { loadListenLog(); } catch (e) { /* later */ } }, 5000);
 function startListen(at) {
   lq.items = buildQueue();
   lq.i = 0;
@@ -780,13 +895,25 @@ function addToQueue(it) {
   lqSave();
   if (aud.paused && !aud.src) playAt(lq.items.length - 1, true); else drawAplayer();
 }
-function heard() {
+function heard(why) {
   const cur = lq.items[lq.i];
-  if (cur && lqHeard >= 5) engage({ k: "listen", f: cur.kind === "edition" ? "audio" : "podcast", t: cur.title.slice(0, 140), s: Math.round(lqHeard), d: cur.kind });
+  why = why || "switch";
+  if (cur && (lqHeard >= 5 || why === "skip")) {
+    const p = aud.duration ? Math.round(100 * aud.currentTime / aud.duration) : undefined;
+    const ev = { k: "listen", at: new Date().toISOString(), f: cur.kind === "edition" ? "audio" : cur.kind, t: cur.title.slice(0, 140), s: Math.round(lqHeard), d: why, h: cur.show || cur.kind, p };
+    engage(ev);
+    if (listenLog) listenLog.push(ev);
+    if (cur.item && (why === "end" || (p || 0) >= 95)) lq.done[cur.item] = Date.now();
+  }
   lqHeard = 0;
 }
-function playAt(i, go) {
-  heard();
+// Skipping an episode leaves an "Undo" in the player for 15 seconds (an accidental tap shouldn't cost
+// you the episode); the skipped one keeps its place, so going back resumes where you were.
+function playAt(i, go, why) {
+  const prev = lq.items[lq.i];
+  if (why === "skip" && prev && prev.kind !== "edition" && i !== lq.i) lq.undo = { id: prev.id, at: Date.now() };
+  heard(why);
+  if (i >= lq.items.length && lq.items.length) extendQueue();
   const cur = lq.items[i];
   if (!cur) { aud.pause(); drawAplayer(); return; }
   lq.i = i;
@@ -811,7 +938,19 @@ function skipChapter(d) {
     if (d < 0 && aud.currentTime - cur.chapters[k + 1].t > 3) { aud.currentTime = cur.chapters[k + 1].t; return; }
     if (k >= 0 && k < cur.chapters.length) { aud.currentTime = cur.chapters[k].t; return; }
   }
-  if (lq.i + d >= 0 && lq.i + d < lq.items.length) playAt(lq.i + d, true);
+  if (lq.i + d >= 0 && lq.i + d < lq.items.length) playAt(lq.i + d, true, d > 0 ? "skip" : "switch");
+  else if (d > 0) playAt(lq.i + 1, true, "skip");
+}
+function nextEpisode() { playAt(lq.i + 1, true, "skip"); setTimeout(() => drawAplayer(), 15500); }
+function undoSkip() {
+  const u = lq.undo; lq.undo = null;
+  const j = u ? lq.items.findIndex((x) => x.id === u.id) : -1;
+  if (j < 0) return;
+  const back = lq.items[j];     // the skip didn't count: mark the restored episode, not the one left
+  const ev = { k: "listen", at: new Date().toISOString(), f: back.kind, t: back.title.slice(0, 140), s: 0, d: "undo", h: back.show || back.kind };
+  engage(ev);
+  if (listenLog) listenLog.push(ev);
+  playAt(j, true, "switch");
 }
 if ("mediaSession" in navigator) {
   const ms = navigator.mediaSession, set = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) { /* unsupported */ } };
@@ -842,7 +981,7 @@ aud.addEventListener("timeupdate", () => {
 });
 aud.addEventListener("pause", () => { lqTick = 0; drawAplayer(); lqSave(); });
 aud.addEventListener("play", () => { lqTick = Date.now(); drawAplayer(); });
-aud.addEventListener("ended", () => { const cur = lq.items[lq.i]; if (cur) delete lq.pos[cur.id]; playAt(lq.i + 1, true); });
+aud.addEventListener("ended", () => { const cur = lq.items[lq.i]; if (cur) delete lq.pos[cur.id]; playAt(lq.i + 1, true, "end"); });
 aud.addEventListener("error", () => { const cur = lq.items[lq.i]; if (cur) { cur.failed = true; drawAplayer(); } });
 const mmss = (s) => { s = Math.max(0, Math.floor(s || 0)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = String(s % 60).padStart(2, "0"); return h ? h + ":" + String(m).padStart(2, "0") + ":" + x : m + ":" + x; };
 function drawAplayer(light) {
@@ -869,20 +1008,23 @@ function drawAplayer(light) {
       el("button", { class: "apbtn", "aria-label": "Back 15 seconds", text: "↺15", onclick: () => { aud.currentTime = Math.max(0, aud.currentTime - 15); } }),
       cur.kind === "edition" ? el("button", { class: "apbtn", "aria-label": "Next story", text: "⏭", onclick: () => skipChapter(1) })
         : el("button", { class: "apbtn", "aria-label": "Forward 15 seconds", text: "15↻", onclick: () => { aud.currentTime = Math.min((aud.duration || 1e9) - 1, aud.currentTime + 15); } }),
+      cur.kind !== "edition" ? el("button", { class: "apbtn", "aria-label": "Next episode", text: "⏭", onclick: () => nextEpisode() }) : null,
       el("button", { class: "apbtn apspeed", "aria-label": "Speed", text: lq.speed + "×", onclick: () => { lq.speed = SPEEDS[(SPEEDS.indexOf(lq.speed) + 1) % SPEEDS.length]; aud.playbackRate = lq.speed; lqSave(); drawAplayer(); } }),
-      el("button", { class: "apbtn", "aria-label": "Stop", text: "✕", onclick: () => { heard(); aud.pause(); aud.removeAttribute("src"); aud.load(); drawAplayer(); } })));
+      el("button", { class: "apbtn", "aria-label": "Stop", text: "✕", onclick: () => { heard("stop"); aud.pause(); aud.removeAttribute("src"); aud.load(); drawAplayer(); } })),
+    lq.undo && Date.now() - lq.undo.at < 15000 && lq.items.some((x) => x.id === lq.undo.id)
+      ? el("button", { class: "apundo", text: "↩ Undo skip · back to " + lq.items.find((x) => x.id === lq.undo.id).title.slice(0, 60), onclick: () => undoSkip() }) : null);
 }
 function openQueue() {
   const cur = lq.items[lq.i];
   const stories = new Map((data.stories || []).map((s) => [s.id, s]));
   const nodes = [
     el("h2", { id: "sheet-title", class: "stitle", text: "Listening" }),
-    el("p", { class: "fine", text: "The edition reads Today's checked story text in Cloudflare's voice; each chapter opens its story. Then episodes from people you follow on your threads, then NPR's newscast. In podcasts, the car's back and forward buttons jump 15 seconds; chapters come from the publisher's feed or show notes (times can drift by the length of inserted ads)." }),
+    el("p", { class: "fine", text: "The edition reads Today's checked story text in Cloudflare's voice; each chapter opens its story. Then NPR's newscast, then episodes ranked by the shows you actually finish and your threads; the queue adds more when it runs low, and ⏭ skips an episode with an undo. In podcasts, the car's back and forward buttons jump 15 seconds; chapters come from the publisher's feed or show notes (times can drift by the length of inserted ads)." }),
   ];
   lq.items.forEach((x, j) => {
     nodes.push(el("section", { class: "ssec" + (j === lq.i ? " apnow" : "") },
       el("div", { class: "aqrow" },
-        el("button", { class: "doclink", text: (j === lq.i ? "▶ " : "") + x.title, onclick: () => { playAt(j, true); openQueue(); } }),
+        el("button", { class: "doclink", text: (j === lq.i ? "▶ " : "") + x.title, onclick: () => { playAt(j, true, j > lq.i ? "skip" : "switch"); openQueue(); } }),
         j !== lq.i ? el("button", { class: "unsave", text: "Remove", onclick: () => { lq.items.splice(j, 1); if (j < lq.i) lq.i -= 1; lqSave(); openQueue(); drawAplayer(); } }) : null),
       el("span", { class: "asrc", text: (x.sub || "") + (x.breaks && x.breaks.length ? " · ad breaks near " + x.breaks.map(mmss).join(", ") : "") + (x.ads ? " · sponsor chapters skipped" : "") }),
       j === lq.i && x.kind !== "edition" ? clipControls(() => aud.currentTime, { kind: "audio", src: x.src, title: x.title, source: x.sub || "", link: x.src }) : null,
@@ -894,6 +1036,11 @@ function openQueue() {
         c.story && stories.get(c.story) ? el("button", { class: "linkbtn aqopen", text: "Open ›", onclick: () => openStory(stories.get(c.story)) }) : null))) : null));
   });
   if (!lq.items.length) nodes.push(el("p", { class: "fine", text: "Nothing queued." }));
+  nodes.push(el("div", { class: "sactions" },
+    el("button", { class: "sbtn", text: "+ More episodes", onclick: () => { const n = extendQueue(); if (!n) alertLine.textContent = "That's every new episode from your shows in the last two weeks."; else openQueue(); } }),
+    el("button", { class: "sbtn", text: "Your shows ›", onclick: () => openShows() })));
+  const alertLine = el("p", { class: "fine", text: "" });
+  nodes.push(alertLine);
   nodes.push(el("button", { class: "sbtn wide", text: "Start over with today's edition", onclick: () => { startListen(); openQueue(); } }));
   openSheet(nodes, "Listening");
 }

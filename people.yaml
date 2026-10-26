@@ -23,23 +23,43 @@
 people:
   # ------------------------------------------------------------ Joe's list
   - {id: citarella, name: Joshua Citarella, role: "Doomscroll podcast; Substack", desk: GOV, perspective: heterodox, unreachable: "his Substack blocks cloud servers",
-     feeds: [{type: podcast, url: "https://www.patreon.com/public-rss/2799152?show=866475"}]}
+     feeds: [{type: podcast, url: "https://www.patreon.com/public-rss/2799152?show=866475", show: Doomscroll}]}
   - {id: bari_weiss, name: Bari Weiss, role: "The Free Press; Honestly", desk: GOV, perspective: heterodox,
-     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/RSV2347142881"}, {type: rss, url: "https://www.thefp.com/feed"}]}
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/RSV2347142881", show: Honestly}, {type: rss, url: "https://www.thefp.com/feed"}]}
   - {id: bill_maher, name: Bill Maher, role: "Real Time; Club Random", desk: GOV, perspective: center-left,
-     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WMHY1886903044"}, {type: podcast, url: "https://rss.pdrl.fm/f10906/feeds.megaphone.fm/MCI6910680963"}]}
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WMHY1886903044", show: Real Time}, {type: podcast, url: "https://rss.pdrl.fm/f10906/feeds.megaphone.fm/MCI6910680963", show: Club Random}]}
   - {id: anderson_cooper, name: Anderson Cooper, role: "CNN; All There Is", desk: WORLD,
-     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WMHY6497875466"}]}
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WMHY6497875466", show: All There Is}]}
   - {id: sanjay_gupta, name: Sanjay Gupta, role: "CNN chief medical correspondent; Chasing Life", desk: WORLD,
-     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WMHY6124370245"}]}
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WMHY6124370245", show: Chasing Life}]}
   - {id: preet, name: Preet Bharara, role: "Stay Tuned with Preet", desk: LAW, perspective: center-left,
-     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/VMP5489734702"}]}
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/VMP5489734702", show: Stay Tuned}]}
   - {id: galloway, name: Scott Galloway, role: "No Mercy / No Malice; Prof G; Pivot", desk: WORLD, perspective: center-left,
-     unreachable: "profgalloway.com's feed is stale", feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WWO6655869236"}, {type: podcast, url: "https://feeds.megaphone.fm/pivot"}]}
+     unreachable: "profgalloway.com's feed is stale", feeds: [{type: podcast, url: "https://feeds.megaphone.fm/WWO6655869236", show: The Prof G Pod}, {type: podcast, url: "https://feeds.megaphone.fm/pivot", show: Pivot},
+            {type: podcast, url: "https://feeds.megaphone.fm/VMP7229898872", show: Raging Moderates}, {type: podcast, url: "https://feeds.megaphone.fm/profgmarkets", show: Prof G Markets}]}
   - {id: swisher, name: Kara Swisher, role: "On with Kara Swisher; Pivot", desk: WORLD, perspective: center-left,
-     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/VMP1684715893"}]}
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/VMP1684715893", show: On with Kara Swisher}]}
   - {id: ryssdal, name: Kai Ryssdal, role: "Marketplace", desk: WORLD,
-     feeds: [{type: podcast, url: "https://feeds.publicradio.org/public_feeds/marketplace"}]}
+     feeds: [{type: podcast, url: "https://feeds.publicradio.org/public_feeds/marketplace", show: Marketplace}]}
+  # Joe's regular shows, added 2026-10-26.
+  - {id: up_first, name: Up First, role: "NPR's morning news podcast", desk: WORLD,
+     feeds: [{type: podcast, url: "https://feeds.npr.org/510318/podcast.xml", show: Up First}]}
+  - {id: npr_politics, name: NPR Politics Podcast, role: "NPR political team", desk: GOV,
+     feeds: [{type: podcast, url: "https://feeds.npr.org/510310/podcast.xml", show: NPR Politics}]}
+  - {id: animal_spirits, name: Michael Batnick and Ben Carlson, role: "Animal Spirits (The Compound)", desk: WORLD,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/TCP6464651487", show: Animal Spirits}]}
+  - {id: psaki, name: Jen Psaki, role: "MS NOW; The Briefing", desk: GOV, perspective: left,
+     feeds: [{type: podcast, url: "https://feeds.simplecast.com/vA1gc2kQ", show: The Briefing}]}
+  - {id: pod_save_world, name: Pod Save the World, role: "Crooked Media foreign policy (Tommy Vietor, Ben Rhodes)", desk: WORLD, perspective: left,
+     feeds: [{type: podcast, url: "https://audioboom.com/channels/5166626.rss", show: Pod Save the World}]}
+  - {id: wolpe, name: David Wolpe, role: "SAPIR with David Wolpe", desk: WORLD, perspective: center,
+     feeds: [{type: podcast, url: "https://anchor.fm/s/67499cbc/podcast/rss", show: SAPIR}]}
+  - {id: meet_the_press, name: Meet the Press, role: "NBC News (Kristen Welker)", desk: GOV,
+     feeds: [{type: podcast, url: "https://podcastfeeds.nbcnews.com/yf3E6y7x", show: Meet the Press}]}
+  - {id: morning_joe, name: Morning Joe, role: "MS NOW (Scarborough, Brzezinski, Geist)", desk: GOV, perspective: center-left,
+     feeds: [{type: podcast, url: "https://feeds.simplecast.com/5EFCkAYb", show: Morning Joe}]}
+  - {id: eitan_levine, name: Eitan Levine, role: "Jew York Times (comedy, Israel and Jewish news)", desk: WORLD,
+     feeds: [{type: podcast, url: "https://api.riverside.fm/hosting/I3mv521n.rss", show: Jew York Times}]}
   # Its own feed answers cloud servers with a bot check (HTTP 202, 2026-10-18), so headlines come via Bing.
   - {id: hv_weather, name: Hudson Valley Weather, role: "Hyper-local forecasts (founded by Alex Marra)", desk: BEACON, unreachable: "its site answers cloud servers with a bot check"}
   - {id: nws_albany, name: NWS Albany forecasters, role: "National Weather Service forecast discussion", desk: BEACON,
