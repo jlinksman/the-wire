@@ -734,6 +734,249 @@ enrollment:
       WEP: 7
       REF: 2
     active_total: 8769
+- as_of: '2026-02-20'
+  source: https://elections.ny.gov/dutchess-02202026 (NYS Board of Elections, NYSVoter Enrollment by Election District; file dutchessed_feb26.xlsx, supplied by Joe)
+  publisher: NYS Board of Elections
+  note: 'OTH = all other parties (Green, Libertarian and others no longer recognized are counted here). 8 election districts, two per ward. Every row checked: parties sum to each total.'
+  districts:
+  - ed: W1 ED1
+    ward: 1
+    code: '001001'
+    active:
+      DEM: 700
+      REP: 143
+      CON: 8
+      WOR: 9
+      OTH: 47
+      BLANK: 304
+    inactive:
+      DEM: 61
+      REP: 10
+      CON: 0
+      WOR: 0
+      OTH: 5
+      BLANK: 29
+    total:
+      DEM: 761
+      REP: 153
+      CON: 8
+      WOR: 9
+      OTH: 52
+      BLANK: 333
+  - ed: W1 ED2
+    ward: 1
+    code: '001002'
+    active:
+      DEM: 733
+      REP: 155
+      CON: 11
+      WOR: 9
+      OTH: 48
+      BLANK: 340
+    inactive:
+      DEM: 62
+      REP: 16
+      CON: 1
+      WOR: 3
+      OTH: 4
+      BLANK: 28
+    total:
+      DEM: 795
+      REP: 171
+      CON: 12
+      WOR: 12
+      OTH: 52
+      BLANK: 368
+  - ed: W2 ED1
+    ward: 2
+    code: '002001'
+    active:
+      DEM: 791
+      REP: 99
+      CON: 6
+      WOR: 7
+      OTH: 27
+      BLANK: 304
+    inactive:
+      DEM: 63
+      REP: 10
+      CON: 0
+      WOR: 1
+      OTH: 2
+      BLANK: 44
+    total:
+      DEM: 854
+      REP: 109
+      CON: 6
+      WOR: 8
+      OTH: 29
+      BLANK: 348
+  - ed: W2 ED2
+    ward: 2
+    code: '002002'
+    active:
+      DEM: 684
+      REP: 118
+      CON: 10
+      WOR: 16
+      OTH: 55
+      BLANK: 334
+    inactive:
+      DEM: 61
+      REP: 10
+      CON: 0
+      WOR: 0
+      OTH: 3
+      BLANK: 28
+    total:
+      DEM: 745
+      REP: 128
+      CON: 10
+      WOR: 16
+      OTH: 58
+      BLANK: 362
+  - ed: W3 ED1
+    ward: 3
+    code: '003001'
+    active:
+      DEM: 599
+      REP: 105
+      CON: 9
+      WOR: 14
+      OTH: 47
+      BLANK: 272
+    inactive:
+      DEM: 46
+      REP: 28
+      CON: 1
+      WOR: 0
+      OTH: 6
+      BLANK: 31
+    total:
+      DEM: 645
+      REP: 133
+      CON: 10
+      WOR: 14
+      OTH: 53
+      BLANK: 303
+  - ed: W3 ED2
+    ward: 3
+    code: '003002'
+    active:
+      DEM: 624
+      REP: 193
+      CON: 13
+      WOR: 14
+      OTH: 41
+      BLANK: 313
+    inactive:
+      DEM: 57
+      REP: 13
+      CON: 2
+      WOR: 0
+      OTH: 6
+      BLANK: 31
+    total:
+      DEM: 681
+      REP: 206
+      CON: 15
+      WOR: 14
+      OTH: 47
+      BLANK: 344
+  - ed: W4 ED1
+    ward: 4
+    code: '004001'
+    active:
+      DEM: 733
+      REP: 158
+      CON: 14
+      WOR: 11
+      OTH: 60
+      BLANK: 373
+    inactive:
+      DEM: 50
+      REP: 11
+      CON: 0
+      WOR: 3
+      OTH: 2
+      BLANK: 26
+    total:
+      DEM: 783
+      REP: 169
+      CON: 14
+      WOR: 14
+      OTH: 62
+      BLANK: 399
+  - ed: W4 ED2
+    ward: 4
+    code: '004002'
+    active:
+      DEM: 659
+      REP: 159
+      CON: 14
+      WOR: 11
+      OTH: 39
+      BLANK: 318
+    inactive:
+      DEM: 37
+      REP: 8
+      CON: 1
+      WOR: 2
+      OTH: 2
+      BLANK: 20
+    total:
+      DEM: 696
+      REP: 167
+      CON: 15
+      WOR: 13
+      OTH: 41
+      BLANK: 338
+  totals:
+    active:
+      DEM: 5523
+      REP: 1130
+      CON: 85
+      WOR: 91
+      OTH: 364
+      BLANK: 2558
+    inactive:
+      DEM: 437
+      REP: 106
+      CON: 5
+      WOR: 9
+      OTH: 30
+      BLANK: 237
+    total:
+      DEM: 5960
+      REP: 1236
+      CON: 90
+      WOR: 100
+      OTH: 394
+      BLANK: 2795
+    active_total: 9751
+    all_total: 10575
+  county:
+    active:
+      DEM: 74714
+      REP: 56019
+      CON: 3952
+      WOR: 1113
+      OTH: 8184
+      BLANK: 60876
+    inactive:
+      DEM: 6037
+      REP: 3434
+      CON: 261
+      WOR: 98
+      OTH: 655
+      BLANK: 4597
+    total:
+      DEM: 80751
+      REP: 59453
+      CON: 4213
+      WOR: 1211
+      OTH: 8839
+      BLANK: 65473
 results:
 - year: 2019
   election: 2019 General Election
@@ -2449,10 +2692,9 @@ wards:
       '2025': Beacon W4 ED1-2 + Town of Fishkill EDs 2,8,9,10
     source: Derived from the ED rows in each year's ED-level results file.
 gaps:
-- 'NYS BOE enrollment for 2022 and 2025/2026 (dutchess-11012022, dutchess-02202026, etc.) could not be fetched: elections.ny.gov blocks scripted clients with a Cloudflare challenge, and the WebFetch tool
-  refused those URLs (they never surfaced in search results). No numbers for those years.'
 - 'Enrollment snapshots included: NYS BOE 2018-04-01 (active/inactive/total) and the county apportionment lists 2018-03-30 and 2020-02-21 (active only).'
 - '2019 results: only the scanned certification (citywide/district-wide totals); no ED-level breakdown, and no Beacon-only share for county legislator districts 16 and 18.'
 - '2023 mayor: the party line for Ruben Simmons is not printed in the source.'
 - An unlabeled column in the 2023/2025 ED tables (rotated header) is kept as unlabeled_col.
 - Mayor was not on the ballot in 2021 or 2025.
+- NYS BOE enrollment for 2022 to 2025 not yet added (the state site blocks automated downloads; files can be supplied by hand).
