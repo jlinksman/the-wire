@@ -844,7 +844,7 @@ aud.addEventListener("pause", () => { lqTick = 0; drawAplayer(); lqSave(); });
 aud.addEventListener("play", () => { lqTick = Date.now(); drawAplayer(); });
 aud.addEventListener("ended", () => { const cur = lq.items[lq.i]; if (cur) delete lq.pos[cur.id]; playAt(lq.i + 1, true); });
 aud.addEventListener("error", () => { const cur = lq.items[lq.i]; if (cur) { cur.failed = true; drawAplayer(); } });
-const mmss = (s) => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+const mmss = (s) => { s = Math.max(0, Math.floor(s || 0)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = String(s % 60).padStart(2, "0"); return h ? h + ":" + String(m).padStart(2, "0") + ":" + x : m + ":" + x; };
 function drawAplayer(light) {
   const bar = $("aplayer");
   const cur = lq.items[lq.i];
@@ -885,6 +885,7 @@ function openQueue() {
         el("button", { class: "doclink", text: (j === lq.i ? "▶ " : "") + x.title, onclick: () => { playAt(j, true); openQueue(); } }),
         j !== lq.i ? el("button", { class: "unsave", text: "Remove", onclick: () => { lq.items.splice(j, 1); if (j < lq.i) lq.i -= 1; lqSave(); openQueue(); drawAplayer(); } }) : null),
       el("span", { class: "asrc", text: (x.sub || "") + (x.breaks && x.breaks.length ? " · ad breaks near " + x.breaks.map(mmss).join(", ") : "") + (x.ads ? " · sponsor chapters skipped" : "") }),
+      j === lq.i && x.kind !== "edition" ? clipControls(() => aud.currentTime, { kind: "audio", src: x.src, title: x.title, source: x.sub || "", link: x.src }) : null,
       x.kind === "podcast" && x.show && j === lq.i ? el("div", { class: "sactions" },
         el("button", { class: "sbtn", text: (lq.intro || {})[x.show] ? "Start this show at " + mmss(lq.intro[x.show]) + " · change to now" : "Skip intro ads: start this show at " + mmss(aud.currentTime), onclick: () => { lq.intro = lq.intro || {}; lq.intro[x.show] = Math.floor(aud.currentTime); lqSave(); openQueue(); } }),
         (lq.intro || {})[x.show] ? el("button", { class: "unsave", text: "Clear", onclick: () => { delete lq.intro[x.show]; lqSave(); openQueue(); } }) : null) : null,
@@ -993,6 +994,7 @@ async function openMeeting(video, agendaIt) {
     el("h2", { id: "sheet-title", class: "stitle", text: video.title }),
     el("div", { class: "meetwrap" }, frame),
     el("div", { class: "aqrow" }, clock, link(video.link, "YouTube ↗", "srcl")),
+    clipControls(() => now, { kind: "yt", v: vid, title: video.title, source: "City of Beacon", link: video.link }),
     markBtn, markBox, lists,
     el("p", { class: "fine", text: "Your moments are private, stored only on Cloudflare. The video plays from YouTube; nothing is downloaded." }),
   ], video.title);
@@ -1028,6 +1030,7 @@ function watchRail() {
       el("span", { class: "wtitle", text: x.it.title }),
       el("span", { class: "wsrc", text: x.it.source + " · " + ago(x.it.ms) })))));
 }
+let clipNow = () => 0;
 function openClip(picks, i) {
   const x = picks[i];
   if (typeof aud !== "undefined" && !aud.paused) aud.pause();
@@ -1036,8 +1039,8 @@ function openClip(picks, i) {
   openSheet([
     el("span", { class: "mlabel", text: "Watch · " + x.it.source + (x.it.video.dur ? " · " + x.it.video.dur : "") }),
     el("h2", { id: "sheet-title", class: "stitle", text: x.it.title }),
-    el("div", { class: "meetwrap" }, el("iframe", { class: "meetframe", allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: "",
-      src: "https://www.youtube.com/embed/" + encodeURIComponent(x.it.video.id) + "?autoplay=1&playsinline=1&rel=0", title: x.it.title })),
+    (() => { const yp = ytPlayer(x.it.video.id, { autoplay: true, title: x.it.title }); clipNow = yp.now; return el("div", { class: "meetwrap" }, yp.frame); })(),
+    clipControls(() => clipNow(), { kind: "yt", v: x.it.video.id, title: x.it.title, source: x.it.source, link: x.it.link }),
     x.st ? el("button", { class: "sbtn wide", text: "The story: " + ((byId.get(x.st.lead) || {}).title || "open") + " ›", onclick: () => openStory(x.st) }) : null,
     el("div", { class: "sactions" },
       i > 0 ? el("button", { class: "sbtn", text: "‹ Previous", onclick: () => openClip(picks, i - 1) }) : null,
@@ -1578,6 +1581,154 @@ function openLocal(tabId) {
     tabs, ...body.filter(Boolean),
     el("p", { class: "fine", text: "Public records and local reporting only, each with its source. People appear in their public roles; no one is profiled beyond that." }),
   ], "Local politics");
+}
+
+// --------------------------------------------------------------- Reels (2026-10-26)
+// Joe's own clips, spliced in order for his reporting: start and end marks on a meeting video, a
+// news clip or a podcast, with a note or quote. A clip is a reference (YouTube id or the
+// publisher's audio URL plus times), never a copy; playback uses YouTube's own player and the
+// publisher's file. Reels are private (/reels, KV). Export gives a script: sources, times, notes.
+let myReels = null;
+async function loadReels(force) {
+  if (myReels && !force) return myReels;
+  try { const r = await fetch("reels", { credentials: "same-origin" }); myReels = r.ok ? await r.json() : { reels: [] }; } catch (e) { myReels = myReels || { reels: [] }; }
+  return myReels;
+}
+const reelPost = (body) => fetch("reels", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+  .then(async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || "HTTP " + r.status); myReels = j; return j; });
+// A YouTube embed that reports its time and state (the player's postMessage protocol; no extra script).
+function ytPlayer(vid, opts) {
+  opts = opts || {};
+  const q = "enablejsapi=1&playsinline=1&rel=0&origin=" + encodeURIComponent(location.origin) + (opts.start != null ? "&start=" + Math.floor(opts.start) : "") + (opts.end != null ? "&end=" + Math.ceil(opts.end) : "") + (opts.autoplay ? "&autoplay=1" : "");
+  const frame = el("iframe", { class: "meetframe", allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: "", src: "https://www.youtube.com/embed/" + encodeURIComponent(vid) + "?" + q, title: opts.title || "Video" });
+  const st = { t: opts.start || 0, state: -1 };
+  const send = (o) => { try { frame.contentWindow.postMessage(JSON.stringify(o), "*"); } catch (e) { /* not ready */ } };
+  frame.addEventListener("load", () => send({ event: "listening", id: 1, channel: "widget" }));
+  const onMsg = (ev) => {
+    if (ev.source !== frame.contentWindow) return;
+    let d; try { d = JSON.parse(ev.data); } catch (e) { return; }
+    if (d && d.info) {
+      if (typeof d.info.currentTime === "number") { st.t = d.info.currentTime; if (opts.onTime) opts.onTime(st.t); }
+      if (typeof d.info.playerState === "number") { st.state = d.info.playerState; if (st.state === 0 && opts.onEnd) opts.onEnd(); }
+    }
+  };
+  window.addEventListener("message", onMsg);
+  return { frame, now: () => st.t, seek: (t) => { send({ event: "command", func: "seekTo", args: [t, true] }); send({ event: "command", func: "playVideo", args: [] }); }, stop: () => window.removeEventListener("message", onMsg) };
+}
+// Start/end controls for any source. getNow() gives the current time; base describes the source.
+function clipControls(getNow, base) {
+  let start = null;
+  const status = el("span", { class: "fine", text: "" });
+  const startBtn = el("button", { class: "sbtn", text: "⏺ Clip start" });
+  const endBtn = el("button", { class: "sbtn", text: "⏹ Clip end", disabled: true });
+  startBtn.onclick = () => { start = Math.floor(getNow()); status.textContent = "from " + mmss(start) + "…"; endBtn.disabled = false; };
+  endBtn.onclick = () => { const end = Math.ceil(getNow()); if (start == null || end <= start) { status.textContent = "Play a little past the start first."; return; }
+    saveClipSheet(Object.assign({}, base, { start, end }), () => { start = null; endBtn.disabled = true; status.textContent = "✓ clipped " + mmss(start || 0); }); };
+  return el("div", { class: "clipctl" }, startBtn, endBtn, status);
+}
+function saveClipSheet(c, done) {
+  loadReels().then(() => {
+    const box = el("div", { class: "clipsave" });
+    let pick = (myReels.reels[0] || {}).id || null;
+    const title = el("input", { class: "tin", type: "text", placeholder: "New reel title" });
+    const note = el("textarea", { class: "tin", rows: "2", placeholder: "Your note: why this matters (optional)" });
+    const quote = el("input", { class: "tin", type: "text", placeholder: "A quote you heard (optional)" });
+    const chips = el("div", { class: "wrow" }, ...myReels.reels.slice(0, 8).map((r) => { const b = el("button", { class: "chip" + (r.id === pick ? " on" : ""), text: r.title });
+      b.onclick = () => { pick = r.id; title.value = ""; [...chips.children].forEach((x) => x.classList.toggle("on", x === b)); }; return b; }));
+    title.oninput = () => { if (title.value) { pick = null; [...chips.children].forEach((x) => x.classList.remove("on")); } };
+    const status = el("p", { class: "fine" });
+    box.replaceChildren(el("b", { text: "Save clip " + mmss(c.start) + "–" + mmss(c.end) }), myReels.reels.length ? chips : null, title, note, quote,
+      el("button", { class: "sbtn primary wide", text: "Save to reel", onclick: async () => {
+        try { await reelPost({ action: "add", reel: pick, title: title.value || (pick ? null : "Untitled reel"), clip: Object.assign({}, c, { note: note.value, quote: quote.value }) });
+          box.replaceChildren(el("p", { class: "okmsg", text: "✓ Saved to your reel." })); engage({ k: "story", f: "video", t: "reel clip" }); if (done) done(); }
+        catch (e) { status.className = "errmsg"; status.textContent = e.message; } } }), status);
+    const host = document.querySelector("#sheet .clipctl");
+    if (host) host.after(box); else openSheet([box], "Save clip");
+  });
+}
+function reelsEntry() {
+  return el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Reels" }),
+    el("p", { class: "rjob", text: "Your clips of meetings, hearings, news video and podcasts, in order: play them straight through or export a script for your own reporting." }),
+    el("button", { class: "sbtn primary wide", text: "Open", onclick: () => openReels() }));
+}
+async function openReels() {
+  await loadReels(true);
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "Reels" }),
+    el("p", { class: "sdesc", text: "Clip from a Beacon meeting, a Watch clip or any podcast with ⏺ Clip start and ⏹ Clip end. Clips are references, not copies: they play from YouTube and the publisher." }),
+    myReels.reels.length ? el("ul", { class: "admin" }, ...myReels.reels.map((r) => el("li", { class: "aqrow" },
+      el("button", { class: "doclink", text: r.title, onclick: () => openReel(r.id) }),
+      el("span", { class: "asrc", text: r.clips.length + " clip" + (r.clips.length === 1 ? "" : "s") + " · " + mmss(r.clips.reduce((s, c) => s + (c.end - c.start), 0)) })))) : el("p", { class: "fine", text: "No reels yet." }),
+  ], "Reels");
+}
+const clipLink = (c) => c.kind === "yt" ? "https://www.youtube.com/watch?v=" + c.v + "&t=" + c.start + "s" : (c.link || c.src);
+function reelScript(r) {
+  const lines = [r.title.toUpperCase(), "Clips: " + r.clips.length + " · running time " + mmss(r.clips.reduce((s, c) => s + (c.end - c.start), 0)), ""];
+  r.clips.forEach((c, i) => { lines.push((i + 1) + ". " + (c.source ? c.source + " · " : "") + c.title + " · " + mmss(c.start) + "–" + mmss(c.end));
+    if (c.quote) lines.push("   “" + c.quote + "”"); if (c.note) lines.push("   Note: " + c.note); lines.push("   " + clipLink(c)); lines.push(""); });
+  return lines.join("\n");
+}
+async function openReel(id) {
+  await loadReels();
+  const r = myReels.reels.find((x) => x.id === id);
+  if (!r) return openReels();
+  const save = async (clips, title) => { await reelPost({ action: "update", reel: r.id, clips, title }); openReel(r.id); };
+  const rows = r.clips.map((c, i) => el("div", { class: "reelclip" },
+    el("div", { class: "aqrow" }, el("b", { text: (i + 1) + ". " + c.title }), el("span", { class: "asrc", text: mmss(c.start) + "–" + mmss(c.end) })),
+    el("span", { class: "asrc", text: (c.source || (c.kind === "yt" ? "YouTube" : "Audio")) }),
+    c.quote ? el("p", { class: "fine", text: "“" + c.quote + "”" }) : null, c.note ? el("p", { text: c.note }) : null,
+    el("div", { class: "wrow" },
+      el("button", { class: "chip", text: "▶ Play", onclick: () => playReel(r, i, true) }),
+      i > 0 ? el("button", { class: "chip", text: "↑", onclick: () => { const a = r.clips.slice(); [a[i - 1], a[i]] = [a[i], a[i - 1]]; save(a); } }) : null,
+      i < r.clips.length - 1 ? el("button", { class: "chip", text: "↓", onclick: () => { const a = r.clips.slice(); [a[i + 1], a[i]] = [a[i], a[i + 1]]; save(a); } }) : null,
+      el("button", { class: "chip", text: "−5s start", onclick: () => { const a = r.clips.slice(); a[i] = Object.assign({}, c, { start: Math.max(0, c.start - 5) }); save(a); } }),
+      el("button", { class: "chip", text: "+5s end", onclick: () => { const a = r.clips.slice(); a[i] = Object.assign({}, c, { end: c.end + 5 }); save(a); } }),
+      el("button", { class: "chip", text: "Note", onclick: () => { const n = prompt("Note for this clip", c.note || ""); if (n != null) { const a = r.clips.slice(); a[i] = Object.assign({}, c, { note: n }); save(a); } } }),
+      el("button", { class: "unsave", text: "Remove", onclick: () => save(r.clips.filter((_, j) => j !== i)) }))));
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Reels", onclick: () => openReels() }),
+    el("h2", { id: "sheet-title", class: "stitle", text: r.title }),
+    el("div", { class: "sactions" },
+      r.clips.length ? el("button", { class: "sbtn primary", text: "▶ Play straight through", onclick: () => playReel(r, 0) }) : null,
+      el("button", { class: "sbtn", text: "Copy script", onclick: async (ev) => { try { await navigator.clipboard.writeText(reelScript(r)); ev.target.textContent = "✓ Copied"; } catch (e) { ev.target.textContent = "Couldn't copy"; } } }),
+      el("button", { class: "sbtn", text: "Rename", onclick: () => { const t = prompt("Reel title", r.title); if (t) save(null, t); } })),
+    ...rows,
+    el("p", { class: "fine", text: "The script lists each clip's source, times, quote, note and a link that opens at the right moment. To make an edited video, get the original files (a FOIL request to the city clerk for Beacon meetings; House and Senate floor video is free to download) and ask Claude to cut them in Descript from this script." }),
+    el("p", { class: "fine" }, el("button", { class: "unsave", text: "Delete this reel", onclick: async () => { if (confirm("Delete “" + r.title + "”?")) { await reelPost({ action: "delete", reel: r.id }); openReels(); } } })),
+  ].filter(Boolean), r.title);
+}
+// Plays clips in order: YouTube clips in its own player with start and end; audio clips from the
+// publisher's file with a separate player that stops at the end mark.
+let reelAudio = null;
+function playReel(r, i, single) {
+  const c = r.clips[i];
+  if (!c) return openReel(r.id);
+  if (typeof aud !== "undefined" && !aud.paused) aud.pause();
+  if (playing) { playing = false; render(); }
+  if (reelAudio) { reelAudio.pause(); reelAudio = null; }
+  const next = () => { if (!single && i + 1 < r.clips.length) playReel(r, i + 1); };
+  let media;
+  if (c.kind === "yt") {
+    let done = false;
+    const p = ytPlayer(c.v, { start: c.start, end: c.end, autoplay: true, title: c.title, onEnd: () => { if (!done) { done = true; p.stop(); next(); } },
+      onTime: (t) => { if (!done && t >= c.end - 0.3) { done = true; p.stop(); next(); } } });
+    media = el("div", { class: "meetwrap" }, p.frame);
+  } else {
+    reelAudio = new Audio(c.src); reelAudio.preload = "auto";
+    reelAudio.addEventListener("loadedmetadata", () => { reelAudio.currentTime = c.start; reelAudio.play().catch(() => {}); }, { once: true });
+    reelAudio.addEventListener("timeupdate", () => { if (reelAudio && reelAudio.currentTime >= c.end) { reelAudio.pause(); next(); } });
+    media = el("div", { class: "reelaudio" }, el("p", { class: "fine", text: "▶ Audio · " + mmss(c.start) + "–" + mmss(c.end) }), el("button", { class: "sbtn", text: "Pause / play", onclick: () => (reelAudio.paused ? reelAudio.play() : reelAudio.pause()) }));
+  }
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ " + r.title, onclick: () => { if (reelAudio) reelAudio.pause(); openReel(r.id); } }),
+    el("span", { class: "mlabel", text: "Clip " + (i + 1) + " of " + r.clips.length + " · " + mmss(c.start) + "–" + mmss(c.end) + (c.source ? " · " + c.source : "") }),
+    el("h2", { id: "sheet-title", class: "stitle", text: c.title }),
+    media,
+    c.quote ? el("p", { class: "fine", text: "“" + c.quote + "”" }) : null, c.note ? el("p", { text: c.note }) : null,
+    el("div", { class: "sactions" },
+      i > 0 ? el("button", { class: "sbtn", text: "‹ Previous", onclick: () => playReel(r, i - 1, single) }) : null,
+      i < r.clips.length - 1 ? el("button", { class: "sbtn primary", text: "Next ›", onclick: () => playReel(r, i + 1, single) }) : null),
+  ].filter(Boolean), c.title);
 }
 
 // --------------------------------------------------------------- engagement log (2026-10-25)
@@ -3977,6 +4128,7 @@ function questionnairesSection(Q) {
     el("p", { class: "fine", text: "Private: your answers, results and proposals are stored only on Cloudflare behind your login, never in the code repository, its logs or Ballot Match. Results show only when you open them." }),
     profileEntry(),
     localEntry(),
+    reelsEntry(),
     baselineEntry(Q),
     el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Five quick questions" }),
       el("p", { class: "rjob", text: lp ? "Last answered " + fmtDate.format(new Date(lp)) + "." : "Not answered yet." }),

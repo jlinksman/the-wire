@@ -813,3 +813,10 @@ select.tin { width: 100%; }
 .mbar { display: grid; grid-template-columns: 3em 1fr 4em; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text2); }
 .mfill { height: 8px; background: var(--here); border-radius: 4px; }
 .mv { text-align: right; }
+
+/* ------------------------------------------------ Reels (2026-10-26) */
+.clipctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0; }
+.clipsave { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; padding: 10px; border: 1px solid var(--hair); border-radius: 10px; }
+.reelclip { padding: 10px 0; border-bottom: 1px solid var(--hair); }
+.reelclip p { margin: 4px 0; }
+.reelaudio { margin: 10px 0; }
