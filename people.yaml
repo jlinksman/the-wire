@@ -60,6 +60,23 @@ people:
      feeds: [{type: podcast, url: "https://feeds.simplecast.com/5EFCkAYb", show: Morning Joe}]}
   - {id: eitan_levine, name: Eitan Levine, role: "Jew York Times (comedy, Israel and Jewish news)", desk: WORLD,
      feeds: [{type: podcast, url: "https://api.riverside.fm/hosting/I3mv521n.rss", show: Jew York Times}]}
+  # Added 2026-10-26 at Joe's request.
+  - {id: unholy, name: Yonit Levi and Jonathan Freedland, role: "Unholy: Two Jews on the News", desk: WORLD, perspective: center-left,
+     feeds: [{type: podcast, url: "https://feeds.simplecast.com/oYXzB8F5", show: Unholy}]}
+  - {id: senor, name: Dan Senor, role: "Call Me Back", desk: WORLD, perspective: center-right,
+     feeds: [{type: podcast, url: "https://rss.beehiiv.com/podcasts/01a0599f-c7dc-725e-a326-2afd78c94e7e.xml", show: Call Me Back}]}
+  - {id: rest_is_politics_us, name: Katty Kay and Anthony Scaramucci, role: "The Rest Is Politics: US", desk: GOV, perspective: center,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/GLT5336643697", show: The Rest Is Politics US}]}
+  - {id: derek_thompson, name: Derek Thompson, role: "Plain English (The Ringer)", desk: WORLD, perspective: center-left,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/plain-english", show: Plain English}]}
+  - {id: ritholtz, name: Barry Ritholtz, role: "Masters in Business (Bloomberg)", desk: WORLD,
+     feeds: [{type: podcast, url: "https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/4e4cd910-40a1-4619-a5f3-ae2b0012ffff/5873a3cb-298f-40bc-b71f-ae2b0013000d/podcast.rss", show: Masters in Business}]}
+  - {id: today_explained, name: Today Explained, role: "Vox daily explainer", desk: WORLD,
+     feeds: [{type: podcast, url: "https://feeds.megaphone.fm/VMP5705694065", show: Today Explained}]}
+  - {id: left_right_center, name: "Left, Right & Center", role: "KCRW weekly left/right debate", desk: GOV, perspective: center,
+     feeds: [{type: podcast, url: "https://leftrightandcenter-feed.kcrw.com", show: "Left, Right & Center"}]}
+  - {id: lawfare, name: Lawfare, role: "The Lawfare Podcast (national security law)", desk: LAW, perspective: center,
+     feeds: [{type: podcast, url: "https://feeds.acast.com/public/shows/60518a52f69aa815d2dba41c", show: Lawfare}]}
   # Its own feed answers cloud servers with a bot check (HTTP 202, 2026-10-18), so headlines come via Bing.
   - {id: hv_weather, name: Hudson Valley Weather, role: "Hyper-local forecasts (founded by Alex Marra)", desk: BEACON, unreachable: "its site answers cloud servers with a bot check"}
   - {id: nws_albany, name: NWS Albany forecasters, role: "National Weather Service forecast discussion", desk: BEACON,
