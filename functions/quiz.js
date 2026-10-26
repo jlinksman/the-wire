@@ -83,6 +83,13 @@ export async function onRequestPost({ request, env }) {
     q.self = q.self || {};
     if ([-3, -2, -1, 0, 1, 2, 3, "unsure"].includes(b.anes)) { q.self.anes = b.anes; q.self.anes_at = now; }
     if (typeof b.pew === "string") { q.self.pew = b.pew.slice(0, 60); q.self.pew_at = now; }
+    // More outside labels (2026-10-26): the Political Compass's two coordinates, the Advocates'
+    // Nolan-chart quiz result, Moral Foundations scores from YourMorals, and the 8values ideology.
+    const num = (x, lo, hi) => { const v = Number(x); return Number.isFinite(v) && v >= lo && v <= hi ? Math.round(v * 100) / 100 : null; };
+    if (b.pc && typeof b.pc === "object") { const e = num(b.pc.econ, -10, 10), so = num(b.pc.soc, -10, 10); if (e != null && so != null) { q.self.pc = { econ: e, soc: so }; q.self.pc_at = now; } }
+    if (["Libertarian", "Left (liberal)", "Right (conservative)", "Statist", "Centrist"].includes(b.nolan)) { q.self.nolan = b.nolan; q.self.nolan_at = now; }
+    if (b.mf && typeof b.mf === "object") { const mf = {}; for (const k of ["care", "fairness", "loyalty", "authority", "purity", "liberty"]) { const v = num(b.mf[k], 0, 5); if (v != null) mf[k] = v; } if (Object.keys(mf).length) { q.self.mf = mf; q.self.mf_at = now; } }
+    if (typeof b.v8 === "string") { q.self.v8 = b.v8.replace(/[^\w '()-]/g, "").slice(0, 40); q.self.v8_at = now; }
   } else if (b.kind === "pulse" && Array.isArray(b.answers)) {
     q.pulse = [...q.pulse, ...b.answers.slice(0, 20).map(pulseOne).filter(Boolean).map((a) => ({ ...a, at: now }))].slice(-200);
   } else if (b.kind === "clear") {

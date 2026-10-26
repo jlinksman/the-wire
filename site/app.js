@@ -1248,6 +1248,153 @@ async function openResonance(p) {
   ].filter(Boolean), "How it lands");
 }
 
+// --------------------------------------------------------------- Your profile (2026-10-26)
+// Everything Joe has answered, argued and proposed in one private place: where he sits, his own and
+// outside labels, which party or line fits best in each electorate, where his sources disagree, how
+// he has moved, and a platform draft built only from what he confirmed. Party fit is from candidates'
+// sourced positions and The Wire's placement of each line until party platforms are coded.
+const NOLAN = ["Libertarian", "Left (liberal)", "Right (conservative)", "Statist", "Centrist"];
+const MF = [["care", "Care"], ["fairness", "Fairness"], ["loyalty", "Loyalty"], ["authority", "Authority"], ["purity", "Sanctity"], ["liberty", "Liberty"]];
+const OUTSIDE = {
+  pc: ["The Political Compass", "https://www.politicalcompass.org/test", "Two numbers, economic (left −10 to right +10) and social (libertarian −10 to authoritarian +10)."],
+  nolan: ["World's Smallest Political Quiz (the Nolan chart)", "https://www.theadvocates.org/quiz/", "Ten questions; places you as libertarian, left, right, statist or centrist."],
+  mf: ["Moral Foundations (YourMorals)", "https://yourmorals.org/", "How much you weigh care, fairness, loyalty, authority, sanctity and liberty (0 to 5 each). The same research behind How it lands."],
+  v8: ["8values", "https://8values.github.io/", "An open-source quiz on four axes that ends with an ideology label."],
+};
+function profileEntry() {
+  return el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Your profile" }),
+    el("p", { class: "rjob", text: "Everything you've answered, argued and proposed in one place: where you sit, your labels, which party fits best in each electorate, and how you've moved." }),
+    el("button", { class: "sbtn primary wide", text: "Open", onclick: () => openProfile() }));
+}
+function recordOutside(k, Q) {
+  const me = (Q && Q.self) || {};
+  const [name, url, what] = OUTSIDE[k];
+  const status = el("p", { class: "fine" });
+  const save = async (body) => { try { await saveQuiz({ kind: "self", ...body }); status.className = "okmsg"; status.textContent = "✓ Saved."; await loadQuiz(true); setTimeout(() => openProfile(), 500); } catch (e) { status.className = "errmsg"; status.textContent = e.message; } };
+  let form;
+  if (k === "pc") {
+    const e = el("input", { class: "tin", type: "number", step: "0.01", min: "-10", max: "10", placeholder: "Economic, e.g. -2.5", value: me.pc ? me.pc.econ : "" });
+    const s = el("input", { class: "tin", type: "number", step: "0.01", min: "-10", max: "10", placeholder: "Social, e.g. 1.8", value: me.pc ? me.pc.soc : "" });
+    form = [e, s, el("button", { class: "sbtn primary wide", text: "Save", onclick: () => save({ pc: { econ: e.value, soc: s.value } }) })];
+  } else if (k === "nolan") form = [el("div", { class: "wrow" }, ...NOLAN.map((n) => el("button", { class: "chip" + (me.nolan === n ? " on" : ""), text: n, onclick: () => save({ nolan: n }) })))];
+  else if (k === "mf") {
+    const ins = MF.map(([id, label]) => [id, el("input", { class: "tin", type: "number", step: "0.1", min: "0", max: "5", placeholder: label + " (0–5)", value: me.mf && me.mf[id] != null ? me.mf[id] : "" })]);
+    form = [...ins.map(([, i]) => i), el("button", { class: "sbtn primary wide", text: "Save", onclick: () => save({ mf: Object.fromEntries(ins.map(([id, i]) => [id, i.value])) }) })];
+  } else {
+    const t = el("input", { class: "tin", type: "text", placeholder: "Your ideology label", value: me.v8 || "" });
+    form = [t, el("button", { class: "sbtn primary wide", text: "Save", onclick: () => save({ v8: t.value }) })];
+  }
+  openSheet([el("button", { class: "linkbtn", text: "‹ Your profile", onclick: () => openProfile() }), el("h2", { id: "sheet-title", class: "stitle", text: name }),
+    el("p", { class: "sdesc", text: what }), el("p", {}, link(url, "Take it on their site ↗", "sbtn")), el("p", { class: "fine", text: "Their site keeps your answers there; record just the result here (private, Cloudflare only)." }), ...form, status], name);
+}
+function lineFit(Q) {
+  const g = data.voter_guide;
+  if (!g || !g.quiz) return [];
+  const a = withProposals("election", ((Q.elections || {})[g.id] || {}).answers || {});
+  const me = myLean();
+  const lines = {};
+  for (const r of g.races || []) for (const c of r.candidates || []) {
+    const m = matchFor(g, c.name, a);
+    if (m.n < 2) continue;
+    for (const l of c.lines || []) (lines[l] = lines[l] || []).push({ name: c.name, pct: m.pct, n: m.n });
+  }
+  const pos = g.line_info || {};
+  return Object.keys({ ...lines, ...pos }).map((l) => {
+    const cs = lines[l] || [];
+    const avg = cs.length ? Math.round(cs.reduce((s, x) => s + x.pct, 0) / cs.length) : null;
+    const dist = me && pos[l] && pos[l].pos ? Math.hypot(pos[l].pos[0] - me[0], pos[l].pos[1] - me[1]) : null;
+    return { l, avg, cs, dist };
+  }).filter((x) => x.avg != null || x.dist != null).sort((x, y) => (y.avg ?? -1) - (x.avg ?? -1) || (x.dist ?? 9) - (y.dist ?? 9));
+}
+function ilFit(Q) {
+  const B = data.il_quiz;
+  if (!B) return [];
+  const a = withProposals("israel", ((Q.elections || {})[IL_ID] || {}).answers || {});
+  return B.lists.map((l) => {
+    let num = 0, den = 0, n = 0;
+    for (const [q, x] of Object.entries(B.stances[l.id] || {})) { const y = a[q]; if (!y || y.skip || y.v == null) continue; num += (y.w || 2) * (1 - Math.abs(y.v - x.v) / 4); den += y.w || 2; n += 1; }
+    return { l, n, pct: den ? Math.round(100 * num / den) : null };
+  }).filter((x) => x.n >= 3).sort((x, y) => y.pct - x.pct);
+}
+async function openProfile() {
+  const [Q] = await Promise.all([loadQuiz(true), loadProps(), loadDebate(), loadBallot()]);
+  const me = Q.self || {};
+  const bank = data.values_bank;
+  const V = Q.values || {};
+  const sc = bank ? standScores(V.answers || {}, electionExtra(Q)) : null;
+  const ax = bank ? Object.fromEntries(bank.axes.map((a) => [a.id, a])) : {};
+  const nAnswers = Object.keys(V.answers || {}).length + Object.keys((((Q.elections || {})[(data.voter_guide || {}).id] || {}).answers) || {}).length + Object.keys((((Q.elections || {})[IL_ID] || {}).answers) || {}).length;
+  const pos = (dData && dData.positions) || [];
+  const firm = pos.filter((p) => rateStrength(p).r === "Firm");
+  const props = Object.entries((myProps || {}).issues || {});
+  const clashes = props.flatMap(([k]) => propClashes(k).map((c) => ({ k, ...c })));
+  const sec = (title, ...kids) => el("section", { class: "ssec" }, el("h3", { class: "sh3", text: title }), ...kids.filter(Boolean));
+  const row = (label, value, onclick) => el("li", { class: "aqrow" }, el("span", {}, el("b", { text: label + ": " }), value || el("span", { class: "fine", text: "not yet" })), onclick ? el("button", { class: "linkbtn", text: value ? "Change" : "Add", onclick }) : null);
+  // 1. Where you sit
+  const sit = sc ? el("ul", { class: "admin" }, ...bank.axes.map((a) => el("li", {}, el("b", { text: a.label + ": " }), lean(sc[a.id].s, a) + (sc[a.id].n ? " · " + sc[a.id].n + " answers" : "")))) : el("p", { class: "fine", text: "Take Where you stand to see this." });
+  // 2. Labels
+  const mfTop = me.mf ? Object.entries(me.mf).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k]) => (MF.find(([id]) => id === k) || [k, k])[1]).join(" and ") : null;
+  const memeAns = (Q.memes || {}).answers;
+  let memeL = null; try { if (memeAns) { const mb = await loadMemeBank(); const r = mb && memeScore(mb, memeAns); if (r) memeL = memeLabel(r); } } catch (e) { memeL = null; }
+  let under = null; try { const rd = sc ? lensReadings(sc, V.past || []) : []; const cur = rd.find((r) => /^Nearest current/.test(r.head)); under = cur ? cur.head.replace(/^Nearest current: /, "nearest current: ") : null; } catch (e) { under = null; }
+  const labels = el("ul", { class: "admin" },
+    row("Self-placement (ANES)", me.anes != null ? (ANES.find(([v]) => v === me.anes) || [0, ""])[1] : null, () => openStand()),
+    row("Pew typology", me.pew, () => openStand()),
+    row("Political Compass", me.pc ? "economic " + me.pc.econ + ", social " + me.pc.soc + " (" + (me.pc.econ < 0 ? "left" : "right") + ", " + (me.pc.soc < 0 ? "libertarian" : "authoritarian") + ")" : null, () => recordOutside("pc", Q)),
+    row("Nolan chart", me.nolan, () => recordOutside("nolan", Q)),
+    row("Moral foundations", mfTop ? "leans most on " + mfTop : null, () => recordOutside("mf", Q)),
+    row("8values", me.v8, () => recordOutside("v8", Q)),
+    row("For fun: the meme map", memeL, () => ((Q.memes || {}).done_at ? openMemeMap() : openMemes())),
+    row("For fun: Undercurrents", under, () => openStand()));
+  // 3. Party fit by electorate
+  const lf = lineFit(Q);
+  const ny = lf.length ? el("ul", { class: "cpos" }, ...lf.map((x) => el("li", {}, el("b", { text: x.l + ": " }),
+    (x.avg != null ? x.avg + "% average agreement with its " + x.cs.length + " candidate" + (x.cs.length > 1 ? "s" : "") + " you can be scored against" : "no scored candidates") +
+    (x.dist != null ? " · " + (x.dist < 0.35 ? "close to" : x.dist < 0.7 ? "some way from" : "far from") + " your economic and cultural answers" : "")))) : el("p", { class: "fine", text: "Answer the election check to see this." });
+  const fed = el("ul", { class: "cpos" },
+    el("li", { text: "Your Pew group: " + (me.pew || "not recorded") + "; your self-placement: " + (me.anes != null ? (ANES.find(([v]) => v === me.anes) || [0, ""])[1].toLowerCase() : "not recorded") + "." }),
+    ...(() => { const g = data.voter_guide; if (!g || !g.quiz) return []; const r = (g.races || []).find((x) => x.id === "ny18"); if (!r) return [];
+      const a = withProposals("election", ((Q.elections || {})[g.id] || {}).answers || {});
+      return r.candidates.map((c) => { const m = matchFor(g, c.name, a); return el("li", { text: "US House: " + c.name + " (" + (c.lines || [])[0] + ") · " + (m.n >= 2 ? m.pct + "% on " + m.n + " statements" : "too few shared statements") }); }); })());
+  const il = ilFit(Q);
+  const blocName = { gov: "the governing bloc", opp: "the opposition bloc", arab: "the Arab lists" };
+  const blocs = {}; for (const x of il) (blocs[x.l.bloc] = blocs[x.l.bloc] || []).push(x.pct);
+  const blocBest = Object.entries(blocs).map(([b, xs]) => [b, Math.round(xs.reduce((s, v) => s + v, 0) / xs.length)]).sort((a, b) => b[1] - a[1]);
+  const isr = il.length ? el("ul", { class: "cpos" }, el("li", { text: "Closest lists: " + il.slice(0, 3).map((x) => x.l.name + " " + x.pct + "%").join(", ") + "." }),
+    blocBest.length ? el("li", { text: "By bloc: " + blocBest.map(([b, v]) => blocName[b] + " " + v + "%").join(", ") + "." }) : null) : el("p", { class: "fine", text: "Take the Israel match to see this." });
+  const local = (() => { const g = data.voter_guide; if (!g || !g.quiz) return null;
+    const a = withProposals("election", ((Q.elections || {})[g.id] || {}).answers || {});
+    const races = (g.races || []).filter((r) => !["governor", "attorney_general", "comptroller", "ny18"].includes(r.id));
+    const rows = races.map((r) => { const ms = r.candidates.map((c) => ({ c, m: matchFor(g, c.name, a) })).filter((x) => x.m.n >= 2).sort((x, y) => y.m.pct - x.m.pct);
+      return ms.length ? el("li", { text: r.office + (r.district ? " (" + r.district + ")" : "") + ": " + ms.map((x) => x.c.name + " " + x.m.pct + "%").join(", ") }) : null; }).filter(Boolean);
+    return rows.length ? el("ul", { class: "cpos" }, ...rows) : el("p", { class: "fine", text: "Local races are candidate by candidate; too few shared statements to score yet." }); })();
+  // 4. Disagreements, drift, platform draft
+  const drift = (V.past || []).length && sc ? (() => { const p = standScores(V.past[0].answers || {}); return el("p", { text: "Since your last take (" + fmtDate.format(new Date(V.past[0].done_at)) + "): " + bank.axes.filter((a) => p[a.id].s != null && sc[a.id].s != null && Math.abs(sc[a.id].s - p[a.id].s) >= 0.1).map((a) => a.label.toLowerCase() + " " + (sc[a.id].s > p[a.id].s ? "toward " + a.right : "toward " + a.left).toLowerCase()).join(", ") + "." }); })() : el("p", { class: "fine", text: "Shows after a second take of Where you stand (it offers a retake about once a year), and as your debate positions build up." });
+  const platform = () => {
+    const lines = ["MY POSITIONS (confirmed)", ...pos.filter((p) => p.confirmed === true).map((p) => "- " + p.summary + " [" + p.topic + "]"),
+      "", "MY PROPOSALS", ...props.map(([k, p]) => "- " + ((data.solutions || {})[k] || {}).title + ": " + p.text),
+      "", "BEST LINES", ...((dData.log || []).flatMap((s) => (s.recap && s.recap.sharpest) || []).slice(0, 8).map((q) => "- “" + q + "”"))];
+    return lines.join("\n");
+  };
+  const copyBtn = el("button", { class: "sbtn wide", text: "Copy my platform draft", onclick: async (ev) => { try { await navigator.clipboard.writeText(platform()); ev.target.textContent = "✓ Copied"; } catch (e) { ev.target.textContent = "Couldn't copy"; } } });
+  openSheet([
+    el("span", { class: "mlabel", text: "Private · Cloudflare only" }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "Your profile" }),
+    el("p", { class: "sdesc", text: nAnswers + " questionnaire answers, " + props.length + " proposals, " + pos.length + " debate positions (" + firm.length + " firm). Everything here comes from those; nothing is guessed from what you read." }),
+    sec("Where you sit", sit, el("button", { class: "linkbtn", text: "The map and readings ›", onclick: () => openStand() })),
+    sec("Your labels", labels, el("p", { class: "fine", text: "Your own placement and outside tools beside The Wire's reading. They measure different things, so they won't always agree; that's useful." })),
+    sec("New York · which line fits", ny, el("p", { class: "fine", text: "From your election check against the candidates on each line, and The Wire's rough placement of each line. Party platforms are being coded next, which will make this a direct comparison." })),
+    sec("Federal", fed),
+    sec("Israel", isr),
+    sec("Beacon and Dutchess", local),
+    clashes.length ? sec("Where your answers disagree · " + clashes.length, el("ul", { class: "cpos" }, ...clashes.slice(0, 6).map((c) => el("li", { text: "“" + c.it.text + "”: your proposal reads " + (SCALE.find(([v]) => v === c.c.v) || [0, ""])[1].toLowerCase() + ", your answer " + (SCALE.find(([v]) => v === c.a.v) || [0, ""])[1].toLowerCase() + "." })))) : null,
+    sec("How you've moved", drift),
+    firm.length ? sec("Firm positions", el("ul", { class: "cpos" }, ...firm.slice(0, 8).map((p) => el("li", { text: p.summary })))) : null,
+    sec("People to watch", el("p", { class: "fine", text: "Coming next: a proposed list of officials and rising figures, for you to approve one by one, each followed as a career thread." })),
+    sec("Platform draft", el("p", { class: "fine", text: "For later: your confirmed positions, proposals and best debate lines as plain text, ready to start a platform from. Nothing leaves this page unless you paste it somewhere." }), copyBtn),
+  ].filter(Boolean), "Your profile");
+}
+
 // --------------------------------------------------------------- engagement log (2026-10-25)
 // Joe: "see what I actually engage with versus what I think I engage with." Private: events go to
 // /engage (KV, behind Access), batched: sent when 25 pile up or the page is hidden.
@@ -3598,6 +3745,7 @@ function questionnairesSection(Q) {
   return [
     el("h2", { class: "sh2", text: "Questionnaires" }),
     el("p", { class: "fine", text: "Private: your answers, results and proposals are stored only on Cloudflare behind your login, never in the code repository, its logs or Ballot Match. Results show only when you open them." }),
+    profileEntry(),
     baselineEntry(Q),
     el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Five quick questions" }),
       el("p", { class: "rjob", text: lp ? "Last answered " + fmtDate.format(new Date(lp)) + "." : "Not answered yet." }),
