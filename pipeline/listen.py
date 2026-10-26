@@ -28,6 +28,7 @@ MAX_CHAPTERS = 8
 MAX_WORDS = 1150                     # about 7 to 8 minutes
 CHUNK_CHARS = 380                    # per TTS call, split at sentence ends
 QUIET_HOURS = range(1, 5)            # no new editions 1–5 AM Eastern
+FORMAT = 2                           # bump to remake the edition at once after an audio change
 
 
 # ------------------------------------------------------------------ script
@@ -82,50 +83,32 @@ def script(data: dict, now: datetime) -> list[dict]:
     return chapters
 
 
-# ------------------------------------------------------------------ MP3 handling
-_BITRATES = {  # (version_bit, layer_bits) -> kbps table index 1..14 ; MPEG-1 L3 and MPEG-2/2.5 L3
-    "1": [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320],
-    "2": [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160],
-}
-_RATES = {3: [44100, 48000, 32000], 2: [22050, 24000, 16000], 0: [11025, 12000, 8000]}
+# ------------------------------------------------------------------ audio
+# MeloTTS returns WAV (checked with the voice probe, 2026-10-26). The pieces are joined as raw PCM,
+# with a short pause between chapters, and encoded once to MP3 (LAME, 64 kbps mono): a 7-minute
+# edition is about 3.4 MB, well under the 25 MB Workers KV limit.
+PAUSE_S = 0.6
+KBPS = 64
 
 
-def _strip_tags(b: bytes) -> bytes:
-    if b[:3] == b"ID3" and len(b) > 10:
-        size = (b[6] & 0x7F) << 21 | (b[7] & 0x7F) << 14 | (b[8] & 0x7F) << 7 | (b[9] & 0x7F)
-        b = b[10 + size + (10 if b[5] & 0x10 else 0):]
-    if len(b) > 128 and b[-128:-125] == b"TAG":
-        b = b[:-128]
-    return b
+def wav_pcm(raw: bytes) -> tuple[bytes, int, int, int]:
+    """(pcm, rate, channels, sample width) from a WAV file."""
+    import io
+    import wave
+    if raw[:4] != b"RIFF":
+        raise RuntimeError("the voice didn't return WAV audio")
+    with wave.open(io.BytesIO(raw)) as w:
+        return w.readframes(w.getnframes()), w.getframerate(), w.getnchannels(), w.getsampwidth()
 
 
-def mp3_frames(b: bytes) -> tuple[bytes, float]:
-    """Layer III frames only (no Xing/Info header frames), and their duration in seconds."""
-    b = _strip_tags(b)
-    out, secs, i = bytearray(), 0.0, 0
-    while i + 4 <= len(b):
-        h = b[i:i + 4]
-        if h[0] != 0xFF or (h[1] & 0xE0) != 0xE0:
-            i += 1
-            continue
-        ver = (h[1] >> 3) & 3          # 3 = MPEG-1, 2 = MPEG-2, 0 = MPEG-2.5
-        layer = (h[1] >> 1) & 3        # 1 = Layer III
-        bri, sri, pad = h[2] >> 4, (h[2] >> 2) & 3, (h[2] >> 1) & 1
-        if ver == 1 or layer != 1 or bri in (0, 15) or sri == 3:
-            i += 1
-            continue
-        kbps = _BITRATES["1" if ver == 3 else "2"][bri]
-        rate = _RATES[ver][sri]
-        samples = 1152 if ver == 3 else 576
-        length = (samples // 8) * kbps * 1000 // rate + pad
-        if length < 4 or i + length > len(b):
-            break
-        frame = b[i:i + length]
-        if b"Xing" not in frame[:64] and b"Info" not in frame[:64] and b"VBRI" not in frame[:64]:
-            out += frame
-            secs += samples / rate
-        i += length
-    return bytes(out), secs
+def encode_mp3(pcm: bytes, rate: int, channels: int) -> bytes:
+    import lameenc
+    enc = lameenc.Encoder()
+    enc.set_bit_rate(KBPS)
+    enc.set_in_sample_rate(rate)
+    enc.set_channels(channels)
+    enc.set_quality(5)
+    return bytes(enc.encode(pcm) + enc.flush())
 
 
 # ------------------------------------------------------------------ TTS
@@ -186,27 +169,37 @@ def run(state: dict, data: dict, session, dist: Path, log) -> dict:
     digest = hashlib.sha1(text.encode()).hexdigest()
     last = datetime.fromisoformat(st["at"]) if st.get("at") else None
     est = sum(len(c["say"].split()) for c in chapters) / 150 * NEURONS_PER_MIN
-    due = (digest != st.get("hash") and len(chapters) > 3
-           and (not last or now - last >= timedelta(minutes=LISTEN_EVERY_MIN))
+    remake = st.get("format") != FORMAT
+    due = ((digest != st.get("hash") or remake) and len(chapters) > 3
+           and (remake or not last or now - last >= timedelta(minutes=LISTEN_EVERY_MIN))
            and now.astimezone(NY).hour not in QUIET_HOURS
            and st["neurons"] + est <= LISTEN_DAILY_NEURONS)
     (dist / "listen.mp3").unlink(missing_ok=True)
     if due:
         st["tried"] = now.isoformat()
         try:
-            audio, t, out = bytearray(), 0.0, []
+            pcm, fmt, t, out = bytearray(), None, 0.0, []
             for c in chapters:
                 start = t
                 for piece in _chunks(c["say"]):
-                    frames, secs = mp3_frames(tts(session, piece))
-                    if not frames:
-                        raise RuntimeError("the voice returned no MP3 frames")
-                    audio += frames
-                    t += secs
+                    p, rate, ch, width = wav_pcm(tts(session, piece))
+                    if fmt and fmt != (rate, ch, width):
+                        raise RuntimeError("the voice changed audio format mid-edition")
+                    fmt = (rate, ch, width)
+                    if width != 2:
+                        raise RuntimeError(f"unexpected sample width {width}")
+                    pcm += p
+                    t += len(p) / (rate * ch * width)
+                pause = int(fmt[0] * PAUSE_S) * fmt[1] * fmt[2]
+                pcm += b"\x00" * pause
+                t += PAUSE_S
                 out.append({k: c[k] for k in ("label", "title", "story", "thread") if c.get(k)} | {"t": round(start, 2)})
-            (dist / "listen.mp3").write_bytes(bytes(audio))
+            audio = encode_mp3(bytes(pcm), fmt[0], fmt[1])
+            (dist / "listen.mp3").write_bytes(audio)
+            words = sum(len(c["say"].split()) for c in chapters)
             st.update({"hash": digest, "at": now.isoformat(), "chapters": out, "seconds": round(t, 1), "bytes": len(audio),
-                       "v": digest[:10], "error": None})
+                       "v": digest[:10], "error": None, "format": FORMAT})
+            log(f"[listen] new edition: {len(out)} chapters, {words} words, {t / 60:.1f} min, {len(audio) // 1024} KB")
             st["neurons"] += t / 60 * NEURONS_PER_MIN
             log(f"[listen] new edition: {len(out)} chapters, {t / 60:.1f} min, {len(audio) // 1024} KB")
         except Exception as exc:

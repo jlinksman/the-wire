@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests
+      - run: pip install requests lameenc
       - name: Probe
         working-directory: pipeline
         run: |
@@ -31,7 +31,7 @@ jobs:
           for n in (1, 2, 4, 6):
               text = base * n
               raw = listen.tts(s, text)
-              frames, secs = listen.mp3_frames(raw)
+              pcm, rate, ch, w = listen.wav_pcm(raw); secs = len(pcm) / (rate * ch * w)
               b = raw[:4]
               print(f"{n} sentences, {len(text)} chars, {len(text.split())} words -> {len(raw)} bytes, {secs:.1f} s, head {b.hex()}")
           PY

@@ -6,3 +6,4 @@ protego>=0.3
 tzdata>=2024.1
 pypdf>=4.0
 trafilatura
+lameenc>=1.7
