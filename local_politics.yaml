@@ -1,0 +1,876 @@
+# Beacon and Dutchess politics (2026-10-26). Public records and local reporting; every fact sourced. Second-checked Oct 26
+# (112 confirmed, 14 corrected in local politics; 44 confirmed, 10 corrected in the independent path).
+# People appear only in public roles. Nothing here describes Joe's views.
+meta:
+  as_of: '2026-10-26'
+  scope: City of Beacon and Dutchess County, NY
+  method: Dutchess BOE certified results (PDF, OCR where scanned), NYS BOE campaign finance open data (data.ny.gov), city/county/party websites, The Highlands Current, A Little Beacon Blog, Hudson Valley
+    Press, City & State
+  confidence_key:
+    verified: Read directly in a primary record or reputable report dated 2025-2026
+    dated: Source is reliable but older than 2025; may be stale
+    projected: Computed from statute or prior-year offsets; not yet published
+parties:
+- name: Beacon Democrats (City of Beacon Democratic Committee)
+  level: city
+  website: https://beacondemocrats.org/
+  contact_page: https://beacondemocrats.org/get-involved/
+  contact_email: info@beacondemocrats.org
+  officers:
+  - role: Co-Chair
+    name: Carolyn Bennett Glauda
+    note: also Ward 4 Council Member
+    source: https://beacondemocrats.org/
+  - role: Co-Chair
+    name: Rachel Saunders
+    source: https://beacondemocrats.org/
+  - role: 1st Vice Chair
+    name: Pam Wetherbee
+    note: former council member (at-large, then Ward 3)
+    source: https://beacondemocrats.org/
+  - role: 2nd Vice Chair
+    name: Lisa Jessup
+    source: https://beacondemocrats.org/
+  - role: Treasurer
+    name: Holly O'Grady
+    source: https://beacondemocrats.org/
+  - role: Corresponding Secretary
+    name: Amber Grant
+    note: also At-Large Council Member
+    source: https://beacondemocrats.org/
+  - role: Recording Secretary
+    name: Clara Masters
+    source: https://beacondemocrats.org/
+  officers_confidence: verified
+  nysboe_filer:
+    filer_id: '8454'
+    name: Beacon Democratic Committee
+    status: ACTIVE
+    type: Duly Constituted Sub-Committee of a County Committee
+    source: https://data.ny.gov/resource/7x2g-h32p.json?filer_id=8454
+  how_it_endorses:
+    summary: The committee typically presents one selected candidate per ward; selected candidates then petition for the Democratic line. No council primary has occurred since June 2019.
+    source: https://www.alittlebeaconblog.com/blog/no-primary-vote-for-beacon-june-2025
+    county_context: Municipal committee members are elected by enrolled Democrats every two years at the June primary; local committees recruit and support candidates for local office.
+    county_context_source: https://www.dutchessdems.com/about
+    gap: No written Beacon Democrats bylaws or designation-meeting procedure found online; committee member count not published.
+- name: Dutchess County Democratic Committee
+  level: county
+  website: https://www.dutchessdems.com/
+  contact_page: https://www.dutchessdems.com/contact
+  mailing_address: PO Box 1652, Poughkeepsie, NY 12601
+  structure: Made up of the members of the 22 town and city Democratic committees; committee members elected every two years at the June primary.
+  structure_source: https://www.dutchessdems.com/about
+  officers:
+  - role: Chair
+    name: Michael Dupree
+    source: https://www.dutchessdems.com/about
+  - role: Vice Chair
+    name: Mark Campbell
+    source: https://www.dutchessdems.com/about
+  - role: Treasurer
+    name: Mike Joyce
+    source: https://www.dutchessdems.com/about
+  - role: Secretary
+    name: Gillian Smith
+    source: https://www.dutchessdems.com/about
+  chair_history:
+  - name: Julie Shiroishi
+    elected: 2022-01
+    source: https://hudsonvalleypress.com/2022/01/05/democrats-elects-julie-shiroishi-as-new-chair/
+    note: now Clerk of the County Legislature per https://dutchessny.gov/elected-officials.htm
+  - name: Michael Dupree
+    elected: 2022-09
+    source: https://hudsonvalleypress.com/2022/09/28/dems-elect-michael-dupree-as-county-chair/
+  chair_corroboration:
+    date: '2025-06-06'
+    source: https://www.cityandstateny.com/politics/2025/06/county-democratic-party-chairs-go-hochul/405888/
+  nysboe_filer:
+    filer_id: '3663'
+    name: Dutchess County Democratic Committee
+    status: ACTIVE
+    source: https://data.ny.gov/resource/7x2g-h32p.json?filer_id=3663
+- name: Dutchess County Republican Committee
+  level: county
+  website: https://dutchessgop.com/
+  contact_page: https://dutchessgop.com/contact/
+  contact_email: Contact@DutchessGOP.com
+  contact_phone: 914-475-5342
+  structure: County committee members are assigned to election districts, circulate petitions, attend an annual county convention that selects fall candidates, and elect the executive board.
+  structure_source: https://dutchessgop.com/about-us/
+  officers:
+  - role: Chair
+    name: Michael McCormack
+    source: https://dutchessgop.com/republican-chairs/
+  - role: Vice Chair
+    name: Bonnie Wiegard
+    note: also East Fishkill GOP chair
+    source: https://dutchessgop.com/republican-chairs/
+  - role: Secretary
+    name: Theresa Hoffman
+    source: https://dutchessgop.com/republican-chairs/
+  - role: Treasurer
+    name: Frank Intervallo
+    source: https://dutchessgop.com/republican-chairs/
+  - role: Parliamentarian
+    name: Shane Egan
+    note: The party's page lists both Shane Egan and John C. Tkazyik as City of Poughkeepsie chair.
+    source: https://dutchessgop.com/republican-chairs/
+  - role: Parliamentarian
+    name: Ken Stenger
+    source: https://dutchessgop.com/republican-chairs/
+  nysboe_filer:
+    filer_id: '21273'
+    name: Dutchess County Republican Committee
+    status: ACTIVE
+    source: https://data.ny.gov/resource/7x2g-h32p.json?filer_id=21273
+  beacon_presence:
+    acting_chair: 'Unclear: the Dutchess GOP''s own page lists both Diane Spiak-Pisanelli (''Acting Chair – Beacon'') and Michael Justice (''Chair, City of Beacon Republican Committee'').'
+    committee_filer:
+      filer_id: '10908'
+      name: City Of Beacon Republican Committee
+      status: ACTIVE
+      last_itemized_receipts_year: 2020
+      source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=10908
+    ballot_activity: No Republican-line candidate for Beacon mayor or council in 2021, 2023 or 2025; last Republican council/mayor candidates ran in 2019.
+    ballot_activity_sources:
+    - https://elections.dutchessny.gov/wp-content/uploads/2021/12/2021-General-Election-Official-Results.pdf
+    - https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+    - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- name: Working Families Party (NYWFP Ulster-Dutchess Chapter)
+  level: regional
+  website: https://workingfamilies.org/
+  contact_page: https://workingfamilies.org/2025/02/nywfp-endorses-slate-of-candidates-in-ulster-and-dutchess-county/
+  leaders:
+  - role: Acting Chair, Ulster-Dutchess Chapter
+    name: Jeremy Koulish
+    as_of: '2025-02-21'
+    source: https://workingfamilies.org/2025/02/nywfp-endorses-slate-of-candidates-in-ulster-and-dutchess-county/
+    confidence: dated
+  - role: Co-Directors, NY WFP (statewide)
+    name: Ana Maria Archila; Jasmine Gripper
+    as_of: '2025-02-21'
+    source: https://workingfamilies.org/2025/02/nywfp-endorses-slate-of-candidates-in-ulster-and-dutchess-county/
+  beacon_role: WFP line carried Wake, Krasikov, Gorton, Bennett Glauda (council), Rhodes and Valdes Smith (legislature) and Aymar-Blair (comptroller) in 2025. WFP's Feb 2025 slate named Wake and Krasikov
+    for Beacon council.
+  beacon_role_sources:
+  - https://workingfamilies.org/2025/02/nywfp-endorses-slate-of-candidates-in-ulster-and-dutchess-county/
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- name: Conservative Party of Dutchess County
+  level: county
+  website: null
+  contact_page: null
+  chair:
+    name: Don Minichino
+    as_of: '2025-10-22'
+    source: https://jewishpress.com/a-conservative-viewpoint-from-one-hudson-valley-county/
+  nysboe_filers:
+  - filer_id: '22207'
+    name: Dutchess County NY Conservative Party
+    status: ACTIVE
+    source: https://data.ny.gov/resource/7x2g-h32p.json?filer_id=22207
+  - filer_id: '12826'
+    name: Dutchess County Conservative Party - Housekeeping
+    status: ACTIVE
+    source: https://data.ny.gov/resource/7x2g-h32p.json?filer_id=12826
+  gap: No official county Conservative Party website found.
+- name: Libertarian Party of Dutchess County
+  level: county
+  website: https://www.dutchesscountylp.org
+  contact_page: https://lpny.org/dutchess
+  officers:
+  - role: Chair/Treasurer
+    name: Robert Cocomello
+    source: https://lpny.org/dutchess
+  - role: Vice-Chair/Secretary
+    name: Catrina Rocco
+    source: https://lpny.org/dutchess
+  notes: LPNY affiliate founded 2021; meets second Tuesday monthly. No Libertarian line on the 2026 Dutchess ballot.
+  notes_sources:
+  - https://lpny.org/dutchess
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf
+- name: Green Party
+  level: historical
+  notes: Green (GRE) line appeared on Beacon ballots in 2017 and 2019 (Kyriacou carried it for mayor in 2019); no Green line appears on the 2026 Dutchess ballot.
+  sources:
+  - https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf
+  gap: No active Dutchess Green Party chapter or chair found.
+- name: Independent bodies on the 2026 Dutchess ballot
+  level: county
+  bodies:
+  - line: Common Ground (CG)
+    used_by: Wappinger town council candidate
+  - line: Vote Affordable (VA)
+    used_by: Blakeman/Hood (governor), state slate
+  - line: Amenia Works (AW)
+    used_by: Amenia town council candidate
+  source: https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf
+  beacon_note: 'The last independent-body line in a Beacon city race was SWA in 2017 (Paul Yeaple, Ward 1). Independence, Women''s Equality and Green were qualified parties then, not independent bodies.
+    Minor-party lines last appeared in 2019 (Independence: Casale, Ellenwood, Gauzza; Green: Kyriacou, Nelson, Rhodes, Aymar-Blair).'
+  beacon_note_sources:
+  - https://elections.dutchessny.gov/wp-content/uploads/2020/02/GE17-Official-Certification.pdf
+  - https://www.alittlebeaconblog.com/blog/beacon-mayoral-and-city-council-election-results-so-far-unofficial
+- name: Other registered party-adjacent committees (Dutchess, NYS BOE filer list)
+  level: county
+  active_examples:
+  - filer_id: '1054'
+    name: New Day Democrats Of Dutchess County
+  - filer_id: '591751'
+    name: Southern Dutchess Democrats
+  - filer_id: '592277'
+    name: Dutchess County Young Democrats
+  - filer_id: '14597'
+    name: Dutchess Democratic Womens Caucus
+  - filer_id: '3649'
+    name: Dutchess County Republican Legislators Fund
+  - filer_id: '731'
+    name: Dutchess County Young Republican Club (DCYR)
+  - filer_id: '14007'
+    name: Federated Republican Women Of Dutchess County
+  - filer_id: '13480'
+    name: The New Dutchess County Independence Party
+  source: https://data.ny.gov/d/7x2g-h32p
+officials:
+  city_of_beacon:
+    mayor:
+      name: Lee Kyriacou
+      party: Democratic
+      term: Four-year term; elected 2019 and 2023; current term ends 2027-12-31 (seat on Nov 2, 2027 ballot)
+      sources:
+      - https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+      - https://www.newpaltz.edu/benjamincenter/4.3.17_beacon_committee_suggests_charter_changes_thehighlandscurrent.pdf
+      - https://beaconny.gov/index.php/2026/03/03/mayor-kyriacou-delivers-2026-state-of-the-city-address/
+    council_term_rule: All six council seats (4 ward, 2 at-large) are two-year terms elected together in odd years; at-large seats were on the 2019, 2021, 2023 and 2025 ballots (a 2017 proposal for four-year
+      at-large terms was not reflected in later ballots).
+    council_term_sources:
+    - https://www.newpaltz.edu/benjamincenter/4.3.17_beacon_committee_suggests_charter_changes_thehighlandscurrent.pdf
+    - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+    council:
+    - seat: Ward 1
+      name: Lastar Gorton
+      party: Democratic (D, WFP lines)
+      term: 2026-01-01 to 2027-12-31
+      first_elected: 2025
+      sources:
+      - https://beaconny.gov/index.php/government/city-council/
+      - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+    - seat: Ward 2
+      name: Zack Smith
+      party: Democratic (D line only)
+      term: 2026-01-01 to 2027-12-31
+      first_elected: 2025
+      sources:
+      - https://beaconny.gov/index.php/government/city-council/
+      - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+    - seat: Ward 3
+      name: Sergei Krasikov
+      party: Democratic (D, WFP lines)
+      term: 2026-01-01 to 2027-12-31
+      first_elected: 2025
+      sources:
+      - https://beaconny.gov/index.php/government/city-council/
+      - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+    - seat: Ward 4
+      name: Carolyn Bennett Glauda
+      party: Democratic (D, WFP lines)
+      term: 2026-01-01 to 2027-12-31
+      first_elected: 2025
+      sources:
+      - https://beaconny.gov/index.php/government/city-council/
+      - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+    - seat: At-Large
+      name: Amber Grant
+      party: Democratic (D line)
+      term: 2026-01-01 to 2027-12-31
+      history: Elected Ward 4 2017, at-large 2019; retired, then appointed back to at-large seat in 2024; elected 2025
+      sources:
+      - https://beaconny.gov/index.php/government/city-council/
+      - https://www.alittlebeaconblog.com/blog/how-beacon-could-hold-an-election-for-citys-3rd-vacancy-on-city-council
+      - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+    - seat: At-Large
+      name: Paloma Wake
+      party: Democratic (D, WFP lines)
+      term: 2026-01-01 to 2027-12-31
+      history: Elected at-large 2021, 2023, 2025
+      sources:
+      - https://beaconny.gov/index.php/government/city-council/
+      - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+    city_administrator:
+      name: Ben Swanson
+      note: Appointed by Council vote 2026-04-06 (Res. 34 of 2026) to succeed Chris White, who planned to retire in June 2026 after the capital budget. Swanson was previously Beacon's first deputy city
+        administrator.
+      sources:
+      - https://beaconny.gov/wp-content/uploads/2026/04/Resolution-Appointing-Benjamin-Swanson-to-the-position-of-City-Administrator.pdf
+      - https://highlandscurrent.org/2026/04/08/beacon-names-next-administrator/
+      caveat: City council web page still lists Swanson as Deputy City Administrator (page likely stale); exact effective date not confirmed.
+    city_attorney:
+      name: Nick Ward-Willis
+      source: https://highlandscurrent.org/2026/04/08/beacon-names-next-administrator/
+    planning_board_chair:
+      name: John Gunn
+      source: https://beaconny.gov/index.php/government/boards-committees/planning-board/
+      note: 'Reappointment resolution Jan 2026: https://beaconny.gov/wp-content/uploads/2026/01/Resolution-Approving-the-Appointment-of-John-Gunn-to-the-Planning-Board.pdf'
+    zba_chair:
+      name: Jordan Haug
+      source: https://beaconny.gov/index.php/government/boards-committees/zoning-board
+    school_board:
+      district: Beacon City School District
+      president:
+        name: Flora Stadler
+        term_expires: '2027-06-30'
+        source: https://www.beaconk12.org/board-of-education/meet-the-board
+      vice_president:
+        name: Meredith Heuer
+        term_expires: '2028-06-30'
+        source: https://www.beaconk12.org/board-of-education/meet-the-board
+      note: Board races are nonpartisan.
+  state_and_federal_for_beacon:
+  - office: U.S. House NY-18
+    name: Pat Ryan
+    party: Democratic
+    on_2026_ballot: vs Jackie Auringer (R/C)
+    source: https://highlandscurrent.org/2026/10/22/whos-on-the-ballot-2026/
+  - office: State Senate District 39
+    name: Rob Rolison
+    party: Republican
+    on_2026_ballot: vs Lisa Kaul (D/WF), county legislator District 6
+    source: https://highlandscurrent.org/2026/10/22/whos-on-the-ballot-2026/
+  - office: State Assembly District 104
+    name: Jonathan Jacobson
+    party: Democratic
+    on_2026_ballot: unopposed (D/WF)
+    source: https://highlandscurrent.org/2026/10/22/whos-on-the-ballot-2026/
+  dutchess_county:
+    legislators_for_beacon:
+    - district: 16
+      coverage: Town of Fishkill + Beacon Ward 4
+      name: Yvette Valdes Smith
+      party: Democratic
+      role: Chair of the Legislature
+      sources:
+      - https://www.dutchessny.gov/Departments/County-Legislature/District-16.htm
+      - https://highlandscurrent.org/2026/10/22/whos-on-the-ballot-2026/
+    - district: 18
+      coverage: Beacon Wards 1-3 + part of Fishkill
+      name: Molly Rhodes
+      party: Democratic
+      role: Vice-Chair, Public Works
+      sources:
+      - https://www.dutchessny.gov/Departments/County-Legislature/Dutchess-County-Legislators.htm
+      - https://highlandscurrent.org/2026/10/22/whos-on-the-ballot-2026/
+    legislature_term_note: Legislators elected Nov 2025 got one-year transition terms under the even-year election law; all 25 seats are on the Nov 3, 2026 ballot, then two-year terms. Both Beacon seats
+      are uncontested in 2026 (D/WF).
+    legislature_term_sources:
+    - https://elections.ny.gov/even-years-election-transition-guidance
+    - https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf
+    legislature_composition:
+      democrats: 15
+      republicans: 10
+      source: https://www.dutchessny.gov/Departments/County-Legislature/Dutchess-County-Legislators.htm
+    legislature_leaders:
+    - role: Chair
+      name: Yvette Valdes Smith
+      party: Democratic
+      district: 16
+    - role: Majority Leader
+      name: Barrington Atkins
+      party: Democratic
+      district: 9
+    - role: Assistant Majority Leader
+      name: Kristofer Munn
+      party: Democratic
+      district: 20
+    - role: Minority Leader
+      name: Michael Polasek
+      party: Republican
+      district: 3
+      note: also LaGrange GOP chair
+    - role: Assistant Minority Leader
+      name: John Metzger
+      party: Republican
+      district: 12
+    - role: Clerk of the Legislature (appointed)
+      name: Julie Shiroishi
+    legislature_leaders_sources:
+    - https://www.dutchessny.gov/Chair-Yvette-Valdes-Smith-Announces-Dutchess-County-Legislatures-2026-Committee-Assignments.htm
+    - https://www.dutchessny.gov/Departments/County-Legislature/Dutchess-County-Legislators.htm
+    countywide:
+    - office: County Executive
+      name: Sue Serino
+      party: Republican (R, C lines in 2023)
+      took_office: '2024-01-01'
+      next_election: 2027 (three-year transition term, then even-year cycle from 2030)
+      sources:
+      - https://dutchessny.gov/elected-officials.htm
+      - https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+      - https://elections.ny.gov/even-years-election-transition-guidance
+    - office: Comptroller
+      name: Dan Aymar-Blair
+      party: Democratic (D, WF lines)
+      took_office: 2025 (special election Nov 2024); second term from Jan 2026
+      next_election: 2028 (three-year term)
+      sources:
+      - https://dutchessny.gov/elected-officials.htm
+      - https://www.dutchessny.gov/Departments/Comptroller/Dan-Aymar-Blair-Sworn-In-for-Second-Term-as-Dutchess-County-Comptroller.htm
+      - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+    - office: County Clerk
+      name: Bradford Kendall
+      party: Republican (R, C lines in 2023)
+      next_election: 2027 if four-year term from 2023 holds (clerk excluded from even-year law)
+      sources:
+      - https://dutchessny.gov/elected-officials.htm
+      - https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+      - https://elections.ny.gov/even-years-election-transition-guidance
+    - office: Sheriff
+      name: Kirk Imperati
+      party: Republican (R, C lines)
+      next_election: On Nov 3, 2026 ballot, unopposed
+      sources:
+      - https://dutchessny.gov/elected-officials.htm
+      - https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf
+    - office: District Attorney
+      name: Anthony Parisi
+      party: Democratic (D, WF lines in 2023)
+      next_election: 2027 (DA excluded from even-year law)
+      sources:
+      - https://dutchessny.gov/elected-officials.htm
+      - https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+contests:
+  beacon_history:
+  - year: 2017
+    mayor: Not on ballot (mayor serves four-year terms)
+    primary: 'Democratic at-large primary: George Mansfield 718, Lee Kyriacou 682, Ali T. Muhammad 429 (top two advance). Green Ward 1 primary: Paul Yeaple.'
+    general:
+      at_large: Mansfield (D,WF) 2,656; Kyriacou (D,WF) 2,514; Amando Downer (R) 816
+      ward_1: Terry Nelson (D,WF) 500; Wayne Theiss (R,C,I) 280; Paul Yeaple (GRE,SWA) 87
+      ward_2: John E. Rembert (D,WF,I) 619; Omar Harper (R,C) 143
+      ward_3: Jodi McCredo (D,WF) 528; Andrew Gauzza III (R,C,I) 349
+      ward_4: Amber Grant (D,WF,WEP) 675; Christopher Bopp (R,C,I) 276
+    contested: All seats contested
+    sources:
+    - https://elections.dutchessny.gov/wp-content/uploads/2020/02/GE17-Official-Certification.pdf
+    - https://elections.dutchessny.gov/wp-content/uploads/2020/02/PE17-Official-Certification-1.pdf
+  - year: 2019
+    mayor: Lee Kyriacou (D,WF,GRE) 2,222 (DEM 1,951, WOR 185, GRE 86) def. former Mayor Randy Casale (R,IND) 1,527 (REP 1,192, IND 335); write-ins incl. Patrick O'Dell 79, Terry Hockler 73
+    primary: 'Ward 4 Democratic primary: Dan Aymar-Blair 252, Kelly Ellenwood 127. Green mayoral primary: Kyriacou won by write-in (9) over Terry Hockler, who was on the Green ballot (7).'
+    general:
+      at_large: Amber Grant (D,WF) 2,851; George Mansfield (D,WF) 2,767; Estefano Rendon (R) 845
+      ward_1: Terry Nelson (D,WF,GRE) 751, unopposed
+      ward_2: Air Rhodes (D,WF,GRE) 710, unopposed
+      ward_3: Jodi McCredo (D,WF) 612; Andrew E. Gauzza IV (R,C,IND) 288
+      ward_4: Dan Aymar-Blair (D,WF,GRE) 668; Kelly Ellenwood (IND) 321
+    contested: Mayor, at-large, Wards 3 and 4 contested; Wards 1-2 unopposed
+    sources:
+    - https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+    - https://elections.dutchessny.gov/wp-content/uploads/2020/04/PE-2019-Official-Results.pdf
+    - https://elections.dutchessny.gov/wp-content/uploads/2020/04/PE-2019-Official-Results.pdf
+  - year: 2021
+    mayor: Not on ballot
+    primary: 'No council primary (City Court judge Democratic primary only: Gregory Johnston def. Timothy Pagones)'
+    general:
+      at_large: Paloma Wake (D,WF) 2,368; George Mansfield (D) 2,203; no other candidates
+      ward_1: Molly Rhodes (D,WF) 567, unopposed
+      ward_2: Justice McCray (D,WF) 645, unopposed
+      ward_3: Wren Longno (D,WF) 565, unopposed (spelled 'Longo' in some press)
+      ward_4: Dan Aymar-Blair (D,WF) 706, unopposed
+    contested: None contested
+    sources:
+    - https://elections.dutchessny.gov/wp-content/uploads/2021/12/2021-General-Election-Official-Results.pdf
+    - https://elections.dutchessny.gov/wp-content/uploads/2022/01/PE21-Results.pdf
+  - year: 2023
+    mayor: 'Lee Kyriacou (D) 2,269; write-in campaign by Reuben (BOE: ''Ruben'') Simmons 390; other write-ins 64'
+    primary: None on the ballot. Lastar Gorton sought the 2023 Ward 1 ballot but did not qualify (postmark problem); A Little Beacon Blog describes it once as a Democratic designation and once as an independent
+      run.
+    general:
+      at_large: Paloma Wake (D,WF) 2,455; Pamela Wetherbee (D) 2,450
+      ward_1: Molly Rhodes (D) 635
+      ward_2: Jeffrey Domanski (D) 640
+      ward_3: Wren Longno (D) 567
+      ward_4: Dan Aymar-Blair (D,WF) 740
+    contested: No ballot opposition for any seat; mayor faced a late write-in
+    sources:
+    - https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+    - https://www.alittlebeaconblog.com/blog/a-few-election-results-from-tuesdays-local-vote
+    - https://www.alittlebeaconblog.com/blog/no-primary-vote-for-beacon-june-2025
+  - year: 2024 (vacancies)
+    events: Ward 3's Wren Longno resigned; Mayor moved at-large Pam Wetherbee to Ward 3 and appointed Amber Grant to the at-large seat; Ward 4's Dan Aymar-Blair resigned end of Dec 2024 to become County
+      Comptroller and George Mansfield was appointed to Ward 4.
+    sources:
+    - https://www.alittlebeaconblog.com/blog/how-beacon-could-hold-an-election-for-citys-3rd-vacancy-on-city-council
+    - https://www.alittlebeaconblog.com/blog/no-primary-vote-for-beacon-june-2025
+  - year: 2025
+    mayor: Not on ballot
+    primary: None (no council primary since 2019)
+    general:
+      at_large: Paloma Wake (D 2,334 + WF 771 = 3,105); Amber Grant (D) 3,023
+      ward_1: Lastar Gorton (D 637 + WF 192 = 829), unopposed
+      ward_2: Zack Smith (D) 765, unopposed
+      ward_3: Sergei Krasikov (D 528 + WF 173 = 701), unopposed
+      ward_4: Carolyn Bennett Glauda (D 735 + WF 215 = 950), unopposed
+    contested: None contested; four new ward members replaced Rhodes, Domanski, Wetherbee and Mansfield
+    sources:
+    - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+    - https://www.alittlebeaconblog.com/blog/no-primary-vote-for-beacon-june-2025
+  related_county_races_2025:
+  - race: Legislature D16
+    result: Yvette Valdes Smith (D,WF) 2,000; John Forman (R,C) 994
+    source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  - race: Legislature D18
+    result: Molly Rhodes (D,WF) 2,607, unopposed
+    source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  - race: County Comptroller
+    result: Dan Aymar-Blair (D,WF) 41,164; William G. Truitt (R,C) 33,346
+    source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  pattern_summary: Beacon city races have been uncontested on the ballot since 2021; the last contested mayoral race was 2019 and the last council primary June 2019.
+  pattern_sources:
+  - https://www.alittlebeaconblog.com/blog/no-primary-vote-for-beacon-june-2025
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  current_cycle_2026:
+    general_date: '2026-11-03'
+    beacon_ballot: NY-18 (Ryan vs Auringer), SD-39 (Rolison vs Kaul), AD-104 (Jacobson), Sheriff (Imperati), Legislature D16 (Valdes Smith) and D18 (Rhodes), statewide offices; no city offices
+    june_2026_primary_in_beacon: Democratic primaries for State Comptroller and State Senate District 39
+    sources:
+    - https://highlandscurrent.org/2026/10/22/whos-on-the-ballot-2026/
+    - https://elections.dutchessny.gov/wp-content/uploads/2026/07/Detailed-Results-by-Contest-Table-7-10.pdf
+  next_beacon_municipal_election:
+    general_date: '2027-11-02'
+    primary_date: '2027-06-22'
+    date_basis: 'General: Tuesday after first Monday in November; primary: fourth Tuesday in June. City offices are excluded from the even-year law.'
+    offices:
+    - Mayor (four-year term)
+    - Council Ward 1
+    - Council Ward 2
+    - Council Ward 3
+    - Council Ward 4
+    - Council At-Large (2 seats)
+    also_on_dutchess_2027_ballot:
+    - County Executive (three-year transition term)
+    - District Attorney
+    - County Clerk (likely; see officials caveat)
+    petitioning_projected:
+      designating_circulate: 2027-02-23 to 2027-04-01
+      designating_file: 2027-03-29 to 2027-04-01
+      independent_first_sign: '2027-04-13'
+      independent_file: 2027-05-18 to 2027-05-25
+      basis: 'Computed from statute. Designating: signatures no earlier than 37 days before the last filing day (§6-134(4)), so Feb 23, 2027; filing the 13th Monday through the 12th Thursday before the
+        June 22 primary (§6-158(1)), so Mar 29 to Apr 1; Wilson-Pakula and acceptances due Apr 5 (§§6-120(3), 6-158(2)). Independent: filing 24 to 23 weeks before Nov 2 (§6-158(9)), so May 18 to 25; first
+        signature Apr 13 (§6-138(4)); accept or decline by May 28 (§6-158(11)). 2026 used one-year exceptions; confirm against the State BOE''s 2027 calendar.'
+      confidence: projected
+      authorizations_due: 2027-04-05 (Wilson-Pakula authorizations; acceptances/declinations of designation)
+    signature_rule: 'Designating petitions: 5% of active enrolled party voters in the ward/city or 500, whichever is less.'
+    sources:
+    - https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+    - https://elections.ny.gov/even-years-election-transition-guidance
+    - https://www.wrvo.org/2025-10-16/even-year-elections-are-coming-to-new-yorks-towns-counties
+    declared_candidates: None publicly reported as of 2026-10-26 (see money.watch for one Beacon filing).
+money:
+  method: NYS BOE campaign finance data mirrored on data.ny.gov. 'Itemized raised' = Schedules A+B+C (monetary contributions from individuals/partnerships, corporations, and committees/other), by election_year;
+    excludes in-kind (D), transfers-in (G) and unitemized receipts, so figures are lower bounds. 2026 is year-to-date (data through ~2026-10-26). Rows are taken as filed; whether amended filings duplicate
+    original rows was not tested.
+  datasets:
+    filers: https://data.ny.gov/d/7x2g-h32p
+    contributions: https://data.ny.gov/d/4j2b-6a2j
+    active_candidates: https://data.ny.gov/d/epr8-9fny
+    official_portal_not_fetched: https://publicreporting.elections.ny.gov/ (bot challenge; skipped)
+  party_committees:
+  - filer_id: '8454'
+    name: Beacon Democratic Committee
+    itemized_raised_by_year:
+      2017: 18540
+      2018: 1685
+      2019: 28458
+      2020: 3605
+      2021: 14130
+      2022: 710
+      2023: 11222
+      2024: 4875
+      2025: 6574
+      2026: 20423
+    source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=8454
+  - filer_id: '10908'
+    name: City Of Beacon Republican Committee
+    itemized_raised_by_year:
+      2017: 19161
+      2018: 16093
+      2019: 14885
+      2020: 11255
+    note: No itemized receipts in the dataset after 2020; filer still ACTIVE.
+    source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=10908
+  - filer_id: '3663'
+    name: Dutchess County Democratic Committee
+    itemized_raised_by_year:
+      2017: 99954
+      2018: 102827
+      2019: 106337
+      2020: 25260
+      2021: 124622
+      2022: 32270
+      2023: 87185
+      2024: 94348
+      2025: 166217
+      2026: 205547
+    source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=3663
+  - filer_id: '21273'
+    name: Dutchess County Republican Committee
+    itemized_raised_by_year:
+      2017: 83025
+      2018: 22935
+      2019: 48290
+      2020: 8560
+      2021: 90025
+      2022: 63532
+      2023: 268821
+      2024: 24730
+      2025: 261156
+      2026: 94193
+    source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=21273
+  - filer_id: '22207'
+    name: Dutchess County NY Conservative Party
+    itemized_raised_by_year:
+      2020: 2200
+      2022: 7090
+      2024: 20200
+    source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=22207
+  beacon_city_candidates:
+    pattern: Recent Beacon council candidates (2023, 2025) registered as candidates without authorized committees (filer records show no committee and TERMINATED status), so no itemized contribution data
+      exists for them. The mayor's candidate filer is ACTIVE without a committee; his old committee F.O.L.K. (4005) is terminated with no receipts since 2017.
+    candidate_filers:
+    - name: Lee Kyriacou
+      filer_id: '31246'
+      status: ACTIVE
+      office: listed as Councilman at Large (stale office code)
+    - name: Paloma Wake
+      filer_id: '186102'
+      status: ACTIVE
+      office: Council Member
+    - name: Lastar L Gorton
+      filer_id: '496599'
+      status: TERMINATED
+    - name: Zack J Smith
+      filer_id: '496596'
+      status: TERMINATED
+    - name: Sergei Krasikov
+      filer_id: '496595'
+      status: TERMINATED
+    - name: Carolyn Bennett Glauda
+      filer_id: '496594'
+      status: TERMINATED
+    - name: Amber Grant
+      filer_id: '36337'
+      status: TERMINATED
+    - name: F.O.L.K. (Friends Of Lee Kyriacou)
+      filer_id: '4005'
+      status: TERMINATED
+    historical_committees_with_receipts:
+    - filer_id: '3727'
+      name: Friends Of Randy Casale
+      status: ACTIVE
+      itemized_raised:
+        2019: 16663
+    - filer_id: '13021'
+      name: Friends Of Kelly Ellenwood
+      status: TERMINATED
+      itemized_raised:
+        2019: 6994
+    sources:
+    - https://data.ny.gov/resource/7x2g-h32p.json?municipality_desc_subdivision=Beacon,City
+    - https://data.ny.gov/resource/epr8-9fny.json?municipality_desc_subdivision=Beacon,City
+    - https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=3727
+  beacon_area_county_officials:
+  - filer_id: '496433'
+    name: Friends of Molly Rhodes
+    itemized_raised:
+      2025: 7491
+      2026: 4135
+    source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=496433
+  - filer_id: '164998'
+    name: Friends of Yvette Valdes Smith
+    status: TERMINATED
+    itemized_raised:
+      2021: 15458
+      2022: 2468
+      2023: 20867
+      2024: 1550
+    note: candidate filer 496636 ACTIVE without committee
+    source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=164998
+  - filer_id: '414370'
+    name: Friends of Dan Aymar-Blair
+    itemized_raised:
+      2024: 126898
+      2025: 101479
+      2026: 2138
+    source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=414370
+  - filer_id: '308720'
+    name: Friends of Sue Serino
+    itemized_raised:
+      2023: 436969
+      2024: 55901
+      2025: 69832
+      2026: 36677
+    source: https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=308720
+  watch:
+  - item: Beacon-registered committee with large 2026 receipts
+    facts: '''Friends of Matt Castelli'' (filer 592003, ACTIVE, Authorized Single Candidate Committee, municipality Beacon,City) and candidate filer ''Matt Castelli'' (592002, office ''Local Undeclared'').
+      Its only itemized receipt is $65,000 from ''Matt Castelli for Congress'' on 2026-06-30 (July Periodic).'
+    context: A Matt Castelli was the 2022 Democratic nominee in NY-21. No press coverage of a Beacon candidacy found; office sought is undeclared in the filing.
+    sources:
+    - https://data.ny.gov/resource/7x2g-h32p.json?filer_id=592003
+    - https://data.ny.gov/resource/4j2b-6a2j.json?filer_id=592003
+    - https://spectrumlocalnews.com/nys/capital-region/news/2022/08/24/voters-tap-castelli-to-take-on-stefanik
+    confidence: filing verified; identity link inferred from transfer source
+    caveat: Filing confirmed as stated. That this is the 2022 NY-21 Democratic nominee is inferred from the transfer's source; no press coverage of a Beacon candidacy found.
+  donors_note: Donor names omitted by design; organization-level detail available per filer via the contributions dataset.
+  contribution_limits_2026: https://elections.dutchessny.gov/wp-content/uploads/2026/03/Resolution-2026-Campiagn-Apportionment-signed.pdf
+calendar:
+  near_term_2026:
+  - date: 2026-10-24 to 2026-11-01
+    event: 'Early voting (Beacon site: Fishkill Town Hall, 807 Route 52)'
+    source: https://highlandscurrent.org/2026/10/22/whos-on-the-ballot-2026/
+  - date: '2026-11-03'
+    event: General election (no Beacon city offices)
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+  - date: '2026-11-28'
+    event: County BOE certification of general election canvass
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+  '2027':
+  - date: early 2027 (first week of January)
+    event: Dutchess County Legislature reorganization meeting (2026's was Jan 5); new two-year legislative terms begin
+    source: https://www.dutchessny.gov/Departments/County-Legislature/Docs/Minutes-2026-01-05-Reorganizational-Meeting.pdf
+    confidence: projected
+  - date: 2027-02 (early)
+    event: Offices to be filled certified; party calls filed by county chairs
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+    confidence: projected
+  - date: winter-spring 2027 (date TBA)
+    event: Dutchess GOP annual county convention selects fall candidates (County Executive, DA, Clerk in 2027)
+    source: https://dutchessgop.com/about-us/
+    confidence: date unannounced
+  - date: winter 2027 (date TBA)
+    event: Beacon Democrats select council/mayor candidates before petitioning
+    source: https://www.alittlebeaconblog.com/blog/no-primary-vote-for-beacon-june-2025
+    confidence: date unannounced
+  - date: 2027-02-23 to 2027-04-01
+    event: Designating petitions circulate (party primary)
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+    confidence: projected
+  - date: 2027-03-29 to 2027-04-01
+    event: Designating petitions filed with Dutchess BOE
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+    confidence: computed from statute
+  - date: '2027-04-05'
+    event: Last day to file Wilson-Pakula authorizations and acceptances of designation
+    source: Election Law §§6-158(2), 6-120(3)
+    confidence: computed from statute
+  - date: '2027-04-13'
+    event: First day to sign independent nominating petitions
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+    confidence: projected
+  - date: 2027-05-18 to 2027-05-25
+    event: Independent nominating petitions filed
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+    confidence: projected
+  - date: '2027-05 (third Tuesday expected: 2027-05-18)'
+    event: Beacon school board election and budget vote; seats of President Stadler and member Lewine expire 2027-06-30
+    source: https://www.beaconk12.org/board-of-education/meet-the-board
+    confidence: date projected
+  - date: 2027-06-12 to 2027-06-20
+    event: Early voting for primary
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+    confidence: projected
+  - date: '2027-06-22'
+    event: Primary election
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+    confidence: projected (fourth Tuesday in June)
+  - date: 2027-10-23 to 2027-10-31
+    event: Early voting for general
+    source: https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+    confidence: projected
+  - date: '2027-11-02'
+    event: 'General election: Beacon mayor + all 6 council seats; Dutchess County Executive, DA, County Clerk'
+    source: https://elections.ny.gov/even-years-election-transition-guidance
+    confidence: projected
+  - date: '2027-12-31'
+    event: Mayor and council terms end; CSEA contract with city also expires this date
+    source: https://highlandscurrent.org/2026/04/08/beacon-names-next-administrator/
+  party_reorganization_note: Dutchess Democrats say municipal/county committee members are elected every two years at the June primary, followed by organizational meetings that elect officers. Which year
+    Dutchess holds those elections (even vs odd) was not confirmed; no county committee contests appeared on the June 2026 Dutchess primary ballot (uncontested committee seats do not appear).
+  party_reorganization_sources:
+  - https://www.dutchessdems.com/about
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/07/Detailed-Results-by-Contest-Table-7-10.pdf
+players:
+- name: Lee Kyriacou
+  role: Mayor of Beacon (since 2020); former at-large council member
+  party: Democratic
+  why: Chief executive; appoints to council vacancies, boards and administrator; term ends 2027 and the seat is on the 2027 ballot.
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- name: Ben Swanson
+  role: Beacon City Administrator (appointed April 2026)
+  party: n/a (appointed)
+  why: Runs day-to-day operations, drafts the budget with the mayor, negotiates the three city union contracts.
+  source: https://highlandscurrent.org/2026/04/08/beacon-names-next-administrator/
+- name: Carolyn Bennett Glauda
+  role: Beacon Democrats co-chair; Ward 4 Council Member
+  party: Democratic
+  why: Leads the city committee that has supplied every council member since 2021 while also holding a council seat.
+  source: https://beacondemocrats.org/
+- name: Rachel Saunders
+  role: Beacon Democrats co-chair
+  party: Democratic
+  why: Co-leads candidate selection for the dominant local party ahead of the 2027 city election.
+  source: https://beacondemocrats.org/
+- name: Paloma Wake
+  role: At-Large Council Member (since 2022)
+  party: Democratic / Working Families
+  why: Longest continuously serving current council member; top vote-getter citywide in 2025; WFP-endorsed.
+  source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- name: Yvette Valdes Smith
+  role: Chair, Dutchess County Legislature; Legislator D16 (Fishkill + Beacon Ward 4)
+  party: Democratic
+  why: Presides over the 15-10 Democratic legislature and sets committee assignments.
+  source: https://www.dutchessny.gov/Chair-Yvette-Valdes-Smith-Announces-Dutchess-County-Legislatures-2026-Committee-Assignments.htm
+- name: Molly Rhodes
+  role: County Legislator D18 (Beacon Wards 1-3); former Ward 1 council member
+  party: Democratic
+  why: Beacon's main county legislator; moved from council to legislature in 2025.
+  source: https://www.dutchessny.gov/Departments/County-Legislature/Dutchess-County-Legislators.htm
+- name: Dan Aymar-Blair
+  role: Dutchess County Comptroller; former Ward 4 council member
+  party: Democratic
+  why: Beacon politician who won countywide twice (2024 special, 2025); audits county finances.
+  source: https://www.dutchessny.gov/Departments/Comptroller/Dan-Aymar-Blair-Sworn-In-for-Second-Term-as-Dutchess-County-Comptroller.htm
+- name: Sue Serino
+  role: Dutchess County Executive
+  party: Republican
+  why: Top county official; her seat is on the 2027 ballot for a three-year transition term.
+  source: https://dutchessny.gov/elected-officials.htm
+- name: Anthony Parisi
+  role: Dutchess County District Attorney
+  party: Democratic
+  why: Won the DA office as a Democrat in 2023; seat on the 2027 ballot.
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- name: Michael Dupree
+  role: Chair, Dutchess County Democratic Committee (since 2022)
+  party: Democratic
+  why: Leads county Democratic organization and endorsements; committee raised over $200k itemized in 2026.
+  source: https://www.dutchessdems.com/about
+- name: Michael McCormack
+  role: Chair, Dutchess County Republican Committee
+  party: Republican
+  why: Leads county GOP and its candidate convention; oversees a Beacon unit with an acting chair.
+  source: https://dutchessgop.com/republican-chairs/
+- name: Rob Rolison
+  role: State Senator, District 39 (covers Beacon); former Poughkeepsie mayor
+  party: Republican
+  why: Beacon's state senator; faces Democrat Lisa Kaul on Nov 3, 2026.
+  source: https://highlandscurrent.org/2026/10/22/whos-on-the-ballot-2026/
+- name: Jonathan Jacobson
+  role: Assemblymember, District 104 (covers Beacon)
+  party: Democratic
+  why: Beacon's Assembly member; unopposed in 2026.
+  source: https://highlandscurrent.org/2026/10/22/whos-on-the-ballot-2026/
+- name: Randy Casale
+  role: Former Mayor of Beacon; 2019 mayoral nominee
+  party: Republican / Independence lines (2019)
+  why: Last candidate to contest a Beacon mayoral race on a ballot line; his committee remains active.
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf

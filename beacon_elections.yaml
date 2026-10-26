@@ -1,0 +1,2458 @@
+# Beacon enrollment and results by election district (2026-10-26). Public records and local reporting; every fact sourced. Second-checked Oct 26
+# (112 confirmed, 14 corrected in local politics; 44 confirmed, 10 corrected in the independent path).
+# People appear only in public roles. Nothing here describes Joe's views.
+generated: '2026-10-26'
+place: City of Beacon, Dutchess County, NY
+enrollment:
+- as_of: '2018-03-30'
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/02/2018-Apportionment-TWD-1.pdf
+  publisher: Dutchess County Board of Elections (Apportionment District List)
+  format: PDF (text layer; pdftotext -layout parses cleanly)
+  note: Active voters only (apportionment counts); no inactive/total split in this report. NOP = no party (BLANK). Ward subtotals rows (district 000) skipped.
+  districts:
+  - ed: W1 ED1
+    ward: 1
+    code: '001001'
+    active:
+      DEM: 576
+      REP: 156
+      CON: 11
+      GRE: 12
+      WOR: 9
+      IND: 46
+      REF: 2
+      BLANK: 235
+      LBT: 1
+    active_total: 1048
+  - ed: W1 ED2
+    ward: 1
+    code: '001002'
+    active:
+      DEM: 521
+      REP: 167
+      CON: 17
+      GRE: 8
+      WOR: 7
+      IND: 57
+      BLANK: 260
+      LBT: 1
+    active_total: 1038
+  - ed: W2 ED1
+    ward: 2
+    code: '002001'
+    active:
+      DEM: 294
+      REP: 51
+      CON: 3
+      GRE: 2
+      WOR: 2
+      IND: 15
+      BLANK: 121
+    active_total: 488
+  - ed: W2 ED2
+    ward: 2
+    code: '002002'
+    active:
+      DEM: 432
+      REP: 94
+      CON: 8
+      GRE: 3
+      WOR: 4
+      IND: 24
+      BLANK: 172
+      LBT: 1
+    active_total: 738
+  - ed: W2 ED3
+    ward: 2
+    code: '002003'
+    active:
+      DEM: 528
+      REP: 120
+      CON: 7
+      GRE: 3
+      WOR: 12
+      IND: 56
+      BLANK: 195
+      LBT: 1
+    active_total: 922
+  - ed: W3 ED1
+    ward: 3
+    code: '003001'
+    active:
+      DEM: 519
+      REP: 163
+      CON: 14
+      GRE: 3
+      WOR: 3
+      IND: 58
+      BLANK: 246
+      LBT: 1
+    active_total: 1007
+  - ed: W3 ED2
+    ward: 3
+    code: '003002'
+    active:
+      DEM: 500
+      REP: 215
+      CON: 17
+      GRE: 3
+      WOR: 7
+      IND: 56
+      WEP: 1
+      BLANK: 315
+      LBT: 3
+    active_total: 1117
+  - ed: W3 ED3
+    ward: 3
+    code: '003003'
+    active:
+      DEM: 1
+      REP: 1
+      WOR: 1
+      BLANK: 2
+    active_total: 5
+  - ed: W4 ED1
+    ward: 4
+    code: '004001'
+    active:
+      DEM: 592
+      REP: 174
+      CON: 19
+      GRE: 6
+      WOR: 5
+      IND: 52
+      WEP: 1
+      REF: 1
+      BLANK: 309
+      LBT: 1
+    active_total: 1160
+  - ed: W4 ED2
+    ward: 4
+    code: '004002'
+    active:
+      DEM: 483
+      REP: 158
+      CON: 13
+      GRE: 5
+      WOR: 2
+      IND: 46
+      WEP: 1
+      BLANK: 287
+    active_total: 995
+  totals:
+    active:
+      DEM: 4446
+      REP: 1299
+      CON: 109
+      GRE: 45
+      WOR: 52
+      IND: 410
+      WEP: 3
+      REF: 3
+      BLANK: 2142
+      LBT: 9
+    active_total: 8518
+- as_of: '2018-04-01'
+  source: https://elections.ny.gov/system/files/documents/2023/11/dutchessed_apr18.pdf
+  publisher: NYS Board of Elections, "NYSVoter Enrollment by Election District, Party Affiliation and Status"
+  format: PDF
+  note: Read through the WebFetch tool (Cloudflare blocks scripted fetches); rows transcribed verbatim and every row passes active+inactive=total and party sum=TOTAL checks. Active rows match the county
+    2018-03-30 apportionment list to within 1-2 voters. Source has no Beacon subtotal; totals below are summed. OTH = other parties (e.g. LBT).
+  label_in_source: COUNTY=Dutchess, ELECTION DIST="City Beacon 001001" (3-digit ward + 3-digit ED)
+  districts:
+  - ed: W1 ED1
+    ward: 1
+    code: '001001'
+    active:
+      DEM: 576
+      REP: 156
+      CON: 11
+      GRE: 12
+      WOR: 9
+      IND: 46
+      WEP: 0
+      REF: 2
+      OTH: 1
+      BLANK: 235
+      TOTAL: 1048
+    inactive:
+      DEM: 49
+      REP: 13
+      CON: 1
+      GRE: 0
+      WOR: 1
+      IND: 6
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 24
+      TOTAL: 94
+    total:
+      DEM: 625
+      REP: 169
+      CON: 12
+      GRE: 12
+      WOR: 10
+      IND: 52
+      WEP: 0
+      REF: 2
+      OTH: 1
+      BLANK: 259
+      TOTAL: 1142
+  - ed: W1 ED2
+    ward: 1
+    code: '001002'
+    active:
+      DEM: 520
+      REP: 167
+      CON: 17
+      GRE: 8
+      WOR: 7
+      IND: 57
+      WEP: 0
+      REF: 0
+      OTH: 1
+      BLANK: 260
+      TOTAL: 1037
+    inactive:
+      DEM: 40
+      REP: 7
+      CON: 0
+      GRE: 0
+      WOR: 2
+      IND: 3
+      WEP: 0
+      REF: 0
+      OTH: 1
+      BLANK: 16
+      TOTAL: 69
+    total:
+      DEM: 560
+      REP: 174
+      CON: 17
+      GRE: 8
+      WOR: 9
+      IND: 60
+      WEP: 0
+      REF: 0
+      OTH: 2
+      BLANK: 276
+      TOTAL: 1106
+  - ed: W2 ED1
+    ward: 2
+    code: '002001'
+    active:
+      DEM: 294
+      REP: 51
+      CON: 3
+      GRE: 2
+      WOR: 2
+      IND: 15
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 121
+      TOTAL: 488
+    inactive:
+      DEM: 24
+      REP: 4
+      CON: 0
+      GRE: 0
+      WOR: 2
+      IND: 0
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 13
+      TOTAL: 43
+    total:
+      DEM: 318
+      REP: 55
+      CON: 3
+      GRE: 2
+      WOR: 4
+      IND: 15
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 134
+      TOTAL: 531
+  - ed: W2 ED2
+    ward: 2
+    code: '002002'
+    active:
+      DEM: 432
+      REP: 94
+      CON: 8
+      GRE: 3
+      WOR: 4
+      IND: 24
+      WEP: 0
+      REF: 0
+      OTH: 1
+      BLANK: 172
+      TOTAL: 738
+    inactive:
+      DEM: 50
+      REP: 3
+      CON: 0
+      GRE: 0
+      WOR: 1
+      IND: 5
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 23
+      TOTAL: 82
+    total:
+      DEM: 482
+      REP: 97
+      CON: 8
+      GRE: 3
+      WOR: 5
+      IND: 29
+      WEP: 0
+      REF: 0
+      OTH: 1
+      BLANK: 195
+      TOTAL: 820
+  - ed: W2 ED3
+    ward: 2
+    code: '002003'
+    active:
+      DEM: 528
+      REP: 120
+      CON: 7
+      GRE: 3
+      WOR: 12
+      IND: 56
+      WEP: 0
+      REF: 0
+      OTH: 1
+      BLANK: 195
+      TOTAL: 922
+    inactive:
+      DEM: 43
+      REP: 9
+      CON: 1
+      GRE: 0
+      WOR: 0
+      IND: 5
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 11
+      TOTAL: 69
+    total:
+      DEM: 571
+      REP: 129
+      CON: 8
+      GRE: 3
+      WOR: 12
+      IND: 61
+      WEP: 0
+      REF: 0
+      OTH: 1
+      BLANK: 206
+      TOTAL: 991
+  - ed: W3 ED1
+    ward: 3
+    code: '003001'
+    active:
+      DEM: 519
+      REP: 163
+      CON: 14
+      GRE: 3
+      WOR: 3
+      IND: 58
+      WEP: 0
+      REF: 0
+      OTH: 1
+      BLANK: 246
+      TOTAL: 1007
+    inactive:
+      DEM: 46
+      REP: 13
+      CON: 0
+      GRE: 1
+      WOR: 0
+      IND: 6
+      WEP: 0
+      REF: 0
+      OTH: 1
+      BLANK: 20
+      TOTAL: 87
+    total:
+      DEM: 565
+      REP: 176
+      CON: 14
+      GRE: 4
+      WOR: 3
+      IND: 64
+      WEP: 0
+      REF: 0
+      OTH: 2
+      BLANK: 266
+      TOTAL: 1094
+  - ed: W3 ED2
+    ward: 3
+    code: '003002'
+    active:
+      DEM: 500
+      REP: 215
+      CON: 17
+      GRE: 3
+      WOR: 7
+      IND: 56
+      WEP: 1
+      REF: 0
+      OTH: 3
+      BLANK: 315
+      TOTAL: 1117
+    inactive:
+      DEM: 37
+      REP: 8
+      CON: 2
+      GRE: 0
+      WOR: 0
+      IND: 3
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 28
+      TOTAL: 78
+    total:
+      DEM: 537
+      REP: 223
+      CON: 19
+      GRE: 3
+      WOR: 7
+      IND: 59
+      WEP: 1
+      REF: 0
+      OTH: 3
+      BLANK: 343
+      TOTAL: 1195
+  - ed: W3 ED3
+    ward: 3
+    code: '003003'
+    active:
+      DEM: 1
+      REP: 1
+      CON: 0
+      GRE: 0
+      WOR: 1
+      IND: 0
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 2
+      TOTAL: 5
+    total:
+      DEM: 1
+      REP: 1
+      CON: 0
+      GRE: 0
+      WOR: 1
+      IND: 0
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 2
+      TOTAL: 5
+    inactive:
+      DEM: 0
+      REP: 0
+      CON: 0
+      GRE: 0
+      WOR: 0
+      IND: 0
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 0
+      TOTAL: 0
+  - ed: W4 ED1
+    ward: 4
+    code: '004001'
+    active:
+      DEM: 592
+      REP: 174
+      CON: 19
+      GRE: 6
+      WOR: 5
+      IND: 52
+      WEP: 1
+      REF: 1
+      OTH: 1
+      BLANK: 309
+      TOTAL: 1160
+    inactive:
+      DEM: 56
+      REP: 18
+      CON: 0
+      GRE: 0
+      WOR: 1
+      IND: 10
+      WEP: 0
+      REF: 0
+      OTH: 0
+      BLANK: 41
+      TOTAL: 126
+    total:
+      DEM: 648
+      REP: 192
+      CON: 19
+      GRE: 6
+      WOR: 6
+      IND: 62
+      WEP: 1
+      REF: 1
+      OTH: 1
+      BLANK: 350
+      TOTAL: 1286
+  - ed: W4 ED2
+    ward: 4
+    code: '004002'
+    active:
+      DEM: 483
+      REP: 158
+      CON: 13
+      GRE: 5
+      WOR: 2
+      IND: 46
+      WEP: 1
+      REF: 0
+      OTH: 0
+      BLANK: 287
+      TOTAL: 995
+    inactive:
+      DEM: 35
+      REP: 10
+      CON: 0
+      GRE: 0
+      WOR: 0
+      IND: 3
+      WEP: 0
+      REF: 0
+      OTH: 1
+      BLANK: 28
+      TOTAL: 77
+    total:
+      DEM: 518
+      REP: 168
+      CON: 13
+      GRE: 5
+      WOR: 2
+      IND: 49
+      WEP: 1
+      REF: 0
+      OTH: 1
+      BLANK: 315
+      TOTAL: 1072
+  totals:
+    active:
+      DEM: 4445
+      REP: 1299
+      CON: 109
+      GRE: 45
+      WOR: 52
+      IND: 410
+      WEP: 3
+      REF: 3
+      OTH: 9
+      BLANK: 2142
+      TOTAL: 8517
+    inactive:
+      DEM: 380
+      REP: 85
+      CON: 4
+      GRE: 1
+      WOR: 7
+      IND: 41
+      WEP: 0
+      REF: 0
+      OTH: 3
+      BLANK: 204
+      TOTAL: 725
+    total:
+      DEM: 4825
+      REP: 1384
+      CON: 113
+      GRE: 46
+      WOR: 59
+      IND: 451
+      WEP: 3
+      REF: 3
+      OTH: 12
+      BLANK: 2346
+      TOTAL: 9242
+- as_of: '2020-02-21'
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/09/TWD.pdf
+  publisher: Dutchess County Board of Elections (Apportionment District List)
+  format: PDF (text layer; pdftotext -layout parses cleanly)
+  note: Active voters only (apportionment counts); no inactive/total split in this report. NOP = no party (BLANK). Ward subtotals rows (district 000) skipped.
+  districts:
+  - ed: W1 ED1
+    ward: 1
+    code: '001001'
+    active:
+      DEM: 638
+      REP: 146
+      CON: 7
+      WOR: 7
+      GRE: 7
+      LBT: 1
+      IND: 42
+      BLANK: 220
+      WEP: 1
+      REF: 1
+    active_total: 1070
+  - ed: W1 ED2
+    ward: 1
+    code: '001002'
+    active:
+      DEM: 572
+      REP: 155
+      CON: 11
+      WOR: 5
+      GRE: 4
+      LBT: 1
+      IND: 57
+      BLANK: 259
+    active_total: 1064
+  - ed: W2 ED1
+    ward: 2
+    code: '002001'
+    active:
+      DEM: 333
+      REP: 54
+      CON: 2
+      WOR: 2
+      GRE: 2
+      LBT: 1
+      IND: 14
+      BLANK: 133
+      WEP: 1
+    active_total: 542
+  - ed: W2 ED2
+    ward: 2
+    code: '002002'
+    active:
+      DEM: 428
+      REP: 82
+      CON: 6
+      WOR: 3
+      GRE: 2
+      IND: 25
+      BLANK: 180
+    active_total: 726
+  - ed: W2 ED3
+    ward: 2
+    code: '002003'
+    active:
+      DEM: 561
+      REP: 102
+      CON: 8
+      WOR: 9
+      GRE: 1
+      LBT: 2
+      IND: 54
+      BLANK: 217
+    active_total: 954
+  - ed: W3 ED1
+    ward: 3
+    code: '003001'
+    active:
+      DEM: 549
+      REP: 147
+      CON: 17
+      WOR: 4
+      GRE: 2
+      IND: 62
+      BLANK: 217
+    active_total: 998
+  - ed: W3 ED2
+    ward: 3
+    code: '003002'
+    active:
+      DEM: 555
+      REP: 221
+      CON: 16
+      WOR: 5
+      GRE: 3
+      LBT: 2
+      IND: 70
+      BLANK: 300
+      WEP: 1
+    active_total: 1173
+  - ed: W3 ED3
+    ward: 3
+    code: '003003'
+    active:
+      DEM: 2
+      BLANK: 1
+    active_total: 3
+  - ed: W4 ED1
+    ward: 4
+    code: '004001'
+    active:
+      DEM: 675
+      REP: 165
+      CON: 15
+      WOR: 5
+      GRE: 7
+      LBT: 4
+      IND: 54
+      BLANK: 293
+      WEP: 1
+      REF: 1
+    active_total: 1220
+  - ed: W4 ED2
+    ward: 4
+    code: '004002'
+    active:
+      DEM: 528
+      REP: 151
+      CON: 12
+      WOR: 4
+      GRE: 4
+      IND: 47
+      BLANK: 270
+      WEP: 3
+    active_total: 1019
+  totals:
+    active:
+      DEM: 4841
+      REP: 1223
+      CON: 94
+      WOR: 44
+      GRE: 32
+      LBT: 11
+      IND: 425
+      BLANK: 2090
+      WEP: 7
+      REF: 2
+    active_total: 8769
+results:
+- year: 2019
+  election: 2019 General Election
+  office: Mayor
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+  format: PDF (scanned)
+  scope: City of Beacon (citywide contest)
+  candidates:
+  - name: Lee Kyriacou
+    lines:
+      DEM: 1951
+      WOR: 185
+      GRE: 86
+    votes: 2222
+  - name: Randy J Casale
+    lines:
+      REP: 1192
+      IND: 335
+    votes: 1527
+  write_in:
+    total: 161
+    scatter: 7
+    void: 2
+    named:
+      Terry Hockler: 73
+      Patrick O'Dell: 79
+  total: 3910
+  ballots: 3976
+  undervotes: 62
+  overvotes: 4
+  by_ed: null
+  note: Scanned PDF (no text layer for most pages); figures read from page images and cross-checked (line sums = candidate totals; candidates + write-ins = Total). No ED-level 2019 general election file
+    is posted on the results page.
+- year: 2019
+  election: 2019 General Election
+  office: City Council At Large (vote for 2)
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+  format: PDF (scanned)
+  scope: City of Beacon (citywide contest)
+  candidates:
+  - name: George Mansfield
+    lines:
+      DEM: 2381
+      WOR: 386
+    votes: 2767
+  - name: Amber Grant
+    lines:
+      DEM: 2406
+      WOR: 445
+    votes: 2851
+  - name: Estefano Rendon
+    lines:
+      REP: 845
+    votes: 845
+  write_in:
+    total: 39
+    scatter: 21
+    void: 3
+    named:
+      Alan Flynn: 15
+  total: 6502
+  ballots: 3976
+  undervotes: 1446
+  overvotes: 4
+  by_ed: null
+  note: Scanned PDF (no text layer for most pages); figures read from page images and cross-checked (line sums = candidate totals; candidates + write-ins = Total). No ED-level 2019 general election file
+    is posted on the results page.
+- year: 2019
+  election: 2019 General Election
+  office: City Council Ward 1
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+  format: PDF (scanned)
+  scope: City of Beacon (citywide contest)
+  candidates:
+  - name: Terry Nelson
+    lines:
+      DEM: 630
+      WOR: 90
+      GRE: 31
+    votes: 751
+  write_in:
+    total: 6
+    scatter: 5
+    void: 1
+  total: 757
+  ballots: 996
+  undervotes: 239
+  overvotes: 0
+  by_ed: null
+  note: Scanned PDF (no text layer for most pages); figures read from page images and cross-checked (line sums = candidate totals; candidates + write-ins = Total). No ED-level 2019 general election file
+    is posted on the results page.
+- year: 2019
+  election: 2019 General Election
+  office: City Council Ward 2
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+  format: PDF (scanned)
+  scope: City of Beacon (citywide contest)
+  candidates:
+  - name: Air Rhodes
+    lines:
+      DEM: 590
+      WOR: 84
+      GRE: 36
+    votes: 710
+  write_in:
+    total: 4
+    scatter: 3
+    void: 1
+  total: 714
+  ballots: 899
+  undervotes: 185
+  overvotes: 0
+  by_ed: null
+  note: Scanned PDF (no text layer for most pages); figures read from page images and cross-checked (line sums = candidate totals; candidates + write-ins = Total). No ED-level 2019 general election file
+    is posted on the results page.
+- year: 2019
+  election: 2019 General Election
+  office: City Council Ward 3
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+  format: PDF (scanned)
+  scope: City of Beacon (citywide contest)
+  candidates:
+  - name: Jodi McCredo
+    lines:
+      DEM: 537
+      WOR: 75
+    votes: 612
+  - name: Andrew E Gauzza IV
+    lines:
+      REP: 233
+      CON: 28
+      IND: 27
+    votes: 288
+  write_in:
+    total: 1
+    scatter: 0
+    void: 0
+    named:
+      Jason Edge: 1
+  total: 901
+  ballots: 967
+  undervotes: 66
+  overvotes: 0
+  by_ed: null
+  note: Scanned PDF (no text layer for most pages); figures read from page images and cross-checked (line sums = candidate totals; candidates + write-ins = Total). No ED-level 2019 general election file
+    is posted on the results page.
+- year: 2019
+  election: 2019 General Election
+  office: City Council Ward 4
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+  format: PDF (scanned)
+  scope: City of Beacon (citywide contest)
+  candidates:
+  - name: Dan Aymar-Blair
+    lines:
+      DEM: 589
+      WOR: 62
+      GRE: 17
+    votes: 668
+  - name: Kelly A Ellenwood
+    lines:
+      IND: 321
+    votes: 321
+  write_in:
+    total: 1
+    scatter: 0
+    void: 1
+  total: 990
+  ballots: 1114
+  undervotes: 123
+  overvotes: 1
+  by_ed: null
+  note: Scanned PDF (no text layer for most pages); figures read from page images and cross-checked (line sums = candidate totals; candidates + write-ins = Total). No ED-level 2019 general election file
+    is posted on the results page.
+- year: 2019
+  election: 2019 General Election
+  office: County Legislator District 16
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+  format: PDF (scanned)
+  scope: Whole legislative district (Beacon + Town of Fishkill)
+  candidates:
+  - name: Theoni S Salotto
+    lines:
+      REP: 1113
+      CON: 212
+      IND: 121
+    votes: 1446
+  - name: Frits Zernike
+    lines:
+      DEM: 1586
+      WOR: 123
+    votes: 1709
+  write_in:
+    total: 1
+    scatter: 0
+    void: 0
+    named:
+      Greg Zuman: 1
+  total: 3156
+  ballots: 3380
+  undervotes: 224
+  overvotes: 0
+  by_ed: null
+  note: Scanned PDF (no text layer for most pages); figures read from page images and cross-checked (line sums = candidate totals; candidates + write-ins = Total). No ED-level 2019 general election file
+    is posted on the results page. District-wide total (district includes part of Beacon and part of the Town of Fishkill); Beacon-only share not available for 2019. The district heading sits at the foot
+    of page 9; the figures are at the top of page 10.
+- year: 2019
+  election: 2019 General Election
+  office: County Legislator District 18
+  source: https://elections.dutchessny.gov/wp-content/uploads/2020/04/GE-2019-Certification.pdf
+  format: PDF (scanned)
+  scope: Whole legislative district (Beacon + Town of Fishkill)
+  candidates:
+  - name: Michael B Justice
+    lines:
+      REP: 581
+      CON: 111
+    votes: 692
+  - name: Nick Page
+    lines:
+      DEM: 1737
+      WOR: 186
+      GRE: 87
+    votes: 2010
+  - name: Sandra Moneymaker
+    lines:
+      IND: 101
+    votes: 101
+  write_in:
+    total: 0
+    scatter: 0
+    void: 0
+  total: 2803
+  ballots: 3023
+  undervotes: 217
+  overvotes: 3
+  by_ed: null
+  note: Scanned PDF (no text layer for most pages); figures read from page images and cross-checked (line sums = candidate totals; candidates + write-ins = Total). No ED-level 2019 general election file
+    is posted on the results page. District-wide total (district includes most of Beacon and part of the Town of Fishkill); Beacon-only share not available for 2019.
+- year: 2021
+  election: 2021 General Election
+  office: City Council At Large (vote for 2)
+  source: https://elections.dutchessny.gov/wp-content/uploads/2022/01/GE21-ED-Level.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Paloma Wake
+    lines:
+      DEM: 1914
+      WOR: 454
+    votes: 2368
+  - name: George Mansfield
+    lines:
+      DEM: 2203
+    votes: 2203
+  beacon_totals:
+    undervotes: 2258
+    overvotes: 0
+    write_in: 45
+    total_votes: 4616
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Paloma Wake:
+        DEM: 191
+        WOR: 40
+      George Mansfield:
+        DEM: 220
+    undervotes: 250
+    overvotes: 0
+    write_in: 5
+    total_votes: 456
+  - ed: W1 ED2
+    votes:
+      Paloma Wake:
+        DEM: 245
+        WOR: 64
+      George Mansfield:
+        DEM: 297
+    undervotes: 331
+    overvotes: 0
+    write_in: 5
+    total_votes: 611
+  - ed: W2 ED1
+    votes:
+      Paloma Wake:
+        DEM: 128
+        WOR: 27
+      George Mansfield:
+        DEM: 131
+    undervotes: 102
+    overvotes: 0
+    write_in: 2
+    total_votes: 288
+  - ed: W2 ED2
+    votes:
+      Paloma Wake:
+        DEM: 185
+        WOR: 53
+      George Mansfield:
+        DEM: 220
+    undervotes: 157
+    overvotes: 0
+    write_in: 7
+    total_votes: 465
+  - ed: W2 ED3
+    votes:
+      Paloma Wake:
+        DEM: 178
+        WOR: 44
+      George Mansfield:
+        DEM: 211
+    undervotes: 174
+    overvotes: 0
+    write_in: 3
+    total_votes: 436
+  - ed: W3 ED1
+    votes:
+      Paloma Wake:
+        DEM: 183
+        WOR: 36
+      George Mansfield:
+        DEM: 195
+    undervotes: 220
+    overvotes: 0
+    write_in: 4
+    total_votes: 418
+  - ed: W3 ED2
+    votes:
+      Paloma Wake:
+        DEM: 264
+        WOR: 56
+      George Mansfield:
+        DEM: 295
+    undervotes: 399
+    overvotes: 0
+    write_in: 4
+    total_votes: 619
+  - ed: W3 ED3
+    votes:
+      Paloma Wake:
+        DEM: 1
+        WOR: 0
+      George Mansfield:
+        DEM: 1
+    undervotes: 0
+    overvotes: 0
+    write_in: 0
+    total_votes: 2
+  - ed: W4 ED1
+    votes:
+      Paloma Wake:
+        DEM: 275
+        WOR: 70
+      George Mansfield:
+        DEM: 324
+    undervotes: 358
+    overvotes: 0
+    write_in: 7
+    total_votes: 676
+  - ed: W4 ED2
+    votes:
+      Paloma Wake:
+        DEM: 264
+        WOR: 64
+      George Mansfield:
+        DEM: 309
+    undervotes: 267
+    overvotes: 0
+    write_in: 8
+    total_votes: 645
+  note: Counting group "All" section of the ED-level PDF. No mayoral race in 2021 (4-year term).
+  format: PDF (text layer)
+- year: 2021
+  election: 2021 General Election
+  office: City Council Ward 1
+  source: https://elections.dutchessny.gov/wp-content/uploads/2022/01/GE21-ED-Level.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Molly Rhodes
+    lines:
+      DEM: 469
+      WOR: 98
+    votes: 567
+  beacon_totals:
+    undervotes: 253
+    overvotes: 0
+    write_in: 4
+    total_votes: 571
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Molly Rhodes:
+        DEM: 209
+        WOR: 39
+    undervotes: 103
+    overvotes: 0
+    write_in: 2
+    total_votes: 250
+  - ed: W1 ED2
+    votes:
+      Molly Rhodes:
+        DEM: 260
+        WOR: 59
+    undervotes: 150
+    overvotes: 0
+    write_in: 2
+    total_votes: 321
+  note: Counting group "All" section of the ED-level PDF. No mayoral race in 2021 (4-year term).
+  format: PDF (text layer)
+- year: 2021
+  election: 2021 General Election
+  office: City Council Ward 2
+  source: https://elections.dutchessny.gov/wp-content/uploads/2022/01/GE21-ED-Level.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Justice McCray
+    lines:
+      DEM: 524
+      WOR: 121
+    votes: 645
+  beacon_totals:
+    undervotes: 161
+    overvotes: 0
+    write_in: 5
+    total_votes: 650
+  by_ed:
+  - ed: W2 ED1
+    votes:
+      Justice McCray:
+        DEM: 131
+        WOR: 27
+    undervotes: 36
+    overvotes: 0
+    write_in: 1
+    total_votes: 159
+  - ed: W2 ED2
+    votes:
+      Justice McCray:
+        DEM: 199
+        WOR: 51
+    undervotes: 59
+    overvotes: 0
+    write_in: 2
+    total_votes: 252
+  - ed: W2 ED3
+    votes:
+      Justice McCray:
+        DEM: 194
+        WOR: 43
+    undervotes: 66
+    overvotes: 0
+    write_in: 2
+    total_votes: 239
+  note: Counting group "All" section of the ED-level PDF. No mayoral race in 2021 (4-year term).
+  format: PDF (text layer)
+- year: 2021
+  election: 2021 General Election
+  office: City Council Ward 3
+  source: https://elections.dutchessny.gov/wp-content/uploads/2022/01/GE21-ED-Level.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Wren Longno
+    lines:
+      DEM: 469
+      WOR: 96
+    votes: 565
+  beacon_totals:
+    undervotes: 261
+    overvotes: 0
+    write_in: 3
+    total_votes: 568
+  by_ed:
+  - ed: W3 ED1
+    votes:
+      Wren Longno:
+        DEM: 192
+        WOR: 37
+    undervotes: 89
+    overvotes: 0
+    write_in: 1
+    total_votes: 230
+  - ed: W3 ED2
+    votes:
+      Wren Longno:
+        DEM: 276
+        WOR: 59
+    undervotes: 172
+    overvotes: 0
+    write_in: 2
+    total_votes: 337
+  - ed: W3 ED3
+    votes:
+      Wren Longno:
+        DEM: 1
+        WOR: 0
+    undervotes: 0
+    overvotes: 0
+    write_in: 0
+    total_votes: 1
+  note: Counting group "All" section of the ED-level PDF. No mayoral race in 2021 (4-year term).
+  format: PDF (text layer)
+- year: 2021
+  election: 2021 General Election
+  office: City Council Ward 4
+  source: https://elections.dutchessny.gov/wp-content/uploads/2022/01/GE21-ED-Level.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Dan Aymar-Blair
+    lines:
+      DEM: 575
+      WOR: 131
+    votes: 706
+  beacon_totals:
+    undervotes: 260
+    overvotes: 0
+    write_in: 7
+    total_votes: 713
+  by_ed:
+  - ed: W4 ED1
+    votes:
+      Dan Aymar-Blair:
+        DEM: 301
+        WOR: 69
+    undervotes: 145
+    overvotes: 0
+    write_in: 2
+    total_votes: 372
+  - ed: W4 ED2
+    votes:
+      Dan Aymar-Blair:
+        DEM: 274
+        WOR: 62
+    undervotes: 115
+    overvotes: 0
+    write_in: 5
+    total_votes: 341
+  note: Counting group "All" section of the ED-level PDF. No mayoral race in 2021 (4-year term).
+  format: PDF (text layer)
+- year: 2021
+  election: 2021 General Election
+  office: County Legislator District 16
+  source: https://elections.dutchessny.gov/wp-content/uploads/2022/01/GE21-ED-Level.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Yvette Valdes Smith
+    lines:
+      DEM: 563
+      WOR: 102
+    votes: 665
+  - name: Ron Davis
+    lines:
+      REP: 226
+      CON: 55
+    votes: 281
+  beacon_totals:
+    undervotes: 27
+    overvotes: 0
+    write_in: 1
+    total_votes: 947
+  by_ed:
+  - ed: W3 ED3
+    votes:
+      Yvette Valdes Smith:
+        DEM: 1
+        WOR: 0
+      Ron Davis:
+        REP: 0
+        CON: 0
+    undervotes: 0
+    overvotes: 0
+    write_in: 0
+    total_votes: 1
+  - ed: W4 ED1
+    votes:
+      Yvette Valdes Smith:
+        DEM: 290
+        WOR: 55
+      Ron Davis:
+        REP: 126
+        CON: 29
+    undervotes: 16
+    overvotes: 0
+    write_in: 1
+    total_votes: 501
+  - ed: W4 ED2
+    votes:
+      Yvette Valdes Smith:
+        DEM: 272
+        WOR: 47
+      Ron Davis:
+        REP: 100
+        CON: 26
+    undervotes: 11
+    overvotes: 0
+    write_in: 0
+    total_votes: 445
+  district_wide:
+    Yvette Valdes Smith:
+      DEM: 1338
+      WOR: 160
+    Ron Davis:
+      REP: 1049
+      CON: 253
+    write_in: 1
+    undervotes: 97
+    total_votes: 2801
+    note: Contest Total row (Beacon W3 ED3, W4 ED1-2 + Town of Fishkill EDs 1,2,4,5,6,15,17)
+  note: Counting group "All" section of the ED-level PDF. No mayoral race in 2021 (4-year term).
+  format: PDF (text layer)
+- year: 2021
+  election: 2021 General Election
+  office: County Legislator District 18
+  source: https://elections.dutchessny.gov/wp-content/uploads/2022/01/GE21-ED-Level.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Nick Page
+    lines:
+      DEM: 1494
+      WOR: 324
+    votes: 1818
+  beacon_totals:
+    undervotes: 636
+    overvotes: 0
+    write_in: 9
+    total_votes: 1827
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Nick Page:
+        DEM: 208
+        WOR: 43
+    undervotes: 101
+    overvotes: 0
+    write_in: 1
+    total_votes: 252
+  - ed: W1 ED2
+    votes:
+      Nick Page:
+        DEM: 268
+        WOR: 58
+    undervotes: 144
+    overvotes: 0
+    write_in: 1
+    total_votes: 327
+  - ed: W2 ED1
+    votes:
+      Nick Page:
+        DEM: 134
+        WOR: 27
+    undervotes: 33
+    overvotes: 0
+    write_in: 1
+    total_votes: 162
+  - ed: W2 ED2
+    votes:
+      Nick Page:
+        DEM: 198
+        WOR: 54
+    undervotes: 57
+    overvotes: 0
+    write_in: 2
+    total_votes: 254
+  - ed: W2 ED3
+    votes:
+      Nick Page:
+        DEM: 200
+        WOR: 48
+    undervotes: 54
+    overvotes: 0
+    write_in: 3
+    total_votes: 251
+  - ed: W3 ED1
+    votes:
+      Nick Page:
+        DEM: 202
+        WOR: 34
+    undervotes: 83
+    overvotes: 0
+    write_in: 0
+    total_votes: 236
+  - ed: W3 ED2
+    votes:
+      Nick Page:
+        DEM: 284
+        WOR: 60
+    undervotes: 164
+    overvotes: 0
+    write_in: 1
+    total_votes: 345
+  district_wide:
+    Nick Page:
+      DEM: 1544
+      WOR: 336
+    write_in: 9
+    undervotes: 680
+    total_votes: 1889
+    note: Contest Total row (Beacon W1-W3 except W3 ED3 + Town of Fishkill ED 3)
+  note: Counting group "All" section of the ED-level PDF. No mayoral race in 2021 (4-year term).
+  format: PDF (text layer)
+- year: 2023
+  election: 2023 General Election
+  office: Mayor
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-ED-Level-Results.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Lee Kyriacou
+    lines:
+      DEM: 2269
+    votes: 2269
+  - name: Ruben Simmons
+    lines:
+      line not printed in source: 390
+    votes: 390
+  beacon_totals:
+    write_in: 64
+    undervotes: 610
+    overvotes: 1
+    unlabeled_col: 72
+    total_votes: 2723
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Lee Kyriacou:
+        DEM: 239
+      Ruben Simmons:
+        line not printed in source: 34
+    write_in: 5
+    undervotes: 60
+    overvotes: 1
+    unlabeled_col: 0
+    total_votes: 278
+  - ed: W1 ED2
+    votes:
+      Lee Kyriacou:
+        DEM: 329
+      Ruben Simmons:
+        line not printed in source: 61
+    write_in: 9
+    undervotes: 89
+    overvotes: 0
+    unlabeled_col: 16
+    total_votes: 399
+  - ed: W2 ED1
+    votes:
+      Lee Kyriacou:
+        DEM: 301
+      Ruben Simmons:
+        line not printed in source: 52
+    write_in: 16
+    undervotes: 52
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 369
+  - ed: W2 ED2
+    votes:
+      Lee Kyriacou:
+        DEM: 261
+      Ruben Simmons:
+        line not printed in source: 44
+    write_in: 4
+    undervotes: 54
+    overvotes: 0
+    unlabeled_col: 13
+    total_votes: 309
+  - ed: W3 ED1
+    votes:
+      Lee Kyriacou:
+        DEM: 212
+      Ruben Simmons:
+        line not printed in source: 29
+    write_in: 4
+    undervotes: 49
+    overvotes: 0
+    unlabeled_col: 21
+    total_votes: 245
+  - ed: W3 ED2
+    votes:
+      Lee Kyriacou:
+        DEM: 291
+      Ruben Simmons:
+        line not printed in source: 59
+    write_in: 7
+    undervotes: 106
+    overvotes: 0
+    unlabeled_col: 22
+    total_votes: 357
+  - ed: W4 ED1
+    votes:
+      Lee Kyriacou:
+        DEM: 314
+      Ruben Simmons:
+        line not printed in source: 39
+    write_in: 11
+    undervotes: 95
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 364
+  - ed: W4 ED2
+    votes:
+      Lee Kyriacou:
+        DEM: 322
+      Ruben Simmons:
+        line not printed in source: 72
+    write_in: 8
+    undervotes: 105
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 402
+  note: Simmons' party line is blank in the summary report; the ED file headers are rotated text. Line left unknown. Column after overvotes has a rotated, unreadable header (values 0/13/16/21/22 by ED);
+    kept as unlabeled_col, not included in totals.
+  format: PDF (text layer; column headers rotated)
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- year: 2023
+  election: 2023 General Election
+  office: City Council At Large (vote for 2)
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-ED-Level-Results.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Paloma Wake
+    lines:
+      DEM: 2019
+      WOR: 436
+    votes: 2455
+  - name: Pamela Wetherbee
+    lines:
+      DEM: 2450
+    votes: 2450
+  beacon_totals:
+    write_in: 64
+    undervotes: 1699
+    overvotes: 0
+    unlabeled_col: 72
+    total_votes: 4969
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Paloma Wake:
+        DEM: 215
+        WOR: 34
+      Pamela Wetherbee:
+        DEM: 249
+    write_in: 6
+    undervotes: 174
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 504
+  - ed: W1 ED2
+    votes:
+      Paloma Wake:
+        DEM: 286
+        WOR: 64
+      Pamela Wetherbee:
+        DEM: 349
+    write_in: 8
+    undervotes: 269
+    overvotes: 0
+    unlabeled_col: 16
+    total_votes: 707
+  - ed: W2 ED1
+    votes:
+      Paloma Wake:
+        DEM: 270
+        WOR: 70
+      Pamela Wetherbee:
+        DEM: 339
+    write_in: 11
+    undervotes: 152
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 690
+  - ed: W2 ED2
+    votes:
+      Paloma Wake:
+        DEM: 229
+        WOR: 45
+      Pamela Wetherbee:
+        DEM: 278
+    write_in: 8
+    undervotes: 166
+    overvotes: 0
+    unlabeled_col: 13
+    total_votes: 560
+  - ed: W3 ED1
+    votes:
+      Paloma Wake:
+        DEM: 191
+        WOR: 34
+      Pamela Wetherbee:
+        DEM: 231
+    write_in: 5
+    undervotes: 127
+    overvotes: 0
+    unlabeled_col: 21
+    total_votes: 461
+  - ed: W3 ED2
+    votes:
+      Paloma Wake:
+        DEM: 265
+        WOR: 57
+      Pamela Wetherbee:
+        DEM: 315
+    write_in: 6
+    undervotes: 283
+    overvotes: 0
+    unlabeled_col: 22
+    total_votes: 643
+  - ed: W4 ED1
+    votes:
+      Paloma Wake:
+        DEM: 267
+        WOR: 59
+      Pamela Wetherbee:
+        DEM: 326
+    write_in: 8
+    undervotes: 258
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 660
+  - ed: W4 ED2
+    votes:
+      Paloma Wake:
+        DEM: 296
+        WOR: 73
+      Pamela Wetherbee:
+        DEM: 363
+    write_in: 12
+    undervotes: 270
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 744
+  format: PDF (text layer; column headers rotated)
+  note: Column after overvotes has a rotated, unreadable header (values 0/13/16/21/22 by ED); kept as unlabeled_col, not included in totals.
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- year: 2023
+  election: 2023 General Election
+  office: City Council Ward 1
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-ED-Level-Results.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Molly Rhodes
+    lines:
+      DEM: 635
+    votes: 635
+  beacon_totals:
+    write_in: 11
+    undervotes: 181
+    overvotes: 0
+    unlabeled_col: 16
+    total_votes: 646
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Molly Rhodes:
+        DEM: 266
+    write_in: 8
+    undervotes: 65
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 274
+  - ed: W1 ED2
+    votes:
+      Molly Rhodes:
+        DEM: 369
+    write_in: 3
+    undervotes: 116
+    overvotes: 0
+    unlabeled_col: 16
+    total_votes: 372
+  format: PDF (text layer; column headers rotated)
+  note: Column after overvotes has a rotated, unreadable header (values 0/13/16/21/22 by ED); kept as unlabeled_col, not included in totals.
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- year: 2023
+  election: 2023 General Election
+  office: City Council Ward 2
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-ED-Level-Results.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Jeffrey Domanski
+    lines:
+      DEM: 640
+    votes: 640
+  beacon_totals:
+    write_in: 9
+    undervotes: 135
+    overvotes: 0
+    unlabeled_col: 13
+    total_votes: 649
+  by_ed:
+  - ed: W2 ED1
+    votes:
+      Jeffrey Domanski:
+        DEM: 355
+    write_in: 5
+    undervotes: 61
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 360
+  - ed: W2 ED2
+    votes:
+      Jeffrey Domanski:
+        DEM: 285
+    write_in: 4
+    undervotes: 74
+    overvotes: 0
+    unlabeled_col: 13
+    total_votes: 289
+  format: PDF (text layer; column headers rotated)
+  note: Column after overvotes has a rotated, unreadable header (values 0/13/16/21/22 by ED); kept as unlabeled_col, not included in totals.
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- year: 2023
+  election: 2023 General Election
+  office: City Council Ward 3
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-ED-Level-Results.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Wren Longno
+    lines:
+      DEM: 567
+    votes: 567
+  beacon_totals:
+    write_in: 9
+    undervotes: 181
+    overvotes: 0
+    unlabeled_col: 43
+    total_votes: 576
+  by_ed:
+  - ed: W3 ED1
+    votes:
+      Wren Longno:
+        DEM: 232
+    write_in: 6
+    undervotes: 56
+    overvotes: 0
+    unlabeled_col: 21
+    total_votes: 238
+  - ed: W3 ED2
+    votes:
+      Wren Longno:
+        DEM: 335
+    write_in: 3
+    undervotes: 125
+    overvotes: 0
+    unlabeled_col: 22
+    total_votes: 338
+  format: PDF (text layer; column headers rotated)
+  note: Column after overvotes has a rotated, unreadable header (values 0/13/16/21/22 by ED); kept as unlabeled_col, not included in totals.
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- year: 2023
+  election: 2023 General Election
+  office: City Council Ward 4
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-ED-Level-Results.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Dan Aymar-Blair
+    lines:
+      DEM: 601
+      WOR: 139
+    votes: 740
+  beacon_totals:
+    write_in: 16
+    undervotes: 210
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 756
+  by_ed:
+  - ed: W4 ED1
+    votes:
+      Dan Aymar-Blair:
+        DEM: 285
+        WOR: 60
+    write_in: 7
+    undervotes: 107
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 352
+  - ed: W4 ED2
+    votes:
+      Dan Aymar-Blair:
+        DEM: 316
+        WOR: 79
+    write_in: 9
+    undervotes: 103
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 404
+  format: PDF (text layer; column headers rotated)
+  note: Column after overvotes has a rotated, unreadable header (values 0/13/16/21/22 by ED); kept as unlabeled_col, not included in totals.
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- year: 2023
+  election: 2023 General Election
+  office: County Legislator District 16
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-ED-Level-Results.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Yvette Valdes Smith
+    lines:
+      DEM: 595
+      WOR: 128
+    votes: 723
+  - name: Ron Davis
+    lines:
+      REP: 180
+      CON: 44
+    votes: 224
+  beacon_totals:
+    write_in: 0
+    undervotes: 18
+    overvotes: 1
+    unlabeled_col: 0
+    total_votes: 947
+  by_ed:
+  - ed: W4 ED1
+    votes:
+      Yvette Valdes Smith:
+        DEM: 283
+        WOR: 56
+      Ron Davis:
+        REP: 89
+        CON: 20
+    write_in: 0
+    undervotes: 11
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 448
+  - ed: W4 ED2
+    votes:
+      Yvette Valdes Smith:
+        DEM: 312
+        WOR: 72
+      Ron Davis:
+        REP: 91
+        CON: 24
+    write_in: 0
+    undervotes: 7
+    overvotes: 1
+    unlabeled_col: 0
+    total_votes: 499
+  district_wide:
+    Yvette Valdes Smith:
+      DEM: 1510
+      WOR: 204
+    Ron Davis:
+      REP: 939
+      CON: 204
+    write_in: 2
+    undervotes: 86
+    overvotes: 1
+    total_votes: 2859
+    note: Contest Total (Beacon W4 ED1-2 + Town of Fishkill EDs 2,8,9,10)
+  format: PDF (text layer; column headers rotated)
+  note: Column after overvotes has a rotated, unreadable header (values 0/13/16/21/22 by ED); kept as unlabeled_col, not included in totals.
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- year: 2023
+  election: 2023 General Election
+  office: County Legislator District 18
+  source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-ED-Level-Results.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Nick Page
+    lines:
+      DEM: 1882
+    votes: 1882
+  beacon_totals:
+    write_in: 22
+    undervotes: 462
+    overvotes: 2
+    unlabeled_col: 72
+    total_votes: 1904
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Nick Page:
+        DEM: 275
+    write_in: 2
+    undervotes: 62
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 277
+  - ed: W1 ED2
+    votes:
+      Nick Page:
+        DEM: 372
+    write_in: 7
+    undervotes: 108
+    overvotes: 1
+    unlabeled_col: 16
+    total_votes: 379
+  - ed: W2 ED1
+    votes:
+      Nick Page:
+        DEM: 357
+    write_in: 5
+    undervotes: 59
+    overvotes: 0
+    unlabeled_col: 0
+    total_votes: 362
+  - ed: W2 ED2
+    votes:
+      Nick Page:
+        DEM: 297
+    write_in: 4
+    undervotes: 61
+    overvotes: 1
+    unlabeled_col: 13
+    total_votes: 301
+  - ed: W3 ED1
+    votes:
+      Nick Page:
+        DEM: 243
+    write_in: 1
+    undervotes: 50
+    overvotes: 0
+    unlabeled_col: 21
+    total_votes: 244
+  - ed: W3 ED2
+    votes:
+      Nick Page:
+        DEM: 338
+    write_in: 3
+    undervotes: 122
+    overvotes: 0
+    unlabeled_col: 22
+    total_votes: 341
+  district_wide:
+    Nick Page:
+      DEM: 2054
+    write_in: 24
+    undervotes: 564
+    overvotes: 2
+    total_votes: 2078
+    note: Contest Total (Beacon W1-W3 + Town of Fishkill ED 1)
+  format: PDF (text layer; column headers rotated)
+  note: Column after overvotes has a rotated, unreadable header (values 0/13/16/21/22 by ED); kept as unlabeled_col, not included in totals.
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2024/02/2023-GE-Results-w-Candidate-Totals.pdf
+- year: 2025
+  election: 2025 General Election
+  office: City Council At Large (vote for 2)
+  source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Detailed-Results-by-Contest-Table.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Amber Grant
+    lines:
+      DEM: 3023
+    votes: 3023
+  - name: Paloma Wake
+    lines:
+      DEM: 2334
+      WOR: 771
+    votes: 3105
+  beacon_totals:
+    write_in: 62
+    overvotes: 0
+    undervotes: 1564
+    unlabeled_col: 0
+    total_votes: 6190
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Amber Grant:
+        DEM: 349
+      Paloma Wake:
+        DEM: 271
+        WOR: 75
+    write_in: 4
+    overvotes: 0
+    undervotes: 169
+    unlabeled_col: 0
+    total_votes: 699
+  - ed: W1 ED2
+    votes:
+      Amber Grant:
+        DEM: 417
+      Paloma Wake:
+        DEM: 321
+        WOR: 122
+    write_in: 8
+    overvotes: 0
+    undervotes: 238
+    unlabeled_col: 0
+    total_votes: 868
+  - ed: W2 ED1
+    votes:
+      Amber Grant:
+        DEM: 414
+      Paloma Wake:
+        DEM: 310
+        WOR: 122
+    write_in: 5
+    overvotes: 0
+    undervotes: 137
+    unlabeled_col: 0
+    total_votes: 851
+  - ed: W2 ED2
+    votes:
+      Amber Grant:
+        DEM: 323
+      Paloma Wake:
+        DEM: 250
+        WOR: 80
+    write_in: 6
+    overvotes: 0
+    undervotes: 153
+    unlabeled_col: 0
+    total_votes: 659
+  - ed: W3 ED1
+    votes:
+      Amber Grant:
+        DEM: 304
+      Paloma Wake:
+        DEM: 239
+        WOR: 69
+    write_in: 5
+    overvotes: 0
+    undervotes: 123
+    unlabeled_col: 0
+    total_votes: 617
+  - ed: W3 ED2
+    votes:
+      Amber Grant:
+        DEM: 356
+      Paloma Wake:
+        DEM: 261
+        WOR: 99
+    write_in: 15
+    overvotes: 0
+    undervotes: 249
+    unlabeled_col: 0
+    total_votes: 731
+  - ed: W4 ED1
+    votes:
+      Amber Grant:
+        DEM: 416
+      Paloma Wake:
+        DEM: 336
+        WOR: 90
+    write_in: 5
+    overvotes: 0
+    undervotes: 263
+    unlabeled_col: 0
+    total_votes: 847
+  - ed: W4 ED2
+    votes:
+      Amber Grant:
+        DEM: 444
+      Paloma Wake:
+        DEM: 346
+        WOR: 114
+    write_in: 14
+    overvotes: 0
+    undervotes: 232
+    unlabeled_col: 0
+    total_votes: 918
+  format: PDF (text layer)
+  note: No mayoral race in 2025. Candidate/line names from GE25-Official-Summary-Results.pdf; column after undervotes is unlabeled in text (all 0 for Beacon).
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- year: 2025
+  election: 2025 General Election
+  office: City Council Ward 1
+  source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Detailed-Results-by-Contest-Table.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Lastar Gorton
+    lines:
+      DEM: 637
+      WOR: 192
+    votes: 829
+  beacon_totals:
+    write_in: 6
+    overvotes: 0
+    undervotes: 152
+    unlabeled_col: 0
+    total_votes: 835
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Lastar Gorton:
+        DEM: 298
+        WOR: 73
+    write_in: 2
+    overvotes: 0
+    undervotes: 61
+    unlabeled_col: 0
+    total_votes: 373
+  - ed: W1 ED2
+    votes:
+      Lastar Gorton:
+        DEM: 339
+        WOR: 119
+    write_in: 4
+    overvotes: 0
+    undervotes: 91
+    unlabeled_col: 0
+    total_votes: 462
+  format: PDF (text layer)
+  note: No mayoral race in 2025. Candidate/line names from GE25-Official-Summary-Results.pdf; column after undervotes is unlabeled in text (all 0 for Beacon).
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- year: 2025
+  election: 2025 General Election
+  office: City Council Ward 2
+  source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Detailed-Results-by-Contest-Table.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Zack Smith
+    lines:
+      DEM: 765
+    votes: 765
+  beacon_totals:
+    write_in: 6
+    overvotes: 0
+    undervotes: 129
+    unlabeled_col: 0
+    total_votes: 771
+  by_ed:
+  - ed: W2 ED1
+    votes:
+      Zack Smith:
+        DEM: 424
+    write_in: 4
+    overvotes: 0
+    undervotes: 66
+    unlabeled_col: 0
+    total_votes: 428
+  - ed: W2 ED2
+    votes:
+      Zack Smith:
+        DEM: 341
+    write_in: 2
+    overvotes: 0
+    undervotes: 63
+    unlabeled_col: 0
+    total_votes: 343
+  format: PDF (text layer)
+  note: No mayoral race in 2025. Candidate/line names from GE25-Official-Summary-Results.pdf; column after undervotes is unlabeled in text (all 0 for Beacon).
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- year: 2025
+  election: 2025 General Election
+  office: City Council Ward 3
+  source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Detailed-Results-by-Contest-Table.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Sergei Krasikov
+    lines:
+      DEM: 528
+      WOR: 173
+    votes: 701
+  beacon_totals:
+    write_in: 11
+    overvotes: 0
+    undervotes: 148
+    unlabeled_col: 0
+    total_votes: 712
+  by_ed:
+  - ed: W3 ED1
+    votes:
+      Sergei Krasikov:
+        DEM: 248
+        WOR: 71
+    write_in: 3
+    overvotes: 0
+    undervotes: 48
+    unlabeled_col: 0
+    total_votes: 322
+  - ed: W3 ED2
+    votes:
+      Sergei Krasikov:
+        DEM: 280
+        WOR: 102
+    write_in: 8
+    overvotes: 0
+    undervotes: 100
+    unlabeled_col: 0
+    total_votes: 390
+  format: PDF (text layer)
+  note: No mayoral race in 2025. Candidate/line names from GE25-Official-Summary-Results.pdf; column after undervotes is unlabeled in text (all 0 for Beacon).
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- year: 2025
+  election: 2025 General Election
+  office: City Council Ward 4
+  source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Detailed-Results-by-Contest-Table.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Carolyn Bennett Glauda
+    lines:
+      DEM: 735
+      WOR: 215
+    votes: 950
+  beacon_totals:
+    write_in: 7
+    overvotes: 0
+    undervotes: 173
+    unlabeled_col: 0
+    total_votes: 957
+  by_ed:
+  - ed: W4 ED1
+    votes:
+      Carolyn Bennett Glauda:
+        DEM: 367
+        WOR: 95
+    write_in: 2
+    overvotes: 0
+    undervotes: 91
+    unlabeled_col: 0
+    total_votes: 464
+  - ed: W4 ED2
+    votes:
+      Carolyn Bennett Glauda:
+        DEM: 368
+        WOR: 120
+    write_in: 5
+    overvotes: 0
+    undervotes: 82
+    unlabeled_col: 0
+    total_votes: 493
+  format: PDF (text layer)
+  note: No mayoral race in 2025. Candidate/line names from GE25-Official-Summary-Results.pdf; column after undervotes is unlabeled in text (all 0 for Beacon).
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- year: 2025
+  election: 2025 General Election
+  office: County Legislator District 16
+  source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Detailed-Results-by-Contest-Table.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Yvette Valdes Smith
+    lines:
+      DEM: 721
+      WOR: 193
+    votes: 914
+  - name: John Forman
+    lines:
+      CON: 42
+      REP: 160
+    votes: 202
+  beacon_totals:
+    write_in: 1
+    overvotes: 0
+    undervotes: 13
+    unlabeled_col: 0
+    total_votes: 1117
+  by_ed:
+  - ed: W4 ED1
+    votes:
+      Yvette Valdes Smith:
+        DEM: 357
+        WOR: 86
+      John Forman:
+        CON: 21
+        REP: 85
+    write_in: 1
+    overvotes: 0
+    undervotes: 5
+    unlabeled_col: 0
+    total_votes: 550
+  - ed: W4 ED2
+    votes:
+      Yvette Valdes Smith:
+        DEM: 364
+        WOR: 107
+      John Forman:
+        CON: 21
+        REP: 75
+    write_in: 0
+    overvotes: 0
+    undervotes: 8
+    unlabeled_col: 0
+    total_votes: 567
+  district_wide:
+    Yvette Valdes Smith:
+      DEM: 1671
+      WOR: 329
+    John Forman:
+      CON: 172
+      REP: 822
+    write_in: 3
+    undervotes: 35
+    overvotes: 3
+    total_votes: 2997
+    note: Contest Total (Beacon W4 ED1-2 + Town of Fishkill EDs 2,8,9,10)
+  format: PDF (text layer)
+  note: No mayoral race in 2025. Candidate/line names from GE25-Official-Summary-Results.pdf; column after undervotes is unlabeled in text (all 0 for Beacon).
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- year: 2025
+  election: 2025 General Election
+  office: County Legislator District 18
+  source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Detailed-Results-by-Contest-Table.pdf
+  scope: Beacon EDs only (summed from ED rows)
+  candidates:
+  - name: Molly Rhodes
+    lines:
+      DEM: 1784
+      WOR: 580
+    votes: 2364
+  beacon_totals:
+    write_in: 20
+    overvotes: 0
+    undervotes: 363
+    unlabeled_col: 0
+    total_votes: 2384
+  by_ed:
+  - ed: W1 ED1
+    votes:
+      Molly Rhodes:
+        DEM: 306
+        WOR: 68
+    write_in: 2
+    overvotes: 0
+    undervotes: 58
+    unlabeled_col: 0
+    total_votes: 376
+  - ed: W1 ED2
+    votes:
+      Molly Rhodes:
+        DEM: 342
+        WOR: 120
+    write_in: 5
+    overvotes: 0
+    undervotes: 86
+    unlabeled_col: 0
+    total_votes: 467
+  - ed: W2 ED1
+    votes:
+      Molly Rhodes:
+        DEM: 320
+        WOR: 131
+    write_in: 3
+    overvotes: 0
+    undervotes: 40
+    unlabeled_col: 0
+    total_votes: 454
+  - ed: W2 ED2
+    votes:
+      Molly Rhodes:
+        DEM: 280
+        WOR: 82
+    write_in: 3
+    overvotes: 0
+    undervotes: 41
+    unlabeled_col: 0
+    total_votes: 365
+  - ed: W3 ED1
+    votes:
+      Molly Rhodes:
+        DEM: 256
+        WOR: 73
+    write_in: 1
+    overvotes: 0
+    undervotes: 40
+    unlabeled_col: 0
+    total_votes: 330
+  - ed: W3 ED2
+    votes:
+      Molly Rhodes:
+        DEM: 280
+        WOR: 106
+    write_in: 6
+    overvotes: 0
+    undervotes: 98
+    unlabeled_col: 0
+    total_votes: 392
+  district_wide:
+    Molly Rhodes:
+      DEM: 1981
+      WOR: 626
+    write_in: 21
+    undervotes: 426
+    overvotes: 0
+    total_votes: 2628
+    note: Contest Total (Beacon W1-W3 + Town of Fishkill ED 1)
+  format: PDF (text layer)
+  note: No mayoral race in 2025. Candidate/line names from GE25-Official-Summary-Results.pdf; column after undervotes is unlabeled in text (all 0 for Beacon).
+  names_source: https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+wards:
+  summary: Beacon has 4 wards; each election district is numbered within its ward. NYS BOE labels them "City Beacon WWWEEE" (e.g. 001002 = Ward 1 ED 2); Dutchess results label them "City of Beacon W 1 ED
+    2" (2021), "City of Beacon*W 1 ED 2.*" (2023), "C/Beacon W 1 ED 2" (2025); the county apportionment list uses Ward 001/W1 + Dist 002.
+  through_2021:
+    ward_1:
+    - W1 ED1
+    - W1 ED2
+    ward_2:
+    - W2 ED1
+    - W2 ED2
+    - W2 ED3
+    ward_3:
+    - W3 ED1
+    - W3 ED2
+    - W3 ED3
+    ward_4:
+    - W4 ED1
+    - W4 ED2
+    note: 10 EDs in 2018 (enrollment), 2020 (enrollment) and 2021 (results). W3 ED3 is a tiny district (5 voters in 2018; 1-2 ballots in 2021).
+  from_2023:
+    ward_1:
+    - W1 ED1
+    - W1 ED2
+    ward_2:
+    - W2 ED1
+    - W2 ED2
+    ward_3:
+    - W3 ED1
+    - W3 ED2
+    ward_4:
+    - W4 ED1
+    - W4 ED2
+    note: 8 EDs in the 2023 and 2025 results (W2 ED3 and W3 ED3 gone). ED boundaries changed between 2021 and 2023, so ED-level comparisons across that break are not like-for-like; ward-level comparisons
+      are safer (ward boundaries may also have shifted; not verified).
+  county_legislature:
+    district_18:
+      '2021': Beacon W1 ED1-2, W2 ED1-3, W3 ED1-2 + Town of Fishkill ED 3
+      '2023': Beacon W1-W3 (6 EDs) + Town of Fishkill ED 1
+      '2025': Beacon W1-W3 (6 EDs) + Town of Fishkill ED 1
+    district_16:
+      '2021': Beacon W3 ED3, W4 ED1-2 + Town of Fishkill EDs 1,2,4,5,6,15,17
+      '2023': Beacon W4 ED1-2 + Town of Fishkill EDs 2,8,9,10
+      '2025': Beacon W4 ED1-2 + Town of Fishkill EDs 2,8,9,10
+    source: Derived from the ED rows in each year's ED-level results file.
+gaps:
+- 'NYS BOE enrollment for 2022 and 2025/2026 (dutchess-11012022, dutchess-02202026, etc.) could not be fetched: elections.ny.gov blocks scripted clients with a Cloudflare challenge, and the WebFetch tool
+  refused those URLs (they never surfaced in search results). No numbers for those years.'
+- 'Enrollment snapshots included: NYS BOE 2018-04-01 (active/inactive/total) and the county apportionment lists 2018-03-30 and 2020-02-21 (active only).'
+- '2019 results: only the scanned certification (citywide/district-wide totals); no ED-level breakdown, and no Beacon-only share for county legislator districts 16 and 18.'
+- '2023 mayor: the party line for Ruben Simmons is not printed in the source.'
+- An unlabeled column in the 2023/2025 ED tables (rotated header) is kept as unlabeled_col.
+- Mayor was not on the ballot in 2021 or 2025.

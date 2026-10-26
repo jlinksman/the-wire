@@ -1,0 +1,319 @@
+# Engaging without a party in New York (2026-10-26). Public records and local reporting; every fact sourced. Second-checked Oct 26
+# (112 confirmed, 14 corrected in local politics; 44 confirmed, 10 corrected in the independent path).
+# People appear only in public roles. Nothing here describes Joe's views.
+meta:
+  as_of: '2026-10-26'
+  jurisdiction: City of Beacon, Dutchess County, NY; AD 104; SD 39; County Legislature CLD 16 and CLD 18
+  blocked_sources:
+  - nysenate.gov/legislation/laws/ELN/* (Cloudflare challenge on direct fetch; 6-138, 6-140, 6-142, 14-114 read via fetch service; 5-304, 6-120, 6-158, 1-104 via newyork.public.law)
+  - elections.ny.gov (Cloudflare challenge on direct fetch; calendar pages read via fetch service)
+  - public.leginfo.state.ny.us (connection reset)
+voting:
+- point: No party box checked means 'blank' (unaffiliated). New York has no enrollment in an independent body; only the four qualified parties hold enrollment-based primaries.
+  cite:
+  - Election Law §8-302(4)
+  - §§6-132, 6-136 (signers)
+  - https://newyork.public.law/laws/n.y._election_law_section_8-302
+  verified_on: '2026-10-26'
+- point: 'Primaries are closed: only voters enrolled in a party may vote in its primary or sign its designating petitions. A blank voter cannot vote in the Democratic or Republican primary.'
+  cite:
+  - Election Law §6-120(1)
+  - Election Law §6-136 (enrolled-voter signature base)
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+  verified_on: 2026-10-26 (closed-primary voting rule itself, Election Law §8-302, not fetched)
+- point: Enrollment change received by the BOE by Feb 14, or after the 7th day following the June primary, takes effect immediately; changes received in between take effect 7 days after the primary.
+  cite:
+  - Election Law §5-304(3)
+  - https://newyork.public.law/laws/n.y._election_law_section_5-304
+  - https://elections.ny.gov/2025-political-calendar
+  verified_on: '2026-10-26'
+- point: '2026 application: changes received Feb 15 to June 30 became effective June 30 (primary June 23, 2026). For the 2027 primary (June 22, 2027), the deadline is Feb 14, 2027, a Sunday; confirm whether
+    the BOE extends it.'
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+  - Election Law §8-100(1)(a)
+  verified_on: 2026-10-26 (2027 date computed; weekend treatment unverified)
+- point: 'Change since 2019: S.6532-A/A.8228-B replaced the old rule (change by ~October took effect only after the November election) with the Feb 14 cutoff, effective immediately.'
+  cite:
+  - https://votesmart.org/public-statement/1373722/governor-cuomo-signs-legislation-expediting-party-enrollment-changes-to-make-it-easier-to-vote-in-primary-elections
+  verified_on: 2026-10-26 (chapter number not confirmed)
+- point: 'Federal, state and local primaries are consolidated on the fourth Tuesday of June (since 2019). 2026 primary: June 23; general: Nov 3. 2027: primary June 22, general Nov 2.'
+  cite:
+  - Election Law §8-100(1)(a), (c)
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+  verified_on: 2026-10-26 (2027 dates computed)
+- point: Any registered voter of the unit, enrolled or not, may sign an independent petition. The signature is not counted if the signer is on another valid petition designating or nominating anyone for
+    the same office.
+  cite:
+  - Election Law §6-138(1)
+  - https://www.nysenate.gov/legislation/laws/ELN/6-138
+  verified_on: 2026-10-26 (second check)
+running:
+- point: Without a party, the route is an independent nominating petition signed by registered voters of the political unit, in any enrollment. It nominates for the general election only, with no primary.
+  cite:
+  - Election Law §6-138(1)
+  - https://www.nysenate.gov/legislation/laws/ELN/6-138
+  verified_on: '2026-10-26'
+- point: 'Signature formula: 5% of votes for governor at the last gubernatorial election in the unit, capped at 1,500 for county/sub-county offices outside NYC, 3,000 for senate, 1,500 for assembly. Statewide:
+    lesser of 45,000 or 1%.'
+  cite:
+  - Election Law §6-142(1), (2)(a), (f), (g)
+  - https://www.nysenate.gov/legislation/laws/ELN/6-142
+  - https://newyork.public.law/laws/n.y._election_law_section_6-142
+  verified_on: '2026-10-26'
+- point: 'Dutchess BOE 2026 minimums (Res. 6:2026): City of Beacon citywide (mayor, at-large council) 285; Ward 1: 70; Ward 2: 69; Ward 3: 68; Ward 4: 79.'
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/04/Min.-Sign.-Requirements-INDT-Petitions.pdf
+  - https://elections.dutchessny.gov/2026/04/06/minimum-signature-requirements-for-independent-petitions/
+  verified_on: '2026-10-26'
+- point: 'Same resolution: County Legislature CLD 16 (Beacon/Fishkill) 236; CLD 18 (Beacon/Fishkill) 232; countywide 1,500. Figures rest on the 2022 governor vote.'
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/04/Min.-Sign.-Requirements-INDT-Petitions.pdf
+  - https://www.dutchessny.gov/Departments/County-Legislature/Dutchess-County-Legislators.htm
+  verified_on: 2026-10-26 (second check)
+- point: 2027 and 2028 figures will be recomputed from the Nov 3, 2026 governor vote. Expect Beacon numbers to move; check the Dutchess BOE resolution in early 2027.
+  cite:
+  - Election Law §6-142(2)
+  verified_on: 2026-10-26 (inference from statute)
+- point: AD 104 (Beacon, Newburgh, part of Poughkeepsie, Ulster towns) requires 1,500; SD 39 (Dutchess/Orange/Putnam) requires 3,000. The caps almost certainly bind. Multi-county districts file with the
+    State BOE.
+  cite:
+  - Election Law §6-142(2)(f), (g)
+  - https://www.nysenate.gov/senators/rob-rolison/district
+  - https://en.wikipedia.org/wiki/New_York%27s_104th_State_Assembly_district
+  verified_on: 2026-10-26 (5% figures for AD104 and SD39 not computed; SBOE filing venue not fetched)
+- point: 'Witness: any duly qualified voter of New York (not necessarily in-district or enrolled) who has not signed a petition for another candidate for the same office. A notary or commissioner of deeds
+    may substitute.'
+  cite:
+  - Election Law §6-140(1)(b), (2)
+  - https://www.nysenate.gov/legislation/laws/ELN/6-140
+  verified_on: '2026-10-26'
+- point: Signers sign in ink and give date, name, residence and town/city. The witness must complete town/city and county identification before filing or the sheet is invalid. The SBOE sample form is deemed
+    compliant.
+  cite:
+  - Election Law §6-140(1)(a), (3)
+  - https://elections.dutchessny.gov/wp-content/uploads/2020/02/Sample-Independent-Nominating-Petition.pdf
+  verified_on: '2026-10-26'
+- point: 'Timing: file between 24 and 23 weeks before the general election. Signatures dated more than 6 weeks before the last filing day don''t count. Acceptance or declination is due by the 3rd day after
+    the 23rd Tuesday.'
+  cite:
+  - Election Law §6-158(9), (11)
+  - Election Law §6-138(4)
+  - https://newyork.public.law/laws/n.y._election_law_section_6-158
+  verified_on: '2026-10-26'
+- point: '2026 cycle (state legislative and county): signing Apr 14; filing May 19–26; accept/decline by May 29. Already past.'
+  cite:
+  - https://www.tiogacountyny.gov/media/ddiphsli/2026-independent-petition-objection-calendar-final.pdf
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+  verified_on: '2026-10-26'
+- point: '2027 cycle (Beacon mayor and all six council seats), computed from §6-158(9)/§6-138(4): first signing Apr 13, 2027; filing May 18–25, 2027; acceptance by May 28, 2027. Confirm against the SBOE
+    2027 calendar.'
+  cite:
+  - Election Law §6-158(9), (11)
+  - Election Law §6-138(4)
+  verified_on: computed 2026-10-26; SBOE 2027 calendar not yet located
+- point: '2028 cycle (Assembly, Senate, County Legislature), computed: first signing Apr 18, 2028; filing May 23–30, 2028 (Memorial Day May 29).'
+  cite:
+  - Election Law §6-158(9)
+  - Election Law §6-138(4)
+  verified_on: computed 2026-10-26
+- point: Mailed filings are timely if postmarked before midnight on the last day and received within two business days. Late delivery is fatal. Filing hours are 9am–5pm.
+  cite:
+  - Election Law §1-106(2)
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+  verified_on: '2026-10-26'
+- point: 'Independent body name: English characters only; may not include any part or abbreviation of an existing party name, may not create confusion with a party or earlier independent body name or emblem;
+    BOE assigns one if omitted.'
+  cite:
+  - Election Law §6-138(3)(a), (f)
+  - https://www.nysenate.gov/legislation/laws/ELN/6-138
+  verified_on: '2026-10-26'
+- point: 'No word is banned outright in an independent body''s name: §6-138(3)(a) bars only part of an existing party''s name or a name confusingly similar to a party''s or an earlier-filed body''s. ''Independent''
+    is allowed, subject to the confusion test.'
+  cite:
+  - Election Law §6-138(3)(a)
+  - https://newyork.public.law/laws/n.y._election_law_section_6-138
+  verified_on: 2026-10-26 (second check)
+- point: 'Recent local examples of independent-body lines on Dutchess''s 2026 ballot: ''Common Ground'', ''Vote Affordable'', ''Amenia Works''. Body lines may cross-nominate party candidates.'
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf
+  verified_on: '2026-10-26'
+- point: Ward council candidates must live in the ward. At-large candidates must be designated as such. City nominations follow the state Election Law; the charter adds no separate nominating process.
+  cite:
+  - Beacon City Charter Art. 78 §§78.02, 78.06 (as described in 2017 Charter Commission report)
+  - https://www.beaconny.gov/wp-content/uploads/2019/10/DRAFT-Report-of-the-City-of-Beacon-Charter-Commission-02212017.pdf
+  verified_on: 2026-10-26 (via 2017 report; current charter text on ecode360 not fetched)
+fusion:
+- point: A party designation or nomination is valid only if the candidate is enrolled in that party, unless the party committee for the unit authorizes a non-member by majority vote of those present, with
+    a quorum (the Wilson-Pakula certificate).
+  cite:
+  - Election Law §6-120(2), (3)
+  - https://newyork.public.law/laws/n.y._election_law_section_6-120
+  verified_on: '2026-10-26'
+- point: The authorization certificate is signed and acknowledged by the presiding officer and secretary. It is due 4 days after the last day to file designating petitions; party rules may assign a different
+    committee.
+  cite:
+  - Election Law §6-120(3)
+  verified_on: '2026-10-26'
+- point: 2026 authorization deadline was Apr 10. For 2027, estimated designating filing is ~Mar 29–Apr 1, 2027, so authorization is due about Apr 5, 2027. Confirm on the SBOE 2027 calendar.
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+  - Election Law §6-158(1)
+  verified_on: 2026 verified; 2027 estimated
+- point: Even with authorization, a party line requires a designating petition signed by that party's enrolled voters (5% of enrollment or statutory cap; Beacon citywide/ward cap 500). The candidate must
+    then win any contested primary.
+  cite:
+  - Election Law §6-136
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/01/2026-Political-Calendar.pdf
+  verified_on: '2026-10-26'
+- point: 'Minor-party cross-endorsement works the same way: WFP and Conservative committees issue Wilson-Pakulas to non-members, typically Democrats and Republicans. Votes on all lines are aggregated for
+    the candidate; each party''s line total counts toward its status.'
+  cite:
+  - Election Law §6-120(3)
+  - Election Law §1-104(3)
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  verified_on: 2026-10-26 (aggregation rule, Election Law §9-112/§7-104, not fetched)
+- point: 'Beacon 2025: three of four ward winners and an at-large winner ran DEM+WOR. No Republican, Conservative or independent-body candidates ran for Beacon council.'
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  verified_on: '2026-10-26'
+- point: A candidate who accepted an independent nomination may decline it until the 3rd day after the primary only if that party's nomination was contested (§6-158(11)); otherwise the acceptance deadline
+    stands and the nomination remains.
+  cite:
+  - Election Law §6-158(11)
+  verified_on: 2026-10-26 (second check)
+party_status:
+- point: A 'party' polls the greater of 2% or 130,000 votes for its governor candidate at the last gubernatorial election, and for its presidential candidate in presidential years. Status is retested every
+    two years.
+  cite:
+  - Election Law §1-104(3)
+  - https://newyork.public.law/laws/n.y._election_law_section_1-104
+  verified_on: '2026-10-26'
+- point: 'Change since 2020: the FY2021 budget (L.2020 ch.58, Part ZZZ) raised the bar from 50,000 governor votes every four years and added the presidential test. The Second Circuit upheld it in SAM Party
+    v. Kosinski (Feb 2021).'
+  cite:
+  - https://www.jurist.org/news/2021/02/federal-appeals-court-rejects-challenge-to-updated-new-york-election-ballot-rules
+  - https://www.wamc.org/wamc-news/2020-04-04/minor-parties-say-nys-budget-provision-unfairly-weakens-them
+  verified_on: 2026-10-26 (Part ZZZ citation from memory/secondary sources)
+- point: The same 2020 change raised statewide independent-petition signatures from 15,000 to the lesser of 45,000 or 1% of the governor vote, with 500 (or 1% of enrollment) from each of half the congressional
+    districts.
+  cite:
+  - Election Law §6-142(1)
+  - https://newyork.public.law/laws/n.y._election_law_section_6-142
+  - https://spectrumlocalnews.com/nys/capital-region/politics/2024/11/04/nys-minor-parties-focus-on-ballot-access-this-election
+  verified_on: '2026-10-26'
+- point: 'Recognized parties for 2026: Democratic, Republican, Conservative, Working Families. Green, Libertarian, Independence and SAM lost status in 2020.'
+  cite:
+  - https://elections.ulstercountyny.gov/wp-content/uploads/2026/02/Political-Parties.pdf
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/02/Signature-Requirements.pdf
+  verified_on: 2026-10-26 (2020 losses from secondary sources)
+- point: Status is retested at the Nov 3, 2026 governor election. On Dutchess's ballot Hochul runs DEM/WOR and Blakeman runs REP/CON/'Vote Affordable', so WFP and Conservative need 2% or 130,000 on their
+    own lines.
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf
+  - Election Law §1-104(3)
+  verified_on: '2026-10-26'
+- point: A group becomes a party only by petitioning its governor or presidential nominee onto the ballot as an independent body (45,000 signatures) and then clearing the threshold. There is no registration
+    route.
+  cite:
+  - Election Law §1-104(3), (12)
+  - Election Law §6-142(1)
+  verified_on: '2026-10-26'
+money:
+- point: 'No dollar trigger: a group must register with the State BOE as a political committee and an independent expenditure committee before spending (§14-107(3)). Weekly reports cover contributions of
+    ,000+, spending over ,000, and digital ads over 00.'
+  cite:
+  - Election Law §14-107(3), (4)(a)(i)
+  - https://newyork.public.law/laws/n.y._election_law_section_14-107
+  verified_on: 2026-10-26 (second check)
+- point: A PAC may only contribute (including in-kind) to candidates, committees and IE committees, plus non-public communications. It may not make its own public expenditures for or against candidates.
+  cite:
+  - Election Law §14-100(16)
+  - https://elections.ny.gov/committee-information
+  verified_on: '2026-10-26'
+- point: An IE committee makes only independent expenditures, with no coordination with the candidate, the candidate's committee or agent. It registers on the SBOE IE form and gives its registration to
+    each broadcaster or platform it buys from.
+  cite:
+  - Election Law §§14-100(15), 14-107(1)(d), 14-107-b
+  - 9 NYCRR 6200.10–6200.11
+  - https://elections.ny.gov/independent-expenditure-committee-information
+  verified_on: '2026-10-26'
+- point: 'IE reporting: contributions of $1,000+ and expenditures over $5,000 are reported within 24 hours inside 30 days of the election, otherwise weekly on Mondays. The regime was rebuilt by L.2018 ch.59
+    Part JJJ.'
+  cite:
+  - https://elections.ny.gov/independent-expenditure-committee-information
+  verified_on: 2026-10-26 (statutory registration trigger amount in §14-107 not verified)
+- point: 'Local office limits per contributor: primary limit is enrolled party voters in the district × $0.05; general limit is registered voters × $0.05; floor $1,000, cap $50,000. Family members: × $0.25,
+    floor $1,250, cap $100,000.'
+  cite:
+  - Election Law §14-114(1)
+  - https://elections.ny.gov/node/576
+  - https://www.nysenate.gov/legislation/laws/ELN/14-114
+  verified_on: '2026-10-26'
+- point: Beacon ward and citywide races almost certainly sit at the $1,000 floor (0.05 × fewer than 20,000 voters). An independent candidate has no primary, so only the general limit applies.
+  cite:
+  - Election Law §14-114(1)
+  - https://elections.ny.gov/node/576
+  verified_on: 2026-10-26 (inference; Dutchess BOE did not publish a Beacon-specific figure)
+- point: 'Other caps: $150,000 per person per calendar year across state and local races; corporations and LLCs $5,000 a year (LLC giving attributed to members). These caps don''t apply to gifts to IE or
+    ballot-proposition committees.'
+  cite:
+  - Election Law §14-114(8)
+  - Election Law §14-116
+  - https://elections.ny.gov/node/576
+  verified_on: 2026-10-26 (§14-116 not fetched directly)
+- point: IE committees, PACs, unions and lobbyists may not lend to candidates or committees. A non-participating candidate's own and spouse's funds are unlimited but must be reported.
+  cite:
+  - Election Law §14-114(6)(c)
+  - https://elections.ny.gov/node/576
+  verified_on: '2026-10-26'
+- point: The state public campaign finance program (matching funds, from 2024) covers only Governor/Lt. Gov, AG, Comptroller, State Senate and Assembly. Beacon and Dutchess County offices are ineligible;
+    no local Dutchess program was found.
+  cite:
+  - Election Law Art. 14, Title II (§14-200 et seq.)
+  - https://pcfb.ny.gov/candidate-committee-services
+  verified_on: 2026-10-26 (absence of a Beacon/Dutchess local program not exhaustively searched)
+beacon:
+- point: Beacon elections are partisan. Candidates appear on party or independent-body lines under the state Election Law, as the 2023 and 2025 Dutchess results show. The charter has no nonpartisan-ballot
+    provision.
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  - https://www.beaconny.gov/wp-content/uploads/2019/10/DRAFT-Report-of-the-City-of-Beacon-Charter-Commission-02212017.pdf
+  verified_on: '2026-10-26'
+- point: 'Council: four ward members plus two at-large, all two-year terms. All six were elected Nov 2025 (at-large: Grant, Wake), so the next election is Nov 2, 2027.'
+  cite:
+  - Beacon Charter Art. 2 §2.00(A), (D)
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  - https://www.newpaltz.edu/benjamincenter/4.3.17_beacon_committee_suggests_charter_changes_thehighlandscurrent.pdf
+  verified_on: 2026-10-26 (2017 proposal for 4-year at-large terms evidently not in effect, inferred from at-large races in both 2023 and 2025)
+- point: 'Mayor: four-year term. Kyriacou was elected 2019 and re-elected 2023; the mayor was not on the 2025 ballot. The next mayoral election is Nov 2, 2027, alongside all six council seats.'
+  cite:
+  - Beacon Charter Art. 2 §2.00(D)(1)
+  - https://www.alittlebeaconblog.com/blog/a-few-election-results-from-tuesdays-local-vote
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  verified_on: '2026-10-26'
+- point: 'City elections stay in odd years: Beacon Charter §78.00 (first Tuesday after first Monday of November, odd years) and NY Const. art. XIII §8. Cities are outside the 2023 Even Year Election Law.'
+  cite:
+  - https://www.beaconny.gov/wp-content/uploads/2019/10/DRAFT-Report-of-the-City-of-Beacon-Charter-Commission-02212017.pdf
+  - https://www.nytowns.org/common/Uploaded%20files/11.21%20Updated%20Even%20Year%20Election%20FAQ.pdf
+  verified_on: '2026-10-26'
+- point: The County Legislature moved to even years under the Even Year Election Law (L.2023 ch.741), upheld in County of Onondaga v State (Oct 16, 2025). CLD 16 and 18 are on the Nov 3, 2026 ballot; next
+    is 2028.
+  cite:
+  - https://nycourts.gov/reporter/3dseries/2025/2025_05737.htm
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf
+  verified_on: 2026-10-26 (2028 assumes restored two-year terms)
+- point: 'State seats covering Beacon: AD 104 (Jacobson, DEM/WOR, unopposed on the 2026 ballot) and SD 39 (Rolison REP/CON vs. Kaul DEM/WOR). Both are elected Nov 3, 2026; next cycle 2028.'
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2026/09/Candidate-Notice-Website-1.pdf
+  - https://www.nysenate.gov/senators/rob-rolison/district
+  verified_on: '2026-10-26'
+- point: Beacon's 2025 council races were all uncontested. In 2023, all seven city offices had a single Democratic nominee, and a write-in mayoral candidate drew 14% (390 of 2,723).
+  cite:
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+  - https://www.alittlebeaconblog.com/blog/a-few-election-results-from-tuesdays-local-vote
+  verified_on: '2026-10-26'
+- point: Dutchess BOE (112 Delafield St, Poughkeepsie) receives Beacon and CLD petitions and posts annual minimum-signature resolutions, sample petition, acceptance and authorization forms.
+  cite:
+  - https://elections.dutchessny.gov/candidate-information/
+  verified_on: '2026-10-26'
