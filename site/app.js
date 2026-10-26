@@ -1287,6 +1287,25 @@ function recordOutside(k, Q) {
   openSheet([el("button", { class: "linkbtn", text: "‹ Your profile", onclick: () => openProfile() }), el("h2", { id: "sheet-title", class: "stitle", text: name }),
     el("p", { class: "sdesc", text: what }), el("p", {}, link(url, "Take it on their site ↗", "sbtn")), el("p", { class: "fine", text: "Their site keeps your answers there; record just the result here (private, Cloudflare only)." }), ...form, status], name);
 }
+// Party platforms coded on the statements (party_platforms.yaml): agreement with each party's own
+// documents, from the election check and Where you stand answers (proposals fill gaps).
+function partyFit(Q, electorate) {
+  const P = data.party_platforms || {};
+  const g = data.voter_guide;
+  const ans = Object.assign({}, (Q.values || {}).answers || {}, withProposals("election", g ? (((Q.elections || {})[g.id] || {}).answers || {}) : {}));
+  return Object.entries(P).filter(([, x]) => x.electorate === electorate).map(([id, x]) => {
+    let num = 0, den = 0, n = 0; const rows = [];
+    for (const [q, c] of Object.entries(x.codes || {})) { const a = ans[q]; if (!a || a.skip || a.v == null) continue; const w = a.w || 2, ag = 1 - Math.abs(a.v - c.v) / 4; num += w * ag; den += w; n += 1; rows.push({ q, ag, c }); }
+    return { id, name: x.name, n, pct: n >= 3 ? Math.round(100 * num / den) : null, rows };
+  }).sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1));
+}
+function partyList(fits) {
+  const text = Object.fromEntries(allQuizItems().map((it) => [it.id, it.text]));
+  return el("div", {}, ...fits.map((f) => el("details", { class: "race" },
+    el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: f.name }), f.pct != null ? " · " + f.pct + "% agreement" + (fits.some((y) => y !== f && y.pct === f.pct) ? " · tied" : "") : " · too few shared statements"),
+      el("span", { class: "rsub", text: f.n + " statements in common" }), el("span", { class: "chev", text: "▾" })),
+    el("ul", { class: "cpos" }, ...f.rows.sort((a, b) => b.ag - a.ag).map((r) => el("li", {}, el("b", { text: r.ag >= 0.75 ? "Agree · " : r.ag <= 0.25 ? "Differ · " : "Partly · " }), "“" + (text[r.q] || r.q) + "” " + (r.c.note || "") + " ", r.c.source ? link(r.c.source, "↗", "srcl") : null))))));
+}
 function lineFit(Q) {
   const g = data.voter_guide;
   if (!g || !g.quiz) return [];
@@ -1383,16 +1402,62 @@ async function openProfile() {
     el("p", { class: "sdesc", text: nAnswers + " questionnaire answers, " + props.length + " proposals, " + pos.length + " debate positions (" + firm.length + " firm). Everything here comes from those; nothing is guessed from what you read." }),
     sec("Where you sit", sit, el("button", { class: "linkbtn", text: "The map and readings ›", onclick: () => openStand() })),
     sec("Your labels", labels, el("p", { class: "fine", text: "Your own placement and outside tools beside The Wire's reading. They measure different things, so they won't always agree; that's useful." })),
-    sec("New York · which line fits", ny, el("p", { class: "fine", text: "From your election check against the candidates on each line, and The Wire's rough placement of each line. Party platforms are being coded next, which will make this a direct comparison." })),
-    sec("Federal", fed),
+    sec("New York · which party fits", partyFit(Q, "ny").length ? partyList(partyFit(Q, "ny")) : null,
+      el("p", { class: "fine", text: partyFit(Q, "ny").length ? "Above: each party's own platform and agenda, coded on the statements. Below: the candidates on each line this year." : "Party platforms are being coded; for now, from the candidates on each line and The Wire's rough placement of each line." }), ny),
+    sec("Federal", partyFit(Q, "us").length ? partyList(partyFit(Q, "us")) : null, fed),
     sec("Israel", isr),
     sec("Beacon and Dutchess", local),
     clashes.length ? sec("Where your answers disagree · " + clashes.length, el("ul", { class: "cpos" }, ...clashes.slice(0, 6).map((c) => el("li", { text: "“" + c.it.text + "”: your proposal reads " + (SCALE.find(([v]) => v === c.c.v) || [0, ""])[1].toLowerCase() + ", your answer " + (SCALE.find(([v]) => v === c.a.v) || [0, ""])[1].toLowerCase() + "." })))) : null,
     sec("How you've moved", drift),
     firm.length ? sec("Firm positions", el("ul", { class: "cpos" }, ...firm.slice(0, 8).map((p) => el("li", { text: p.summary })))) : null,
-    sec("People to watch", el("p", { class: "fine", text: "Coming next: a proposed list of officials and rising figures, for you to approve one by one, each followed as a career thread." })),
+    sec("People to watch", (data.watch_pool || []).length ? el("p", { class: "fine", text: (followsNow().topics || []).filter((t) => String(t.id).startsWith("person_")).length + " watched. Officials and rising figures across parties, with how their sourced positions compare with yours." }) : el("p", { class: "fine", text: "The list is being researched; it appears here when it's ready." }),
+      (data.watch_pool || []).length ? el("button", { class: "sbtn wide", text: "Open people to watch", onclick: () => openWatch() }) : null),
     sec("Platform draft", el("p", { class: "fine", text: "For later: your confirmed positions, proposals and best debate lines as plain text, ready to start a platform from. Nothing leaves this page unless you paste it somewhere." }), copyBtn),
   ].filter(Boolean), "Your profile");
+}
+
+// --------------------------------------------------------------- People to watch (2026-10-26)
+// A neutral, balanced pool of public figures (watch_pool.yaml: officials and rising figures across
+// parties, with sourced positions on the election check's statements). Closeness to Joe is computed
+// here on the page only. Watching someone follows their name as a topic, so their news, votes and
+// moves collect in a thread over the years.
+const WGROUP = [["beacon", "Beacon"], ["dutchess", "Dutchess County"], ["state", "New York"], ["national", "Washington"], ["israel", "Israel"]];
+function personFit(p, answers) {
+  let num = 0, den = 0, n = 0;
+  for (const [q, x] of Object.entries(p.codes || {})) { const a = answers[q]; if (!a || a.skip || a.v == null) continue; const w = a.w || 2; num += w * (1 - Math.abs(a.v - x.v) / 4); den += w; n += 1; }
+  return n >= 2 ? { pct: Math.round(100 * num / den), n } : { pct: null, n };
+}
+async function openWatch(group) {
+  const Q = await loadQuiz(true);
+  const g = data.voter_guide;
+  const answers = withProposals("election", g ? (((Q.elections || {})[g.id] || {}).answers || {}) : {});
+  const pool = data.watch_pool || [];
+  const watching = new Set((followsNow().topics || []).filter((t) => String(t.id).startsWith("person_")).map((t) => t.id));
+  const grp = group || "beacon";
+  const list = pool.filter((p) => p.group === grp).map((p) => ({ p, f: personFit(p, answers) }))
+    .sort((a, b) => watching.has("person_" + b.p.id) - watching.has("person_" + a.p.id) || (b.f.pct ?? -1) - (a.f.pct ?? -1));
+  const card = ({ p, f }) => {
+    const on = watching.has("person_" + p.id);
+    return el("details", { class: "race" },
+      el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: p.name }), " · " + p.party + (on ? " · watching" : "")),
+        el("span", { class: "rsub", text: p.role + (f.pct != null ? " · " + f.pct + "% agreement on " + f.n + " statements" : "") }), el("span", { class: "chev", text: "▾" })),
+      el("p", { text: p.why_watch }),
+      (p.career || []).length ? el("ul", { class: "cpos" }, ...p.career.map((c) => el("li", { text: c }))) : null,
+      f.n ? el("p", { class: "fine", text: "Agreement uses only their sourced positions on the election check (" + f.n + " in common); a rough guide, not their whole record." }) : null,
+      el("div", { class: "sactions" },
+        el("button", { class: "sbtn" + (on ? "" : " primary"), text: on ? "Stop watching" : "Watch their career", onclick: async () => {
+          await setFollow({ action: on ? "unfollow" : "follow", type: "topic", id: "person_" + p.id, title: p.name, kind: "entity", desk: p.group === "israel" ? "WORLD" : p.group === "beacon" || p.group === "dutchess" ? "BEACON" : "GOV",
+              pattern: p.name });
+          openWatch(grp); } }),
+        ...(p.links || []).slice(0, 2).map((u) => link(u, (() => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return "link"; } })() + " ↗", "sbtn"))));
+  };
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Your profile", onclick: () => openProfile() }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "People to watch" }),
+    el("p", { class: "sdesc", text: "Officials and rising figures across parties, chosen for where their careers are heading, not for agreeing with you. Agreement shows where their sourced positions overlap your answers. Watching someone follows their name, so their news collects in a thread over time." }),
+    el("div", { class: "wrow" }, ...WGROUP.map(([k, label]) => el("button", { class: "chip" + (k === grp ? " on" : ""), text: label, onclick: () => openWatch(k) }))),
+    list.length ? el("div", {}, ...list.map(card)) : el("p", { class: "fine", text: "No one in this group yet." }),
+  ], "People to watch");
 }
 
 // --------------------------------------------------------------- engagement log (2026-10-25)

@@ -116,6 +116,12 @@ def run(data: dict, follows: dict, log) -> None:
     f = ROOT / "israel_quiz.yaml"
     if f.exists():
         data["il_quiz"] = yaml.safe_load(f.read_text())
+    # Your profile (2026-10-26): a neutral pool of public figures to watch, and party platforms coded
+    # on the statements (public information; closeness to Joe is computed only on the page).
+    for fname, key, sub in (("watch_pool.yaml", "watch_pool", "people"), ("party_platforms.yaml", "party_platforms", "parties")):
+        f2 = ROOT / fname
+        if f2.exists():
+            data[key] = (yaml.safe_load(f2.read_text()) or {}).get(sub) or ({} if sub == "parties" else [])
     sf = ROOT / "solutions.yaml"     # Your solutions: issues, mechanisms and sourced plans (public)
     if sf.exists():
         data["solutions"] = (yaml.safe_load(sf.read_text()) or {}).get("issues") or {}
