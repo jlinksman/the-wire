@@ -778,3 +778,11 @@ body.listening .player.mini { bottom: calc(var(--tabh) + env(safe-area-inset-bot
 .meetag li { padding: 8px 0; border-bottom: 1px solid var(--hair); display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
 .meetag .anum { color: var(--text3); min-width: 1.6em; }
 .meetag .atext { flex: 1 1 80%; font-size: 0.9rem; color: var(--text2); }
+
+/* ------------------------------------------------ Watch rail (2026-10-26) */
+.wrail { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding: 2px 0 10px; margin: 0 calc(-1 * var(--gutter-r)) 0 0; }
+.wclip { flex: 0 0 72%; max-width: 280px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 4px; text-align: left; }
+.wthumb { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 10px; background: #000 center / cover no-repeat; }
+.wdur { position: absolute; right: 6px; bottom: 6px; padding: 1px 6px; border-radius: 4px; background: rgba(0, 0, 0, 0.75); color: #fff; font-size: 0.7rem; }
+.wtitle { font-size: 0.88rem; font-weight: 600; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wsrc { font-size: 0.72rem; color: var(--text3); }

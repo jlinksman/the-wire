@@ -119,7 +119,7 @@ def group(items: list[dict], now: datetime | None = None) -> list[dict]:
         out.append({
             "id": c[0]["id"],
             # Lead: the newest plain headline (English, not a live blog, not WSJ).
-            "lead": max(c, key=lambda m: (not m.get("no_ai"), not m.get("translated"),
+            "lead": max(c, key=lambda m: (not m.get("clip"), not m.get("no_ai"), not m.get("translated"),
                                           not re.match(r"\W*(live|watch)\b", m["title"], re.IGNORECASE), ms(m), not m.get("quiet")))["id"],   # newest headline leads; id stays the first report
             "members": [m["id"] for m in sorted(c, key=ms, reverse=True)],
             "sources": len(outlets),

@@ -344,6 +344,8 @@ function todayView() {
     el("span", { class: "bc-txt" },
       el("span", { class: "bc-t", text: "Brief me" }),
       el("span", { class: "bc-s", text: (since ? "What's new since " + (isToday(since) ? fmtTime.format(new Date(since)) : exact(since)) : "What matters today") + " · newscast or narrative" }))));
+  const wrail = watchRail();
+  if (wrail) out.push(wrail);
 
   // 2. Threads you follow, then a little new territory
   out.push(...threadsStrip());
@@ -745,7 +747,8 @@ function podcastPicks(n) {
   const followed = (data.threads || []).filter((t) => t.followed);
   const words = new Set(followed.flatMap((t) => String(t.title || "").toLowerCase().match(/[a-z]{5,}/g) || []));
   const eps = (data.items || []).filter((it) => it.audio && it.source_id !== "npr_news_now" && it.ms >= cut);
-  const score = (it) => { const st = storyOf.get(it.id); let s = st && st.followed ? 3 : 0;
+  const ms = memberStories();
+  const score = (it) => { const st = ms.get(it.id); let s = st && st.followed ? 3 : 0;
     for (const w of String(it.title + " " + (it.summary || "")).toLowerCase().match(/[a-z]{5,}/g) || []) if (words.has(w)) s += 1;
     return s; };
   return eps.map((it) => ({ it, s: score(it) })).sort((a, b) => b.s - a.s || b.it.ms - a.it.ms).slice(0, n).map((x) => x.it);
@@ -977,6 +980,55 @@ async function openMeeting(video, agendaIt) {
     markBtn, markBox, lists,
     el("p", { class: "fine", text: "Your moments are private, stored only on Cloudflare. The video plays from YouTube; nothing is downloaded." }),
   ], video.title);
+}
+
+// --------------------------------------------------------------- Watch rail (2026-10-26)
+// Short official clips (sources marked clip: true) on the stories you follow and the day's top
+// stories, swipeable on Today, each played as YouTube's own embed with a link to its story.
+// Any report's story, not just the lead's (storyOf is keyed by lead).
+function memberStories() { const m = new Map(); for (const st of data.stories || []) for (const id of st.members || []) if (!m.has(id)) m.set(id, st); return m; }
+const durSecs = (d) => String(d || "").split(":").reduce((s, x) => s * 60 + Number(x || 0), 0);
+function watchPicks(n) {
+  const cut = Date.now() - 36 * 3600e3;
+  const top = new Map((data.stories || []).slice(0, 12).map((s, i) => [s.id, 12 - i]));
+  const words = new Set((data.threads || []).filter((t) => t.followed).flatMap((t) => String(t.title || "").toLowerCase().match(/[a-z]{5,}/g) || []));
+  const seen = new Set(), ms = memberStories();
+  return (data.items || []).filter((it) => it.clip && it.video && it.ms >= cut && (!it.video.dur || durSecs(it.video.dur) <= 900) && !isMuted(it))
+    .map((it) => { const st = ms.get(it.id); let s = 0;
+      if (st && st.followed) s += 20; if (st && top.has(st.id)) s += top.get(st.id);
+      for (const w of String(it.title).toLowerCase().match(/[a-z]{5,}/g) || []) if (words.has(w)) s += 2;
+      return { it, st, s }; })
+    .filter((x) => x.s > 0).sort((a, b) => b.s - a.s || b.it.ms - a.it.ms)
+    .filter((x) => { const k = x.st ? x.st.id : x.it.id; if (seen.has(k)) return false; seen.add(k); return true; })   // one clip per story
+    .slice(0, n);
+}
+function watchRail() {
+  const picks = watchPicks(6);
+  if (!picks.length) return null;
+  return el("section", { class: "watchrail" }, sectionHead("Watch", picks.length + " clips"),
+    el("div", { class: "wrail" }, ...picks.map((x, i) => el("button", { class: "wclip", onclick: () => openClip(picks, i) },
+      el("span", { class: "wthumb", style: "background-image:url('https://i.ytimg.com/vi/" + encodeURIComponent(x.it.video.id) + "/mqdefault.jpg')" },
+        x.it.video.dur ? el("span", { class: "wdur", text: x.it.video.dur }) : null),
+      el("span", { class: "wtitle", text: x.it.title }),
+      el("span", { class: "wsrc", text: x.it.source + " · " + ago(x.it.ms) })))));
+}
+function openClip(picks, i) {
+  const x = picks[i];
+  if (typeof aud !== "undefined" && !aud.paused) aud.pause();
+  if (playing) { playing = false; render(); }
+  engage({ k: "story", f: "video", t: "clip: " + x.it.title.slice(0, 120), h: "youtube.com" });
+  openSheet([
+    el("span", { class: "mlabel", text: "Watch · " + x.it.source + (x.it.video.dur ? " · " + x.it.video.dur : "") }),
+    el("h2", { id: "sheet-title", class: "stitle", text: x.it.title }),
+    el("div", { class: "meetwrap" }, el("iframe", { class: "meetframe", allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: "",
+      src: "https://www.youtube.com/embed/" + encodeURIComponent(x.it.video.id) + "?autoplay=1&playsinline=1&rel=0", title: x.it.title })),
+    x.st ? el("button", { class: "sbtn wide", text: "The story: " + ((byId.get(x.st.lead) || {}).title || "open") + " ›", onclick: () => openStory(x.st) }) : null,
+    el("div", { class: "sactions" },
+      i > 0 ? el("button", { class: "sbtn", text: "‹ Previous", onclick: () => openClip(picks, i - 1) }) : null,
+      i < picks.length - 1 ? el("button", { class: "sbtn primary", text: "Next clip ›", onclick: () => openClip(picks, i + 1) }) : null,
+      link(x.it.link, "YouTube ↗", "sbtn")),
+    el("p", { class: "fine", text: "Official clips from news organizations' own YouTube channels, matched to your threads and the day's top stories. Turn a channel off in sources.yaml." }),
+  ].filter(Boolean), x.it.title);
 }
 
 // --------------------------------------------------------------- engagement log (2026-10-25)

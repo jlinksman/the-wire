@@ -1048,6 +1048,7 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             **({"audio": it["audio"]} if it.get("audio") else {}),
             **({"video": it["video"]} if it.get("video") else {}),
             **({"meeting_video": True} if src.get("meeting_video") else {}),
+            **({"clip": True} if src.get("clip") else {}),
             **({"people": sorted(people)} if people else {}),
             **({"person_feed": True} if src.get("person_feed") else {}),
             **({"blotter": it["blotter"]} if it.get("blotter") else {}),
