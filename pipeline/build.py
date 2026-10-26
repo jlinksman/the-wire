@@ -720,8 +720,57 @@ def parse_nws_afd(src: dict, content: bytes) -> list[dict]:
     }]
 
 
+def parse_yt_channel(src: dict, content: bytes) -> list[dict]:
+    """A YouTube channel's /videos page (2026-10-26): the uploads, newest first. YouTube's robots.txt
+    disallows its RSS feeds (/feeds/videos.xml) but not channel pages, so the page is read instead,
+    once an hour. Played only as YouTube's own embed."""
+    html = content.decode("utf-8", "replace")
+    m = re.search(r"var ytInitialData = (\{.*?\});</script>", html)
+    if not m:
+        raise ValueError("no video list on the channel page (layout changed or blocked)")
+    found = []
+
+    def walk(o):
+        if isinstance(o, dict):
+            if "lockupViewModel" in o:
+                found.append(o["lockupViewModel"])
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+    walk(json.loads(m.group(1)))
+    units = {"second": 1, "minute": 60, "hour": 3600, "day": 86400, "d": 86400, "h": 3600, "week": 604800, "month": 2592000, "year": 31536000}
+    items = []
+    for lk in found:
+        if lk.get("contentType") != "LOCKUP_CONTENT_TYPE_VIDEO" or not lk.get("contentId"):
+            continue
+        md = (lk.get("metadata") or {}).get("lockupMetadataViewModel") or {}
+        title = clean_text(((md.get("title") or {}).get("content")), 300)
+        parts = [((p.get("text") or {}).get("content") or "") for r in ((md.get("metadata") or {}).get("contentMetadataViewModel") or {}).get("metadataRows", []) for p in r.get("metadataParts", [])]
+        age = next((p for p in parts if re.search(r"\bago\b", p)), "")
+        am = re.match(r"(\d+)\s*(second|minute|hour|day|week|month|year|d|h)", age)
+        when = now_utc() - timedelta(seconds=int(am.group(1)) * units[am.group(2)]) if am else None
+        dur = re.search(r'"thumbnailBadgeViewModel":\s*\{"text":\s*"([\d:]+)"', json.dumps(lk))
+        # Meeting titles carry the date ("Beacon Planning Board 10 14 26"): use it, so the time doesn't drift between fetches.
+        td = re.search(r"\b(\d{1,2})[ ./-](\d{1,2})[ ./-](\d{2}|\d{4})\b", title or "")
+        if td:
+            try:
+                y = int(td.group(3)); y = y + 2000 if y < 100 else y
+                when = datetime(y, int(td.group(1)), int(td.group(2)), 19, 0, tzinfo=NY).astimezone(timezone.utc)
+            except ValueError:
+                pass
+        if not title:
+            continue
+        items.append({"title": title, "link": f"https://www.youtube.com/watch?v={lk['contentId']}", "summary": "",
+                      "published": iso(when) if when else None, "video": {"id": lk["contentId"], **({"dur": dur.group(1)} if dur else {})}})
+    return items
+
+
 def pick_parser(src: dict):
     url = src["url"]
+    if re.search(r"youtube\.com/(channel/[^/]+|@[^/]+)/videos", url):
+        return parse_yt_channel
     if src.get("feed_kind") == "nws_afd":
         return parse_nws_afd
     if "wp-json/wp/v2/media" in url:
@@ -997,6 +1046,8 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             **({"author": it["author"]} if it.get("author") else {}),
             **({"doc_text": it["doc_text"]} if it.get("doc_text") else {}),
             **({"audio": it["audio"]} if it.get("audio") else {}),
+            **({"video": it["video"]} if it.get("video") else {}),
+            **({"meeting_video": True} if src.get("meeting_video") else {}),
             **({"people": sorted(people)} if people else {}),
             **({"person_feed": True} if src.get("person_feed") else {}),
             **({"blotter": it["blotter"]} if it.get("blotter") else {}),

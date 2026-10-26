@@ -87,12 +87,19 @@ beacon:
     poll: 120
     notes: Discover new blotters through beacon_wp_media (titles like 09.23.2026). Uploaded in batches several days late. Parse rows of time, call type, disposition, officer. Never use for alerts.
   - id: beacon_youtube
-    name: City of Beacon YouTube
-    type: youtube_channel
+    name: City of Beacon YouTube (meeting videos)
+    short: City of Beacon video
+    enabled: true
+    meeting_video: true
+    desk: BEACON
+    scope: local
+    type: html
+    url: https://www.youtube.com/channel/UCvPpigGwZDeR7WYmw-SuDxg/videos
     channel_id: UCvPpigGwZDeR7WYmw-SuDxg
     status: OK
-    poll: 5
-    notes: Live detection needs the YouTube Data API (channel RSS omits live and upcoming streams).
+    poll: 60
+    max_items: 12
+    notes: "2026-10-26: the channel's /videos page (YouTube's robots.txt disallows /feeds/videos.xml, not channel pages). Each meeting video plays beside its Granicus agenda; YouTube embed only."
   - id: beacon_youtube_playlist_a
     name: Beacon meeting playlist A
     type: youtube_playlist

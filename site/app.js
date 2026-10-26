@@ -878,6 +878,107 @@ function openQueue() {
   openSheet(nodes, "Listening");
 }
 
+// --------------------------------------------------------------- Meetings (2026-10-26)
+// A Beacon meeting video (YouTube embed only) beside its Granicus agenda. Beacon's uploads carry no
+// chapters, so Joe marks moments himself as he watches, optionally tied to an agenda item; they're
+// private (/moments, KV) and become jump links on the agenda. Chapters a source does publish in its
+// description show too.
+const MEET_BODIES = [["zoning", /zoning/i], ["planning", /planning/i], ["council", /council/i], ["historic", /historic|landmark/i], ["conservation", /conservation/i], ["school", /school|education/i]];
+function meetingBody(title) { const m = MEET_BODIES.find(([, re]) => re.test(title || "")); return m ? m[0] : null; }
+function meetingDay(it) {
+  const t = it.title || "";
+  let m = t.match(/\b([A-Z][a-z]{2})[a-z]*\.? (\d{1,2}), (\d{4})\b/);
+  if (m) { const d = new Date(m[1] + " " + m[2] + ", " + m[3] + " 12:00"); if (!isNaN(d)) return d; }
+  m = t.match(/\b(\d{1,2})[ ./-](\d{1,2})[ ./-](\d{2}|\d{4})\b/);
+  if (m) { const y = +m[3] < 100 ? 2000 + +m[3] : +m[3]; return new Date(y, +m[1] - 1, +m[2], 12); }
+  return it.ms ? new Date(it.ms) : null;
+}
+function pairMeeting(it, wantVideo) {
+  const body = meetingBody(it.title), day = meetingDay(it);
+  if (!body || !day) return null;
+  const pool = (data.items || []).filter((x) => (wantVideo ? x.meeting_video && x.video : x.agenda && x.agenda.length) && meetingBody(x.title) === body);
+  const best = pool.map((x) => ({ x, d: Math.abs((meetingDay(x) || 0) - day) / 86400e3 })).filter((y) => y.d <= 2.5).sort((a, b) => a.d - b.d)[0];
+  return best ? best.x : null;
+}
+let myMoments = null;
+async function loadMoments(force) {
+  if (myMoments && !force) return myMoments;
+  try { const r = await fetch("moments", { credentials: "same-origin" }); myMoments = r.ok ? await r.json() : { moments: [] }; } catch (e) { myMoments = myMoments || { moments: [] }; }
+  return myMoments;
+}
+function descChapters(text) {
+  const out = [];
+  for (const m of String(text || "").matchAll(/(?:^|\s)((?:\d{1,2}:)?\d{1,2}:\d{2})\s+[-–·]?\s*([^\n]{3,80}?)(?=\s+(?:\d{1,2}:)?\d{1,2}:\d{2}\s|$|\n)/g)) {
+    const p = m[1].split(":").map(Number); out.push({ t: p.reduce((s, x) => s * 60 + x, 0), label: m[2].trim() });
+  }
+  return out.length >= 2 ? out : [];
+}
+async function openMeeting(video, agendaIt) {
+  if (typeof aud !== "undefined" && !aud.paused) aud.pause();
+  if (playing) { playing = false; render(); }
+  const M = await loadMoments(true);
+  const vid = video.video.id;
+  engage({ k: "story", f: "video", t: "meeting: " + video.title.slice(0, 100) });
+  let now = 0;
+  const frame = el("iframe", { class: "meetframe", allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: "",
+    src: "https://www.youtube.com/embed/" + encodeURIComponent(vid) + "?enablejsapi=1&playsinline=1&rel=0&origin=" + encodeURIComponent(location.origin), title: video.title });
+  const send = (o) => { try { frame.contentWindow.postMessage(JSON.stringify(o), "*"); } catch (e) { /* not ready */ } };
+  frame.addEventListener("load", () => send({ event: "listening", id: 1, channel: "widget" }));
+  const onMsg = (ev) => {
+    if (!/youtube\.com$/.test(new URL(ev.origin).hostname)) return;
+    let d; try { d = JSON.parse(ev.data); } catch (e) { return; }
+    if (d && d.info && typeof d.info.currentTime === "number") { now = d.info.currentTime; clock.textContent = "at " + mmss(now); }
+  };
+  window.removeEventListener("message", window.__meetMsg || (() => {}));
+  window.__meetMsg = onMsg; window.addEventListener("message", onMsg);
+  const seek = (t) => { send({ event: "command", func: "seekTo", args: [t, true] }); send({ event: "command", func: "playVideo", args: [] }); };
+  const clock = el("span", { class: "asrc", text: "" });
+  const mine = () => (myMoments.moments || []).filter((m) => m.v === vid).sort((a, b) => a.t - b.t);
+  const agenda = (agendaIt && agendaIt.agenda) || [];
+  const chapters = descChapters(video.summary);
+  // Mark a moment: the time now, optionally an agenda item and a note.
+  let pickN = null;
+  const note = el("input", { class: "tin", type: "text", placeholder: "Note (optional)", maxlength: "200" });
+  const chips = el("div", { class: "wrow" }, ...[null, ...agenda.filter((a) => a.n != null).map((a) => a.n)].map((n) => {
+    const b = el("button", { class: "chip" + (n === pickN ? " on" : ""), text: n == null ? "No item" : "Item " + n });
+    b.onclick = () => { pickN = n; [...chips.children].forEach((c) => c.classList.toggle("on", c === b)); }; return b; }));
+  const markBox = el("div", { class: "markbox", hidden: true }, el("p", { class: "fine", text: "Tie this moment to an agenda item:" }), chips, note,
+    el("button", { class: "sbtn primary wide", text: "Save the moment", onclick: async () => {
+      try { const r = await fetch("moments", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "add", v: vid, t: Math.floor(now), meeting: agendaIt ? agendaIt.id : null, n: pickN, note: note.value }) }); myMoments = await r.json(); } catch (e) { /* keep going */ }
+      markBox.hidden = true; note.value = ""; drawLists(); } }));
+  const markBtn = el("button", { class: "sbtn wide", text: "📍 Mark this moment", onclick: () => { markBox.hidden = !markBox.hidden; } });
+  const lists = el("div", {});
+  function drawLists() {
+    const ms = mine();
+    const byN = {};
+    for (const m of ms) if (m.n) (byN[m.n] = byN[m.n] || []).push(m);
+    lists.replaceChildren(...[
+      chapters.length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Chapters" }), el("ul", { class: "admin" }, ...chapters.map((c) => el("li", {}, el("button", { class: "linkbtn", text: mmss(c.t) + " · " + c.label, onclick: () => seek(c.t) }))))) : null,
+      el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Your moments · " + ms.length }),
+        ms.length ? el("ul", { class: "admin" }, ...ms.map((m) => el("li", { class: "aqrow" },
+          el("button", { class: "linkbtn", text: "▶ " + mmss(m.t) + (m.n ? " · Item " + m.n : "") + (m.note ? " · " + m.note : ""), onclick: () => seek(m.t) }),
+          el("button", { class: "unsave", text: "✕", "aria-label": "Delete moment", onclick: async () => { try { const r = await fetch("moments", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "delete", v: vid, t: m.t }) }); myMoments = await r.json(); } catch (e) { /* ignore */ } drawLists(); } }))))
+          : el("p", { class: "fine", text: "None yet. Tap Mark this moment while it plays; tie it to an agenda item and it shows on the agenda below." })),
+      agenda.length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "The agenda · " + agenda.length + " items" }),
+        el("ol", { class: "meetag" }, ...agenda.map((a) => el("li", {},
+          el("span", { class: "anum", text: a.n != null ? a.n + "." : "·" }),
+          el("span", { class: "atext", text: a.text.length > 220 ? a.text.slice(0, 220) + "…" : a.text }),
+          ...(a.flags || []).map((f) => el("span", { class: "aflag", text: f })),
+          ...((a.n != null && byN[a.n]) || []).map((m) => el("button", { class: "chip on", text: "▶ " + mmss(m.t), onclick: () => seek(m.t) }))))),
+        el("button", { class: "linkbtn", text: "Open the full agenda ›", onclick: () => openItem(agendaIt) })) : el("p", { class: "fine", text: "No matching agenda found for this meeting." }),
+    ].filter(Boolean));
+  }
+  drawLists();
+  openSheet([
+    el("span", { class: "mlabel", text: "Meeting · City of Beacon" + (video.video.dur ? " · " + video.video.dur : "") }),
+    el("h2", { id: "sheet-title", class: "stitle", text: video.title }),
+    el("div", { class: "meetwrap" }, frame),
+    el("div", { class: "aqrow" }, clock, link(video.link, "YouTube ↗", "srcl")),
+    markBtn, markBox, lists,
+    el("p", { class: "fine", text: "Your moments are private, stored only on Cloudflare. The video plays from YouTube; nothing is downloaded." }),
+  ], video.title);
+}
+
 // --------------------------------------------------------------- engagement log (2026-10-25)
 // Joe: "see what I actually engage with versus what I think I engage with." Private: events go to
 // /engage (KV, behind Access), batched: sent when 25 pile up or the page is hidden.
@@ -1046,6 +1147,8 @@ function openItem(it) {
     it.summary && !it.agenda ? el("p", { class: "sdesc", text: it.summary }) : null,
     it.watch_terms && it.watch_terms.length ? el("p", { class: "swatch", text: "Matched your watchlist: " + it.watch_terms.join(", ") }) : null,
     quoteList(qs),
+    it.meeting_video && it.video ? el("button", { class: "sbtn primary wide", text: "▶ Watch" + (pairMeeting(it, false) ? " with the agenda" : ""), onclick: () => openMeeting(it, pairMeeting(it, false)) }) : null,
+    it.agenda && pairMeeting(it, true) ? el("button", { class: "sbtn primary wide", text: "▶ Watch this meeting with its agenda", onclick: () => openMeeting(pairMeeting(it, true), it) }) : null,
     it.agenda ? agendaList(it) : null,
     it.blotter ? blotterTable(it.blotter) : null,
     el("div", { class: "sactions" },

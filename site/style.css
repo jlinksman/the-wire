@@ -769,3 +769,12 @@ body.listening .player.mini { bottom: calc(var(--tabh) + env(safe-area-inset-bot
 .aqch { margin: 6px 0 0 0; padding-left: 0; list-style: none; }
 .aqch li { display: flex; justify-content: space-between; gap: 8px; }
 .aqopen { flex: none; }
+
+/* ------------------------------------------------ meetings (2026-10-26) */
+.meetwrap { position: sticky; top: 0; z-index: 2; background: #000; margin: 8px 0; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; }
+.meetframe { width: 100%; height: 100%; border: 0; display: block; }
+.markbox { margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
+.meetag { list-style: none; padding: 0; margin: 0; }
+.meetag li { padding: 8px 0; border-bottom: 1px solid var(--hair); display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+.meetag .anum { color: var(--text3); min-width: 1.6em; }
+.meetag .atext { flex: 1 1 80%; font-size: 0.9rem; color: var(--text2); }
