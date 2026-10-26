@@ -124,6 +124,13 @@ def main():
             mech = S.get("mechanisms") or []
             stances = {a: {m: {"v": x["v"], "source": x.get("source")} for m, x in cells.items()} for a, cells in (S.get("plans") or {}).items()}
             errs += lint(f"Your solutions {k}", mech, stances=stances, min_shared=2)
+    pf = ROOT / "party_platforms.yaml"
+    if pf.exists():
+        parties = (yaml.safe_load(pf.read_text()) or {}).get("parties") or {}
+        items = el["elections"][0]["quiz"]["items"] if False else [it for e in el.get("elections") or [] for it in ((e.get("quiz") or {}).get("items") or [])] + yaml.safe_load((ROOT / "values.yaml").read_text())["items"]
+        bad = [f"{p}/{q}" for p, x in parties.items() for q, c in (x.get("codes") or {}).items() if not c.get("source")]
+        print(f"== Party platforms: {sum(len(x.get('codes') or {}) for x in parties.values())} codes, {len(bad)} without a source")
+        errs += bad
     v = yaml.safe_load((ROOT / "values.yaml").read_text())
     errs += lint("Where you stand", v["items"], explain=explain, kind="scale")
     tf = ROOT / "values_topup.yaml"

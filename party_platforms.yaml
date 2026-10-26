@@ -1,0 +1,851 @@
+# Party platforms coded on the statements (2026-10-26): New York's Democratic, Republican, Working
+# Families and Conservative parties, and the two national parties. Codes come from each party's own
+# documents (platforms, adopted programs, statements in the party's name); enacted laws, caucus votes
+# and leaders' actions are proxies, capped at ±1 and labeled. Missing stays missing. checked: true =
+# confirmed or corrected by an independent second coder (Oct 26). Public information only; agreement
+# with Joe is computed only on the page.
+version: 2026-10-26.1
+parties:
+  ny_dem:
+    name: Democratic Party (New York)
+    electorate: ny
+    sources:
+    - https://nystateofpolitics.com/state-of-politics/new-york/politics/2026/05/29/hochul-signs-measures-to-limit-ice-cooperation
+    - https://spectrumlocalnews.com/nys/buffalo/politics/2026/03/10/highlights-of-new-york-state-senate-s-one-house-budget-proposal
+    - https://ag.ny.gov/press-release/2025/attorney-general-james-senator-comrie-and-assemblymember-lasher-celebrate
+    - https://www.governor.ny.gov/news/governor-hochul-directs-new-york-power-authority-develop-zero-emission-advanced-nuclear-energy
+    - https://news.bloomberglaw.com/states-of-play/ny-lawmakers-budgets-oppose-governors-plans-on-taxes-housing
+    - https://en.wikipedia.org/wiki/Climate_Leadership_and_Community_Protection_Act
+    - https://en.wikipedia.org/wiki/Congestion_pricing_in_New_York_City
+    - https://en.wikipedia.org/wiki/2024_New_York_Proposal_1
+    - https://en.wikipedia.org/wiki/Housing_Stability_and_Tenant_Protection_Act_of_2019
+    - https://en.wikipedia.org/wiki/Reproductive_Health_Act
+    - https://en.wikipedia.org/wiki/Marihuana_Regulation_and_Taxation_Act
+    codes:
+      q07:
+        v: 1
+        source: https://nystateofpolitics.com/state-of-politics/new-york/politics/2026/05/29/hochul-signs-measures-to-limit-ice-cooperation
+        note: 'Proxy: Democratic-led Legislature passed, Gov. Hochul signed 2026 judicial-warrant rule for sensitive locations.'
+        checked: true
+      q09:
+        v: 1
+        source: https://www.governor.ny.gov/news/governor-hochul-directs-new-york-power-authority-develop-zero-emission-advanced-nuclear-energy
+        note: 'Proxy: Gov. Hochul (party leader) directed NYPA in 2025 to develop new advanced nuclear capacity.'
+        checked: true
+      q16:
+        v: 1
+        source: https://ag.ny.gov/press-release/2025/attorney-general-james-senator-comrie-and-assemblymember-lasher-celebrate
+        note: 'Proxy: FAIR Business Practices Act sponsored by Democrats Comrie and Lasher, signed by Hochul 2025.'
+        checked: true
+      q19:
+        v: -1
+        source: https://en.wikipedia.org/wiki/Congestion_pricing_in_New_York_City
+        note: 'Proxy: Democratic majorities enacted congestion pricing in 2019; Hochul restarted the toll in 2025.'
+        checked: true
+      q20:
+        v: -1
+        source: https://blogs.law.columbia.edu/climatechange/2026/06/05/unpacking-new-york-states-rollback-of-its-landmark-climate-law/
+        note: 'Proxy: Democrats enacted the law in 2019; 2026 budget amended it but kept the 2050 target.'
+        checked: true
+      q22:
+        v: 1
+        source: https://nystateofpolitics.com/state-of-politics/new-york/politics/2026/05/29/hochul-signs-measures-to-limit-ice-cooperation
+        note: 'Proxy: Democratic-led Legislature passed, Hochul signed 2026 ban on 287(g) agreements.'
+        checked: true
+      q25:
+        v: -1
+        source: https://news.bloomberglaw.com/states-of-play/ny-lawmakers-budgets-oppose-governors-plans-on-taxes-housing
+        note: 'Proxy: Democratic Senate and Assembly one-house budgets (2024) supported higher Medicaid spending.'
+        checked: true
+      q38:
+        v: 1
+        source: https://spectrumlocalnews.com/nys/buffalo/politics/2026/03/10/highlights-of-new-york-state-senate-s-one-house-budget-proposal
+        note: 'Proxy: Senate and Assembly Democratic one-house budgets (2026) both raise income taxes on top brackets.'
+        checked: true
+      q41:
+        v: 1
+        source: https://en.wikipedia.org/wiki/2024_New_York_Proposal_1
+        note: 'Proxy: Democratic majorities twice passed the Equal Rights Amendment (Prop 1) sending it to voters.'
+        checked: true
+      q42:
+        v: 1
+        source: https://en.wikipedia.org/wiki/Housing_Stability_and_Tenant_Protection_Act_of_2019
+        note: 'Proxy: 2019 Democratic tenant law lets municipalities statewide adopt their own rent regulation.'
+        checked: true
+      v03:
+        v: 1
+        source: https://spectrumlocalnews.com/nys/buffalo/politics/2026/03/10/highlights-of-new-york-state-senate-s-one-house-budget-proposal
+        note: 'Proxy: Senate Democratic one-house budget 2026 proposes higher taxes on top earners.'
+        checked: true
+      v10:
+        v: 1
+        source: https://en.wikipedia.org/wiki/Reproductive_Health_Act
+        note: 'Proxy: Democratic majorities enacted the Reproductive Health Act in 2019.'
+        checked: true
+      v13:
+        v: 1
+        source: https://en.wikipedia.org/wiki/Marihuana_Regulation_and_Taxation_Act
+        note: 'Proxy: Democratic majorities passed recreational marijuana legalization (MRTA) in 2021.'
+        checked: true
+      q21:
+        v: -1
+        source: https://www.nrdc.org/bio/marisa-guerrero/new-york-state-codifies-fracking-ban-budget
+        note: 'Proxy: Democratic governor and Legislature codified the fracking ban in the 2020 state budget.'
+        checked: true
+    note: 'No published platform: positions read from what Democratic majorities in Albany enacted, each a capped proxy; left missing where the party is split.'
+  ny_gop:
+    name: Republican Party (New York)
+    electorate: ny
+    sources:
+    - https://nygop.org/news/
+    - https://nygop.org/protect-womens-sports/
+    codes:
+      q03:
+        v: -1
+        source: https://nygop.org/faso-in-daily-news-how-we-have-to-lower-building-costs-in-new-york/
+        note: 'Proxy: NYGOP-posted Faso op-ed urges repealing the Scaffold Law to cut construction costs.'
+        checked: true
+      q04:
+        v: 1
+        source: https://nygop.org/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety/
+        note: 'Proxy: nominee pledges tax cuts funded by redirecting waste and fraud spending.'
+        checked: true
+      q06:
+        v: 2
+        source: https://nygop.org/nygop-statement-on-attorney-general-debate/
+        note: 'Chair: AG James "is for cashless bail and letting criminals walk free."'
+        checked: true
+      q07:
+        v: -1
+        source: https://nygop.org/cox-hochul-james-lawlessness-ends-on-day-one-of-governor-stefanik/
+        note: 'Proxy: chair vows to "end the sanctuary madness" and work with federal authorities.'
+        checked: true
+      q09:
+        v: 1
+        source: https://nygop.org/hochuls-nuclear-pivot-proves-new-yorks-green-agenda-is-failing/
+        note: 'Proxy: NYGOP-posted op-ed by Senate GOP Leader Ortt backs expanding nuclear power.'
+        checked: true
+      q11:
+        v: 2
+        source: https://nygop.org/cox-tish-james-weaponized-ag-office-unfit-to-serve/
+        note: 'Chair: New Yorkers deserve an AG "who prosecutes criminals."'
+        checked: true
+      q12:
+        v: 1
+        source: https://nygop.org/statement-from-nygop-chair-ed-cox-in-remembrance-of-the-october-7-attacks-on-israel/
+        note: 'Chair: Israel must receive "our full support"; aid levels not specified.'
+        checked: true
+      q15:
+        v: 1
+        source: https://nygop.org/statement-by-ed-cox-on-lawsuit-to-stop-hochuls-climate-law/
+        note: Chair blames "burdensome tax and regulation" for New York's affordability losses.
+        checked: true
+      q19:
+        v: 2
+        source: https://nygop.org/statement-by-ed-cox-on-president-trump-cancelling-hochuls-congestion-pricing/
+        note: Chair commends halting congestion pricing, calls it a "cash-grab."
+        checked: true
+      q20:
+        v: 1
+        source: https://nygop.org/hochuls-nuclear-pivot-proves-new-yorks-green-agenda-is-failing/
+        note: 'Proxy: Ortt op-ed calls CLCPA "dangerously unrealistic"; no explicit repeal call.'
+        checked: true
+      q21:
+        v: 1
+        source: https://nygop.org/cox-new-yorks-wind-power-plan-is-a-disaster-for-new-yorkers/
+        note: 'Proxy: chair laments Southern Tier natural gas "goes untapped" versus Pennsylvania.'
+        checked: true
+      q22:
+        v: -2
+        source: https://nygop.org/cox-hochul-james-lawlessness-ends-on-day-one-of-governor-stefanik/
+        note: 'Chair: end sanctuary policies, work with federal authorities to deport criminal migrants.'
+        checked: true
+      q23:
+        v: -1
+        source: https://nygop.org/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety/
+        note: Party release faults "failing to fix the Raise the Age law"; seeks changes, not repeal.
+        checked: true
+      q26:
+        v: -2
+        source: https://nygop.org/protect-womens-sports/
+        note: Party opposes "biological males" on women's and girls' teams; urges GENDA amendment.
+        checked: true
+      q27:
+        v: 2
+        source: https://nygop.org/cox-tish-james-weaponized-ag-office-unfit-to-serve/
+        note: 'Chair: James "weaponized" the AG office into "a political hit squad" against Trump.'
+        checked: true
+      q29:
+        v: -1
+        source: https://nygop.org/cox-damning-medicaid-report-one-more-reason-ag-james-unfit-for-office/
+        note: 'Proxy: chair faults AG for ranking last in Medicaid fraud indictments and convictions.'
+        checked: true
+      q38:
+        v: -1
+        source: https://nygop.org/statement-from-ed-cox-in-response-to-mamdani-albany-dems-tax-hike-proposal/
+        note: 'Proxy: chair opposes Mamdani and Albany Democrats'' 25% surcharge on NYC businesses.'
+        checked: true
+      q39:
+        v: 1
+        source: https://nygop.org/hochuls-nuclear-pivot-proves-new-yorks-green-agenda-is-failing/
+        note: 'Proxy: Ortt op-ed calls closing Indian Point a mistake; no explicit reopen call.'
+        checked: true
+      q40:
+        v: 2
+        source: https://nygop.org/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety/
+        note: 'Party release: roll back "hidden taxes and mandates" and green mandates driving energy costs.'
+        checked: true
+      q41:
+        v: -1
+        source: https://nygop.org/statement-from-ed-cox-on-decision-regarding-prop-1/
+        note: 'Proxy: chair urged voters to reject Prop 1, citing immigrant benefits and gender identity.'
+        checked: true
+      q42:
+        v: -2
+        source: https://nygop.org/cox-hochuls-housing-policies-doomed-to-failure/
+        note: 'Chair: exporting NYC housing policies like good cause eviction statewide is "doomed to failure."'
+        checked: true
+      q43:
+        v: 1
+        source: https://nygop.org/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety/
+        note: 'Proxy: nominee pledges to roll back state-imposed costs on utility bills; no suspension specified.'
+        checked: true
+      v02:
+        v: 1
+        source: https://nygop.org/cox-first-hochul-banned-gas-stoves-now-this/
+        note: 'Proxy: chair says Hochul''s refrigerant rule risks destroying small businesses.'
+        checked: true
+      v03:
+        v: -1
+        source: https://nygop.org/statement-from-ed-cox-in-response-to-mamdani-albany-dems-tax-hike-proposal/
+        note: 'Proxy: chair opposes Mamdani and Albany Democrats'' 25% surcharge on NYC businesses.'
+        checked: true
+      v20:
+        v: 2
+        source: https://nygop.org/statement-from-nygop-chair-ed-cox-in-remembrance-of-the-october-7-attacks-on-israel/
+        note: 'Chair: Israel must receive "our full support."'
+        checked: true
+      v22:
+        v: 2
+        source: https://nygop.org/statement-from-nygop-chair-ed-cox-in-remembrance-of-the-october-7-attacks-on-israel/
+        note: Chair warns of "rising tide of anti-Semitism" across society.
+        checked: true
+      v27:
+        v: -2
+        source: https://nygop.org/statement-by-ed-cox-on-hochuls-energy-rate-hikes/
+        note: Chair blames "reckless green agenda" for rate hikes making life unaffordable.
+        checked: true
+      v28:
+        v: -1
+        source: https://nygop.org/cox-first-hochul-banned-gas-stoves-now-this/
+        note: 'Proxy: chair opposes costly environmental mandates hurting small businesses.'
+        checked: true
+      v29:
+        v: 2
+        source: https://nygop.org/cox-new-yorks-wind-power-plan-is-a-disaster-for-new-yorkers/
+        note: 'Chair: prioritize "affordable, reliable energy"; green policy is a "costly fantasy."'
+        checked: true
+      v30:
+        v: 1
+        source: https://nygop.org/cox-new-yorks-wind-power-plan-is-a-disaster-for-new-yorkers/
+        note: Chair favors natural gas and "all of America's vast natural resources."
+        checked: true
+  ny_wfp:
+    name: Working Families Party (New York)
+    electorate: ny
+    sources:
+    - https://workingfamilies.org/2026/06/memo-winning-our-agenda-nywfps-2026-electoral-strategy/
+    - https://workingfamilies.org/guarantee/
+    - https://workingfamilies.org/wp-content/uploads/2021/02/NYWFP_2021LegislativeAgenda.pdf
+    - https://www.cityandstateny.com/personality/2026/04/wfp-head-jasmine-gripper-talks-state-budget-priorities/412748/
+    codes:
+      q04:
+        v: -1
+        source: https://workingfamilies.org/2026/01/nywfp-statement-on-gov-hochul-and-mayor-mamdanis-childcare-announcement/
+        note: 'Proxy: NYWFP wants more revenue from the rich to fund programs; no tax-cut stance.'
+        checked: true
+      q08:
+        v: 1
+        source: https://workingfamilies.org/guarantee/
+        note: 'Proxy: WFP Guarantee (adopted April 2026) calls for "guaranteed healthcare for all"; not state-specific.'
+        checked: true
+      q12:
+        v: -1
+        source: https://workingfamilies.org/2024/02/wfp-on-proposal-to-enact-trump-era-immigration-restrictions-and-give-israel-unconditional-military-aid-a-moral-and-political-disaster/
+        note: National WFP opposed "unconditional" military aid to Israel (2024).
+        checked: true
+      q14:
+        v: 1
+        source: https://workingfamilies.org/2026/02/wfp-on-trump-tariffs-working-people-have-paid-the-price/
+        note: 'National WFP: Trump tariffs "raised costs for working families."'
+        checked: true
+      q20:
+        v: -2
+        source: https://www.cityandstateny.com/personality/2026/04/wfp-head-jasmine-gripper-talks-state-budget-priorities/412748/
+        note: 'State director opposes rolling back climate laws: governor "can''t just steamroll back" them.'
+        checked: true
+      q25:
+        v: -2
+        source: https://workingfamilies.org/2022/06/new-york-needs-leaders-who-will-fight-for-us-not-them/
+        note: NYWFP attacked "meaningful cuts" to Medicaid as part of a Conservative agenda (2022).
+        checked: true
+      q36:
+        v: 1
+        source: https://workingfamilies.org/2026/01/stand-up-to-ice/
+        note: 'Proxy: WFP calls to "abolish ICE"; no position on warrants specifically.'
+        checked: true
+      q38:
+        v: 2
+        source: https://workingfamilies.org/2026/01/nywfp-statement-on-gov-hochul-and-mayor-mamdanis-childcare-announcement/
+        note: 'NYWFP: "Governor Hochul must raise revenue by taxing the rich."'
+        checked: true
+      q40:
+        v: -2
+        source: https://www.cityandstateny.com/personality/2026/04/wfp-head-jasmine-gripper-talks-state-budget-priorities/412748/
+        note: State director opposes rollback of CLCPA mandates (April 2026).
+        checked: true
+      q41:
+        v: 2
+        source: https://workingfamilies.org/2024/10/nywfp-voting-guide-for-the-2024-general-election/
+        note: NYWFP urged "Vote YES to protect abortion access" on Prop 1.
+        checked: true
+      q42:
+        v: 1
+        source: https://nystateofpolitics.com/state-of-politics/new-york/politics/2024/05/02/new-york-working-families-party-on-state-budget
+        note: 'Proxy: NYWFP wants tenant protections statewide, not NYC-only with local opt-in.'
+        checked: true
+      v01:
+        v: 2
+        source: https://workingfamilies.org/wp-content/uploads/2021/02/NYWFP_2021LegislativeAgenda.pdf
+        note: 'People''s Charter principle: "A Good Job for Everyone Who Needs One"; 2026 Guarantee adds jobs program.'
+        checked: true
+      v03:
+        v: 2
+        source: https://workingfamilies.org/guarantee/
+        note: 'WFP Guarantee: "TAX THE RICH"; NYWFP backs taxing the ultrawealthy.'
+        checked: true
+      v05:
+        v: 1
+        source: https://workingfamilies.org/wp-content/uploads/2021/02/NYWFP_2021LegislativeAgenda.pdf
+        note: 'NYWFP agenda: workers should have "access to a union."'
+        checked: true
+      v10:
+        v: 1
+        source: https://workingfamilies.org/2024/10/nywfp-voting-guide-for-the-2024-general-election/
+        note: NYWFP backed Prop 1 "to protect abortion access."
+        checked: true
+      v12:
+        v: 1
+        source: https://workingfamilies.org/2026/06/memo-winning-our-agenda-nywfps-2026-electoral-strategy/
+        note: 'Proxy: agenda centers "protecting immigrant communities" and immigrant rights.'
+        checked: true
+      v13:
+        v: 1
+        source: https://workingfamilies.org/wp-content/uploads/2021/02/NYWFP_2021LegislativeAgenda.pdf
+        note: 'Proxy: NYWFP 2021 agenda championed MRTA marijuana legalization; no later outcome assessment.'
+        checked: true
+      v17:
+        v: 1
+        source: https://workingfamilies.org/guarantee/
+        note: 'WFP: system "rigged" by billionaires, CEOs and "their bought-off politicians."'
+        checked: true
+      v20:
+        v: -1
+        source: https://workingfamilies.org/2024/02/wfp-on-proposal-to-enact-trump-era-immigration-restrictions-and-give-israel-unconditional-military-aid-a-moral-and-political-disaster/
+        note: National WFP opposed unconditional military aid to Israel.
+        checked: true
+  ny_con:
+    name: Conservative Party of New York State
+    electorate: ny
+    sources:
+    - https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+    - https://www.cpnys.org/wp-content/uploads/2025/09/2025-National-Affairs-Platform-Final-1.pdf
+    - https://www.cpnys.org/legislative-priorities/
+    codes:
+      q03:
+        v: -2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Program lists the Scaffold Law among "costly mandates" deterring private capital.
+        checked: true
+      q04:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Program: cut the budget across the board, including Medicaid and school aid; lower taxes.'
+        checked: true
+      q06:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Program: "Cashless Bail must end."'
+        checked: true
+      q07:
+        v: -1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Proxy: opposes sanctuary laws prohibiting cooperation with federal immigration enforcement.'
+        checked: true
+      q08:
+        v: -2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Program: "Repeal the New York Health Act."'
+        checked: true
+      q09:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Supports "a return of nuclear energy production" and small nuclear reactors.
+        checked: true
+      q12:
+        v: 1
+        source: https://www.cpnys.org/wp-content/uploads/2025/09/2025-National-Affairs-Platform-Final-1.pdf
+        note: 'National platform: "Full support of Israel by the U.S."; aid levels not specified.'
+        checked: true
+      q15:
+        v: 1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Blames high taxes, energy costs and "over regulation" for New York's business climate.
+        checked: true
+      q18:
+        v: -2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Program: "The free market, not government controls," is the only way to affordable housing.'
+        checked: true
+      q19:
+        v: 2
+        source: https://www.cpnys.org/legislative-priorities/
+        note: 'Priorities: congestion pricing "must be repealed."'
+        checked: true
+      q20:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Program opposes the Climate Leadership and Community Protection Act.
+        checked: true
+      q21:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Supports ending the fracking ban in the Southern Tier.
+        checked: true
+      q22:
+        v: -2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Local and state police "must follow federal laws" on detaining illegal aliens; rejects sanctuary status.
+        checked: true
+      q23:
+        v: -2
+        source: https://www.cpnys.org/legislative-priorities/
+        note: 'Priorities: Raise the Age "must be repealed and replaced."'
+        checked: true
+      q24:
+        v: -2
+        source: https://www.cpnys.org/legislative-priorities/
+        note: 'Priorities: "We oppose all efforts by the state to interfere with local zoning laws."'
+        checked: true
+      q25:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Program: "Medicaid must be reformed to decrease spending"; no exclusion from cuts.'
+        checked: true
+      q26:
+        v: -2
+        source: https://www.cpnys.org/legislative-priorities/
+        note: Opposes participation in sports of the sex other than birth gender.
+        checked: true
+      q27:
+        v: 1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Proxy: program opposes "law fare and the weaponization of the legal system."'
+        checked: true
+      q33:
+        v: -1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Proxy: retirement funds should use free-market principles, not mandated ESG investing.'
+        checked: true
+      q35:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2025/09/2025-National-Affairs-Platform-Final-1.pdf
+        note: 'National platform: voter ID laws "for all elections."'
+        checked: true
+      q36:
+        v: -1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Proxy: wants agencies to hold federal fugitives for federal law enforcement; backs more ICE resources.'
+        checked: true
+      q37:
+        v: 1
+        source: https://www.cpnys.org/wp-content/uploads/2025/09/2025-National-Affairs-Platform-Final-1.pdf
+        note: 'Applauds Dobbs: each state can now protect the unborn "as their citizens see fit."'
+        checked: true
+      q38:
+        v: -2
+        source: https://www.cpnys.org/legislative-priorities/
+        note: 'Priorities: "We reject extending and/or increasing the personal income tax on higher earners."'
+        checked: true
+      q40:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Opposes CLCPA mandates, gas bans and electric vehicle/school bus mandates.
+        checked: true
+      q41:
+        v: -2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Program: repeal New York''s expanded abortion law; therapeutic abortions only.'
+        checked: true
+      q42:
+        v: -2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Opposes rent regulation expansion throughout New York State.
+        checked: true
+      q43:
+        v: 1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Proxy: wants sales tax cut on gasoline and an end to hidden fees; utility bills not named.'
+        checked: true
+      q44:
+        v: 1
+        source: https://www.cpnys.org/legislative-priorities/
+        note: 'Proxy: Raise the Age should be repealed, which would return such cases to adult court.'
+        checked: true
+      v02:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Program: New York "over-regulates small business"; cut over-regulation.'
+        checked: true
+      v03:
+        v: -2
+        source: https://www.cpnys.org/legislative-priorities/
+        note: Rejects higher income taxes on higher earners.
+        checked: true
+      v05:
+        v: -2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Program: "New York State should be a right-to-work state."'
+        checked: true
+      v06:
+        v: 1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Proxy: program says a free competitive market most efficiently ends housing shortages.'
+        checked: true
+      v07:
+        v: -2
+        source: https://www.cpnys.org/legislative-priorities/
+        note: Opposes "the forgiveness of student loans."
+        checked: true
+      v08:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Schools may not encourage or acknowledge a minor's alternate gender identification against parents.
+        checked: true
+      v09:
+        v: 1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Proxy: program protects religious practice, including school prayer in public schools.'
+        checked: true
+      v10:
+        v: -2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Program: repeal expanded abortion law; therapeutic abortions only.'
+        checked: true
+      v13:
+        v: -1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Proxy: opposes decriminalizing "gateway drugs" and legalizing recreational use of illegal drugs.'
+        checked: true
+      v16:
+        v: -1
+        source: https://www.cpnys.org/wp-content/uploads/2025/09/2025-National-Affairs-Platform-Final-1.pdf
+        note: 'Proxy: says bureaucrats exploit "expansive health emergencies"; urges WHO withdrawal.'
+        checked: true
+      v18:
+        v: 1
+        source: https://www.cpnys.org/wp-content/uploads/2025/09/2025-National-Affairs-Platform-Final-1.pdf
+        note: Backs AUKUS, expanded U.S. base facilities and patrols with Asian allies; supports NATO aid to Ukraine.
+        checked: true
+      v19:
+        v: -1
+        source: https://www.cpnys.org/wp-content/uploads/2025/09/2025-National-Affairs-Platform-Final-1.pdf
+        note: 'Proxy: supports continued NATO supply of Ukraine and alliance commitments.'
+        checked: true
+      v20:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2025/09/2025-National-Affairs-Platform-Final-1.pdf
+        note: 'National platform: "Full support of Israel by the U.S."'
+        checked: true
+      v21:
+        v: -1
+        source: https://www.cpnys.org/wp-content/uploads/2025/09/2025-National-Affairs-Platform-Final-1.pdf
+        note: 'Proxy: wants Ukraine supplied with equipment "needed to stop the Russian invasion."'
+        checked: true
+      v26:
+        v: 1
+        source: https://www.cpnys.org/legislative-priorities/
+        note: 'Proxy: backs initiative and referendum and local control of zoning.'
+        checked: true
+      v27:
+        v: -2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Opposes the climate law as costly and unrealistic.
+        checked: true
+      v28:
+        v: -1
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: 'Proxy: says over-regulation and costly mandates strangle small business.'
+        checked: true
+      v29:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Costly mandated energy policies ignore "the struggles of average New Yorkers."
+        checked: true
+      v30:
+        v: 2
+        source: https://www.cpnys.org/wp-content/uploads/2026/02/2026-Legislative-Platform-Final.pdf
+        note: Opposes gas bans; supports fracking.
+        checked: true
+  us_dem:
+    name: Democratic Party (national)
+    electorate: us
+    sources:
+    - https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+    codes:
+      q04:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: platform pledges "ironclad commitment" to protect Social Security, Medicare and Medicaid; not state taxes.'
+        checked: true
+      q12:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: Commitment to Israel's security, qualitative military edge and the 2016 MOU "is ironclad."
+        checked: true
+      q14:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: 2024 platform calls Trump''s proposed "extreme import tariffs" costly; predates current tariffs.'
+        checked: true
+      q24:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: platform "encourages state and local efforts to take on barriers to building new housing."'
+        checked: true
+      q25:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: supports Medicaid expansion and rejects cutting Medicaid; not NY-specific.'
+        checked: true
+      q37:
+        v: -2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Platform: "we will pass national legislation to make Roe the law of the land again."'
+        checked: true
+      q38:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Platform: billionaire minimum tax of 25 percent; end capital-gains preference for millionaires.'
+        checked: true
+      q40:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: platform says the climate crisis makes the clean-energy shift "more urgent."'
+        checked: true
+      v03:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Platform: make billionaires and millionaires pay higher rates; "fair share."'
+        checked: true
+      v05:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: Platform backs the PRO Act and opposes state right-to-work laws.
+        checked: true
+      v07:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: Platform touts $167 billion in canceled loans and "every available tool" for relief.
+        checked: true
+      v10:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: Platform pledges to "restore reproductive freedom for every woman in every state."
+        checked: true
+      v12:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Platform: immigrants "have made our country stronger"; "America is a nation of immigrants."'
+        checked: true
+      v18:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Platform: strengthen NATO and Indo-Pacific alliances; stand by South Korea against troop-withdrawal threats.'
+        checked: true
+      v19:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: platform defends alliance commitments while pressing NATO''s 2 percent goal as a floor.'
+        checked: true
+      v20:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Platform: ironclad commitment to Israel''s security and the 2016 aid MOU.'
+        checked: true
+      v21:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: platform backs Ukraine against Russian aggression; no territorial settlement endorsed.'
+        checked: true
+      v22:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: Platform cites "rising antisemitism" and the first National Strategy to Counter Antisemitism.
+        checked: true
+      v25:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: platform will "improve and speed up" environmental review and permitting.'
+        checked: true
+      v28:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: platform defends regulations and criticizes loosened toxic-chemical rules.'
+        checked: true
+      v29:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-democratic-party-platform
+        note: 'Proxy: platform pairs lower energy costs with tackling the climate crisis.'
+        checked: true
+  us_gop:
+    name: Republican Party (national)
+    electorate: us
+    sources:
+    - https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+    codes:
+      q04:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Proxy: platform pairs slashing "wasteful Government spending" with large tax cuts; federal, not state.'
+        checked: true
+      q07:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Proxy: platform cuts funds to sanctuary jurisdictions, requires local cooperation with ICE.'
+        checked: true
+      q09:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Proxy: platform will unleash energy production "from all sources, including nuclear"; not NY-specific.'
+        checked: true
+      q12:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: "We will stand with Israel"; aid levels not specified.'
+        checked: true
+      q14:
+        v: -2
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: Platform supports "baseline Tariffs on Foreign-made goods" and the Reciprocal Trade Act.
+        checked: true
+      q15:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: cut regulations that "make everything more expensive" and raise housing costs.'
+        checked: true
+      q21:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Proxy: platform ends restrictions on oil and natural gas; not NY-specific.'
+        checked: true
+      q22:
+        v: -2
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: "We will require local cooperation with Federal Immigration Enforcement."'
+        checked: true
+      q26:
+        v: -2
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: "keep men out of women''s sports."'
+        checked: true
+      q35:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: secure elections with "Voter ID" and proof of citizenship.'
+        checked: true
+      q36:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Proxy: platform strengthens ICE and plans largest deportation program; no warrant stance.'
+        checked: true
+      q37:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: after Dobbs the power "has been given to the States."'
+        checked: true
+      q38:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: make Trump tax cuts permanent and pursue additional tax cuts.'
+        checked: true
+      q40:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Proxy: platform terminates the "Green New Deal" and EV mandates; not NY-specific.'
+        checked: true
+      v02:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: slash regulations that "stifle Jobs, Freedom, Innovation."'
+        checked: true
+      v03:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: make Trump tax cuts permanent and pursue additional tax cuts.'
+        checked: true
+      v04:
+        v: -2
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: Platform faults "unfair Trade Deals" and "blind faith in the siren song of globalism."
+        checked: true
+      v08:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: cut funds for schools pushing "radical gender ideology."'
+        checked: true
+      v09:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: Platform defends religious liberty and the right to pray in school.
+        checked: true
+      v10:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: states free to protect life under the 14th Amendment; softened 2024 language.'
+        checked: true
+      v19:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: allies "must meet their obligations to invest in our Common Defense."'
+        checked: true
+      v20:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: "We will stand with Israel"; aid not specified.'
+        checked: true
+      v22:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Proxy: platform "condemn[s] antisemitism," pledges visa revocations for terror supporters.'
+        checked: true
+      v25:
+        v: 1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: "streamline permitting" to increase energy production.'
+        checked: true
+      v28:
+        v: -1
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Proxy: platform reverses "regulatory onslaught" hurting households and businesses.'
+        checked: true
+      v29:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: unleash energy to "slash Inflation" and lower prices; ends Green New Deal.'
+        checked: true
+      v30:
+        v: 2
+        source: https://www.presidency.ucsb.edu/documents/2024-republican-party-platform
+        note: 'Platform: become top oil and natural gas producer again; "DRILL, BABY, DRILL."'
+        checked: true
