@@ -125,6 +125,12 @@ def run(data: dict, follows: dict, log) -> None:
         f2 = ROOT / fname
         if f2.exists():
             data[key] = (yaml.safe_load(f2.read_text()) or {}).get(sub) or ({} if sub == "parties" else [])
+    # Local politics (2026-10-26): public records on Beacon and Dutchess parties, officials, elections and money,
+    # and New York's rules for engaging without a party.
+    for fname, key in (("local_politics.yaml", "local"), ("beacon_elections.yaml", "local_elections"), ("independent_path.yaml", "independent")):
+        f3 = ROOT / fname
+        if f3.exists():
+            data[key] = yaml.safe_load(f3.read_text()) or {}
     sf = ROOT / "solutions.yaml"     # Your solutions: issues, mechanisms and sourced plans (public)
     if sf.exists():
         data["solutions"] = (yaml.safe_load(sf.read_text()) or {}).get("issues") or {}

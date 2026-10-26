@@ -798,3 +798,18 @@ body.listening .player.mini { bottom: calc(var(--tabh) + env(safe-area-inset-bot
 .dyou p, .dwire p { margin: 4px 0; }
 .dtight { background: var(--surface); padding: 8px; border-radius: 8px; }
 select.tin { width: 100%; }
+
+/* ------------------------------------------------ Local politics (2026-10-26) */
+.lplayer { padding: 8px 0; border-bottom: 1px solid var(--hair); }
+.lplayer p { margin: 2px 0; }
+.lrec > div { margin: 3px 0; font-size: 0.9rem; }
+.pbar2 { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--surface); margin: 6px 0; }
+.pseg { display: block; height: 100%; }
+.p-DEM { background: #5b8fd6; } .p-REP { background: #d66b5b; } .p-BLANK { background: #9aa0a6; } .p-CON { background: #a0522d; }
+.p-WOR { background: #8e6bd6; } .p-IND { background: #c9b458; } .p-GRE { background: #5bab6b; } .p-LBT { background: #d6b25b; } .p-OTH, .p-WEP, .p-REF { background: #6b6f73; }
+.lres { margin: 8px 0; }
+.lmoney { margin: 10px 0; }
+.mbars { display: flex; flex-direction: column; gap: 2px; margin: 4px 0; }
+.mbar { display: grid; grid-template-columns: 3em 1fr 4em; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text2); }
+.mfill { height: 8px; background: var(--here); border-radius: 4px; }
+.mv { text-align: right; }

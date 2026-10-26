@@ -1410,7 +1410,7 @@ async function openProfile(notice) {
       el("p", { class: "fine", text: partyFit(Q, "ny").length ? "Above: each party's own platform and agenda, coded on the statements. Below: the candidates on each line this year." : "Party platforms are being coded; for now, from the candidates on each line and The Wire's rough placement of each line." }), ny),
     sec("Federal", partyFit(Q, "us").length ? partyList(partyFit(Q, "us")) : null, fed),
     sec("Israel", isr),
-    sec("Beacon and Dutchess", local),
+    sec("Beacon and Dutchess", local, data.local ? el("button", { class: "sbtn wide", text: "Local politics: players, parties, elections, the independent path ›", onclick: () => openLocal() }) : null),
     clashes.length ? sec("Where your answers disagree · " + clashes.length, el("ul", { class: "cpos" }, ...clashes.slice(0, 6).map((c) => el("li", { text: "“" + c.it.text + "”: your proposal reads " + (SCALE.find(([v]) => v === c.c.v) || [0, ""])[1].toLowerCase() + ", your answer " + (SCALE.find(([v]) => v === c.a.v) || [0, ""])[1].toLowerCase() + "." })))) : null,
     sec("How you've moved", drift),
     firm.length ? sec("Firm positions", el("ul", { class: "cpos" }, ...firm.slice(0, 8).map((p) => el("li", { text: p.summary })))) : null,
@@ -1462,6 +1462,106 @@ async function openWatch(group) {
     el("div", { class: "wrow" }, ...WGROUP.map(([k, label]) => el("button", { class: "chip" + (k === grp ? " on" : ""), text: label, onclick: () => openWatch(k) }))),
     list.length ? el("div", {}, ...list.map(card)) : el("p", { class: "fine", text: "No one in this group yet." }),
   ], "People to watch");
+}
+
+// --------------------------------------------------------------- Local politics (2026-10-26)
+// Beacon and Dutchess: the parties and their officers, officials and key players, every city
+// election since 2017, enrollment and results by district, party money, the calendar, and the
+// independent path (New York law for voting, running or backing someone without a party). Public
+// records only (local_politics.yaml, beacon_elections.yaml, independent_path.yaml).
+const LTABS = [["players", "Players"], ["parties", "Parties"], ["elections", "Elections"], ["money", "Money"], ["calendar", "Calendar"], ["independent", "Independent path"]];
+const human = (k) => String(k).replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+const isUrl = (s) => typeof s === "string" && /^https?:\/\//.test(s);
+const hostOf = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return "link"; } };
+// A plain renderer for nested public records: keys become labels, URLs become small links.
+function renderAny(v, depth) {
+  depth = depth || 0;
+  if (v == null) return null;
+  if (isUrl(v)) return link(v, hostOf(v) + " ↗", "srcl");
+  if (typeof v !== "object") return el("span", { text: String(v) });
+  if (Array.isArray(v)) {
+    if (v.every(isUrl)) return el("span", { class: "fine" }, ...v.flatMap((u, i) => [i ? " · " : "", link(u, hostOf(u) + " ↗", "srcl")]));
+    if (v.every((x) => typeof x !== "object")) return el("span", { text: v.join(", ") });
+    return el("ul", { class: "cpos" }, ...v.map((x) => el("li", {}, renderAny(x, depth + 1))));
+  }
+  const keys = Object.keys(v).filter((k) => !["sources", "source"].includes(k));
+  const src = v.sources || v.source;
+  return el(depth ? "div" : "div", { class: "lrec" }, ...keys.map((k) => typeof v[k] === "object" && v[k] && !Array.isArray(v[k]) && depth < 3
+      ? el("details", { class: "rest" }, el("summary", {}, el("span", { text: human(k) }), el("span", { class: "chev", text: "▾" })), renderAny(v[k], depth + 1))
+      : el("div", {}, el("b", { text: human(k) + ": " }), renderAny(v[k], depth + 1))),
+    src ? el("div", { class: "fine" }, "Source: ", renderAny(Array.isArray(src) ? src : [src], depth + 1)) : null);
+}
+function localEntry() {
+  if (!data.local) return null;
+  return el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Local politics" }),
+    el("p", { class: "rjob", text: "Beacon and Dutchess: who holds power, the parties and their officers, every city election since 2017, the money, the calendar to 2027, and what it takes to run or back someone without a party." }),
+    el("button", { class: "sbtn primary wide", text: "Open", onclick: () => openLocal() }));
+}
+function partyBar(counts) {
+  const order = ["DEM", "REP", "BLANK", "CON", "WOR", "IND", "GRE", "LBT", "OTH", "WEP", "REF"];
+  const name = { DEM: "Democratic", REP: "Republican", BLANK: "No party", CON: "Conservative", WOR: "Working Families", IND: "Independence", GRE: "Green", LBT: "Libertarian", OTH: "Other", WEP: "Women's Equality", REF: "Reform" };
+  const tot = Object.values(counts).reduce((s, x) => s + (Number(x) || 0), 0);
+  const parts = order.filter((k) => counts[k]).map((k) => [k, counts[k]]);
+  return el("div", {}, el("div", { class: "pbar2" }, ...parts.map(([k, n]) => el("span", { class: "pseg p-" + k, style: "width:" + (100 * n / tot).toFixed(1) + "%", title: name[k] + " " + n }))),
+    el("p", { class: "fine", text: parts.filter(([, n]) => n / tot >= 0.01).map(([k, n]) => name[k] + " " + Math.round(100 * n / tot) + "% (" + n.toLocaleString() + ")").join(" · ") + " · " + tot.toLocaleString() + " voters" }));
+}
+function openLocal(tabId) {
+  const L = data.local || {}, E = data.local_elections || {}, I = data.independent || {};
+  const t = tabId || "players";
+  const tabs = el("div", { class: "wrow" }, ...LTABS.map(([k, label]) => el("button", { class: "chip" + (k === t ? " on" : ""), text: label, onclick: () => openLocal(k) })));
+  let body = [];
+  if (t === "players") {
+    body = [el("p", { class: "sdesc", text: "The people who shape Beacon and Dutchess politics now, from public records and local reporting." }),
+      ...(L.players || []).map((p) => el("div", { class: "lplayer" }, el("b", { text: p.name }), el("span", { class: "asrc", text: " · " + (p.party || "") }),
+        el("p", { class: "fine", text: p.role }), p.why ? el("p", { text: p.why }) : null, p.source ? renderAny([p.source]) : null)),
+      el("h3", { class: "sh3", text: "Officials" }), renderAny(L.officials || {}, 1)];
+  } else if (t === "parties") {
+    body = [el("p", { class: "sdesc", text: "Party committees and their officers, as published or filed. Officers hold public party roles; committee members appear only as listed in public filings." }),
+      ...(L.parties || []).map((p) => el("details", { class: "race" },
+        el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: p.name })), el("span", { class: "rsub", text: p.level || "" }), el("span", { class: "chev", text: "▾" })),
+        renderAny(Object.fromEntries(Object.entries(p).filter(([k]) => k !== "name")), 1)))];
+  } else if (t === "elections") {
+    const enr = E.enrollment || [];
+    const latest = enr[enr.length - 1];
+    const byYear = {};
+    for (const r of E.results || []) (byYear[r.year] = byYear[r.year] || []).push(r);
+    body = [
+      el("h3", { class: "sh3", text: "Who's enrolled in Beacon" }),
+      ...enr.map((e) => el("div", {}, el("p", { class: "asrc", text: e.as_of + " · " + (e.publisher || "") }), partyBar((e.totals && (e.totals.active || e.totals.total)) || {}))),
+      el("p", { class: "fine", text: "Enrollment from 2022 on sits on the state elections site, which blocks automated downloads; paste its Dutchess enrollment link in a chat and it can be added." }),
+      el("h3", { class: "sh3", text: "Every city election since 2017" }),
+      ...((L.contests || {}).beacon_history || []).map((h) => el("details", { class: "race" },
+        el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: String(h.year) }), " · " + (h.contested || "")), el("span", { class: "chev", text: "▾" })),
+        renderAny(Object.fromEntries(Object.entries(h).filter(([k]) => !["year", "contested"].includes(k))), 1))),
+      el("h3", { class: "sh3", text: "Results by contest" }),
+      ...Object.keys(byYear).sort().reverse().map((y) => el("details", { class: "race" },
+        el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: y + " general" })), el("span", { class: "chev", text: "▾" })),
+        ...byYear[y].map((r) => el("div", { class: "lres" }, el("b", { text: r.office }),
+          el("ul", { class: "cpos" }, ...(r.candidates || []).map((c) => el("li", { text: c.name + " · " + (c.votes || 0).toLocaleString() + (c.lines ? " (" + Object.entries(c.lines).map(([k, n]) => k + " " + n).join(", ") + ")" : "") }))),
+          r.source ? renderAny([r.source]) : null)))),
+    ];
+  } else if (t === "money") {
+    const M = L.money || {};
+    body = [el("p", { class: "sdesc", text: M.method || "" }),
+      ...((M.party_committees) || []).map((c) => { const yrs = Object.entries(c.itemized_raised_by_year || {}); const mx = Math.max(1, ...yrs.map(([, v]) => v));
+        return el("div", { class: "lmoney" }, el("b", { text: c.name }), el("div", { class: "mbars" }, ...yrs.map(([y, v]) => el("div", { class: "mbar" }, el("span", { class: "my", text: y }), el("span", { class: "mfill", style: "width:" + Math.round(100 * v / mx) + "%" }), el("span", { class: "mv", text: "$" + Math.round(v / 1000) + "k" })))),
+          c.note ? el("p", { class: "fine", text: c.note }) : null, c.source ? renderAny([c.source]) : null); }),
+      renderAny(Object.fromEntries(Object.entries(M).filter(([k]) => !["method", "party_committees", "datasets"].includes(k))), 1)];
+  } else if (t === "calendar") {
+    body = Object.entries(L.calendar || {}).sort(([a], [b]) => (/^\d/.test(a) ? 1 : 0) - (/^\d/.test(b) ? 1 : 0) || a.localeCompare(b)).map(([k, list]) => el("section", { class: "ssec" }, el("h3", { class: "sh3", text: human(k) }),
+      Array.isArray(list) ? el("ul", { class: "cpos" }, ...list.map((c) => el("li", {}, el("b", { text: c.date + ": " }), c.event + (c.confidence ? " (" + c.confidence + ")" : "") + " ", c.source ? link(c.source, "↗", "srcl") : null))) : renderAny(list, 1)));
+  } else {
+    body = [el("p", { class: "sdesc", text: "What New York law asks of a voter, a candidate or a backer without a party, with the sections cited. Dates for 2027 are computed from the statutes until the state publishes its calendar." }),
+      ...Object.entries(I).filter(([, v]) => Array.isArray(v)).map(([k, pts]) => el("section", { class: "ssec" }, el("h3", { class: "sh3", text: human(k) }),
+        el("ul", { class: "cpos" }, ...pts.map((p) => el("li", {}, p.point + " ", el("span", { class: "fine" }, ...(p.cite || []).flatMap((c, i) => [i ? " · " : "", isUrl(c) ? link(c, hostOf(c), "srcl") : el("span", { text: c })]))))))),
+    ];
+  }
+  openSheet([
+    el("span", { class: "mlabel", text: "Beacon · Dutchess" + ((L.meta || {}).as_of ? " · as of " + L.meta.as_of : "") }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "Local politics" }),
+    tabs, ...body.filter(Boolean),
+    el("p", { class: "fine", text: "Public records and local reporting only, each with its source. People appear in their public roles; no one is profiled beyond that." }),
+  ], "Local politics");
 }
 
 // --------------------------------------------------------------- engagement log (2026-10-25)
@@ -3860,6 +3960,7 @@ function questionnairesSection(Q) {
     el("h2", { class: "sh2", text: "Questionnaires" }),
     el("p", { class: "fine", text: "Private: your answers, results and proposals are stored only on Cloudflare behind your login, never in the code repository, its logs or Ballot Match. Results show only when you open them." }),
     profileEntry(),
+    localEntry(),
     baselineEntry(Q),
     el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Five quick questions" }),
       el("p", { class: "rjob", text: lp ? "Last answered " + fmtDate.format(new Date(lp)) + "." : "Not answered yet." }),
