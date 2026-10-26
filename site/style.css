@@ -742,3 +742,30 @@ p.lens { font: 1.02rem/1.5 var(--serif); margin: 4px 0 6px; }
 .reslist li { display: block; padding: 10px 0; border-bottom: 1px solid var(--hair); }
 .reslist .asrc { display: block; margin-bottom: 2px; }
 .reslist .doclink { display: block; font-size: 1.02rem; }
+
+/* ------------------------------------------------ Listen (2026-10-26) */
+.aplayer {
+  position: fixed; z-index: 29; left: 0; right: 0; bottom: calc(var(--tabh) + env(safe-area-inset-bottom, 0px) + 4px);
+  background: var(--raised); border-top: 1px solid var(--hair);
+  -webkit-backdrop-filter: saturate(150%) blur(18px); backdrop-filter: saturate(150%) blur(18px);
+}
+.approg { height: 2px; background: var(--hair); }
+.apfill { height: 2px; background: var(--here); width: 0; }
+.aprow { display: flex; align-items: center; gap: 2px; padding: 4px var(--gutter-r) 4px var(--gutter-l); min-height: 52px; }
+.apbtn { min-width: 40px; min-height: 44px; text-align: center; color: var(--text2); font-size: 0.86rem; font-family: var(--mono, ui-monospace, monospace); }
+.apmain { color: var(--text); font-size: 1rem; }
+.apspeed { min-width: 46px; }
+.apinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left; min-height: 44px; justify-content: center; }
+.apline { font-size: 0.9rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.apsub { font-size: 0.72rem; color: var(--text3); white-space: nowrap; }
+body.listening main.view { padding-bottom: calc(var(--tabh) + env(safe-area-inset-bottom, 0px) + 96px); }
+body.listening .player.mini { bottom: calc(var(--tabh) + env(safe-area-inset-bottom, 0px) + 72px); }
+.listencard .bc-ico { color: var(--here); }
+.row.hasaudio { display: flex; align-items: stretch; }
+.row.hasaudio .head { flex: 1; min-width: 0; }
+.lqadd { flex: none; min-width: 48px; min-height: 44px; color: var(--text3); font-size: 0.8rem; }
+.aqrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.apnow .doclink { color: var(--here); }
+.aqch { margin: 6px 0 0 0; padding-left: 0; list-style: none; }
+.aqch li { display: flex; justify-content: space-between; gap: 8px; }
+.aqopen { flex: none; }

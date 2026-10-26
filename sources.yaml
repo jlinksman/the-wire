@@ -225,6 +225,8 @@ national_world:
   - {id: france24_en, short: "France 24", enabled: true, scope: world, desk: WORLD, fast: true, name: France 24 English, type: rss, url: "https://www.france24.com/en/rss", status: OK, poll: 15, fulltext: true}
   - {id: bbc_world, short: "BBC", enabled: true, quiet: true, desk: WORLD, scope: world, fast: true, name: BBC World, type: rss, url: "https://feeds.bbci.co.uk/news/world/rss.xml", status: OK, poll: 15, fulltext: true, notes: "Reachable from GitHub runners (probe 2026-10-17)."}
   - {id: npr, short: "NPR", enabled: true, quiet: true, desk: WORLD, fast: true, name: NPR News, type: rss, url: "https://feeds.npr.org/1001/rss.xml", status: OK, poll: 15, fulltext: true}
+  # Listen queue (2026-10-26): NPR's five-minute hourly newscast, played after the audio edition. Quiet: never listed as a story.
+  - {id: npr_news_now, short: "NPR News Now", enabled: true, quiet: true, no_brief: true, newscast: true, feed_kind: podcast, max_items: 2, desk: WORLD, scope: world, name: NPR News Now (hourly newscast), type: rss, url: "https://feeds.npr.org/500005/podcast.xml", status: OK, poll: 30}
   - {id: npr_world, short: "NPR", enabled: true, quiet: true, desk: WORLD, scope: world, name: NPR World, type: rss, url: "https://feeds.npr.org/1004/rss.xml", status: OK, poll: 30, fulltext: true}
   - {id: guardian_world, short: "Guardian", enabled: true, quiet: true, desk: WORLD, scope: world, name: The Guardian World, type: rss, url: "https://www.theguardian.com/world/rss", status: OK, poll: 15, fulltext: true}
   - {id: guardian_us, short: "Guardian", enabled: true, quiet: true, desk: WORLD, scope: national, name: The Guardian US, type: rss, url: "https://www.theguardian.com/us-news/rss", status: OK, poll: 15, fulltext: true}

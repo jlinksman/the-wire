@@ -22,6 +22,8 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
   if (req.method !== "GET" || url.origin !== location.origin) return;
   const p = url.pathname;
+  // Audio (the edition, podcasts) streams in byte ranges: never cached here.
+  if (p.endsWith(".mp3") || req.headers.has("range") || req.destination === "audio") return;
   if (p.endsWith("/data.json") || p.endsWith("/brief") || p.endsWith("/version.json") || p.startsWith("/cdn-cgi/") || url.searchParams.has("reauth")) return;
 
   if (req.mode === "navigate") {

@@ -320,9 +320,10 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
     items = []
     for e in feed.entries:
         link = e.get("link")
+        # Podcast episodes: the publisher's own audio file, for the Listen queue (2026-10-26).
+        enc = [x.get("href") for x in e.get("enclosures", []) if x.get("href") and (str(x.get("type", "")).startswith("audio") or re.search(r"\.(mp3|m4a|aac)(\?|$)", x.get("href", ""), re.I))]
         if not link:
-            # Podcast episodes without a page link: the publisher's own audio file.
-            enc = [x.get("href") for x in e.get("enclosures", []) if x.get("href")]
+            # Episodes without a page link: the audio file is the link.
             link = enc[0] if enc else None
         title = clean_text(e.get("title"), 400)
         if not title and src.get("feed_kind") == "bluesky":
@@ -357,6 +358,7 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
             **({"doc_text": clean_text(e.get("summary"), DOC_TEXT_CHARS)} if src.get("public_doc") else {}),
             **({"outlet": outlet} if outlet and not src.get("site_feed") else {}),
             **({"author": author} if author else {}),
+            **({"audio": enc[0]} if enc and src.get("feed_kind") == "podcast" else {}),
         })
     return items
 
@@ -994,6 +996,7 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             "kind": it.get("kind") or ("PODCAST" if src.get("feed_kind") == "podcast" else "POST" if src.get("feed_kind") == "bluesky" else None) or item_kind(src, it),
             **({"author": it["author"]} if it.get("author") else {}),
             **({"doc_text": it["doc_text"]} if it.get("doc_text") else {}),
+            **({"audio": it["audio"]} if it.get("audio") else {}),
             **({"people": sorted(people)} if people else {}),
             **({"person_feed": True} if src.get("person_feed") else {}),
             **({"blotter": it["blotter"]} if it.get("blotter") else {}),
@@ -1334,6 +1337,12 @@ def main() -> int:
             data["sources"].append(row)
     except Exception as exc:
         log(f"[il_polls] failed: {type(exc).__name__}: {exc}")
+    # Listen: the audio edition, read from the stories' checked text (pipeline/listen.py).
+    try:
+        import listen
+        data["sources"].append(listen.run(state, data, session, DIST, log))
+    except Exception as exc:
+        log(f"[listen] failed: {type(exc).__name__}")
     # V6: push-alert candidates for the Cloudflare Worker, and its health.
     try:
         alerts.run(data, yaml.safe_load(CONFIG.read_text()).get("push_alerts") or {}, DIST, log)

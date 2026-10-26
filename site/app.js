@@ -337,6 +337,8 @@ function todayView() {
   if (data.voter_guide) out.push(guideCard());
   const pc = myQuiz ? pulseCard(myQuiz) : (loadQuiz().then(() => { if (myQuiz && pulseCard(myQuiz) && tab === "today") render(); }), null);
   if (pc) out.push(pc);
+  const lc = listenCard();
+  if (lc) out.push(lc);
   out.push(el("button", { class: "briefcard", onclick: openBrief },
     el("span", { class: "bc-ico", "aria-hidden": "true", text: "▶" }),
     el("span", { class: "bc-txt" },
@@ -543,8 +545,9 @@ function row(it, opt = {}) {
     st && st.developing ? el("span", { class: "dev", text: "Developing" }) : null,
     st ? el("span", { class: "plus", text: st.sources + " sources" }) : null,
     ...tags.map((tg) => el("span", { class: "tag", text: String(tg) })));
-  return el("li", { class: "row" + (watch ? " watch" : "") + (isSeen(it) ? " seen" : "") },
-    el("button", { class: "head", onclick: () => openItem(it) }, headline, meta));
+  return el("li", { class: "row" + (watch ? " watch" : "") + (isSeen(it) ? " seen" : "") + (it.audio ? " hasaudio" : "") },
+    el("button", { class: "head", onclick: () => openItem(it) }, headline, meta),
+    it.audio ? el("button", { class: "lqadd", "aria-label": "Listen later", text: "＋🎧", onclick: (ev) => { ev.stopPropagation(); addToQueue(it); ev.currentTarget.textContent = "✓🎧"; } }) : null);
 }
 
 // The unit (BRIEF.md): one story told in place. Label, headline, a paragraph, a quote with
@@ -715,6 +718,164 @@ async function writeBrief(beat, style) {
   const sel = document.querySelector(".bpills [aria-selected='true']");
   if (sel) sel.scrollIntoView({ inline: "center", block: "nearest" });
   if (prefs.speak) speak(texts, listen);
+}
+
+// --------------------------------------------------------------- Listen (2026-10-26)
+// The audio edition (the build's MP3 of Today's checked text, chapters per story), then podcast
+// episodes on threads you follow, then NPR's hourly newscast. One player for all of it, with
+// lock-screen and car controls (Media Session), speed, and resume. The queue and positions are a
+// per-device convenience (localStorage); what you listen to goes to the private engagement log.
+const LQ_KEY = "wire.listen";
+const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
+let lq = { items: [], i: 0, pos: {}, speed: 1 };
+try { lq = Object.assign(lq, JSON.parse(store.get(LQ_KEY) || "{}")); } catch (e) { /* fresh */ }
+const aud = new Audio();
+aud.preload = "metadata";
+let lqHeard = 0, lqTick = 0;
+function lqSave() { try { store.set(LQ_KEY, JSON.stringify({ items: lq.items.slice(0, 30), i: lq.i, pos: lq.pos, speed: lq.speed })); } catch (e) { /* ignore */ } }
+function editionItem() {
+  const L = data.listen;
+  if (!L || !L.v) return null;
+  return { id: "ed:" + L.v, kind: "edition", title: "The Wire · audio edition", sub: Math.round((L.seconds || 0) / 60) + " min · " + fmtTime.format(new Date(Date.parse(L.at))), src: "listen.mp3?v=" + L.v, chapters: L.chapters || [] };
+}
+function podItem(it) { return { id: "pod:" + it.id, kind: "podcast", title: it.title, sub: byline(it), src: it.audio, item: it.id }; }
+// Episodes from people you follow that touch a thread you follow, then the newest; last 7 days.
+function podcastPicks(n) {
+  const cut = Date.now() - 7 * 86400e3;
+  const followed = (data.threads || []).filter((t) => t.followed);
+  const words = new Set(followed.flatMap((t) => String(t.title || "").toLowerCase().match(/[a-z]{5,}/g) || []));
+  const eps = (data.items || []).filter((it) => it.audio && it.source_id !== "npr_news_now" && it.ms >= cut);
+  const score = (it) => { const st = storyOf.get(it.id); let s = st && st.followed ? 3 : 0;
+    for (const w of String(it.title + " " + (it.summary || "")).toLowerCase().match(/[a-z]{5,}/g) || []) if (words.has(w)) s += 1;
+    return s; };
+  return eps.map((it) => ({ it, s: score(it) })).sort((a, b) => b.s - a.s || b.it.ms - a.it.ms).slice(0, n).map((x) => x.it);
+}
+function newscastItem() {
+  const it = (data.items || []).filter((x) => x.source_id === "npr_news_now" && x.audio).sort((a, b) => b.ms - a.ms)[0];
+  return it ? { id: "nc:" + it.id, kind: "newscast", title: "NPR News Now · " + it.title.split("|")[0].trim(), sub: "hourly newscast", src: it.audio } : null;
+}
+function buildQueue() { return [editionItem(), ...podcastPicks(3).map(podItem), newscastItem()].filter(Boolean); }
+function listenCard() {
+  const ed = editionItem();
+  if (!ed) return null;
+  const eps = podcastPicks(3).length, nc = newscastItem();
+  return el("button", { class: "briefcard listencard", onclick: () => startListen() },
+    el("span", { class: "bc-ico", "aria-hidden": "true", text: "🎧" }),
+    el("span", { class: "bc-txt" },
+      el("span", { class: "bc-t", text: "Listen" }),
+      el("span", { class: "bc-s", text: "Today's stories read aloud · " + ed.sub + (eps || nc ? " · then " + [eps ? eps + " episode" + (eps > 1 ? "s" : "") : "", nc ? "the newscast" : ""].filter(Boolean).join(" and ") : "") })));
+}
+function startListen(at) {
+  lq.items = buildQueue();
+  lq.i = 0;
+  if (at != null && lq.items[0] && lq.items[0].kind === "edition") lq.pos[lq.items[0].id] = at;
+  playAt(0, true);
+}
+function addToQueue(it) {
+  const x = podItem(it);
+  if (!lq.items.some((y) => y.id === x.id)) lq.items.push(x);
+  lqSave();
+  if (aud.paused && !aud.src) playAt(lq.items.length - 1, true); else drawAplayer();
+}
+function heard() {
+  const cur = lq.items[lq.i];
+  if (cur && lqHeard >= 5) engage({ k: "listen", f: cur.kind === "edition" ? "audio" : "podcast", t: cur.title.slice(0, 140), s: Math.round(lqHeard), d: cur.kind });
+  lqHeard = 0;
+}
+function playAt(i, go) {
+  heard();
+  const cur = lq.items[i];
+  if (!cur) { aud.pause(); drawAplayer(); return; }
+  lq.i = i;
+  if (playing) { playing = false; render(); }     // one thing at a time: stop the live player
+  aud.src = cur.src;
+  aud.playbackRate = lq.speed;
+  const resume = lq.pos[cur.id] || 0;
+  aud.addEventListener("loadedmetadata", () => { if (resume && (!aud.duration || resume < aud.duration - 10)) aud.currentTime = resume; aud.playbackRate = lq.speed; }, { once: true });
+  if (go) aud.play().catch(() => drawAplayer());
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({ title: cur.title, artist: cur.kind === "edition" ? "The Wire" : cur.sub || "", album: "The Wire", artwork: [{ src: "icon-512.png", sizes: "512x512", type: "image/png" }] });
+  }
+  lqSave(); drawAplayer();
+}
+function chapterAt(cur, t) { const cs = (cur && cur.chapters) || []; let k = 0; for (let j = 0; j < cs.length; j++) if (cs[j].t <= t + 0.5) k = j; return k; }
+function skipChapter(d) {
+  const cur = lq.items[lq.i];
+  if (cur && cur.chapters && cur.chapters.length) {
+    const k = chapterAt(cur, aud.currentTime) + d;
+    if (d < 0 && aud.currentTime - cur.chapters[k + 1].t > 3) { aud.currentTime = cur.chapters[k + 1].t; return; }
+    if (k >= 0 && k < cur.chapters.length) { aud.currentTime = cur.chapters[k].t; return; }
+  }
+  if (lq.i + d >= 0 && lq.i + d < lq.items.length) playAt(lq.i + d, true);
+}
+if ("mediaSession" in navigator) {
+  const ms = navigator.mediaSession, set = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) { /* unsupported */ } };
+  set("play", () => aud.play()); set("pause", () => aud.pause());
+  set("seekbackward", () => { aud.currentTime = Math.max(0, aud.currentTime - 15); });
+  set("seekforward", () => { aud.currentTime = Math.min(aud.duration || 1e9, aud.currentTime + 30); });
+  set("previoustrack", () => skipChapter(-1)); set("nexttrack", () => skipChapter(1));
+}
+aud.addEventListener("timeupdate", () => {
+  const cur = lq.items[lq.i];
+  if (!cur) return;
+  const now = Date.now();
+  if (!aud.paused && lqTick) lqHeard += Math.min(2, (now - lqTick) / 1000) * 1;
+  lqTick = now;
+  lq.pos[cur.id] = aud.currentTime;
+  if (Math.round(aud.currentTime) % 5 === 0) lqSave();
+  drawAplayer(true);
+});
+aud.addEventListener("pause", () => { lqTick = 0; drawAplayer(); lqSave(); });
+aud.addEventListener("play", () => { lqTick = Date.now(); drawAplayer(); });
+aud.addEventListener("ended", () => { const cur = lq.items[lq.i]; if (cur) delete lq.pos[cur.id]; playAt(lq.i + 1, true); });
+aud.addEventListener("error", () => { const cur = lq.items[lq.i]; if (cur) { cur.failed = true; drawAplayer(); } });
+const mmss = (s) => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+function drawAplayer(light) {
+  const bar = $("aplayer");
+  const cur = lq.items[lq.i];
+  if (!cur || (!aud.src)) { bar.hidden = true; document.body.classList.remove("listening"); return; }
+  bar.hidden = false; document.body.classList.add("listening");
+  const k = cur.chapters ? chapterAt(cur, aud.currentTime) : -1;
+  const line = cur.failed ? "Couldn't play this one" : k >= 0 && cur.chapters[k] ? cur.chapters[k].label : cur.title;
+  const pct = aud.duration ? (100 * aud.currentTime / aud.duration) : 0;
+  if (light && bar.firstChild) {
+    bar.querySelector(".apline").textContent = line;
+    bar.querySelector(".aptime").textContent = mmss(aud.currentTime) + (aud.duration ? " / " + mmss(aud.duration) : "");
+    bar.querySelector(".apfill").style.width = pct + "%";
+    return;
+  }
+  bar.replaceChildren(
+    el("div", { class: "approg" }, el("div", { class: "apfill", style: "width:" + pct + "%" })),
+    el("div", { class: "aprow" },
+      el("button", { class: "apbtn apmain", "aria-label": aud.paused ? "Play" : "Pause", text: aud.paused ? "▶" : "❚❚", onclick: () => (aud.paused ? aud.play() : aud.pause()) }),
+      el("button", { class: "apinfo", onclick: () => openQueue() },
+        el("span", { class: "apline", text: line }),
+        el("span", { class: "apsub" }, el("span", { text: (cur.kind === "edition" ? "The Wire" : cur.sub || "") + " · " }), el("span", { class: "aptime", text: mmss(aud.currentTime) + (aud.duration ? " / " + mmss(aud.duration) : "") }))),
+      el("button", { class: "apbtn", "aria-label": "Back 15 seconds", text: "↺15", onclick: () => { aud.currentTime = Math.max(0, aud.currentTime - 15); } }),
+      el("button", { class: "apbtn", "aria-label": "Next", text: "⏭", onclick: () => skipChapter(1) }),
+      el("button", { class: "apbtn apspeed", "aria-label": "Speed", text: lq.speed + "×", onclick: () => { lq.speed = SPEEDS[(SPEEDS.indexOf(lq.speed) + 1) % SPEEDS.length]; aud.playbackRate = lq.speed; lqSave(); drawAplayer(); } }),
+      el("button", { class: "apbtn", "aria-label": "Stop", text: "✕", onclick: () => { heard(); aud.pause(); aud.removeAttribute("src"); aud.load(); drawAplayer(); } })));
+}
+function openQueue() {
+  const cur = lq.items[lq.i];
+  const stories = new Map((data.stories || []).map((s) => [s.id, s]));
+  const nodes = [
+    el("h2", { id: "sheet-title", class: "stitle", text: "Listening" }),
+    el("p", { class: "fine", text: "The edition reads Today's checked story text in Cloudflare's voice; each chapter opens its story. Then episodes from people you follow on your threads, then NPR's newscast." }),
+  ];
+  lq.items.forEach((x, j) => {
+    nodes.push(el("section", { class: "ssec" + (j === lq.i ? " apnow" : "") },
+      el("div", { class: "aqrow" },
+        el("button", { class: "doclink", text: (j === lq.i ? "▶ " : "") + x.title, onclick: () => { playAt(j, true); openQueue(); } }),
+        j !== lq.i ? el("button", { class: "unsave", text: "Remove", onclick: () => { lq.items.splice(j, 1); if (j < lq.i) lq.i -= 1; lqSave(); openQueue(); drawAplayer(); } }) : null),
+      el("span", { class: "asrc", text: x.sub || "" }),
+      x.chapters && x.chapters.length ? el("ol", { class: "aqch" }, ...x.chapters.map((c, k) => el("li", {},
+        el("button", { class: "linkbtn", text: mmss(c.t) + " · " + c.label, onclick: () => { if (j !== lq.i) { lq.pos[x.id] = c.t; playAt(j, true); } else aud.currentTime = c.t; } }),
+        c.story && stories.get(c.story) ? el("button", { class: "linkbtn aqopen", text: "Open ›", onclick: () => openStory(stories.get(c.story)) }) : null))) : null));
+  });
+  if (!lq.items.length) nodes.push(el("p", { class: "fine", text: "Nothing queued." }));
+  nodes.push(el("button", { class: "sbtn wide", text: "Start over with today's edition", onclick: () => { startListen(); openQueue(); } }));
+  openSheet(nodes, "Listening");
 }
 
 // --------------------------------------------------------------- engagement log (2026-10-25)
@@ -1059,6 +1220,7 @@ function liveView() {
 }
 
 function play(id) {
+  if (typeof aud !== "undefined" && !aud.paused) aud.pause();   // one thing at a time
   channel = id;
   playing = true;
   store.set(KEY.channel, id);
