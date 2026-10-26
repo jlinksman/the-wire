@@ -1296,7 +1296,7 @@ function partyFit(Q, electorate) {
   return Object.entries(P).filter(([, x]) => x.electorate === electorate).map(([id, x]) => {
     let num = 0, den = 0, n = 0; const rows = [];
     for (const [q, c] of Object.entries(x.codes || {})) { const a = ans[q]; if (!a || a.skip || a.v == null) continue; const w = a.w || 2, ag = 1 - Math.abs(a.v - c.v) / 4; num += w * ag; den += w; n += 1; rows.push({ q, ag, c }); }
-    return { id, name: x.name, n, pct: n >= 3 ? Math.round(100 * num / den) : null, rows };
+    return { id, name: x.name, note: x.note, n, pct: n >= 3 ? Math.round(100 * num / den) : null, rows };
   }).sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1));
 }
 function partyList(fits) {
@@ -1304,6 +1304,7 @@ function partyList(fits) {
   return el("div", {}, ...fits.map((f) => el("details", { class: "race" },
     el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: f.name }), f.pct != null ? " · " + f.pct + "% agreement" + (fits.some((y) => y !== f && y.pct === f.pct) ? " · tied" : "") : " · too few shared statements"),
       el("span", { class: "rsub", text: f.n + " statements in common" }), el("span", { class: "chev", text: "▾" })),
+    f.note ? el("p", { class: "fine", text: f.note }) : null,
     el("ul", { class: "cpos" }, ...f.rows.sort((a, b) => b.ag - a.ag).map((r) => el("li", {}, el("b", { text: r.ag >= 0.75 ? "Agree · " : r.ag <= 0.25 ? "Differ · " : "Partly · " }), "“" + (text[r.q] || r.q) + "” " + (r.c.note || "") + " ", r.c.source ? link(r.c.source, "↗", "srcl") : null))))));
 }
 function lineFit(Q) {
