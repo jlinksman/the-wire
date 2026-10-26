@@ -786,3 +786,7 @@ body.listening .player.mini { bottom: calc(var(--tabh) + env(safe-area-inset-bot
 .wdur { position: absolute; right: 6px; bottom: 6px; padding: 1px 6px; border-radius: 4px; background: rgba(0, 0, 0, 0.75); color: #fff; font-size: 0.7rem; }
 .wtitle { font-size: 0.88rem; font-weight: 600; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .wsrc { font-size: 0.72rem; color: var(--text3); }
+
+/* On air later (2026-10-26) */
+.onair { margin-top: 18px; }
+.onair .chn { white-space: normal; }

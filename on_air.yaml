@@ -1,0 +1,15 @@
+# On air later (2026-10-26): scheduled broadcasts worth knowing about, beyond what the build finds on
+# its own (Beacon meetings from Granicus agendas, House committee hearings from docs.house.gov feeds,
+# your teams' next games). Times are New York time. "watch" is where to see it: a live-lineup
+# channel id (it plays in The Wire) or an official page. Past entries drop off by themselves.
+events:
+  - id: il_election_night_2026
+    at: "2026-10-27 16:00"
+    title: "Israel election night: polls close, exit polls on Kan 11, N12 and Channel 13"
+    watch: https://www.kan.org.il/live/
+    note: "Polls close at 10 PM Israel time. The Wire's election box switches to the live count."
+  - id: ny_election_night_2026
+    at: "2026-11-03 21:00"
+    title: "New York election night: polls close"
+    watch: https://www.ny1.com/nyc/all-boroughs/live-tv
+    note: "Results: the State Board of Elections and Dutchess County post unofficial counts after 9 PM."

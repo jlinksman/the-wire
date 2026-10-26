@@ -1031,6 +1031,44 @@ function openClip(picks, i) {
   ].filter(Boolean), x.it.title);
 }
 
+// --------------------------------------------------------------- On air later (2026-10-26)
+// Upcoming broadcasts (pipeline/onair.py) on the Live tab. Star one for a push 10 minutes before it
+// starts (the timer Worker sends it, within the 5-a-day cap); stars live in KV (/onair).
+let myStars = null;
+async function loadStars() {
+  try { const r = await fetch("onair", { credentials: "same-origin" }); myStars = r.ok ? await r.json() : { stars: [] }; } catch (e) { myStars = myStars || { stars: [] }; }
+  return myStars;
+}
+const ONAIR_KIND = { meeting: "Beacon", hearing: "House hearing", game: "Game", event: "Event" };
+function onAirSection() {
+  const list = (data.on_air || []).filter((e) => Date.parse(e.at) > Date.now() - 2 * 3600e3);
+  if (!list.length) return null;
+  if (!myStars) loadStars().then(() => { if (tab === "live") renderView("live"); });
+  const starred = new Set(((myStars || {}).stars || []).map((s) => s.id));
+  const day = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric" });
+  const rows = list.slice(0, 15).map((e) => {
+    const ms = Date.parse(e.at), on = starred.has(e.id);
+    const vids = data.video || [];
+    const playable = e.watch === "beacon" ? vids.find((v) => v.meetings) : e.watch && vids.find((v) => v.id === e.watch);
+    const when = (isToday(ms) ? "Today" : isTomorrow(ms) ? "Tomorrow" : day.format(new Date(ms))) + " " + fmtTime.format(new Date(ms));
+    const star = el("button", { class: "star" + (on ? " on" : ""), "aria-label": on ? "Don't remind me" : "Remind me 10 minutes before", text: on ? "🔔" : "🔕",
+      onclick: async (ev) => { ev.stopPropagation();
+        try { const r = await fetch("onair", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ action: on ? "unstar" : "star", id: e.id, at: e.at, title: e.title, watch: /^https:/.test(e.watch || "") ? e.watch : null }) }); myStars = await r.json(); } catch (x) { /* keep going */ }
+        renderView("live"); } });
+    const info = el("span", { class: "chi" }, el("span", { class: "chn", text: e.title }),
+      el("span", { class: "cht", text: when + " · " + (ONAIR_KIND[e.kind] || "Event") + (e.note ? " · " + e.note : "") }));
+    const main = playable ? el("button", { class: "chmain", onclick: () => play(playable.id) }, info, el("span", { class: "chgo", text: "▶" }))
+      : e.watch && /^https:/.test(e.watch) ? el("a", { class: "chmain", href: e.watch, target: "_blank", rel: "noopener" }, info, el("span", { class: "chgo out", text: "↗" }))
+      : e.item && byId.get(e.item) ? el("button", { class: "chmain", onclick: () => openItem(byId.get(e.item)) }, info, el("span", { class: "chgo", text: "›" }))
+      : el("div", { class: "chmain" }, info);
+    return el("div", { class: "chrow" }, main, star);
+  });
+  return el("section", { class: "onair" }, sectionHead("On air later", list.length + " in the next two weeks"),
+    el("div", { class: "chlist" }, ...rows),
+    el("p", { class: "fine", text: "🔔 = a push 10 minutes before it starts (counts toward your 5 a day). Beacon meetings come from the agendas, House hearings from the House's own schedule, the rest from on_air.yaml." }));
+}
+
 // --------------------------------------------------------------- engagement log (2026-10-25)
 // Joe: "see what I actually engage with versus what I think I engage with." Private: events go to
 // /engage (KV, behind Access), batched: sent when 25 pile up or the page is hidden.
@@ -1370,8 +1408,9 @@ function liveView() {
     el("div", { class: "stage", id: "stage" }, playing ? null : el("div", { class: "stage-empty", text: "Choose a channel below. It keeps playing in a small player while you read other tabs." })),
     pills,
     el("div", { class: "chlist" }, ...rows),
+    onAirSection(),
     el("p", { class: "fine", text: "Official streams only: the publishers' own YouTube channels, players and radio streams. Live status is checked every 20 minutes; a channel that isn't live may still say the video is unavailable." }),
-  ];
+  ].filter(Boolean);
 }
 
 function play(id) {

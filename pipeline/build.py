@@ -871,9 +871,13 @@ def item_kind(src: dict, it: dict) -> str | None:
     return None
 
 
+HOUSE_MEETING = re.compile(r"Meeting Date:\s*(?:[A-Z][a-z]+day),?\s+([A-Z][a-z]+\s+\d{1,2},\s+\d{4})\s+(\d{1,2}:\d{2}\s*[AP]M)")
+
+
 def meeting_time(it: dict) -> str | None:
-    """Beacon agendas say 'will meet on Tuesday, October 20, 2026, at 7:00 PM'."""
-    m = MEETING.search(it.get("summary") or "")
+    """Beacon agendas say 'will meet on Tuesday, October 20, 2026, at 7:00 PM'; House committee
+    feeds say 'Meeting Date: Wednesday, September 16, 2026 10:00 AM'."""
+    m = MEETING.search(it.get("summary") or "") or HOUSE_MEETING.search(it.get("summary") or "")
     if not m:
         return None
     try:
@@ -1049,6 +1053,7 @@ def merge(state: dict, src: dict, items: list[dict], watch) -> None:
             **({"video": it["video"]} if it.get("video") else {}),
             **({"meeting_video": True} if src.get("meeting_video") else {}),
             **({"clip": True} if src.get("clip") else {}),
+            **({"onair": src["onair"]} if src.get("onair") else {}),
             **({"people": sorted(people)} if people else {}),
             **({"person_feed": True} if src.get("person_feed") else {}),
             **({"blotter": it["blotter"]} if it.get("blotter") else {}),
@@ -1389,6 +1394,12 @@ def main() -> int:
             data["sources"].append(row)
     except Exception as exc:
         log(f"[il_polls] failed: {type(exc).__name__}: {exc}")
+    # On air later: upcoming broadcasts (pipeline/onair.py).
+    try:
+        import onair
+        onair.run(data, log)
+    except Exception as exc:
+        log(f"[onair] failed: {type(exc).__name__}")
     # Listen: the audio edition, read from the stories' checked text (pipeline/listen.py).
     try:
         import listen

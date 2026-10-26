@@ -82,6 +82,21 @@ async function checkAlerts(env) {
   }
   cands.push(...(feed.candidates || []));
 
+  // On air later (2026-10-26): broadcasts Joe starred, 10 minutes before they start (same daily cap).
+  try {
+    const st = (await env.WIRE.get("onair_stars.json", "json")) || { stars: [] };
+    for (const s of st.stars || []) {
+      const lead = new Date(s.at) - now;
+      if (lead <= 12 * 60000 && lead > -5 * 60000) {
+        cands.push({ key: `onair:${s.id}`, priority: 3, tags: ["tv"], title: "Starting soon: " + s.title.slice(0, 120),
+          message: "Starts " + new Date(s.at).toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }) + ".",
+          click: s.watch || "https://the-wire-8je.pages.dev/" });
+      }
+    }
+  } catch (e) {
+    errors.push("on-air stars: " + String(e.message || e));
+  }
+
   // First run: record what's already there instead of pushing a backlog.
   if (!fresh) {
     for (const c of cands) state.sent[c.key] = now.toISOString();
