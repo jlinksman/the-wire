@@ -1427,13 +1427,31 @@ def main() -> int:
     before = len(data["items"])
     # Israel and Jewish-world items ship too: the Israel segment lists them under its headings.
     seg_cut = now_utc() - timedelta(hours=36)
+    # The Listen queue's newscast is quiet but ships: only episodes from the last six hours.
+    news_cut = now_utc() - timedelta(hours=6)
     data["items"] = [it for it in data["items"] if not it.get("quiet") or it["id"] in in_story or it.get("people")
+                     or (it.get("audio") and it.get("source_id") == "npr_news_now" and parse_iso(it.get("t")) and parse_iso(it["t"]) >= news_cut)
                      or (it.get("itopic") and parse_iso(it.get("t")) and parse_iso(it["t"]) >= seg_cut)]
     # Thread docs carry the document excerpt; items don't ship it (the stored records keep it).
     data["items"] = [{k: v for k, v in it.items() if k != "doc_text"} for it in data["items"]]
     log(f"[slim] shipped {len(data['items'])} of {before} items (quiet items outside stories stay in the build)")
     (DIST / "data.json").write_text(json.dumps(data, separators=(",", ":")))
     (DIST / "version.txt").write_text(data["generated_at"])
+    # The build's own Workers AI use today and its 7-day average (news processing only, nothing
+    # about Joe), published as data.json's KV metadata so the page's functions can see how much of
+    # the free daily allowance is left for them (2026-10-26).
+    try:
+        day = now_utc().date().isoformat()
+        used = float((state.get("ai") or {}).get("neurons", 0) if (state.get("ai") or {}).get("day") == day else 0) \
+            + float((state.get("listen") or {}).get("neurons", 0) if (state.get("listen") or {}).get("day") == day else 0)
+        hist = state.setdefault("ai_hist", {})
+        hist[day] = round(used)
+        for k in sorted(hist)[:-8]:
+            del hist[k]
+        past = [v for k, v in hist.items() if k != day]
+        (DIST / "ai.txt").write_text(json.dumps({"day": day, "ai": round(used), "ai7": round(sum(past) / len(past)) if past else 6000}))
+    except Exception:
+        pass
     mark_changed(state)
     save_state(state)
     failing = sum(1 for h in data["sources"] if h["last_error"])

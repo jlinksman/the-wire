@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PRIVATE_FILES = re.compile(r"(^|/)(quiz|ballot|engage|follows|proposals|share)\.json$")
+PRIVATE_FILES = re.compile(r"(^|/)(quiz|ballot|engage|follows|proposals|share|debate_now|debate_log|positions|moments|onair_stars|ai_usage)\.json$")
 QUIZ_FILES = {"values.yaml", "elections.yaml", "israel_quiz.yaml", "baseline.yaml", "memes.yaml"}
 WEIGHTS = re.compile(r"(priorit|criteri)[^\n]{0,80}\b\d{1,2}\s?%|\b\d{1,2}\s?%[^\n]{0,80}(priorit|criteri)", re.I)
 ANSWER_SHAPE = re.compile(r'"v"\s*:\s*-?[0-2]\s*,\s*"w"\s*:\s*[1-3]')

@@ -1069,6 +1069,185 @@ function onAirSection() {
     el("p", { class: "fine", text: "🔔 = a push 10 minutes before it starts (counts toward your 5 a day). Beacon meetings come from the agendas, House hearings from the House's own schedule, the rest from on_air.yaml." }));
 }
 
+// --------------------------------------------------------------- Debate mode (2026-10-26)
+// Talk an idea in (the keyboard's microphone works); The Wire spars with it, coaches it, or checks
+// it during a debate, from the same sourced material as the questionnaires. Ending a session writes
+// a recap and updates a private list of positions rated firm, forming or passing, with the evidence.
+// All of it lives only in KV behind Access (functions/debate.js); see CLAUDE.md rule 10.
+const DMODES = [["spar", "Spar", "Argues the strongest other side"], ["coach", "Coach", "Sharpens your own case"], ["night", "Debate night", "Checks claims as you watch"]];
+let dState = { mode: "spar", topic: null, who: null, video: null };
+try { dState = Object.assign(dState, JSON.parse(store.get("wire.debate") || "{}")); } catch (e) { /* fresh */ }
+const dSave = () => { try { store.set("wire.debate", JSON.stringify(dState)); } catch (e) { /* ignore */ } };
+let dData = null;
+async function loadDebate() { try { const r = await fetch("debate", { credentials: "same-origin" }); dData = r.ok ? await r.json() : { now: null, log: [], positions: [] }; } catch (e) { dData = dData || { now: null, log: [], positions: [] }; } return dData; }
+const dPost = (body) => fetch("debate", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+  .then(async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || "HTTP " + r.status); return j; });
+// Subjects: the Your solutions issues and the Get up to speed topics.
+function debateTopics() {
+  const out = {};
+  for (const [k, S] of Object.entries(data.solutions || {})) out[k] = S.title;
+  for (const [k, T] of Object.entries((data.learn || {}).topics || {})) if (!out[k]) out[k] = T.title;
+  return out;
+}
+function guessTopic(text) {
+  const words = new Set(String(text).toLowerCase().match(/[a-z]{4,}/g) || []);
+  let best = null, bs = 0;
+  for (const [k, title] of Object.entries(debateTopics())) {
+    const bag = [title, ...allQuizItems().filter((it) => it.topic === k).map((it) => it.text), ...((data.solutions || {})[k] ? data.solutions[k].mechanisms.map((m) => m.text) : [])].join(" ").toLowerCase().match(/[a-z]{4,}/g) || [];
+    const s = new Set(bag); let n = 0; for (const w of words) if (s.has(w)) n += 1;
+    if (n > bs) { bs = n; best = k; }
+  }
+  return bs >= 2 ? best : null;
+}
+// The numbered material the model may use: statements, explainers, and sourced positions on the subject.
+function debateContext(k) {
+  const items = [];
+  if (!k) return { title: null, items };
+  const quizItems = allQuizItems().filter((it) => it.topic === k);
+  for (const it of quizItems.slice(0, 4)) {
+    const e = (data.explain || {})[it.id];
+    if (e && e.now) items.push({ text: "Where things stand on “" + it.text + "”: " + e.now, source: (e.sources || [])[0] || "" });
+    if (e && e.case_for) items.push({ text: "Case for: " + e.case_for, source: (e.sources || [])[1] || (e.sources || [])[0] || "" });
+    if (e && e.case_against) items.push({ text: "Case against: " + e.case_against, source: (e.sources || [])[2] || (e.sources || [])[0] || "" });
+  }
+  const S = (data.solutions || {})[k];
+  if (S) {
+    const names = solveActors(S), mt = Object.fromEntries(S.mechanisms.map((m) => [m.id, m.text]));
+    for (const [a, cells] of Object.entries(S.plans || {})) for (const [m, x] of Object.entries(cells)) {
+      if (items.length >= 24 || x.unverified) continue;
+      items.push({ text: (names[a] || a) + " " + (x.v > 0 ? "supports" : x.v < 0 ? "opposes" : "is mixed on") + ": " + mt[m] + (x.note ? " (" + x.note + ")" : ""), source: x.source || "" });
+    }
+  }
+  return { title: debateTopics()[k] || k, items: items.slice(0, 24) };
+}
+function debateEntry() {
+  return el("div", { class: "rbox quizbox" }, el("span", { class: "mlabel", text: "Debate mode" }),
+    el("p", { class: "rjob", text: "Talk an idea through. The Wire argues the other side, sharpens your case, or checks claims while you watch a debate, and keeps track of which views are firm and which are passing." }),
+    el("button", { class: "sbtn primary wide", text: "Open", onclick: () => openDebate() }));
+}
+function dTurn(t) {
+  if (t.who === "you") return el("div", { class: "dyou" }, el("span", { class: "mlabel", text: "You" + (t.re ? " · on " + t.re : "") }), el("p", { text: t.text }));
+  const src = (t.sources || []).length ? el("p", { class: "fine" }, "Sources: ", ...t.sources.flatMap((x, i) => [i ? " · " : "", x.source && /^https?:/.test(x.source) ? link(x.source, "[" + x.n + "]") : el("span", { text: "[" + x.n + "]" })])) : null;
+  if (t.mode === "coach") return el("div", { class: "dwire" }, el("span", { class: "mlabel", text: "Coach" }),
+    (t.unsupported || []).length ? el("div", {}, el("b", { text: "Needs evidence:" }), el("ul", { class: "cpos" }, ...t.unsupported.map((u) => el("li", {}, "“" + u.quote + "” " + u.why)))) : null,
+    t.rebuttal ? el("p", {}, el("b", { text: "The rebuttal you'll get: " }), t.rebuttal) : null,
+    t.tight ? el("p", { class: "dtight" }, el("b", { text: "Your 30 seconds: " }), t.tight) : null, src);
+  if (t.mode === "night") return el("div", { class: "dwire" }, el("span", { class: "mlabel", text: "Check · " + (t.verdict || "") }), el("p", { text: t.check || t.text }), src);
+  return el("div", { class: "dwire" }, el("span", { class: "mlabel", text: "The other side" }), el("p", { text: t.reply || t.text }), src);
+}
+async function openDebate(notice) {
+  await loadDebate();
+  const topics = debateTopics();
+  const now = dData.now;
+  const box = el("textarea", { class: "tin", rows: "4", placeholder: dState.mode === "night" ? "What did they just say, and what do you make of it? (Tap the keyboard's mic to talk.)" : "Say what you think. Tap the keyboard's mic to talk it in." });
+  const status = el("p", { class: notice ? "okmsg" : "fine", text: notice || "" });
+  const send = el("button", { class: "sbtn primary wide", text: "Send" });
+  send.onclick = async () => {
+    const text = box.value.trim();
+    if (text.split(/\s+/).length < 4) { status.className = "errmsg"; status.textContent = "Say a little more."; return; }
+    send.disabled = true; send.textContent = "Thinking…";
+    const k = dState.topic || guessTopic(text);
+    try { await dPost({ action: "say", text, mode: dState.mode, who: dState.mode === "night" ? dState.who : null, context: debateContext(k) });
+      engage({ k: "quiz", t: "debate:" + dState.mode }); openDebate(); }
+    catch (e) { status.className = "errmsg"; status.textContent = e.message; send.disabled = false; send.textContent = "Send"; }
+  };
+  const modeRow = el("div", { class: "wrow" }, ...DMODES.map(([m, label]) => el("button", { class: "chip" + (dState.mode === m ? " on" : ""), text: label, onclick: () => { dState.mode = m; dSave(); openDebate(); } })));
+  const sel = el("select", { class: "tin", onchange: (ev) => { dState.topic = ev.target.value || null; dSave(); } },
+    el("option", { value: "", text: "Subject: work it out from what I say" }), ...Object.entries(topics).map(([k, t]) => { const o = el("option", { value: k, text: t }); if (dState.topic === k) o.selected = true; return o; }));
+  const g = data.voter_guide;
+  const names = g && g.quiz ? Object.keys(g.quiz.stances || {}) : [];
+  const whoRow = dState.mode === "night" ? el("div", { class: "wrow" }, ...names.map((n) => el("button", { class: "chip" + (dState.who === n ? " on" : ""), text: n.split(" ").slice(-1)[0], onclick: () => { dState.who = dState.who === n ? null : n; dSave(); openDebate(); } }))) : null;
+  const vidIn = dState.mode === "night" ? el("input", { class: "tin", type: "url", placeholder: "Optional: paste the debate's YouTube link to watch it here", value: dState.video || "",
+    onchange: (ev) => { const m = String(ev.target.value).match(/(?:v=|youtu\.be\/|embed\/|live\/)([A-Za-z0-9_-]{11})/); dState.video = m ? m[1] : null; dSave(); openDebate(); } }) : null;
+  const B = dData.budget;
+  openSheet([
+    el("h2", { id: "sheet-title", class: "stitle", text: "Debate" }),
+    modeRow, el("p", { class: "fine", text: DMODES.find(([m]) => m === dState.mode)[2] + ". Facts come only from The Wire's sourced material, cited." }),
+    sel, whoRow, vidIn,
+    dState.mode === "night" && dState.video ? el("div", { class: "meetwrap" }, el("iframe", { class: "meetframe", allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: "", src: "https://www.youtube.com/embed/" + encodeURIComponent(dState.video) + "?playsinline=1&rel=0", title: "Debate" })) : null,
+    now && now.turns.length ? el("div", { class: "dlog" }, ...now.turns.map(dTurn)) : el("p", { class: "fine", text: "Start anywhere: a reaction to the news, a half-formed idea, or what you'd say to someone who disagrees." }),
+    box, send, status,
+    el("div", { class: "sactions" },
+      now && now.turns.length ? el("button", { class: "sbtn", text: "End and recap", onclick: async (ev) => { ev.target.textContent = "Writing the recap…"; try { const R = await dPost({ action: "end" }); openRecap(R); } catch (e) { status.className = "errmsg"; status.textContent = e.message; } } }) : null,
+      el("button", { class: "sbtn", text: "Your positions", onclick: () => openPositions() })),
+    B ? el("p", { class: "fine", text: "AI today: " + B.used + " of about " + B.allowed + " units free for debate mode (Cloudflare's free daily allowance, after the news build's share). It resets at midnight UTC." }) : null,
+    el("p", { class: "fine", text: "Private: what you say is stored only in your Cloudflare storage and read only by Cloudflare's AI, which doesn't keep or train on it." }),
+  ].filter(Boolean), "Debate");
+  const body = $("sheet-body"); if (body && now && now.turns.length) setTimeout(() => { box.scrollIntoView({ block: "end" }); }, 50);
+}
+function openRecap(R) {
+  const r = R.recap || {};
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Debate", onclick: () => openDebate() }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "Recap" }),
+    (r.sharpest || []).length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Your sharpest points" }), el("ul", { class: "cpos" }, ...r.sharpest.map((q) => el("li", { text: "“" + q + "”" })))) : null,
+    (r.weakest || []).length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Where you were weakest" }), el("ul", { class: "cpos" }, ...r.weakest.map((w) => el("li", {}, "“" + w.quote + "” ", el("span", { class: "fine", text: w.why }))))) : null,
+    (r.new || []).length ? el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "New for you" }), el("ul", { class: "cpos" }, ...r.new.map((s) => el("li", { text: s })))) : null,
+    !R.recap ? el("p", { class: "fine", text: "The session was saved, but the recap couldn't be written (likely today's AI allowance). Your positions update next time." }) : null,
+    el("button", { class: "sbtn primary wide", text: "Your positions", onclick: () => openPositions() }),
+  ].filter(Boolean), "Recap");
+}
+// Firm, forming or passing: how often it comes back (days), how certain the wording is, and whether
+// it held when challenged (attitude-strength research: Krosnick and Petty).
+function rateStrength(p) {
+  const days = (p.days || []).length, c = p.certainty || {}, tot = (c.high || 0) + (c.medium || 0) + (c.low || 0);
+  const sure = tot ? (c.high || 0) / tot : 0, ch = p.challenge || {}, held = ch.held || 0, gave = (ch.softened || 0) + (ch.changed || 0);
+  const why = [days + (days === 1 ? " day" : " days") + " you've raised it", Math.round(sure * 100) + "% said with certainty"];
+  if (held || gave) why.push("held " + held + "×, softened or changed " + gave + "× when challenged");
+  if (p.confirmed === true) why.push("you confirmed it");
+  let r = "Forming";
+  if ((days >= 3 && sure >= 0.5 && held >= gave) || (p.confirmed === true && days >= 2 && held >= gave)) r = "Firm";
+  else if ((days <= 1 && (sure < 0.5 || gave > held)) || p.confirmed === false) r = "Passing";
+  return { r, why };
+}
+async function openPositions() {
+  await loadDebate();
+  const P = (dData.positions || []).slice().sort((a, b) => String(b.last || "").localeCompare(String(a.last || "")));
+  const groups = { Firm: [], Forming: [], Passing: [] };
+  for (const p of P) { const s = rateStrength(p); groups[s.r].push({ p, s }); }
+  const card = ({ p, s }) => el("details", { class: "race" },
+    el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: p.summary })), el("span", { class: "rsub", text: p.topic + " · " + s.why[0] }), el("span", { class: "chev", text: "▾" })),
+    el("p", { class: "fine", text: s.why.join(" · ") }),
+    el("ul", { class: "cpos" }, ...(p.quotes || []).slice(0, 4).map((x) => el("li", { text: "“" + x.q + "” · " + fmtDate.format(new Date(x.at)) }))),
+    el("div", { class: "sactions" },
+      el("button", { class: "sbtn", text: "How it lands", onclick: () => openResonance(p) }),
+      el("button", { class: "sbtn", text: p.confirmed === true ? "✓ That's me" : "That's me", onclick: async () => { await dPost({ action: "position", id: p.id, confirm: p.confirmed === true ? null : true }); openPositions(); } }),
+      el("button", { class: "sbtn", text: p.confirmed === false ? "✓ Not really" : "Not really", onclick: async () => { await dPost({ action: "position", id: p.id, confirm: p.confirmed === false ? null : false }); openPositions(); } }),
+      el("button", { class: "unsave", text: "Forget", onclick: async () => { await dPost({ action: "forget", id: p.id }); openPositions(); } })));
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Debate", onclick: () => openDebate() }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "Your positions" }),
+    el("p", { class: "sdesc", text: "What you've argued in debate mode, grouped by how firmly you seem to hold it: how often it comes back, how certain your words are, and whether it held when challenged. A reading, not a verdict: confirm or dismiss any of them." }),
+    ...["Firm", "Forming", "Passing"].flatMap((k) => groups[k].length ? [el("h3", { class: "sh3", text: k + " · " + groups[k].length }), ...groups[k].map(card)] : []),
+    !P.length ? el("p", { class: "fine", text: "Nothing yet. Positions appear after you end a debate session." }) : null,
+  ].filter(Boolean), "Your positions");
+}
+async function openResonance(p) {
+  const words = (p.topic + " " + p.summary).toLowerCase();
+  const k = guessTopic(words + " " + (p.quotes || []).map((x) => x.q).join(" "));
+  const items = k ? allQuizItems().filter((it) => it.topic === k) : [];
+  const out = el("div", {});
+  const ask = (audience) => async (ev) => {
+    ev.target.textContent = "Rewriting…";
+    try { const R = await dPost({ action: "reframe", audience, text: p.summary + " " + (p.quotes || []).map((x) => x.q).join(" ") });
+      out.replaceChildren(el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "For a " + R.audience + " audience" }), el("p", { text: R.reframed }),
+        el("p", { class: "fine", text: "Leans on: " + (R.values || []).join(", ") + ". A technique (Feinberg and Willer, Stanford): arguments land better framed in the listener's values. It isn't a prediction of how anyone will react." }))); }
+    catch (e) { out.replaceChildren(el("p", { class: "errmsg", text: e.message })); }
+  };
+  openSheet([
+    el("button", { class: "linkbtn", text: "‹ Your positions", onclick: () => openPositions() }),
+    el("h2", { id: "sheet-title", class: "stitle", text: "How it lands" }),
+    el("p", { class: "sdesc", text: p.summary }),
+    el("h3", { class: "sh3", text: "Where the public is" }),
+    items.length ? el("ul", { class: "admin" }, ...items.filter((it) => (data.explain || {})[it.id]).slice(0, 4).map((it) => el("li", {},
+      el("b", { text: it.text }), el("p", { class: "fine", text: data.explain[it.id].now }), explainBtn(it.id, () => openResonance(p))))) : el("p", { class: "fine", text: "No polling on file for this subject yet." }),
+    el("h3", { class: "sh3", text: "Make the case to the other side" }),
+    el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Right-leaning listener", onclick: ask("right") }), el("button", { class: "sbtn", text: "Left-leaning listener", onclick: ask("left") })),
+    out,
+    el("p", { class: "fine", text: "Good arguments move policy opinions about 5 points, in the same direction across parties, and backlash is rare (Coppock, Persuasion in Parallel). Evidence and framing matter more than who's talking." }),
+  ].filter(Boolean), "How it lands");
+}
+
 // --------------------------------------------------------------- engagement log (2026-10-25)
 // Joe: "see what I actually engage with versus what I think I engage with." Private: events go to
 // /engage (KV, behind Access), batched: sent when 25 pile up or the page is hidden.
@@ -1409,6 +1588,7 @@ function liveView() {
     pills,
     el("div", { class: "chlist" }, ...rows),
     onAirSection(),
+    el("button", { class: "sbtn wide", text: "🎙 Debate night: react as you watch", onclick: () => { dState.mode = "night"; dSave(); openDebate(); } }),
     el("p", { class: "fine", text: "Official streams only: the publishers' own YouTube channels, players and radio streams. Live status is checked every 20 minutes; a channel that isn't live may still say the video is unavailable." }),
   ].filter(Boolean);
 }
@@ -3425,6 +3605,7 @@ function questionnairesSection(Q) {
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "Answer now", onclick: () => openPulse() }), lp ? el("button", { class: "sbtn", text: "What it changed", onclick: () => pulseEffect() }) : null)),
     valuesEntry(Q),
     ilEntry(Q),
+    debateEntry(),
     solveEntry(),
     learnEntry(),
     el("div", { class: "rbox quizbox memeentry" }, el("span", { class: "mlabel", text: "For fun" }),

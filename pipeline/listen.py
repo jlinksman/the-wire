@@ -22,7 +22,7 @@ from zoneinfo import ZoneInfo
 NY = ZoneInfo("America/New_York")
 MODEL = "@cf/myshell-ai/melotts"
 NEURONS_PER_MIN = 18.63              # Workers AI pricing, MeloTTS
-LISTEN_DAILY_NEURONS = 900           # its own share; the build's other AI stays under 6,000 + reading
+LISTEN_DAILY_NEURONS = 900           # its own share; the build's other AI stays under AI_DAILY_NEURONS
 LISTEN_EVERY_MIN = 120
 MAX_CHAPTERS = 12
 MAX_WORDS = 1150                     # about 7 to 8 minutes

@@ -334,7 +334,7 @@ def extract_quotes(text: str, limit: int = 2) -> list[dict]:
 # ---------------------------------------------------------------- summaries (Cloudflare Workers AI, free plan)
 
 AI_MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8-fast"
-AI_DAILY_NEURONS = 6000          # free plan gives 10,000/day; stay well under
+AI_DAILY_NEURONS = 5200          # free plan gives 10,000/day; the rest is headroom for the page's own AI (debate mode, Ask, Brief me, Your solutions), which uses what's left each day (2026-10-26)
 NEURONS_PER_M_IN, NEURONS_PER_M_OUT = 4119, 34868
 AI_MAX_CALLS = 25
 SUMMARY_REFRESH_H = 3

@@ -86,7 +86,10 @@ jobs:
           # The build's timestamp rides along as metadata so the page can ask "anything new?"
           # and get a tiny "not modified" answer between builds.
           npx --yes wrangler@4.152.0 kv key put data.json --path dist/data.json --namespace-id "$WIRE_KV_ID" --remote \
-            --metadata "{\"v\":\"$(cat dist/version.txt)\"}"
+            --metadata "$(python3 -c "import json;m={'v':open('dist/version.txt').read().strip()}
+          try: m.update(json.load(open('dist/ai.txt')))
+          except Exception: pass
+          print(json.dumps(m))")"
           # Briefing signal, push-alert candidates and thread evidence: written only when their content changed
           # (or every two hours), per dist/publish.txt from the build.
           # The audio edition: the build writes dist/listen.mp3 only when it made a new one.

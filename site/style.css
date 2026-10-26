@@ -790,3 +790,11 @@ body.listening .player.mini { bottom: calc(var(--tabh) + env(safe-area-inset-bot
 /* On air later (2026-10-26) */
 .onair { margin-top: 18px; }
 .onair .chn { white-space: normal; }
+
+/* ------------------------------------------------ Debate mode (2026-10-26) */
+.dlog { display: flex; flex-direction: column; gap: 10px; margin: 10px 0; }
+.dyou { align-self: flex-end; max-width: 88%; background: var(--raised); border-radius: 12px; padding: 8px 12px; }
+.dwire { max-width: 94%; border-left: 2px solid var(--here); padding: 4px 0 4px 12px; }
+.dyou p, .dwire p { margin: 4px 0; }
+.dtight { background: var(--surface); padding: 8px; border-radius: 8px; }
+select.tin { width: 100%; }
