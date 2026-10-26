@@ -814,9 +814,14 @@ function skipChapter(d) {
 if ("mediaSession" in navigator) {
   const ms = navigator.mediaSession, set = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) { /* unsupported */ } };
   set("play", () => aud.play()); set("pause", () => aud.pause());
-  set("seekbackward", () => { aud.currentTime = Math.max(0, aud.currentTime - 15); });
-  set("seekforward", () => { aud.currentTime = Math.min(aud.duration || 1e9, aud.currentTime + 30); });
-  set("previoustrack", () => skipChapter(-1)); set("nexttrack", () => skipChapter(1));
+  // Car and lock-screen buttons (2026-10-26): in a podcast or the newscast, back and forward jump
+  // 15 seconds (quick past an ad read); in the audio edition they move between stories.
+  const jump = (d) => { aud.currentTime = Math.max(0, Math.min((aud.duration || 1e9) - 1, aud.currentTime + d)); };
+  const inEdition = () => { const cur = lq.items[lq.i]; return cur && cur.kind === "edition"; };
+  set("seekbackward", (e) => jump(-((e && e.seekOffset) || 15)));
+  set("seekforward", (e) => jump((e && e.seekOffset) || 15));
+  set("previoustrack", () => (inEdition() ? skipChapter(-1) : jump(-15)));
+  set("nexttrack", () => (inEdition() ? skipChapter(1) : jump(15)));
 }
 aud.addEventListener("timeupdate", () => {
   const cur = lq.items[lq.i];
@@ -855,7 +860,8 @@ function drawAplayer(light) {
         el("span", { class: "apline", text: line }),
         el("span", { class: "apsub" }, el("span", { text: (cur.kind === "edition" ? "The Wire" : cur.sub || "") + " · " }), el("span", { class: "aptime", text: mmss(aud.currentTime) + (aud.duration ? " / " + mmss(aud.duration) : "") }))),
       el("button", { class: "apbtn", "aria-label": "Back 15 seconds", text: "↺15", onclick: () => { aud.currentTime = Math.max(0, aud.currentTime - 15); } }),
-      el("button", { class: "apbtn", "aria-label": "Next", text: "⏭", onclick: () => skipChapter(1) }),
+      cur.kind === "edition" ? el("button", { class: "apbtn", "aria-label": "Next story", text: "⏭", onclick: () => skipChapter(1) })
+        : el("button", { class: "apbtn", "aria-label": "Forward 15 seconds", text: "15↻", onclick: () => { aud.currentTime = Math.min((aud.duration || 1e9) - 1, aud.currentTime + 15); } }),
       el("button", { class: "apbtn apspeed", "aria-label": "Speed", text: lq.speed + "×", onclick: () => { lq.speed = SPEEDS[(SPEEDS.indexOf(lq.speed) + 1) % SPEEDS.length]; aud.playbackRate = lq.speed; lqSave(); drawAplayer(); } }),
       el("button", { class: "apbtn", "aria-label": "Stop", text: "✕", onclick: () => { heard(); aud.pause(); aud.removeAttribute("src"); aud.load(); drawAplayer(); } })));
 }
