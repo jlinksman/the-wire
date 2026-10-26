@@ -305,6 +305,46 @@ def canonical_outlet(name: str) -> str:
     return OUTLET_ALIASES.get(n.lower(), n)
 
 
+AD_TITLE = re.compile(r"\b(sponsor\w*|ad break|ads?|advert\w*|promo\w*|commercial|a word from|brought to you|message from)\b", re.I)
+SHOWNOTE_TS = re.compile(r"(?:^|[\s(\[])((?:\d{1,2}:)?\d{1,2}:\d{2})[)\]]?\s*[-–—:]?\s*([^\n(\[]{3,80})")
+
+
+def _secs(t: str) -> int:
+    n = 0
+    for part in str(t).split(":"):
+        n = n * 60 + int(float(part))
+    return n
+
+
+def episode_chapters(e) -> list[dict]:
+    """Podcast chapters (2026-10-26): Podlove chapters in the feed, or timestamps in the show notes.
+    Titles that name a sponsor or ad are marked ad: true (the player can skip those); dynamic-ad
+    insertion markers ('Marker 01') are marked as ad-break points. Times are the publisher's and can
+    drift by the length of ads inserted before them."""
+    out = []
+    psc = (e.get("psc_chapters") or {}).get("chapters") if isinstance(e.get("psc_chapters"), dict) else None
+    for c in psc or []:
+        try:
+            title = clean_text(c.get("title"), 80)
+            out.append({"t": _secs(c.get("start", "0")), "label": title, **({"ad": True} if AD_TITLE.search(title) else {}),
+                        **({"marker": True} if re.fullmatch(r"marker\s*\d*", title, re.I) else {})})
+        except (TypeError, ValueError):
+            continue
+    if not out:
+        notes = re.sub(r"<br\s*/?>|</p>|</li>", "\n", e.get("summary") or e.get("description") or "", flags=re.I)
+        notes = re.sub(r"<[^>]+>", " ", notes)
+        for m in SHOWNOTE_TS.finditer(notes):
+            try:
+                title = re.sub(r"\s+", " ", m.group(2)).strip(" -–—:")
+                out.append({"t": _secs(m.group(1)), "label": title[:80], **({"ad": True} if AD_TITLE.search(title) else {})})
+            except ValueError:
+                continue
+        if len(out) < 3:
+            return []
+    out.sort(key=lambda c: c["t"])
+    return out[:40]
+
+
 def parse_rss(src: dict, content: bytes) -> list[dict]:
     feed = feedparser.parse(content)
     if not feed.entries:
@@ -359,6 +399,7 @@ def parse_rss(src: dict, content: bytes) -> list[dict]:
             **({"outlet": outlet} if outlet and not src.get("site_feed") else {}),
             **({"author": author} if author else {}),
             **({"audio": enc[0]} if enc and src.get("feed_kind") == "podcast" else {}),
+            **({"chapters": ch} if src.get("feed_kind") == "podcast" and (ch := episode_chapters(e)) else {}),
         })
     return items
 

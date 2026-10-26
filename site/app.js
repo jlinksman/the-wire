@@ -734,13 +734,13 @@ try { lq = Object.assign(lq, JSON.parse(store.get(LQ_KEY) || "{}")); } catch (e)
 const aud = new Audio();
 aud.preload = "metadata";
 let lqHeard = 0, lqTick = 0;
-function lqSave() { try { store.set(LQ_KEY, JSON.stringify({ items: lq.items.slice(0, 30), i: lq.i, pos: lq.pos, speed: lq.speed })); } catch (e) { /* ignore */ } }
+function lqSave() { try { store.set(LQ_KEY, JSON.stringify({ items: lq.items.slice(0, 30), i: lq.i, pos: lq.pos, speed: lq.speed, intro: lq.intro || {}, noAdSkip: !!lq.noAdSkip })); } catch (e) { /* ignore */ } }
 function editionItem() {
   const L = data.listen;
   if (!L || !L.v) return null;
   return { id: "ed:" + L.v, kind: "edition", title: "The Wire · audio edition", sub: Math.round((L.seconds || 0) / 60) + " min · " + fmtTime.format(new Date(Date.parse(L.at))), src: "listen.mp3?v=" + L.v, chapters: L.chapters || [] };
 }
-function podItem(it) { return { id: "pod:" + it.id, kind: "podcast", title: it.title, sub: byline(it), src: it.audio, item: it.id }; }
+function podItem(it) { return { id: "pod:" + it.id, kind: "podcast", title: it.title, sub: byline(it), src: it.audio, item: it.id, show: it.source_id, chapters: (it.chapters || []).filter((c) => !c.marker), breaks: (it.chapters || []).filter((c) => c.marker).map((c) => c.t), ads: (it.chapters || []).some((c) => c.ad) }; }
 // Episodes from people you follow that touch a thread you follow, then the newest; last 7 days.
 function podcastPicks(n) {
   const cut = Date.now() - 7 * 86400e3;
@@ -793,7 +793,9 @@ function playAt(i, go) {
   if (playing) { playing = false; render(); }     // one thing at a time: stop the live player
   aud.src = cur.src;
   aud.playbackRate = lq.speed;
-  const resume = lq.pos[cur.id] || 0;
+  // A show's intro ads: if you've set "start this show at", new episodes begin there (per device).
+  const intro = cur.show && (lq.intro || {})[cur.show];
+  const resume = lq.pos[cur.id] || intro || 0;
   aud.addEventListener("loadedmetadata", () => { if (resume && (!aud.duration || resume < aud.duration - 10)) aud.currentTime = resume; aud.playbackRate = lq.speed; }, { once: true });
   if (go) aud.play().catch(() => drawAplayer());
   if ("mediaSession" in navigator) {
@@ -830,6 +832,11 @@ aud.addEventListener("timeupdate", () => {
   if (!aud.paused && lqTick) lqHeard += Math.min(2, (now - lqTick) / 1000) * 1;
   lqTick = now;
   lq.pos[cur.id] = aud.currentTime;
+  // Publisher chapters titled as sponsor or ad segments are skipped to the next chapter.
+  if (cur.kind === "podcast" && cur.ads && cur.chapters && cur.chapters.length) {
+    const k = chapterAt(cur, aud.currentTime), ch = cur.chapters[k], next = cur.chapters[k + 1];
+    if (ch && ch.ad && !lq.noAdSkip && aud.currentTime - ch.t < 5) aud.currentTime = next ? next.t : aud.duration || aud.currentTime;
+  }
   if (Math.round(aud.currentTime) % 5 === 0) lqSave();
   drawAplayer(true);
 });
@@ -870,14 +877,17 @@ function openQueue() {
   const stories = new Map((data.stories || []).map((s) => [s.id, s]));
   const nodes = [
     el("h2", { id: "sheet-title", class: "stitle", text: "Listening" }),
-    el("p", { class: "fine", text: "The edition reads Today's checked story text in Cloudflare's voice; each chapter opens its story. Then episodes from people you follow on your threads, then NPR's newscast." }),
+    el("p", { class: "fine", text: "The edition reads Today's checked story text in Cloudflare's voice; each chapter opens its story. Then episodes from people you follow on your threads, then NPR's newscast. In podcasts, the car's back and forward buttons jump 15 seconds; chapters come from the publisher's feed or show notes (times can drift by the length of inserted ads)." }),
   ];
   lq.items.forEach((x, j) => {
     nodes.push(el("section", { class: "ssec" + (j === lq.i ? " apnow" : "") },
       el("div", { class: "aqrow" },
         el("button", { class: "doclink", text: (j === lq.i ? "▶ " : "") + x.title, onclick: () => { playAt(j, true); openQueue(); } }),
         j !== lq.i ? el("button", { class: "unsave", text: "Remove", onclick: () => { lq.items.splice(j, 1); if (j < lq.i) lq.i -= 1; lqSave(); openQueue(); drawAplayer(); } }) : null),
-      el("span", { class: "asrc", text: x.sub || "" }),
+      el("span", { class: "asrc", text: (x.sub || "") + (x.breaks && x.breaks.length ? " · ad breaks near " + x.breaks.map(mmss).join(", ") : "") + (x.ads ? " · sponsor chapters skipped" : "") }),
+      x.kind === "podcast" && x.show && j === lq.i ? el("div", { class: "sactions" },
+        el("button", { class: "sbtn", text: (lq.intro || {})[x.show] ? "Start this show at " + mmss(lq.intro[x.show]) + " · change to now" : "Skip intro ads: start this show at " + mmss(aud.currentTime), onclick: () => { lq.intro = lq.intro || {}; lq.intro[x.show] = Math.floor(aud.currentTime); lqSave(); openQueue(); } }),
+        (lq.intro || {})[x.show] ? el("button", { class: "unsave", text: "Clear", onclick: () => { delete lq.intro[x.show]; lqSave(); openQueue(); } }) : null) : null,
       x.chapters && x.chapters.length ? el("ol", { class: "aqch" }, ...x.chapters.map((c, k) => el("li", {},
         el("button", { class: "linkbtn", text: mmss(c.t) + " · " + c.label, onclick: () => { if (j !== lq.i) { lq.pos[x.id] = c.t; playAt(j, true); } else aud.currentTime = c.t; } }),
         c.story && stories.get(c.story) ? el("button", { class: "linkbtn aqopen", text: "Open ›", onclick: () => openStory(stories.get(c.story)) }) : null))) : null));
