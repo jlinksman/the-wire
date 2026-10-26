@@ -1,0 +1,37 @@
+name: Voice probe
+
+# By hand only: how long Cloudflare's MeloTTS speaks for fixed sample texts of different lengths
+# (fixed public sentences, nothing from The Wire), to size the audio edition's chunks.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Probe
+        working-directory: pipeline
+        run: |
+          python3 - <<'PY'
+          import requests, listen
+          s = requests.Session()
+          base = "The quick brown fox jumps over the lazy dog near the river in Beacon. "
+          for n in (1, 2, 4, 6):
+              text = base * n
+              raw = listen.tts(s, text)
+              frames, secs = listen.mp3_frames(raw)
+              b = raw[:4]
+              print(f"{n} sentences, {len(text)} chars, {len(text.split())} words -> {len(raw)} bytes, {secs:.1f} s, head {b.hex()}")
+          PY
