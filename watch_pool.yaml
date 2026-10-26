@@ -1,0 +1,901 @@
+# People to watch (2026-10-26): a neutral, balanced pool of officeholders and rising figures across
+# parties (Beacon, Dutchess, New York, Washington, Israel), with verified roles, careers and sourced
+# positions on the election check's statements. Chosen for trajectory, not for agreement with anyone;
+# closeness to Joe is computed only on the page, and whom he watches lives only in KV.
+version: 2026-10-26.1
+people:
+- id: lee_kyriacou
+  name: Lee Kyriacou
+  role: Mayor of Beacon
+  party: Democratic
+  place: City of Beacon
+  group: beacon
+  career:
+  - '1993: first elected to Beacon City Council (Ward 2, 1994-1999)'
+  - '2002-2007: citywide council member; 2007: on leave to lead the state agency overseeing local property taxes'
+  - '2014-2019: citywide council member again'
+  - '2020 (Jan 1): became Mayor; 2023 (Nov): re-elected on the Democratic line'
+  why_watch: Mayor since 2020; has nominated the appointees who filled several council vacancies since 2024; delivered his 2026 State of the City in March.
+  links:
+  - https://beaconny.gov/?p=5780
+  - https://beaconny.gov/index.php/2026/03/03/mayor-kyriacou-delivers-2026-state-of-the-city-address/
+  - https://www.alittlebeaconblog.com/blog/a-few-election-results-from-tuesdays-local-vote
+- id: amber_grant
+  name: Amber Grant
+  role: Beacon City Council member, At-Large
+  party: Democratic
+  place: City of Beacon
+  group: beacon
+  career:
+  - '2019 (Nov): elected At-Large on the Democratic and Working Families lines'
+  - 'Later: left the council'
+  - '2024 (Jan): appointed to the vacant At-Large seat at the mayor''s request'
+  - '2025 (Nov): elected At-Large on the Democratic line, unopposed'
+  why_watch: Veteran member who returned by appointment, then won the seat in 2025; one of two citywide council votes.
+  links:
+  - https://beaconny.gov/index.php/government/city-council/
+  - https://www.alittlebeaconblog.com/blog/beacon-mayoral-and-city-council-election-results-so-far-unofficial
+  - https://www.alittlebeaconblog.com/monday-meetings/tag/Faye+Leone
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: paloma_wake
+  name: Paloma Wake
+  role: Beacon City Council member, At-Large
+  party: Democratic (also Working Families line)
+  place: City of Beacon
+  group: beacon
+  career:
+  - '2023 (Nov): elected At-Large on the Democratic and Working Families lines'
+  - '2024 (Dec): proposed a public notice and application process for filling council vacancies'
+  - '2025 (Nov): re-elected At-Large, unopposed'
+  why_watch: Has pressed for more open processes when council vacancies are filled; watch for process and transparency debates.
+  links:
+  - https://beaconny.gov/index.php/government/city-council/
+  - https://www.alittlebeaconblog.com/blog/a-few-election-results-from-tuesdays-local-vote
+  - https://alittlebeaconblog.com/blog/tag/Wren+Long
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: lastar_gorton
+  name: Lastar Gorton
+  role: Beacon City Council member, Ward 1
+  party: Democratic (also Working Families line)
+  place: Beacon Ward 1
+  group: beacon
+  career:
+  - '2025 (Nov): elected Ward 1 on the Democratic and Working Families lines, unopposed, succeeding Molly Rhodes'
+  - '2026 (Jan): took office on Beacon City Council'
+  why_watch: First-term member in the seat Molly Rhodes left for the County Legislature.
+  links:
+  - https://beaconny.gov/index.php/government/city-council/
+  - https://www.alittlebeaconblog.com/blog/tag/Election
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: zack_smith
+  name: Zack Smith
+  role: Beacon City Council member, Ward 2
+  party: Democratic
+  place: Beacon Ward 2
+  group: beacon
+  career:
+  - '2025 (Nov): elected Ward 2 on the Democratic line, unopposed, succeeding Jeff Domanski'
+  - '2026 (Jan): took office on Beacon City Council'
+  why_watch: First-term ward member; part of the 2026 turnover that replaced four of six council seats.
+  links:
+  - https://beaconny.gov/index.php/government/city-council/
+  - https://www.alittlebeaconblog.com/blog/tag/Election
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: sergei_krasikov
+  name: Sergei Krasikov
+  role: Beacon City Council member, Ward 3
+  party: Democratic (also Working Families line)
+  place: Beacon Ward 3
+  group: beacon
+  career:
+  - '2025 (Nov): elected Ward 3 on the Democratic and Working Families lines, unopposed, succeeding Pam Wetherbee'
+  - '2026 (Jan): took office on Beacon City Council'
+  why_watch: First-term ward member; part of the 2026 council turnover.
+  links:
+  - https://beaconny.gov/index.php/government/city-council/
+  - https://www.alittlebeaconblog.com/blog/tag/Election
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: carolyn_bennett_glauda
+  name: Carolyn Bennett Glauda
+  role: Beacon City Council member, Ward 4
+  party: Democratic (also Working Families line)
+  place: Beacon Ward 4
+  group: beacon
+  career:
+  - '2013-present: programs and outreach manager, Southeastern NY Library Resources Council'
+  - '2025 (Nov): elected Ward 4 on the Democratic and Working Families lines, succeeding George Mansfield; term ends Dec 31, 2027'
+  why_watch: First-term ward member; campaigned on density, affordable housing options and complete streets.
+  links:
+  - https://beaconny.gov/index.php/government/city-council/
+  - https://www.ballotready.org/people/carolyn-glauda
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: dan_aymar_blair
+  name: Dan Aymar-Blair
+  role: Dutchess County Comptroller
+  party: Democratic
+  place: Dutchess County (Beacon resident)
+  group: beacon
+  career:
+  - '2019 (Nov): re-elected Beacon Ward 4; served three council terms'
+  - '2024 (Nov): won special election for Dutchess County Comptroller over Republican A. Gregg Pulver'
+  - '2025 (Nov): won a full term over Republican Will Truitt, 41,164 to 33,346'
+  why_watch: Beacon-rooted officeholder now auditing county finances countywide; won twice in a county that had long elected Republicans.
+  links:
+  - https://millertonnews.com/aymar-blair-declares-victory-in-county-comptroller-race
+  - https://millertonnews.com/aymar-blair-gearing-up-for-another-comptroller-election
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: sue_serino
+  name: Sue Serino
+  role: Dutchess County Executive
+  party: Republican
+  place: Dutchess County
+  group: dutchess
+  career:
+  - '2015-2022: State Senator (41st District)'
+  - '2022: lost Senate seat to Michelle Hinchey'
+  - '2024 (Jan): took office as County Executive'
+  - '2026 (Feb): opposed a proposed ICE detention facility anywhere in the Hudson Valley'
+  why_watch: Republican executive now working with a Democratic legislature (since Jan 2026); re-election due 2027.
+  links:
+  - https://www.dutchessny.gov/Departments/County-Executive/Statement-from-County-Executive-Serino-following-confirmation-of-property-purchased-by-US-ICE.htm
+- id: yvette_valdes_smith
+  name: Yvette Valdés Smith
+  role: Chair, Dutchess County Legislature
+  party: Democratic (also Working Families line)
+  place: District 16 (Fishkill, Beacon)
+  group: dutchess
+  career:
+  - '2024: Legislature Minority Leader; lost State Senate race (SD-39) to Rob Rolison, 50.7% to 49.3%'
+  - '2025 (Nov): re-elected District 16; Democrats won a 15-10 majority'
+  - '2026 (Jan): elected Chair of the Legislature'
+  why_watch: Leads the first Democratic legislative majority since 2008-2009; sets the agenda opposite a Republican county executive.
+  links:
+  - https://www.dutchessny.gov/Departments/County-Legislature/District-16.htm
+  - https://www.dutchessny.gov/Dutchess-County-Legislature-Announces-New-Chair-and-New-Dem-Majority.htm
+  - https://en.wikipedia.org/wiki/New_York%27s_39th_State_Senate_district
+- id: michael_polasek
+  name: Michael Polasek
+  role: Minority Leader, Dutchess County Legislature
+  party: Republican (also Conservative line)
+  place: District 3 (LaGrange)
+  group: dutchess
+  career:
+  - 'Before 2026: Dutchess County legislator, District 3 (LaGrange)'
+  - '2025 (Nov): re-elected 1,719 to 1,658 on the Republican and Conservative lines'
+  - '2026 (Jan): became Minority Leader after Democrats took a 15-10 majority'
+  why_watch: Leads the 10-member Republican caucus; key negotiator between the Democratic majority and County Executive Serino.
+  links:
+  - https://www.dutchessny.gov/Departments/County-Legislature/District-3.htm
+  - https://www.dutchessny.gov/Departments/County-Legislature/Dutchess-County-Legislators.htm
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: john_metzger
+  name: John Metzger
+  role: Assistant Minority Leader, Dutchess County Legislature
+  party: Republican (also Conservative line)
+  place: District 12 (East Fishkill)
+  group: dutchess
+  career:
+  - '2024: chaired the Legislature''s Public Works and Capital Projects Committee'
+  - '2025 (Nov): re-elected District 12, unopposed, on the Republican and Conservative lines'
+  - '2026 (Jan): became Assistant Minority Leader'
+  why_watch: Second-ranking Republican in the new minority; represents East Fishkill, also home to Assemblymember Beephan.
+  links:
+  - https://www.dutchessny.gov/Departments/County-Legislature/District-12.htm
+  - https://www.dutchessny.gov/CMSPrint/45514.htm
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: molly_rhodes
+  name: Molly Rhodes
+  role: Dutchess County legislator
+  party: Democratic (also Working Families line)
+  place: District 18 (Beacon, Fishkill)
+  group: dutchess
+  career:
+  - '2023 (Nov): re-elected Beacon Ward 1 for a second term'
+  - '2025 (Nov): elected Dutchess County Legislature, District 18, on the Democratic and Working Families lines, unopposed'
+  - '2026: vice-chair, Public Works Committee'
+  why_watch: Moved from Beacon council to the county; one of Beacon's county legislators in the new Democratic majority.
+  links:
+  - https://www.dutchessny.gov/Departments/County-Legislature/Dutchess-County-Legislators.htm
+  - https://www.alittlebeaconblog.com/blog/a-few-election-results-from-tuesdays-local-vote
+  - https://elections.dutchessny.gov/wp-content/uploads/2025/11/GE25-Official-Summary-Results.pdf
+- id: kathy_hochul
+  name: Kathy Hochul
+  role: Governor of New York; 2026 nominee for re-election
+  party: Democratic (also Working Families line)
+  place: New York State
+  group: state
+  career:
+  - '2011: won special election to Congress (NY-26)'
+  - '2015: became Lieutenant Governor'
+  - '2021 (Aug): became Governor'
+  - '2022: elected to a full term; 2026: faces Bruce Blakeman'
+  why_watch: Incumbent in the Nov. 3, 2026 race; her 2026 budget changed the climate law, ICE cooperation rules and data-center policy.
+  links:
+  - https://www.governor.ny.gov
+  - https://spectrumlocalnews.com/nys/central-ny/politics/2026/10/14/hochul-and-blakeman-trade-barbs-in-only-governor-debate
+  codes:
+    q05:
+      v: 1
+      source: https://www.nixonpeabody.com/insights/alerts/2026/05/28/new-york-seqra-changes---eligibility-for-affordable-housing-projects
+    q06:
+      v: -1
+      source: https://www.wxxinews.org/local-news/2026-08-17/blakeman-touts-dangerousness-standard-in-setting-bail-claiming-crime-is-up
+    q07:
+      v: 2
+      source: https://nystateofpolitics.com/state-of-politics/new-york/politics/2026/05/29/hochul-signs-measures-to-limit-ice-cooperation
+    q09:
+      v: 2
+      source: https://www.wshu.org/2026-01-13/ny-gov-kathy-hochul-to-double-down-on-affordability-in-state-of-the-state-speech
+    q10:
+      v: 2
+      source: https://abc7ny.com/post/new-york-gov-kathy-hocul-delays-ai-data-centers-energy-environmental-concerns/19505160/
+      note: issued an executive order for a one-year statewide data-center moratorium; wants new centers to bring their own power
+    q14:
+      v: 2
+      source: https://governor.ny.gov/news/video-audio-rush-transcript-governor-hochul-calls-new-york-congressional-republicans-stand
+    q19:
+      v: -2
+      source: https://abc7ny.com/post/nyc-congestion-pricing-gov-kathy-hochul-stands-mta-tolling-plan-vowing-fight-trump-administrations-move/15933727/
+      note: 'launched the toll in Jan. 2025 and is fighting federal efforts to end it: ''The tolls are staying on.'''
+    q20:
+      v: -1
+      source: https://policyintegrity.org/publications/detail/new-yorks-climate-law-amendments-usher-in-new-challenges-and-opportunities
+      note: signed May 2026 budget amendments that delay rules to 2028 and change methane accounting, but kept the law and its...
+    q21:
+      v: -2
+      source: https://spectrumlocalnews.com/nys/central-ny/news/2026/06/12/hochul-defends-fracking-ban-as-blakeman-presses-for-it-to-be-overturned
+    q22:
+      v: 2
+      source: https://spectrumlocalnews.com/nys/central-ny/politics/2026/08/27/national-issues-dominate-govenrors-race-
+      note: signed the law; says 287(g) agreements are 'in the way of making progress'
+    q23:
+      v: 2
+      source: https://imprintnews.org/justice/juvenile-justice-2/new-york-governor-stands-by-states-raise-the-age-law/270374
+      note: kept Raise the Age changes out of her Jan. 2026 budget despite prosecutors' requests
+    q24:
+      v: 1
+      source: https://www.governor.ny.gov/news/governor-hochul-announces-statewide-strategy-address-new-yorks-housing-crisis-and-build-800000
+    q25:
+      v: -1
+      source: https://nny360.com/top_stories/as-hospitals-face-uncertain-fiscal-future-candidates-for-governor-offer-different-views-on-state-s/article_4b3dc540-db1c-5d77-959a-161c8bf7b799.html
+      note: opposes the 2025 federal cuts and warns of hospital closures, though she is trimming Medicaid costs she calls wasteful
+    q26:
+      v: 1
+      source: https://www.nbcnews.com/nbc-out/out-news/long-island-county-bans-transgender-athletes-competing-girls-rcna140184
+      note: accused Blakeman of bullying transgender kids over his 2024 Nassau ban and said the state would enforce its anti-discrimination laws
+    q39:
+      v: -2
+      source: https://www.cityandstateny.com/policy/2026/03/mike-lawler-and-trump-admin-wants-reopen-indian-point/411964
+      note: 'Her office: ''The Governor has emphatically stated she will not support the re-opening of Indian Point.'''
+    q40:
+      v: 1
+      source: https://www.whec.com/?p=936379
+      note: 'Oct. 2025, on delaying the All-Electric Buildings Act: ''my number one focus is affordability right now''; state then paused enforcement...'
+- id: bruce_blakeman
+  name: Bruce Blakeman
+  role: Nassau County Executive; 2026 Republican nominee for Governor
+  party: Republican (also Conservative line)
+  place: Nassau County / statewide
+  group: state
+  career:
+  - '2022 (Jan): became Nassau County Executive'
+  - '2024: barred transgender athletes from girls'' teams at county facilities'
+  - '2025 (Dec): Trump endorsed him after Stefanik left the race'
+  - '2026 (Feb): accepted Republican nomination for Governor'
+  why_watch: Leads the Republican statewide ticket; his result sets the party's direction and Conservative ballot status for 2028.
+  links:
+  - https://www.nassaucountyny.gov
+  - https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html
+  codes:
+    q04:
+      v: 2
+      source: https://ny1.com/nyc/all-boroughs/politics/2026/09/29/hochul-blakeman-tax-relief
+    q06:
+      v: 2
+      source: https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html
+    q07:
+      v: -1
+      source: https://spectrumlocalnews.com/nys/central-ny/politics/2026/10/14/hochul-and-blakeman-trade-barbs-in-only-governor-debate
+      note: opposes sanctuary policies; supports local cooperation with federal enforcement
+    q09:
+      v: 1
+      source: https://rocklandtimes.com/2026/08/06/bruce-blakeman-the-run-for-ny-governor/
+      note: Suggests New York 'explore' small modular nuclear reactors; tentative, so +1.
+    q10:
+      v: -2
+      source: https://cbs6albany.com/news/local/after-hochuls-data-center-moratorium-her-republican-challenger-blasts-the-idea
+      note: 'Blasted the moratorium: ''We''re talking about a tremendous amount of jobs.'''
+    q15:
+      v: 1
+      source: https://rocklandtimes.com/2026/08/06/bruce-blakeman-the-run-for-ny-governor/
+      note: would cut 'silly regulations,' but names high taxes as the main reason businesses leave
+    q19:
+      v: 2
+      source: https://longisland.news12.com/2026/07/29/blakeman-targets-mta-leadership-congestion-pricing-while-riding-lirr/01qlKmNuFL7wlamtEdBMHY
+      note: calls the toll 'a tax on the middle class'
+    q20:
+      v: 2
+      source: https://www.audacy.com/wben/news/blakeman-backs-fracking-but-not-the-clcpa
+      note: would scrap the law, which he calls 'that green energy scam'; has floated a 25% renewables goal instead
+    q21:
+      v: 2
+      source: https://spectrumlocalnews.com/nys/central-ny/news/2026/06/12/hochul-defends-fracking-ban-as-blakeman-presses-for-it-to-be-overturned
+    q22:
+      v: -2
+      source: https://www.wamc.org/2026-08-26/blakeman-bows-to-ny-law-limiting-cooperation-with-ice
+      note: complied in Nassau but called it 'a very, very bad and dangerous law' and joined a sheriffs' lawsuit against it
+    q23:
+      v: -2
+      source: https://www.fox5ny.com/news/bruce-blakeman-takes-aim-nys-justice-system-a-revolving-door-criminality
+    q24:
+      v: -2
+      source: https://www.wnycstudios.org/podcasts/bl/segments/nassau-county-exec-gov-hochuls-call-more-housing-long-island
+      note: 'opposed Hochul''s 2023 plan: ''it''s not a good idea to do planning for Long Island from Albany'''
+    q25:
+      v: 1
+      source: https://www.cityandstateny.com/politics/2026/07/congressional-democrats-blast-trump-blakeman-over-newly-enacted-essential-plan-cuts/414576/
+      note: told Fox Business he would 'cut Medicaid in half'; at the Oct. debate said he never said that and framed...
+    q26:
+      v: -2
+      source: https://www.nbcnews.com/nbc-out/out-news/long-island-county-bans-transgender-athletes-competing-girls-rcna140184
+      note: barred transgender athletes from women's and girls' teams at Nassau County facilities by executive order in 2024, later passed as...
+    q40:
+      v: 2
+      source: https://www.longisland.com/news/02-11-26/blakeman-accepts-republican-nomination-for-governor-pledges-to-end-hochuls-tax-hikes-and-restore-affordability-and-public-safety.html
+      note: Pledges to 'roll back Albany's hidden taxes and mandates driving up energy costs'; called Hochul's mandate pause a 'political stunt'...
+- id: saritha_komatireddy
+  name: Saritha Komatireddy
+  role: Republican nominee for Attorney General
+  party: Republican (also Conservative line)
+  place: New York State
+  group: state
+  career:
+  - 'About 2013-2025: federal prosecutor, Eastern District of New York (12 years)'
+  - '2025 (late): left the U.S. Attorney''s office'
+  - '2026: Republican nominee against Letitia James'
+  why_watch: First-time candidate running on prosecution and Medicaid fraud; a new statewide Republican name whatever the result.
+  links:
+  - https://www.cityandstateny.com/personality/2026/08/komatireddys-law-and-order-ag-campaign/415186/
+  - https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy
+  codes:
+    q06:
+      v: 1
+      source: https://thepostmillennial.com/pathetic-gop-challenger-komatireddy-torches-tish-james-in-ny-attorney-general-debate-over-lax-bail-laws-medicaid-fraud
+      note: wants judges able to weigh dangerousness without repealing the whole bail law
+    q11:
+      v: 2
+      source: https://www.cityandstateny.com/personality/2026/08/komatireddys-law-and-order-ag-campaign/415186/
+    q27:
+      v: 2
+      source: https://spectrumlocalnews.com/nys/buffalo/politics/2026/10/07/attorney-general-candidates-set-to-clash-on-ny1-letitia-james-komatireddy
+      note: says James pursued a personal vendetta against Trump and is too focused on national politics; also says she would protect...
+    q28:
+      v: 2
+      source: https://wjla.com/news/nation-world/ny-republican-attorney-general-candidate-drops-52-count-indictment-against-letitia-james-saritha-komatireddy-president-trump-medicaid-fraud
+      note: 'her own proposal: an Office of Civil Commitment staffed by law enforcement and doctors, plus residential treatment centers statewide'
+    q29:
+      v: -2
+      source: https://wjla.com/news/nation-world/ny-republican-attorney-general-candidate-drops-52-count-indictment-against-letitia-james-saritha-komatireddy-president-trump-medicaid-fraud
+      note: calls James 'the watchdog that did not bark,' citing a drop in Medicaid fraud indictments from more than 100 a...
+- id: rob_rolison
+  name: Rob Rolison
+  role: State Senator, 39th District; 2026 nominee for re-election
+  party: Republican (also Conservative line)
+  place: SD-39 (Dutchess, Orange, Putnam)
+  group: state
+  career:
+  - '2003-2015: Dutchess County legislator'
+  - '2016-2022: Mayor of Poughkeepsie'
+  - '2022: elected State Senator, SD-39'
+  - '2024: re-elected over Yvette Valdés Smith by about 1.4 points'
+  why_watch: Holds a closely divided Hudson Valley Senate seat; utility-cost bills are his signature issue; faces Lisa Kaul Nov. 3.
+  links:
+  - https://www.nysenate.gov/senators/rob-rolison
+  - https://en.wikipedia.org/wiki/Robert_Rolison
+  codes:
+    q02:
+      v: 2
+      source: https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-bill-requiring-public-hearings-utility
+    q04:
+      v: 1
+      source: https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/statement-senator-rolisons-response-governor-hochuls-state
+      note: Blames 'over-spending, over-taxing' in Albany; no specific trade-off stated.
+    q06:
+      v: 1
+      source: https://nysenate.gov/print/pdf/node/12011516
+      note: Called the 2023 bail changes 'watered-down'; wants judges to weigh a defendant's dangerousness when setting bail.
+    q10:
+      v: 2
+      source: https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html
+      note: voted for a one-year statewide data-center moratorium
+    q15:
+      v: 1
+      source: https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html
+      note: called for cutting regulatory challenges for small businesses
+    q40:
+      v: 1
+      source: https://www.nysenate.gov/affordable-energy-not-albany-mandates
+      note: sponsors S1031 (cost of CLCPA mandates per ratepayer, with a credit) and S8463 (two-year green-energy charge holiday) in the 'Affordable...
+    q41:
+      v: -1
+      source: https://www.nysenate.gov/legislation/bills/2023/S108/amendment/A
+      note: voted no on the state Equal Rights Amendment (2023), which covers pregnancy outcomes among other things
+    q43:
+      v: 2
+      source: https://www.nysenate.gov/newsroom/press-releases/2026/rob-rolison/senator-rolison-urges-energy-committee-advance-utility-tax
+      note: 'Sponsor of S8463: one-year holiday on utility-bill taxes and surcharges plus two years on green-energy charges.'
+    q44:
+      v: 2
+      source: https://www.aol.com/articles/teens-caught-guns-face-adult-194500923.html
+      note: Introduced S.8531 to restore judicial discretion over family-court removal and keep firearm cases from moving automatically (Nov. 2025).
+- id: lisa_kaul
+  name: Lisa Kaul
+  role: Dutchess County legislator; 2026 Democratic nominee for State Senate SD-39
+  party: Democratic (also Working Families line)
+  place: County District 6 (Town of Poughkeepsie); SD-39
+  group: state
+  career:
+  - '2008: became a U.S. citizen; later educator and Vassar College administrator'
+  - '2023: elected to Dutchess County Legislature with 58%'
+  - '2026 (June): won three-way Democratic primary for SD-39 with 62%'
+  why_watch: Challenger in one of the state's closest Senate seats; runs on public power, single-payer and climate.
+  links:
+  - https://www.ballotready.org/people/lisa-kaul
+  - https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+  codes:
+    q01:
+      v: 2
+      source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+    q08:
+      v: 2
+      source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+    q09:
+      v: -1
+      source: https://voterguide.abundanceny.org/questionnaires/lisa-kaul
+      note: Keep existing nuclear plants running, but opposes taxpayer or ratepayer money for new nuclear.
+    q10:
+      v: 1
+      source: https://www.yahoo.com/news/politics/articles/ny-state-senate-candidates-data-090557752.html
+      note: Says communities should decide and that the region lacks grid capacity and water for hyperscale data centers; did not address...
+    q18:
+      v: 2
+      source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+      note: supports the Social Housing Development Act
+    q20:
+      v: -1
+      source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+      note: '''I entered electoral politics because I really wanted to do something about climate change''; wants to cut fossil-fuel dependence. Nothing...'
+      proxy: true
+    q40:
+      v: -1
+      source: https://www.ballotready.org/people/lisa-kaul
+      note: Top priority is speeding renewables, transmission and batteries; frames climate action as a cost-lowering measure. Did not address the gas...
+    q41:
+      v: 1
+      source: https://www.ballotready.org/people/lisa-kaul
+      note: She will 'defend New Yorkers' reproductive freedom and bodily autonomy,' lists it as a priority, and sits on the Planned...
+    q42:
+      v: 2
+      source: https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/
+      note: Supports the REST Act; 'municipalities should have the ability to decide when they're in a housing emergency.'
+- id: jonathan_jacobson
+  name: Jonathan Jacobson
+  role: State Assemblymember, 104th District; chair of the Assembly majority conference
+  party: Democratic (also Working Families line)
+  place: AD-104 (Beacon, Newburgh, Poughkeepsie area)
+  group: state
+  career:
+  - 'Earlier: assistant attorney general, workers'' compensation law judge, Newburgh City Council member'
+  - '2018 (Nov): elected to the Assembly; took office 2019'
+  - '2025 (Dec): co-sponsored utility rate-transparency law'
+  - '2026 (May): co-sponsored law ending automatic utility rate increases; unopposed in Nov. 2026'
+  why_watch: Beacon's Assemblymember; leads Central Hudson and utility-rate fights in the Assembly majority.
+  links:
+  - https://assembly.ny.gov/mem/Jonathan-G-Jacobson/bio
+  - https://assembly.ny.gov/mem/Jonathan-G-Jacobson/press
+- id: anil_beephan
+  name: Anil Beephan Jr.
+  role: State Assemblymember, 105th District
+  party: Republican (also Conservative line)
+  place: AD-105 (eastern and southern Dutchess)
+  group: state
+  career:
+  - 'Earlier: legislative staff for State Sen. Sue Serino; East Fishkill town councilman'
+  - '2022 (Nov): elected to the Assembly, AD-105; re-elected 2024'
+  - '2026 (Apr): urged a moratorium on large data-center approvals'
+  why_watch: Young Dutchess Republican with ties to Serino; energy affordability and data centers are his recent focus.
+  links:
+  - https://assembly.ny.gov/mem/Anil-Beephan-Jr/bio/
+  - https://assembly.ny.gov/mem/Anil-Beephan-Jr/story/118084
+  codes:
+    q10:
+      v: 1
+      source: https://assembly.ny.gov/mem/Anil-Beephan-Jr/story/118084
+      note: 'Apr. 2026: urged a moratorium ''until the governor addresses in-state energy production capacity''; conditional, so +1.'
+- id: matt_slater
+  name: Matt Slater
+  role: State Assemblymember, 94th District; 2026 nominee for re-election
+  party: Republican
+  place: AD-94 (Putnam, northern Westchester)
+  group: state
+  career:
+  - '2015-2018: chief of staff to State Sen. Terrence Murphy'
+  - '2020-2022: Yorktown town supervisor'
+  - '2022 (Nov): elected to the Assembly, succeeding Kevin Byrne; re-elected 2024'
+  - '2026: on the Nov. 3 ballot for re-election'
+  why_watch: Putnam-Westchester Republican pushing for regional hearings before utility rate increases; on the ballot Nov. 3.
+  links:
+  - https://assembly.ny.gov/mem/Matt-Slater/bio/
+  - https://en.wikipedia.org/wiki/Matt_Slater_(politician)
+  - https://www.ballotready.org/people/matthew-j-slater
+- id: sarahana_shrestha
+  name: Sarahana Shrestha
+  role: State Assemblymember, 103rd District
+  party: Democratic (DSA member)
+  place: AD-103 (Ulster County)
+  group: state
+  career:
+  - '2022 (June): unseated incumbent Kevin Cahill in the Democratic primary; took office Jan. 2023'
+  - '2024: won primary over Gabi Madden and general election, 64% to 36%'
+  - '2025: sponsor of A2127A, the Hudson Valley Power Authority Act'
+  why_watch: Leading voice for public power in the Hudson Valley; her Central Hudson replacement bill is a regional flashpoint.
+  links:
+  - https://en.wikipedia.org/wiki/Sarahana_Shrestha
+  - https://nyassembly.gov/leg/?bn=A02127
+  - https://assembly.ny.gov/mem/Sarahana-Shrestha/story/117729
+  codes:
+    q01:
+      v: 2
+      source: https://assembly.ny.gov/mem/Sarahana-Shrestha/story/117729
+      note: Sponsor of A2127A; 'we must pass our bill to replace Central Hudson with a publicly-owned utility.'
+- id: zohran_mamdani
+  name: Zohran Mamdani
+  role: Mayor of New York City
+  party: Democratic (DSA member; also Working Families line)
+  place: New York City
+  group: state
+  career:
+  - '2021: took office as Assemblymember, AD-36 (Queens)'
+  - '2025 (June): won Democratic mayoral primary'
+  - '2025 (Nov): elected Mayor'
+  - '2026 (Jan 1): took office'
+  why_watch: Mayor of the largest city; his push for higher taxes on top earners is a recurring issue in Albany budget talks.
+  links:
+  - https://www.nyc.gov/mayors-office
+  - https://www.cpapracticeadvisor.com/2026/01/21/mamdani-signals-hes-ready-to-push-gov-hochul-on-tax-hikes-as-nyc-budget-shortfall-looms/176684/
+  codes:
+    q38:
+      v: 2
+      source: https://www.cpapracticeadvisor.com/2026/01/21/mamdani-signals-hes-ready-to-push-gov-hochul-on-tax-hikes-as-nyc-budget-shortfall-looms/176684/
+      note: 'Jan. 2026: wealthiest residents should ''pay their fair share''; pledged a 2% tax on top city earners.'
+    q19:
+      v: -2
+      source: https://www.yahoo.com/news/articles/mamdani-hochul-celebrate-congestion-pricing-033900525.html
+      note: 'Jan. 2026: marked the toll''s first anniversary with Hochul; said its revenue ''could grow even further.'''
+- id: yvonne_flowers
+  name: Yvonne Flowers
+  role: Mayor of Poughkeepsie
+  party: Democratic
+  place: City of Poughkeepsie
+  group: state
+  career:
+  - 'About 2015-2023: City of Poughkeepsie Common Council member (Fifth Ward)'
+  - '2023 (Nov): elected mayor as a Democrat'
+  - '2024 (Jan): took office, succeeding Marc Nelson'
+  why_watch: Poughkeepsie's first Black mayor; city housing and development decisions shape the Dutchess county seat.
+  links:
+  - https://en.wikipedia.org/wiki/List_of_mayors_of_Poughkeepsie,_New_York
+  - https://spectrumlocalnews.com/nys/hudson-valley/politics/2023/06/20/meet-the-democratic-candidates-running-for-mayor-in-poughkeepsie
+  - https://spectrumlocalnews.com/nys/central-ny/in-focus/2026/08/13/mayor-yvonne-flowers-discusses-revitalizing-city-of-poughkeepsie
+- id: torrance_harvey
+  name: Torrance Harvey
+  role: Mayor of Newburgh
+  party: Democratic
+  place: City of Newburgh (across the river from Beacon)
+  group: state
+  career:
+  - 'Earlier: Newburgh City Council member at-large; longtime Newburgh school district teacher'
+  - '2018 (May): named mayor after Judy Kennedy''s death'
+  - '2019: elected mayor; 2023: re-elected'
+  - '2024 (Jan): sworn in for another term'
+  why_watch: Leads Beacon's cross-river neighbor; ferry service and waterfront redevelopment link the two cities.
+  links:
+  - https://hudsonvalleypress.com/?p=35812
+  - https://hudsonvalleypress.com/?p=60838
+  - https://spectrumlocalnews.com/nys/hudson-valley/news/2023/10/21/3-way-race-for-mayor-in-newburgh
+- id: steve_noble
+  name: Steve Noble
+  role: Mayor of Kingston
+  party: Democratic
+  place: City of Kingston (Ulster County)
+  group: state
+  career:
+  - 'Earlier: City of Kingston parks department environmental educator'
+  - '2016 (Jan 1): took office as mayor'
+  - '2023 (Nov): won a third four-year term over Scott Denny (Republican-endorsed)'
+  - '2024 (Jan 1): third term began'
+  why_watch: Three-term mayor of Ulster's county seat; cites the city's new zoning and a $22 million federal waterfront grant as priorities.
+  links:
+  - https://kingston-ny.gov/content/8399/10762/10764/default.aspx
+  - https://wamc.org/news/2023-11-07/another-four-years-for-kingston-mayor-steve-noble
+- id: steve_neuhaus
+  name: Steve Neuhaus
+  role: Orange County Executive
+  party: Republican (also Conservative line)
+  place: Orange County
+  group: state
+  career:
+  - 'Earlier: six years as Chester town supervisor; Navy Reserve officer'
+  - '2014 (Jan): took office as Orange County Executive'
+  - '2025 (Nov): re-elected with 60% over Michael Sussman (D, WFP)'
+  why_watch: Long-serving Republican executive across the river; re-elected to a fourth term in 2025 with 60% of the vote.
+  links:
+  - https://www.orangecountyny.gov/254/County-Executive
+  - https://en.wikipedia.org/wiki/2025_Orange_County,_New_York_Executive_election
+- id: kevin_byrne
+  name: Kevin Byrne
+  role: Putnam County Executive
+  party: Republican
+  place: Putnam County
+  group: state
+  career:
+  - '2017-2022: State Assemblymember, AD-94'
+  - '2023 (Jan): took office as Putnam County Executive'
+  - '2025 (Oct): proposed a 2026 budget cutting the property tax levy by $1 million, which the county called its largest cut'
+  - Running for re-election as County Executive
+  why_watch: Former Assemblymember now running Putnam; tax-levy cuts and county services are his recurring themes.
+  links:
+  - https://en.wikipedia.org/wiki/Kevin_Byrne_(New_York_politician)
+  - https://putnamcountyny.gov/county-executive-articles/item/byrnes-2026-executive-budget-includes-historic-tax-cut
+  - https://bullmooseproject.org/press/endorsement-of-kevin-byrne
+- id: gerard_kassar
+  name: Gerard Kassar
+  role: Chairman, New York State Conservative Party
+  party: Conservative
+  place: New York State (Brooklyn)
+  group: state
+  career:
+  - '1989: became Brooklyn Conservative Party chairman'
+  - '2019 (Feb): elected state Conservative Party chairman, succeeding Michael Long'
+  - '2026 (Feb): party nominated Bruce Blakeman for governor'
+  why_watch: His party's 2026 governor's-race total decides whether it keeps an automatic ballot line; Conservative endorsements shape Republican nominations.
+  links:
+  - https://en.wikipedia.org/wiki/Gerard_Kassar
+  - https://www.cityandstateny.com/politics/2026/02/blakeman-courts-right-wing-voters-state-conservative-party-convention/411132/
+- id: pat_ryan
+  name: Pat Ryan
+  role: U.S. Representative, NY-18; 2026 nominee for re-election
+  party: Democratic (also Working Families line)
+  place: NY-18 (includes Beacon)
+  group: national
+  career:
+  - '2019: elected Ulster County Executive'
+  - '2022 (Aug): won special election for NY-19'
+  - '2022 (Nov): elected in NY-18; re-elected 2024'
+  - '2026: faces Jackie Auringer'
+  why_watch: Beacon's congressman; Army veteran in a competitive Hudson Valley seat, often mentioned for future statewide races.
+  links:
+  - https://patryan.house.gov
+  - https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+  codes:
+    q03:
+      v: 2
+      source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+    q07:
+      v: 1
+      source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-votes-against-bill-funding-ices-unconstitutional
+      note: 'Federal stance: demands judicial warrants before ICE arrests; has not spoken to the state law itself.'
+    q10:
+      v: 1
+      source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+      note: Opposes data centers in the region; did not address a statewide pause.
+    q12:
+      v: -2
+      source: https://www.jta.org/2026/07/15/politics/more-than-100-house-democrats-support-failed-massie-bid-to-cut-military-aid-to-israel
+    q14:
+      v: 2
+      source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+      note: At the Oct. 23 forum he called for repealing the tariffs and called them taxes that raise costs. This fits...
+    q35:
+      v: -1
+      source: https://clerk.house.gov/evs/2026/roll280
+      note: voted no on H.R. 7008, which paired a photo-ID requirement with a stock-trading ban he otherwise supports
+    q36:
+      v: 2
+      source: https://patryan.house.gov/media/press-releases/congressman-pat-ryan-votes-against-bill-funding-ices-unconstitutional-0
+      note: Voted against ICE funding twice (Jan. 22 and Feb. 3, 2026), citing the lack of judicial warrants, body cameras, a...
+    q37:
+      v: -2
+      source: https://patryan.house.gov/media/press-releases/51st-anniversary-roe-v-wade-congressman-pat-ryan-condemns-far-rights
+      note: Cosponsor of the Women's Health Protection Act; called on Congress to pass a law guaranteeing abortion rights nationally (Jan. 2024).
+    q38:
+      v: 2
+      source: https://midhudsonnews.com/2026/10/23/ryan-and-auringer-face-off-at-public-forum/
+      note: Wants to roll back the federal tax cut for the top 1% and give middle-class relief; says everyone should pay...
+- id: alexandria_ocasio_cortez
+  name: Alexandria Ocasio-Cortez
+  role: U.S. Representative, NY-14
+  party: Democratic
+  place: NY-14 (Bronx, Queens)
+  group: national
+  career:
+  - '2018: unseated Rep. Joe Crowley in the primary; elected to Congress'
+  - '2024: re-elected'
+  - '2026 (July): voted for the Massie amendment to cut $3.3B in Israel military aid'
+  why_watch: National progressive leader; widely discussed as a future Senate or national candidate from New York.
+  links:
+  - https://ocasio-cortez.house.gov
+  - https://jewishinsider.com/2026/07/nearly-half-of-house-democrats-vote-to-cut-off-aid-to-israel/
+  - https://clerk.house.gov/evs/2026/roll243.xml
+  codes:
+    q12:
+      v: -2
+      source: https://clerk.house.gov/evs/2026/roll243.xml
+      note: 'July 15, 2026: voted aye on the Massie amendment cutting $3.3B; called opponents ''stuck in the past.'''
+- id: mike_lawler
+  name: Mike Lawler
+  role: U.S. Representative, NY-17
+  party: Republican (also Conservative line)
+  place: NY-17 (Rockland, Putnam, northern Westchester)
+  group: national
+  career:
+  - '2021: took office as Assemblymember, AD-97'
+  - '2022: elected to Congress, NY-17'
+  - '2024: re-elected'
+  - '2025: chose a House re-election run over a governor''s race'
+  why_watch: Leading Hudson Valley Republican in a competitive seat; pushes reopening Indian Point; possible future statewide candidate.
+  links:
+  - https://lawler.house.gov
+  - https://www.cityandstateny.com/policy/2026/03/mike-lawler-and-trump-admin-wants-reopen-indian-point/411964
+  - https://www.ans.org/news/2026-03-10/article-7832/doe-secretary-and-new-york-congressman-call-for-reopening-of-indian-point/
+  codes:
+    q39:
+      v: 2
+      source: https://www.ans.org/news/2026-03-10/article-7832/doe-secretary-and-new-york-congressman-call-for-reopening-of-indian-point/
+      note: 'Mar. 6, 2026: ''I''m calling for the rebuilding and reopening of Indian Point Energy Center.'''
+- id: nicole_malliotakis
+  name: Nicole Malliotakis
+  role: U.S. Representative, NY-11
+  party: Republican (also Conservative line)
+  place: NY-11 (Staten Island, southern Brooklyn)
+  group: national
+  career:
+  - '2010: elected to the State Assembly'
+  - '2017: Republican nominee for New York City mayor; lost to Bill de Blasio'
+  - '2020: elected to Congress, NY-11; re-elected 2022 and 2024'
+  - '2023 (Jan): joined the Ways and Means Committee'
+  why_watch: New York City's only Republican member of Congress; her district survived a 2026 court-ordered redraw after the Supreme Court intervened.
+  links:
+  - https://malliotakis.house.gov
+  - https://en.wikipedia.org/wiki/Nicole_Malliotakis
+  - https://en.wikipedia.org/wiki/New_York%27s_11th_congressional_district
+  codes:
+    q19:
+      v: 2
+      source: https://malliotakis.house.gov/media/press-releases/malliotakis-congestion-pricing-we-will-continue-relentlessly-fight-unfair-tax
+      note: 'Jan. 2025: ''the best solution is for the state legislature to undo the mess they created.'''
+- id: nick_langworthy
+  name: Nick Langworthy
+  role: U.S. Representative, NY-23
+  party: Republican
+  place: NY-23 (Southern Tier, Western NY)
+  group: national
+  career:
+  - '2010: became Erie County Republican chairman'
+  - '2019: elected New York Republican Party chairman'
+  - '2022: elected to Congress, NY-23; re-elected 2024'
+  - '2026 (Feb): pushed Senate passage of the SAVE America voter-ID bill'
+  why_watch: Former state party chair with strong influence over New York Republican nominations and statewide strategy.
+  links:
+  - https://langworthy.house.gov
+  - https://nystateofpolitics.com/state-of-politics/new-york/politics/2026/02/18/reps--langworthy--kennedy-offer-different-viewpoints-on-voter-id-bill
+  codes:
+    q35:
+      v: 2
+      source: https://nystateofpolitics.com/state-of-politics/new-york/politics/2026/02/18/reps--langworthy--kennedy-offer-different-viewpoints-on-voter-id-bill
+      note: 'Feb. 2026: backs the SAVE America Act; called voting without ID ''ludicrous'': ''Let''s make it law.'''
+- id: naftali_bennett
+  name: Naftali Bennett
+  role: Head of the Together list (Bennett 2026 with Yair Lapid's Yesh Atid)
+  party: Bennett 2026 / Together
+  place: Israel
+  group: israel
+  career:
+  - '2013: Economy Minister'
+  - '2021-2022: Prime Minister'
+  - '2025 (Apr): founded Bennett 2026'
+  - '2026 (Apr): joint list with Lapid''s Yesh Atid'
+  why_watch: Leads the largest opposition list into the Oct. 27, 2026 Knesset election; a right-wing alternative to Netanyahu.
+  links:
+  - https://en.wikipedia.org/wiki/Naftali_Bennett
+  - https://en.wikipedia.org/wiki/2026_Israeli_legislative_election
+- id: gadi_eisenkot
+  name: Gadi Eisenkot
+  role: Leader of Yashar
+  party: Yashar (opposition, centrist)
+  place: Israel
+  group: israel
+  career:
+  - '2015-2019: IDF Chief of Staff'
+  - '2022: elected to Knesset (National Unity); 2023-2024: minister and war-cabinet observer'
+  - '2025 (July): left National Unity and resigned from the Knesset'
+  - '2025 (Sept): founded Yashar'
+  why_watch: Former army chief heading a new centrist party; signed the Sept. 2026 opposition non-aggression pledge.
+  links:
+  - https://en.wikipedia.org/wiki/Gadi_Eisenkot
+  - https://en.wikipedia.org/wiki/2026_Israeli_legislative_election
+- id: eli_cohen
+  name: Eli Cohen
+  role: Energy and Infrastructure Minister; first among elected slots in the 2026 Likud primary
+  party: Likud (coalition)
+  place: Israel
+  group: israel
+  career:
+  - '2015: elected to Knesset (Kulanu)'
+  - '2023: Foreign Minister'
+  - 'By 2026: Energy and Infrastructure Minister'
+  - '2026 (Aug 17): placed first in the Likud primary vote, behind Netanyahu''s reserved top spot'
+  why_watch: Topped Likud's rank-and-file vote; his showing marks him as a contender in any post-Netanyahu Likud.
+  links:
+  - https://jpost.com/israel-election-2026/article-905846
+  - https://en.wikipedia.org/wiki/2026_Israeli_legislative_election
+- id: yair_golan
+  name: Yair Golan
+  role: Leader of The Democrats
+  party: The Democrats (Labor-Meretz merger; opposition, left)
+  place: Israel
+  group: israel
+  career:
+  - '2014 (Dec): IDF Deputy Chief of Staff'
+  - '2019: entered Knesset (Democratic Union); 2021-2022: Deputy Economy Minister (Meretz)'
+  - '2024 (May): won Labor leadership with about 95%'
+  - '2024 (July): led Labor and Meretz into a merged party, The Democrats'
+  why_watch: Leads the main left-wing list, polling 9-11 seats; the only opposition party openly backing Arab parties in a coalition.
+  links:
+  - https://en.wikipedia.org/wiki/Yair_Golan
+  - https://www.jpost.com/israel-election-2026/article-910100
+  - https://en.wikipedia.org/wiki/2026_Israeli_legislative_election
+- id: simcha_rothman
+  name: Simcha Rothman
+  role: Knesset member; chair, Constitution, Law and Justice Committee
+  party: Religious Zionist Party (coalition)
+  place: Israel
+  group: israel
+  career:
+  - '2013: founded the Movement for Governability and Democracy'
+  - '2021: elected to Knesset (Religious Zionist Party)'
+  - '2023: became chair of the Constitution, Law and Justice Committee'
+  - '2026: third on the Religious Zionist Party list'
+  why_watch: Lead legislator of the judicial overhaul; a central figure for the religious right after the election.
+  links:
+  - https://en.wikipedia.org/wiki/Simcha_Rothman
+  - https://en.wikipedia.org/wiki/2026_Israeli_legislative_election
+- id: mansour_abbas
+  name: Mansour Abbas
+  role: Leader of the United Arab List (Ra'am)
+  party: Ra'am (Arab party)
+  place: Israel
+  group: israel
+  career:
+  - '2019: entered Knesset as Ra''am leader'
+  - '2021: Ra''am joined the Bennett-Lapid coalition, the first independent Arab party to join a governing coalition'
+  - '2026: runs Ra''am separately, with a surplus-vote agreement with the Joint List'
+  why_watch: Pragmatic Arab party leader whose seats could again decide whether an opposition coalition forms.
+  links:
+  - https://en.wikipedia.org/wiki/Mansour_Abbas
+  - https://en.wikipedia.org/wiki/2026_Israeli_legislative_election
+- id: yousef_jabareen
+  name: Yousef Jabareen
+  role: Head of the Joint List (Hadash, Ta'al, Balad); Hadash leader
+  party: Hadash / Joint List (Arab-Jewish left and Arab parties)
+  place: Israel
+  group: israel
+  career:
+  - '2004-2015: law faculty, University of Haifa, Tel Aviv University and Tel-Hai College'
+  - '2015-2021: Knesset member (Joint List)'
+  - '2026 (May): chosen to lead Hadash, succeeding Ayman Odeh'
+  - '2026: heads the Joint List of Hadash, Ta''al and Balad'
+  why_watch: Constitutional-law scholar heading the reunited Joint List; tests whether the Arab and Arab-Jewish lists hold their seats.
+  links:
+  - https://en.wikipedia.org/wiki/Yousef_Jabareen
+  - https://en.wikipedia.org/wiki/2026_Israeli_legislative_election
