@@ -24,7 +24,7 @@ MODEL = "@cf/myshell-ai/melotts"
 NEURONS_PER_MIN = 18.63              # Workers AI pricing, MeloTTS
 LISTEN_DAILY_NEURONS = 900           # its own share; the build's other AI stays under 6,000 + reading
 LISTEN_EVERY_MIN = 120
-MAX_CHAPTERS = 8
+MAX_CHAPTERS = 12
 MAX_WORDS = 1150                     # about 7 to 8 minutes
 CHUNK_CHARS = 380                    # per TTS call, split at sentence ends
 QUIET_HOURS = range(1, 5)            # no new editions 1–5 AM Eastern
@@ -201,7 +201,6 @@ def run(state: dict, data: dict, session, dist: Path, log) -> dict:
                        "v": digest[:10], "error": None, "format": FORMAT})
             log(f"[listen] new edition: {len(out)} chapters, {words} words, {t / 60:.1f} min, {len(audio) // 1024} KB")
             st["neurons"] += t / 60 * NEURONS_PER_MIN
-            log(f"[listen] new edition: {len(out)} chapters, {t / 60:.1f} min, {len(audio) // 1024} KB")
         except Exception as exc:
             st["error"] = f"{type(exc).__name__}: {exc}"[:240]
             log(f"[listen] {type(exc).__name__}")
