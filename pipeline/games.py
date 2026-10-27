@@ -1285,9 +1285,78 @@ BODIES = {"council": "City Council", "planning": "Planning Board", "zoning": "Zo
           "historic": "Historic District & Landmark Commission", "conservation": "Conservation Advisory Committee"}
 
 
-def beacon_agenda(data, seed, drops) -> list[dict]:
+COMPANY = re.compile(r"\b(LLC|L\.L\.C\.|Inc|Corp|Corporation|Company|Co\.|L\.?P\.?|Partners|Associates|City of Beacon|Holdings|Realty|Development|Developments|Properties|Studios|Center|Trust|Church|District|Authority)\b", re.I)
+# Words that give the board away; the question keeps the substance and drops the procedure.
+AGENDA_CUES = [
+    (r"\*{2,}[^*]+\*{2,}\s*", ""),                                         # ***ADJOURNED …*** (kept as status)
+    (r"^Resolution No\.?\s*\d+\s*[-–—:]?\s*", ""),
+    (r"\bResolution No\.?\s*\d+\b", "a resolution"),
+    (r"\bLocal Law No\.?\s*\d+ of \d{4}\b", "a local law"),
+    (r"\b(Amended )?Site Plan( and Subdivision)? Approval\b", lambda m: ("amended " if m.group(1) else "") + "approval"),
+    (r"\bSite Plan\b", "plan"),
+    (r"\bSubdivision( and Site Plan)? Approval\b", "approval"),
+    (r"\b(area |use )?variances?( approval| relief)?\b", "relief"),
+    (r"\bSpecial Use Permit\b", "permit"),
+    (r"\bCertificate of Appropriateness\b", "Approval"),
+    (r"\bArchitectural Review\b", "review"),
+    (r"\bTax Certiorari\b", "tax assessment case"),
+    (r",?\s*\(?Tax Grid (No|Nos|#)\.?\s*[\d\- ,and]+\)?", ""),
+    (r",?\s*in the [A-Z0-9][A-Z0-9.\-]*( district)?(?=,)", ""),             # zoning district codes
+]
+AGENDA_BOILERPLATE = re.compile(r"\s*(agenda items and/or topics of interest\b|A work session will take place\b|The regular meeting will begin\b).*$", re.I)
+AGENDA_VERBS = set("""continue continued public hearing review consider request application submitted resolution authorizing adopting approving
+setting proposed concerning regarding amended approval plan site subdivision for the and of a an to on at by with discussion
+presentation workshop city beacon local law""".split())
+
+
+def agenda_status(a: dict, raw: str) -> str:
+    """What the posted agenda says about the item, for the reveal (the agenda is the only record we
+    read, so this is the stage it was at, not the vote)."""
+    flags, t = set(a.get("flags") or []), raw.lower()
+    num = re.search(r"Resolution No\.?\s*(\d+)", raw)
+    if "ADJOURNED" in flags or "adjourned" in t:
+        return "Adjourned at the applicant's request"
+    if num:
+        return f"Up for a vote as Resolution No. {num.group(1)}"
+    if re.search(r"extension", t):
+        return "Extension request"
+    if "HEARING" in flags or "public hearing" in t:
+        return "Public hearing (continued)" if re.match(r"continue", t) else "Public hearing"
+    if re.match(r"continue", t):
+        return "Continued review"
+    if re.match(r"(review|consider)", t):
+        return "First review" if t.startswith("review") else "Under consideration"
+    if "workshop" in (a.get("section") or "").lower():
+        return "Workshop discussion"
+    return "On the agenda"
+
+
+def meeting_date(it: dict) -> date | None:
+    m = re.search(r"-\s*([A-Z][a-z]{2}) (\d{1,2}), (\d{4})", it.get("title") or "")
+    if m:
+        try:
+            return datetime.strptime(" ".join(m.groups()), "%b %d %Y").date()
+        except ValueError:
+            pass
+    t = parse_t(it.get("event_at") or it.get("t"))
+    return t.astimezone(NY).date() if t else None
+
+
+def agenda_key(text: str, addr: str | None) -> frozenset:
+    if addr:
+        return frozenset({"addr:" + fold(re.sub(r"^\d+-", "", addr))})
+    return frozenset(w for w in fold(re.sub(r"\d+", " ", text)).split() if len(w) > 3 and w not in AGENDA_VERBS)
+
+
+def beacon_agenda(data, seed, drops, now: datetime | None = None, max_age_days: int = 21) -> list[dict]:
+    """Which board hears this item? From Beacon's posted agendas (Granicus). Never a private person:
+    items brought by a person, naming a person (appointments), or about a private home are dropped,
+    and "Person (Company LLC)" keeps only the company. The same application on several agendas
+    appears once (its newest), meetings over three weeks old are skipped, scraped boilerplate is cut,
+    and procedure words that give the board away are taken out of the question."""
     rng = random.Random(seed + "agenda")
-    out = []
+    today = (now or datetime.now(timezone.utc)).astimezone(NY).date()
+    cands = []
     for it in data.get("items", []):
         if not it.get("agenda"):
             continue
@@ -1295,24 +1364,67 @@ def beacon_agenda(data, seed, drops) -> list[dict]:
                                       ("conservation", r"conservation"), ("council", r"council")) if re.search(rx, it.get("title", ""), re.I)), None)
         if not body:
             continue
+        md = meeting_date(it)
+        if md and (today - md).days > max_age_days:
+            drops.append(("beacon_agenda", "meeting more than three weeks old"))
+            continue
         for a in it["agenda"]:
-            text = a.get("text") or ""
-            m = re.search(r"submitted by ([^,]+(?:,\s*(?:LLC|Inc\.?|L\.P\.|Corp\.?))?)", text)
-            applicant = m.group(1) if m else ""
-            if m and not re.search(r"\b(LLC|Inc|Corp|Company|L\.?P\.?|Partners|Associates|City of Beacon|Holdings|Realty|Development|Properties)\b", applicant, re.I):
-                drops.append(("beacon_agenda", "item brought by a private person"))
+            raw = AGENDA_BOILERPLATE.sub("", re.sub(r"\s+", " ", a.get("text") or "")).strip()
+            raw = raw.replace("Â§", "§").replace("â€™", "’")
+            if re.search(r"\b(single-family|single family|residence of|home of)\b", raw, re.I):
+                drops.append(("beacon_agenda", "a private home"))
                 continue
-            if blocked(text) or len(text) < 40 or not re.match(r"(Public hearing|Continue|Consider|Discussion|Resolution|Approval|Review|Workshop|Presentation|Request|Application)", text, re.I):
+            if re.search(r"\bAppoint\w*\s+(of\s+)?[A-Z][a-z]+\s+[A-Z]", raw):
+                drops.append(("beacon_agenda", "names a private person (appointment)"))
                 continue
-            others = [v for k, v in BODIES.items() if k != body]
-            opts = rng.sample(others, 3) + [BODIES[body]]
-            rng.shuffle(opts)
-            out.append({"id": "b" + pid(it["id"], a.get("n"), text[:60]), "text": text[:400], "answer": BODIES[body], "options": opts,
-                        "meeting": it.get("title"), "date": (it.get("t") or "")[:10], "link": it.get("link")})
+            text = raw
+            m = re.search(r"submitted by (.+?)(?:,\s*\d|\s*$)", raw)
+            if m:
+                applicant = m.group(1).strip().rstrip(".")
+                paren = re.match(r"^(?P<person>[^()]+?)\s*\((?P<co>[^()]+)\)$", applicant)
+                if paren and COMPANY.search(paren.group("co")) and not COMPANY.search(paren.group("person")):
+                    text = raw.replace(applicant, paren.group("co"))           # strip the person, keep the company
+                    applicant = paren.group("co")
+                parts = re.split(r"\s+and\s+|,\s*", applicant)
+                if not all(COMPANY.search(x) for x in parts if x.strip()):
+                    drops.append(("beacon_agenda", "item brought by a private person"))
+                    continue
+            if blocked(text) or len(text) < 30:
+                continue
+            core = re.sub(r"^Resolution No\.?\s*\d+\s*[-–—:]?\s*", "", re.sub(r"^\*{2,}[^*]+\*{2,}\s*", "", text))
+            if not re.match(r"(Public hearing|Continue|Consider|Discussion|Approval|Review|Workshop|Presentation|Request|Application|Authoriz|Adopt|Setting|Settlement|Proposed|Certificate|City Council request)", core, re.I):
+                continue
+            q = text
+            for rx, rep in AGENDA_CUES:
+                q = re.sub(rx, rep, q, flags=re.I)
+            q = re.sub(r"\s{2,}", " ", re.sub(r"\s+,", ",", q)).strip(" ,-")
+            q = q[0].upper() + q[1:]
+            if re.search(r"\b(variance|site plan|resolution no|special use permit)\b", q, re.I):
+                continue                                                         # a cue survived: don't ask
+            cands.append({"key": agenda_key(core, a.get("addr")), "md": md or today, "res": "Resolution No" in text,
+                          "item": {"text": q[:400], "answer": BODIES[body], "status": agenda_status(a, raw), "meeting": it.get("title"),
+                                   "date": (md.isoformat() if md else (it.get("t") or "")[:10]), "link": it.get("link"), "body": body}})
+    # The same application across meetings (or a workshop item and its resolution): keep the newest,
+    # the resolution when there's one (it carries the number for the reveal).
+    cands.sort(key=lambda c: (c["md"], c["res"]), reverse=True)
+    out, keys = [], []
+    for c in cands:
+        k = c["key"]
+        dup = any(k == o or (len(k) >= 2 and len(o) >= 2 and len(k & o) / len(k | o) >= 0.6) for o in keys)
+        if dup:
+            drops.append(("beacon_agenda", "same application on another agenda"))
+            continue
+        keys.append(k)
+        x = c["item"]
+        others = [v for kk, v in BODIES.items() if kk != x["body"]]
+        x["options"] = rng.sample(others, 3) + [x["answer"]]
+        rng.shuffle(x["options"])
+        x["id"] = "b" + pid(*sorted(k))
+        out.append(x)
     rng.shuffle(out)
     if not out:
         drops.append(("beacon_agenda", "no eligible agenda items this week"))
-    return out[:12]
+    return out
 
 
 # ------------------------------------------------------------------ Library: Name them all / Match
@@ -1560,7 +1672,7 @@ def main(argv=None) -> int:
         vlist = rollcalls.parse(a.votes, legislator_index(a.rosters)) if a.votes else []
         srows = scotus.rows(a.scotus) if a.scotus else []
         tl = fresh(timeline(vlist, srows, seed, now, drops), "timeline")
-    ba = fresh(beacon_agenda(data, seed, drops), "beacon_agenda")
+    ba = fresh(beacon_agenda(data, seed, drops, now), "beacon_agenda")[:12]
     lib = library(a.rosters, [], data, now)
     left = who_left(lib, a.snapshots, day)
     lg = legal(data, now, drops, a.scotus.parent / "openleg.json" if a.scotus else None)

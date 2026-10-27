@@ -3,6 +3,7 @@ known-bad puzzles. Run: python tests/test_games.py (CI: privacy-check workflow).
 from __future__ import annotations
 
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -241,6 +242,40 @@ def test_quote_budget_two_games():
     cq = games.cryptoquotes(wsi, "s", [], b)
     assert wsi[0]["id"] not in [c["source"] for c in cq] and cq
     assert all(len(u) <= 2 for u in b.uses.values())
+
+
+def test_beacon_agenda_rules():
+    from datetime import datetime, timezone
+    now = datetime(2026, 10, 19, 20, tzinfo=timezone.utc)
+    A = lambda n, text, addr=None, flags=(): {"n": n, "text": text, "addr": addr, "flags": list(flags), "section": ""}
+    data = {"items": [
+        {"id": "pb1", "title": "Planning Board - Oct 09, 2026", "t": "2026-10-09T13:30:00Z", "link": "x", "agenda": [
+            A(1, "Consider request for a one (1) year extension of Site Plan Approval, 300 Main Street, Mixed-Use, submitted by Anthony Hardisty (300 Main St LLC) agenda items and/or topics of interest to the Planning Board. The regular meeting will begin", "300 Main Street"),
+            A(2, "Continue public hearing and continue review of application for Subdivision Approval, 108 Liberty Street, Residential, submitted by Stephen Spaccarelli and Claire Tipley", "108 Liberty Street", ["HEARING"]),
+            A(3, "Public hearing and continue review application for Amended Site Plan Approval, 248 Tioronda Avenue, Residential, submitted by Beacon 248 Holdings, LLC", "248 Tioronda Avenue", ["HEARING"]),
+            A(4, "New Single-Family House: Rombout Avenue (Tax Grid #5954-36-949764) Architectural Review")]},
+        {"id": "pb0", "title": "Planning Board - Oct 01, 2026", "t": "2026-10-01T13:30:00Z", "link": "y", "agenda": [
+            A(6, "Continue public hearing and continue review application for Amended Site Plan Approval, 248 Tioronda Avenue, Residential, submitted by Beacon 248 Holdings, LLC", "248 Tioronda Avenue", ["HEARING"])]},
+        {"id": "pbold", "title": "Planning Board - Sep 10, 2026", "t": "2026-09-10T13:45:00Z", "link": "z", "agenda": [
+            A(1, "Review of application for Amended Site Plan Approval, 172 Main Street, Mixed-Use, submitted by Hudson Todd, LLC", "172 Main Street")]},
+        {"id": "cc", "title": "City Council - Oct 19, 2026", "t": "2026-10-16T09:47:18Z", "link": "w", "agenda": [
+            A(None, "Appointment of David Murphy to the Position of Mechanical Equipment Operator"),
+            A(None, "Settlement of Prospect Realty Syndicate Inc. Tax Certiorari"),
+            A(4, "Resolution No. 85 - Authorizing Settlement of Prospect Realty Syndicate Inc. Tax Certiorari", None, ["RESOLUTION"])]},
+    ]}
+    drops = []
+    out = games.beacon_agenda(data, "s", drops, now)
+    texts = " | ".join(x["text"] for x in out)
+    assert "Hardisty" not in texts and "300 Main St LLC" in texts               # person stripped, company kept
+    assert "agenda items" not in texts                                          # boilerplate cut
+    assert "Spaccarelli" not in texts and "Murphy" not in texts and "Rombout" not in texts
+    assert "172 Main" not in texts                                              # meeting over three weeks old
+    assert texts.count("248 Tioronda") == 1 and texts.count("Prospect Realty") == 1   # deduped across meetings
+    assert not any(re.search(r"site plan|variance|resolution no", x["text"], re.I) for x in out), texts
+    pr = next(x for x in out if "Prospect" in x["text"])
+    assert pr["status"] == "Up for a vote as Resolution No. 85" and pr["answer"] == "City Council"
+    tio = next(x for x in out if "Tioronda" in x["text"])
+    assert tio["date"] == "2026-10-09"                                         # the newest meeting wins
 
 
 def test_legal_yaml_scalars():
