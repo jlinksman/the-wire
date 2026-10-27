@@ -1347,7 +1347,7 @@ def main(argv=None) -> int:
             res = pendmod.fetch_oyez(a.scotus, requests.Session(), "TheWire/1.0 (personal news reader; " + os.environ.get("WIRE_CONTACT", "github") + ")", now)
             if res.get("error"):
                 drops.append(("pending_docket", f"oyez: {res['error']}"))
-        pend = pendmod.pending(a.scotus, scotus.rows(a.scotus), court_ok, now)
+        pend = pendmod.pending(a.scotus, scotus.rows(a.scotus), court_ok, now, _disp(a.dispositions).keys())
         seen_p = a.scotus / "pending_seen.json"
         seen = set(json.loads(seen_p.read_text())) if seen_p.exists() else set()
         seen_p.write_text(json.dumps(sorted(seen | {x["docket"] for x in pend})))

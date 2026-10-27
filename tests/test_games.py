@@ -152,6 +152,25 @@ def test_openleg_holds():
     assert "no longer matches" in openleg.holds([card], p)["x"]
 
 
+def test_pending_term_and_emergency():
+    import json
+    import tempfile
+    from datetime import datetime, timezone
+    import pending
+    d = Path(tempfile.mkdtemp())
+    ts = lambda s: datetime.fromisoformat(s + "T15:00:00+00:00").timestamp()
+    case = lambda dk, day, name="Acme Corp. v. Widget Co.": {"docket_number": dk, "name": name, "question": "Whether the statute applies.", "term": "2025",
+                                                             "timeline": [{"event": "Argued", "dates": [ts(day)]}]}
+    d.joinpath("oyez_2025.json").write_text(json.dumps([case("24-983", "2026-02-23"), case("25A312", "2026-10-08", "Trump v. Cook"),
+                                                        case("25-459", "2026-10-14"), case("24-1", "2026-03-02")]))
+    now = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
+    got = [x["docket"] for x in pending.pending(d, [], lambda r: None, now)]
+    assert got == ["25-459"], got                      # last term's undecided-on-Oyez and the A-docket are out
+    got = [x["docket"] for x in pending.pending(d, [], lambda r: None, now, disposed={"24-1"})]
+    assert got == ["25-459", "24-1"], got
+    assert pending.term_start(datetime(2027, 3, 1, tzinfo=timezone.utc)) == "2026-10-01"
+
+
 def test_legal_yaml_scalars():
     import yaml
     cards = (yaml.safe_load((games.ROOT / "legal.yaml").read_text()) or {}).get("cards", [])

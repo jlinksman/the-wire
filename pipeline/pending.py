@@ -60,20 +60,37 @@ def _text(s: str) -> str:
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
 
 
-def pending(cache: Path, slip_rows: list[dict], court_ok, now: datetime) -> list[dict]:
-    """Argued, not yet in the Court's slip-opinion list. Newest argument first."""
+EMERGENCY = re.compile(r"^\d+A\d+$")
+
+
+def term_start(now: datetime) -> str:
+    """October 1 of the current October Term (ISO date)."""
+    year = now.year if now.month >= 10 else now.year - 1
+    return f"{year}-10-01"
+
+
+def pending(cache: Path, slip_rows: list[dict], court_ok, now: datetime, disposed=()) -> list[dict]:
+    """Argued, not yet in the Court's slip-opinion list. Newest argument first.
+
+    Left out: emergency applications (dockets like 25A312: no argument calendar, no prediction to
+    make), and cases argued before this October Term began that have no disposition on file. Those
+    were decided last term; Oyez's timeline just hasn't caught up."""
     decided = {r["docket"] for r in slip_rows}
+    disposed = set(disposed or ())
+    start = term_start(now)
     out = []
     for f in sorted(cache.glob("oyez_[0-9]*.json")):
         for c in json.loads(f.read_text()):
             dk = (c.get("docket_number") or "").strip()
             argued = [d for ev in (c.get("timeline") or []) if ev.get("event") == "Argued" for d in (ev.get("dates") or [])]
-            if not dk or not argued or dk in decided:
+            if not dk or not argued or dk in decided or EMERGENCY.match(dk):
                 continue
             if any(ev.get("event") == "Decided" for ev in (c.get("timeline") or [])):
                 continue
             when = datetime.fromtimestamp(min(argued), tz=timezone.utc)
             if when > now:
+                continue
+            if when.date().isoformat() < start and dk not in disposed:
                 continue
             name = _text(c.get("name"))
             q = _text(c.get("question"))
