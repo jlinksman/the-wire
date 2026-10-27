@@ -430,6 +430,28 @@ def test_legal_news_matches_statute():
     assert nav["elements"][1]["text"] == "The defendant is a discharger" and "Green" in nav["note"]
 
 
+def test_fresh_burns_only_published_and_served():
+    import json
+    import tempfile
+    data, reg, now = _wsi_data()
+    for it in data["items"]:
+        it["quotes"] = [dict(q, by={"Chris Drago": "Dutchess County Legislator Chris Drago"}.get(q["by"], q["by"])) for q in it["quotes"]]
+    d = Path(tempfile.mkdtemp())
+    (d / "data.json").write_text(json.dumps(dict(data, generated_at="2026-10-19T00:00:00Z")))
+    h = d / "hashes.json"
+    games.main([str(d / "data.json"), str(d / "tue.json"), "--date", "2026-10-20", "--hashes", str(h)])
+    tue = json.loads((d / "tue.json").read_text())
+    used = json.loads(h.read_text())
+    assert tue["who_said_it"] and not any(q["id"] in used for q in tue["who_said_it"])     # Tuesday: no who-said-it served, nothing burned
+    assert tue["casefile"]["id"] not in used                                                 # case file is a Sunday game
+    games.main([str(d / "data.json"), str(d / "mon.json"), "--date", "2026-10-19", "--hashes", str(h)])
+    mon = json.loads((d / "mon.json").read_text())
+    used = json.loads(h.read_text())
+    assert mon["who_said_it"] and all(q["id"] in used for q in mon["who_said_it"])          # Monday: published and served, burned
+    assert {r["game"] for r in mon["health"]} >= {"keyed", "patristocrat", "meta", "defectors", "docket"}
+    assert all(r["why"] for r in mon["health"] if r["game"] in ("defectors", "docket", "keyed", "patristocrat", "meta") and not r["made"])
+
+
 def test_legal_yaml_scalars():
     import yaml
     cards = (yaml.safe_load((games.ROOT / "legal.yaml").read_text()) or {}).get("cards", [])

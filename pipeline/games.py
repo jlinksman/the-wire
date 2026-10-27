@@ -307,7 +307,7 @@ def leaks(title: str, sp: dict) -> bool:
     return bool(role) and len(role) > 6 and role in t
 
 
-def who_said_it(data, reg, now, drops, week_speakers=frozenset()) -> list[dict]:
+def who_said_it(data, reg, now, drops, week_speakers=frozenset(), is_used=lambda _id: False) -> list[dict]:
     """One quote per speaker (and none from a speaker already offered earlier this ISO week),
     local, state and followed speakers ahead of national and world ones, newest first within that.
     Hints go role → where → initials; party is the roster's (members of Congress) or None."""
@@ -358,6 +358,9 @@ def who_said_it(data, reg, now, drops, week_speakers=frozenset()) -> list[dict]:
     cands.sort(key=lambda x: (not x["followed"], LEVEL_RANK.get(x["level"], 2)))   # … followed, then local/state first
     out, speakers = [], set()
     for q in cands:
+        if is_used(q["id"]):
+            drops.append(("who_said_it", "used in the last 90 days"))
+            continue
         if q["speaker_key"] in week_speakers:
             drops.append(("who_said_it", "speaker already quoted this week"))
             continue
@@ -1501,7 +1504,7 @@ def defectors(data, votes, legis, now, drops) -> list[dict]:
         })
     out.sort(key=lambda x: x["date"], reverse=True)
     out.sort(key=lambda x: not x["in_news"])
-    return out[:12]
+    return out                                            # main() keeps the first 12 not used lately
 
 
 # ------------------------------------------------------------------ Legal refreshers
@@ -1954,7 +1957,7 @@ def docket(scotus_rows, data, seed, now, drops) -> list[dict]:
                     "pdf": r["pdf"], "in_news": in_news, "term": r["term"]})
     out.sort(key=lambda x: x["date"], reverse=True)
     out.sort(key=lambda x: (not x["in_news"], x["author_code"] in ("PC", "D")))   # in the news, then signed opinions
-    return out[:10]
+    return out                                            # main() keeps the first 10 not used lately
 
 
 # ------------------------------------------------------------------ Timeline
@@ -1991,7 +1994,7 @@ def timeline(votes, scotus_rows, seed, now, drops) -> list[dict]:
             if len(pick) == 7:
                 break
         if len(pick) >= 5:
-            out.append({"id": "t" + pid(seed, k, *[e["text"] for e in pick]), "cards": pick})
+            out.append({"id": "t" + pid("timeline", *sorted(e["text"] for e in pick)), "cards": pick})
     if not out:
         drops.append(("timeline", "fewer than 5 dated events"))
     return out
@@ -2331,14 +2334,19 @@ def main(argv=None) -> int:
     cutoff = (date.fromisoformat(day) - timedelta(days=90)).isoformat()
     used = {h: d for h, d in used.items() if d >= cutoff}
 
-    def fresh(xs, kind):
+    def is_used(i):
+        return i in used and used[i] != day
+
+    def fresh(xs, kind, limit=None):
+        """Drop what was published in the last 90 days, then keep the first `limit`: candidates past
+        the cut aren't burned, so a thin day carries over."""
         keep = []
         for x in xs:
-            if x["id"] in used and used[x["id"]] != day:
+            if is_used(x["id"]):
                 drops.append((kind, "used in the last 90 days"))
                 continue
             keep.append(x)
-        return keep
+        return keep[:limit] if limit else keep
 
     d0 = date.fromisoformat(day)
     dow = d0.weekday()
@@ -2349,7 +2357,7 @@ def main(argv=None) -> int:
     week_start = (d0 - timedelta(days=dow)).isoformat()
     week_speakers = {k for k, d in used.items() if k.startswith("spk") and week_start <= d < day}
     budget = QuoteBudget()
-    wsi = fresh(who_said_it(data, reg, now, drops, week_speakers), "who_said_it")
+    wsi = who_said_it(data, reg, now, drops, week_speakers, is_used)
     for q in wsi:
         budget.take(q["id"], "who_said_it")
     grid = connections(data, reg, a.rosters, seed, now, drops,
@@ -2363,9 +2371,13 @@ def main(argv=None) -> int:
             res = rollcalls.fetch(a.votes, requests.Session(), "TheWire/1.0 (personal news reader; " + os.environ.get("WIRE_CONTACT", "github") + ")", now)
             vote_errors = res["errors"]
             print(f"[games] roll calls: {res['house']} new House, {res['senate']} new Senate" + (f"; {res['errors']}" if res["errors"] else ""))
-        dv = fresh(defectors(data, rollcalls.parse(a.votes, legislator_index(a.rosters)), legislator_index(a.rosters), now, drops), "defectors")
+        dv = fresh(defectors(data, rollcalls.parse(a.votes, legislator_index(a.rosters)), legislator_index(a.rosters), now, drops), "defectors", 12)
         for ch, err in vote_errors.items():
             drops.append(("defectors", f"{ch} votes unavailable: {err}"))
+        if not dv and not any(g == "defectors" for g, _ in drops):
+            drops.append(("defectors", "no House roll calls in the last 45 days in the cache"))
+    else:
+        drops.append(("defectors", "no roll-call cache this run (--votes)"))
     dk, pend = [], []
     if a.scotus:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -2375,7 +2387,12 @@ def main(argv=None) -> int:
             res = scotus.fetch(a.scotus, requests.Session(), "TheWire/1.0 (personal news reader; " + os.environ.get("WIRE_CONTACT", "github") + ")", now)
             if res.get("error"):
                 drops.append(("docket", f"supremecourt.gov: {res['error']}"))
-        dk = fresh(docket(scotus.rows(a.scotus), data, seed, now, drops), "docket")
+        srows_ = scotus.rows(a.scotus)
+        dk = fresh(docket(srows_, data, seed, now, drops), "docket", 10)
+        if not srows_:
+            drops.append(("docket", "no decided cases in the Court's opinion-list cache yet"))
+        elif not dk and not any(g == "docket" for g, _ in drops):
+            drops.append(("docket", "fewer than four eligible decided cases to choose among"))
         import pending as pendmod
         if a.fetch_oyez:
             import requests
@@ -2386,12 +2403,16 @@ def main(argv=None) -> int:
         seen_p = a.scotus / "pending_seen.json"
         seen = set(json.loads(seen_p.read_text())) if seen_p.exists() else set()
         seen_p.write_text(json.dumps(sorted(seen | {x["docket"] for x in pend})))
+        if not pend:
+            drops.append(("pending_docket", "no argued, undecided cases this term in the Oyez cache"))
+    else:
+        drops.append(("docket", "no Supreme Court cache this run (--scotus)"))
     tl = []
     if a.votes or a.scotus:
         import rollcalls
         vlist = rollcalls.parse(a.votes, legislator_index(a.rosters)) if a.votes else []
         srows = scotus.rows(a.scotus) if a.scotus else []
-        tl = fresh(timeline(vlist, srows, seed, now, drops), "timeline")
+        tl = fresh(timeline(vlist, srows, seed, now, drops), "timeline", 3)
     ba = fresh(beacon_agenda(data, seed, drops, now), "beacon_agenda")[:12]
     lib = library(a.rosters, [], data, now)
     left = who_left(lib, a.snapshots, day)
@@ -2409,18 +2430,31 @@ def main(argv=None) -> int:
     if not WORDS:
         drops.append(("cryptoquote", "word list missing (/usr/share/dict/words): difficulty grading and wordplay are off"))
     cq = fresh(cryptoquotes(wsi, seed, drops, budget), "cryptoquote")
+    if not fri:
+        drops.append(("keyed", "built on Fridays only"))
+    if not sun:
+        drops.append(("patristocrat", "built on Sundays only"))
+    if not sat:
+        drops.append(("meta", "built on Saturdays only"))
+    more = [("keyed", 1 if wk.get("keyed") else 0), ("patristocrat", 1 if wk.get("patristocrat") else 0), ("meta", 1 if mt else 0),
+            ("casefile", 1 if cf else 0), ("tactics", len(tx)), ("pending_docket", len(pend))]
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
         "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left, "weekend": wk, "meta": mt, "casefile": cf, "tactics": tx,
         "pending_docket": pend[:40], "dispositions": _disp(a.dispositions),
-        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba, more=(("casefile", 1 if cf else 0), ("tactics", len(tx)), ("pending_docket", len(pend)))),
+        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba, more=more),
     }
+    if not WORDS:                                  # loud: ciphers grade blind and purple wordplay is off without it
+        pool["health"].insert(0, {"game": "word_list", "made": 0, "dropped": 1,
+                                  "why": [["/usr/share/dict/words missing: cipher grading, pattern giveaways and wordplay are off", 1]]})
     if a.quiz:
         try:
             import requests
             import wirequiz
             label = datetime.fromisoformat(day + "T12:00:00").strftime("%A, %B %-d")
             pool["wirequiz"] = wirequiz.build(pool, requests.Session(), a.quiz, label)
+            pool["health"].append({"game": "wirequiz", "made": 1 if pool["wirequiz"] else 0, "dropped": 0 if pool["wirequiz"] else 1,
+                                   "why": [] if pool["wirequiz"] else [["fewer than two questions today", 1]]})
         except Exception as exc:                     # the quiz is optional; the puzzles still ship
             pool["wirequiz"] = None
             pool["health"].append({"game": "wirequiz", "made": 0, "dropped": 1, "why": [[f"{type(exc).__name__}", 1]]})
@@ -2437,11 +2471,24 @@ def main(argv=None) -> int:
         lp.write_text(json.dumps(log_))
         pool["connections_live"] = sum(log_.values()) >= 10
         pool["connections_record"] = f"{sum(log_.values())} of {len(log_)} days"
-    if a.hashes:                                   # offered today = used; never back within 90 days
-        for x in wsi + cq + dv + ldg + dk + tl + ([grid] if grid else []):
-            used.setdefault(x["id"], day)
-        for q in wsi:                              # one quote per speaker per ISO week
-            used.setdefault(q["speaker_key"], day)
+    if a.hashes:
+        # Burn only what was published in today's pool for a game served today (functions/games.js
+        # picks by weekday; its own served list stops repeats on fallback days). Candidates that
+        # weren't offered, or were offered on a day their game can't be played, carry over.
+        today_games = {g for g, days in SERVE_DAYS.items() if dow in days}
+        published = {"who_said_it": wsi, "cryptoquote": cq, "defectors": dv, "docket": dk, "ledger": ldg, "timeline": tl,
+                     "beacon_agenda": ba, "friday_quiz": [fq] if fq else [], "keyed": [wk["keyed"]] if wk.get("keyed") else [],
+                     "patristocrat": [wk["patristocrat"]] if wk.get("patristocrat") else [], "meta": [mt] if mt else [],
+                     "casefile": [cf] if cf else [], "connections": [grid] if grid else []}
+        for g, xs in published.items():
+            if g in today_games:
+                for x in xs:
+                    used.setdefault(x["id"], day)
+                    if x.get("source"):                # a cipher's quote is spent too
+                        used.setdefault(x["source"], day)
+        if today_games & QUOTE_GAMES:              # one quote per speaker per ISO week
+            for q in wsi:
+                used.setdefault(q["speaker_key"], day)
         for label in (grid or {}).get("board", []):  # no item in more than two grids a week
             for k in grid_item_keys(label):
                 if used.get(k, "") < week_start or used.get(k) == day:
@@ -2451,6 +2498,12 @@ def main(argv=None) -> int:
     print(f"[games] {day}: who said it {len(wsi)}, cryptoquote {len(cq)}, connections {'1 (shadow)' if grid else 'dropped'}; "
           f"{len(drops)} candidates dropped")
     return 0
+
+
+# Weekday each game is served on (Mon=0), as functions/games.js assembles the day.
+SERVE_DAYS = {"who_said_it": {0}, "cryptoquote": {0, 2}, "defectors": {1}, "docket": {2}, "ledger": {3}, "friday_quiz": {4}, "keyed": {4},
+              "timeline": {5}, "meta": {5}, "beacon_agenda": {6}, "patristocrat": {6}, "casefile": {6}, "connections": set(range(7))}
+QUOTE_GAMES = {"who_said_it", "cryptoquote", "friday_quiz", "keyed", "patristocrat", "meta"}
 
 
 def _disp(p: Path | None) -> dict:
@@ -2469,7 +2522,7 @@ def health(wsi, cq, grid, drops, dv=(), lg=None, ldg=None, fq=None, dk=None, tl=
         for g, r in drops:
             if g == game:
                 why[r] = why.get(r, 0) + 1
-        rows.append({"game": game, "made": made, "dropped": sum(why.values()),
+        rows.append({"game": game, "made": made, "dropped": sum(v for k, v in why.items() if not k.startswith("built on")),
                      "why": sorted(([k, v] for k, v in why.items()), key=lambda kv: -kv[1])[:5]})
     return rows
 
