@@ -28,6 +28,7 @@ cards:
     status: verified
     verified: "2026-10-27"
     news: '\b(oil|petroleum|gasoline|fuel|heating oil|diesel) (spill|leak|discharge)|\bspill\b|navigation law'
+    news_ny: true          # a NY statute: only New York stories feature it
     elements:
       - text: "A discharge of petroleum"
         keys: [discharge, petroleum, spill, release]
@@ -271,6 +272,7 @@ cards:
     status: draft          # amended 2026; confirm the chapter's effective date and scope first
     verified: null
     news: '\bcomparative (fault|negligence)\b'
+    news_ny: true
     elements:
       - text: "The claimant's own culpable conduct does not bar recovery (§ 1411(a))"
         keys: [not bar, does not bar, no bar]

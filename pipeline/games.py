@@ -561,7 +561,8 @@ def legal(data, now, drops) -> dict:
         rx = re.compile(c["news"], re.I)
         for it in data.get("items", []):
             t = parse_t(it.get("t"))
-            if t and t >= cut and rx.search(it.get("title") or "") and not blocked(it.get("title")):
+            ny_ok = not c.get("news_ny") or it.get("scope") in ("local", "state") or re.search(r"New York|\bN\.?Y\.?\b|Hudson|Dutchess|Beacon|Albany", f"{it.get('title', '')} {it.get('summary', '')}")
+            if t and t >= cut and ny_ok and rx.search(it.get("title") or "") and not blocked(it.get("title")):
                 featured.append({"card": c["id"], "title": it.get("title"), "link": it.get("link"), "outlet": it.get("source"),
                                  **context_for(it, story_of, threads)})
                 break
