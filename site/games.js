@@ -603,9 +603,14 @@
       }
     };
     window.addEventListener("message", onMsg);
+    // Number puzzles need digits; iPhone shows no keyboard for the canvas, so a pad sends them.
+    const size = parseInt(p.params, 10) || 0;
+    const pad = ["keen", "towers", "unequal"].includes(p.game) && size ? el("div", { class: "gm-pad" },
+      ...Array.from({ length: Math.min(9, size) }, (_, i) => String(i + 1)).concat(["Backspace"]).map((k) => el("button", { class: "sbtn", text: k === "Backspace" ? "⌫" : k,
+        onclick: () => { try { frame.contentWindow.postMessage({ wireKey: k }, location.origin); } catch (e) { /* not ready */ } } }))) : null;
     openSheet([el("h2", { id: "sheet-title", class: "stitle", text: LOGIC_NAMES[p.game] || "Logic" }),
-      el("div", { class: "sactions" }, markBtn, el("span", { class: "fine", text: "Rules are under the puzzle." })),
-      frame, msg, backBtn()], "Logic");
+      el("div", { class: "sactions" }, markBtn, el("span", { class: "fine", text: pad ? "Tap a square, then a number. Mark + number = pencil mark. Rules under the puzzle." : "Rules are under the puzzle." })),
+      frame, pad, msg, backBtn()], "Logic");
   }
 
   // ---------------------------------------------------------------- home card

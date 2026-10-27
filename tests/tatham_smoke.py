@@ -37,6 +37,14 @@ with sync_playwright() as p:
             visible = frame.evaluate("(()=>{const c=document.getElementById('puzzlecanvas');if(!c)return false;const r=c.getBoundingClientRect();return r.width>100&&r.height>100&&getComputedStyle(c).display!=='none'})()") if frame else False
             if not visible:
                 err.append("puzzle canvas not visible")
+            if g in ("keen", "towers", "unequal") and t == 1 and frame:
+                before = frame.evaluate("document.getElementById('undo').disabled")
+                cw = frame.evaluate("(()=>{const c=document.getElementById('puzzlecanvas');const r=c.getBoundingClientRect();return [r.left+r.width*0.1, r.top+r.height*0.1]})()")
+                pg.mouse.click(pg.frame_locator("iframe").locator("#puzzlecanvas").bounding_box()["x"] + 25, pg.frame_locator("iframe").locator("#puzzlecanvas").bounding_box()["y"] + 25)
+                pg.evaluate("document.querySelector('iframe').contentWindow.postMessage({wireKey:'1'}, location.origin)")
+                pg.wait_for_timeout(300)
+                if frame.evaluate("document.getElementById('undo').disabled") and before:
+                    err.append("number pad key did not reach the puzzle")
             if t == 2:
                 Path("shots").mkdir(exist_ok=True)
                 pg.screenshot(path=f"shots/{g}.png")

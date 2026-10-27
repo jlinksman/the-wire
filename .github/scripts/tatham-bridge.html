@@ -21,8 +21,15 @@
   // "Mark" toggle: a tap becomes a Ctrl-click, which the front end treats as a right-click.
   var mark = false;
   window.addEventListener("message", function (ev) {
-    if (ev.origin !== location.origin || !ev.data || typeof ev.data.wireMark !== "boolean") return;
-    mark = ev.data.wireMark;
+    if (ev.origin !== location.origin || !ev.data) return;
+    if (typeof ev.data.wireMark === "boolean") mark = ev.data.wireMark;
+    // Number pad on the page (iPhone has no keyboard for the canvas): forward keys to the puzzle.
+    if (typeof ev.data.wireKey === "string") {
+      var c = document.getElementById("puzzlecanvas");
+      var k = ev.data.wireKey;
+      var code = k === "Backspace" ? 8 : k.charCodeAt(0);
+      if (c) c.dispatchEvent(new KeyboardEvent("keydown", { key: k, keyCode: code, which: code, bubbles: true, cancelable: true }));
+    }
   });
   document.addEventListener("mousedown", function (e) {
     if (!mark || !e.isTrusted || e.ctrlKey || !e.target || e.target.id !== "puzzlecanvas") return;

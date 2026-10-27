@@ -867,3 +867,5 @@ select.tin { width: 100%; }
 .gm-health summary { color: var(--text2); font-size: 0.84rem; cursor: pointer; }
 .gm-vote { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--line, #333); }
 .gm-vote > span { flex: 1; min-width: 0; }
+.gm-pad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 8px 0; }
+.gm-pad .sbtn { min-height: 44px; font-family: var(--mono, ui-monospace, monospace); font-size: 1.05rem; }
