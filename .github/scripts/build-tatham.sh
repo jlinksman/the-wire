@@ -9,7 +9,7 @@
 # Output: site/vendor/puzzles/<game>.{html,js,wasm} plus LICENCE. Not committed to git.
 set -euo pipefail
 VERSION="20260923.616da16"
-SHA256="${TATHAM_SHA256:-}"
+SHA256="${TATHAM_SHA256:-cc419c8060b4e22be398aa03e30651fbce146eee510645c303fb6f5f1b77b78e}"
 GAMES="loopy keen towers galaxies signpost dominosa unequal slant range pattern"
 OUT="$(realpath -m "${1:-site/vendor/puzzles}")"
 BRIDGE="$(realpath .github/scripts/tatham-bridge.html)"

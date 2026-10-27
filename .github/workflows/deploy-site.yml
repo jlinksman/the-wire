@@ -12,6 +12,7 @@ on:
       - ".github/scripts/public-kv.sh"
       - ".github/scripts/build-tatham.sh"
       - ".github/scripts/tatham-bridge.html"
+      - "tests/tatham_smoke.py"
   workflow_dispatch:
 
 permissions:
@@ -91,6 +92,15 @@ jobs:
       - name: Build logic puzzles
         if: steps.tatham.outputs.cache-hit != 'true'
         run: bash .github/scripts/build-tatham.sh site/vendor/puzzles
+
+      # Every logic puzzle opens at each tier the Puzzle Page uses and reports "solved".
+      # Not blocking: a broken puzzle shouldn't hold up the news.
+      - name: Smoke-test logic puzzles
+        continue-on-error: true
+        run: |
+          pip install -q playwright==1.48.0
+          python -m playwright install --with-deps chromium >/dev/null
+          python tests/tatham_smoke.py site/vendor/puzzles
 
       - name: Deploy
         run: npx --yes wrangler@4.152.0 pages deploy site --project-name the-wire --branch main --commit-dirty=true
