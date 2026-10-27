@@ -12,6 +12,7 @@ on:
       - ".github/scripts/public-kv.sh"
       - ".github/scripts/build-tatham.sh"
       - ".github/scripts/tatham-bridge.html"
+      - ".github/scripts/build-maps.mjs"
   workflow_dispatch:
 
 permissions:
@@ -91,6 +92,28 @@ jobs:
       - name: Build logic puzzles
         if: steps.tatham.outputs.cache-hit != 'true'
         run: bash .github/scripts/build-tatham.sh site/vendor/puzzles
+
+      # Map shapes (GAMES.md): us-atlas, world-atlas (ISC; Census and Natural Earth, public domain) and
+      # Census 2024 cartographic boundaries, turned into SVG paths. Cached until the script changes.
+      - name: Restore maps
+        id: maps
+        uses: actions/cache@v4
+        with:
+          path: site/vendor/maps
+          key: maps-${{ hashFiles('.github/scripts/build-maps.mjs') }}
+
+      - name: Build maps
+        if: steps.maps.outputs.cache-hit != 'true'
+        run: |
+          W="$(mktemp -d)"
+          cp .github/scripts/build-maps.mjs "$W/"
+          ( cd "$W" && npm init -y >/dev/null && npm install --silent us-atlas@3.0.1 world-atlas@2.0.2 d3-geo@3.1.1 topojson-client@3.1.0 shapefile@0.6.6 )
+          mkdir -p "$W/census"
+          for f in cb_2024_us_cd119_500k cb_2024_36_cousub_500k; do
+            curl -sSL -A "TheWire/1.0 (personal news reader; ${{ github.server_url }}/${{ github.repository }})" -o "$W/$f.zip" "https://www2.census.gov/geo/tiger/GENZ2024/shp/$f.zip"
+            python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])" "$W/$f.zip" "$W/census"
+          done
+          ( cd "$W" && node build-maps.mjs "$GITHUB_WORKSPACE/site/vendor/maps" census )
 
       - name: Deploy
         run: npx --yes wrangler@4.152.0 pages deploy site --project-name the-wire --branch main --commit-dirty=true

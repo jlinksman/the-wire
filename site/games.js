@@ -875,6 +875,12 @@
         el("button", { class: "chip", text: "Name them", onclick: () => nameAll(L) }),
         L.n <= 14 ? el("button", { class: "chip", text: "Match", onclick: () => matchGame(L) }) : null));
     }
+    nodes.push(el("h3", { class: "sh3", text: "Maps" }));
+    for (const id of Object.keys(MAPS)) nodes.push(el("div", { class: "gm-libl" },
+      el("span", { class: "gm-t", text: MAPS[id].title }),
+      el("button", { class: "chip", text: "Find it", onclick: () => mapGame(id, "find") }),
+      el("button", { class: "chip", text: "Name it", onclick: () => mapGame(id, "name") })));
+    nodes.push(el("div", { class: "gm-libl" }, el("span", { class: "gm-t", text: "Outline: today's country" }), el("button", { class: "chip", text: "Play", onclick: outlineGame })));
     nodes.push(el("button", { class: "sbtn wide", text: "‹ Puzzles", onclick: () => openPuzzles() }));
     openSheet(nodes, "Library");
   }
@@ -966,6 +972,171 @@
       input, el("ol", { class: "gm-rows" }, ...rows),
       el("button", { class: "sbtn", text: "Show them", onclick: () => people.forEach((p, i) => { if (!got.has(i)) { rows[i].classList.add("miss"); rows[i].lastChild.textContent = p.name; } }) }),
       el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Who left the list");
+    setTimeout(() => input.focus(), 50);
+  }
+
+  // ---------------------------------------------------------------- Maps and geography
+  // Two directions: find it (tap; first tap highlights, a second confirms, so a fat finger never
+  // costs you) and name it (a shape is highlighted; type its name). Zoom buttons for small targets.
+  // Shapes are public domain (Census, Natural Earth); disputed borders follow Natural Earth's de facto view.
+  const MAPS = {
+    "us-states": { title: "U.S. states", noun: "state" },
+    "world": { title: "Countries of the world", noun: "country" },
+    "ny-districts": { title: "New York's congressional districts", noun: "district" },
+    "dutchess": { title: "Dutchess County towns and cities", noun: "town" },
+  };
+  const ALIASES = { "United States of America": ["usa", "us", "united states", "america"], "United Kingdom": ["uk", "britain", "great britain"],
+    "Dem. Rep. Congo": ["drc", "democratic republic of the congo", "congo kinshasa"], "Congo": ["republic of the congo", "congo brazzaville"],
+    "Central African Rep.": ["central african republic", "car"], "Dominican Rep.": ["dominican republic"], "Bosnia and Herz.": ["bosnia", "bosnia and herzegovina"],
+    "S. Sudan": ["south sudan"], "Eq. Guinea": ["equatorial guinea"], "eSwatini": ["eswatini", "swaziland"], "Solomon Is.": ["solomon islands"],
+    "Falkland Is.": ["falkland islands", "falklands"], "N. Cyprus": ["northern cyprus"], "W. Sahara": ["western sahara"], "Côte d'Ivoire": ["ivory coast", "cote divoire"],
+    "Czechia": ["czech republic"], "Macedonia": ["north macedonia"], "Timor-Leste": ["east timor"], "Myanmar": ["burma"], "Fr. S. Antarctic Lands": ["french southern lands"],
+    "Somaliland": [], "Palestine": ["palestinian territories"], "Taiwan": [], "Kosovo": [], "Turkey": ["turkiye"] };
+  const mapCache = {};
+  async function loadMap(id) {
+    if (mapCache[id]) return mapCache[id];
+    const r = await fetch("vendor/maps/" + id + ".json");
+    if (!r.ok) throw new Error("the maps arrive with the next site deploy");
+    return (mapCache[id] = await r.json());
+  }
+  const NS = "http://www.w3.org/2000/svg";
+  function svgMap(M, onTap) {
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", M.viewBox);
+    svg.setAttribute("class", "gm-map");
+    const vb0 = M.viewBox.split(" ").map(Number);
+    let vb = vb0.slice();
+    const paths = {};
+    for (const sh of M.shapes) {
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("d", sh.d);
+      p.setAttribute("class", "gm-shape");
+      p.addEventListener("click", (e) => { e.stopPropagation(); onTap && onTap(sh, p); });
+      svg.appendChild(p);
+      paths[sh.id] = p;
+    }
+    let pinchAt = 0;
+    svg.addEventListener("touchstart", (e) => { if (e.touches.length > 1) pinchAt = Date.now(); }, { passive: true });
+    svg.addEventListener("click", (e) => { if (Date.now() - pinchAt < 400) e.stopPropagation(); }, true);   // ignore taps during a pinch
+    const set = () => svg.setAttribute("viewBox", vb.join(" "));
+    const zoom = (f, cx, cy) => {
+      const w = Math.min(vb0[2], vb[2] / f), h = Math.min(vb0[3], vb[3] / f);
+      cx = cx == null ? vb[0] + vb[2] / 2 : cx; cy = cy == null ? vb[1] + vb[3] / 2 : cy;
+      vb = [Math.max(vb0[0], Math.min(cx - w / 2, vb0[0] + vb0[2] - w)), Math.max(vb0[1], Math.min(cy - h / 2, vb0[1] + vb0[3] - h)), w, h];
+      set();
+    };
+    const pan = (dx, dy) => { vb[0] = Math.max(vb0[0], Math.min(vb[0] + dx * vb[2] * 0.3, vb0[0] + vb0[2] - vb[2])); vb[1] = Math.max(vb0[1], Math.min(vb[1] + dy * vb[3] * 0.3, vb0[1] + vb0[3] - vb[3])); set(); };
+    const controls = el("div", { class: "gm-zoom" },
+      el("button", { class: "chip", text: "＋", onclick: () => zoom(2) }), el("button", { class: "chip", text: "－", onclick: () => zoom(0.5) }),
+      el("button", { class: "chip", text: "←", onclick: () => pan(-1, 0) }), el("button", { class: "chip", text: "→", onclick: () => pan(1, 0) }),
+      el("button", { class: "chip", text: "↑", onclick: () => pan(0, -1) }), el("button", { class: "chip", text: "↓", onclick: () => pan(0, 1) }),
+      el("button", { class: "chip", text: "Fit", onclick: () => { vb = vb0.slice(); set(); } }));
+    return { svg, paths, controls, zoomTo: (c, f) => { vb = vb0.slice(); zoom(f, c[0], c[1]); } };
+  }
+  function shuffle(a, seed) { const r = a.slice(); let h = 0; for (const ch of String(seed)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; for (let i = r.length - 1; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [r[i], r[j]] = [r[j], r[i]]; } return r; }
+
+  async function mapGame(id, mode) {
+    let M;
+    try { M = await loadMap(id); } catch (e) { openSheet([el("h2", { id: "sheet-title", class: "stitle", text: MAPS[id].title }), el("p", { class: "fine", text: e.message }), el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Maps"); return; }
+    const t0 = Date.now();
+    const shapes = M.shapes.filter((s) => s.d && (id !== "world" || s.area > 0.00005));
+    const deck = shuffle(shapes, Date.now()).slice(0, 10);
+    let k = 0, right = 0, pending = null;
+    const missed = [];
+    const msg = el("p", { class: "fine", text: "" });
+    const prompt = el("p", { class: "gm-keep", text: "" });
+    const input = answerInput("Name the highlighted " + MAPS[id].noun);
+    keepVisible(input);
+    const confirm = el("button", { class: "sbtn primary", text: "That one", hidden: true });
+    const m = svgMap(M, (sh, p) => {
+      if (mode !== "find" || !deck[k]) return;
+      Object.values(m.paths).forEach((x) => x.classList.remove("pick"));
+      p.classList.add("pick");
+      pending = sh;
+      confirm.hidden = false;
+      confirm.textContent = "That one" + (id === "world" || id === "us-states" ? "" : "");
+    });
+    const next = () => {
+      Object.values(m.paths).forEach((x) => x.classList.remove("pick", "target", "right", "wrong"));
+      pending = null; confirm.hidden = true;
+      const cur = deck[k];
+      if (!cur) return finish();
+      if (mode === "find") prompt.textContent = (k + 1) + " of " + deck.length + " · Find: " + cur.name;
+      else {
+        prompt.textContent = (k + 1) + " of " + deck.length + " · Name the highlighted " + MAPS[id].noun;
+        m.paths[cur.id].classList.add("target"); input.value = "";
+        try {                                    // small targets (NYC districts, tiny states): zoom in on them
+          const bb = m.paths[cur.id].getBBox(), vbw = Number(M.viewBox.split(" ")[2]);
+          m.zoomTo([bb.x + bb.width / 2, bb.y + bb.height / 2], bb.width < vbw * 0.06 ? Math.min(6, (vbw * 0.25) / Math.max(bb.width, 1)) : 1);
+        } catch (e) { /* not laid out yet */ }
+      }
+    };
+    const judge = (ok, cur, shown) => {
+      if (ok) right += 1; else missed.push(cur);
+      m.paths[cur.id].classList.add(ok ? "right" : "wrong");
+      msg.textContent = ok ? "✓ " + cur.name : "✗ That was " + (shown ? shown.name : "—") + ". It's " + cur.name + " (shown in red).";
+      k += 1;
+      setTimeout(next, ok ? 600 : 1600);
+    };
+    confirm.addEventListener("click", () => { const cur = deck[k]; if (cur && pending) judge(pending.id === cur.id, cur, pending); });
+    input.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      const cur = deck[k];
+      if (!cur) return;
+      const extra = id === "ny-districts" ? [cur.name.replace("NY-", ""), "district " + cur.name.replace("NY-", "")] : ALIASES[cur.name] || [];
+      judge(accepts(input.value, cur.name, extra) || (id === "ny-districts" && input.value.replace(/\D/g, "") === cur.name.replace("NY-", "")), cur, null);
+    });
+    function finish() {
+      const ok = right / deck.length >= 0.8;
+      const items = missed.map((s) => ({ id: "pl:" + id + ":" + fold(s.name).replace(/ /g, "_").slice(0, 24), type: "roster", q: "On the map of " + MAPS[id].title.toLowerCase() + ": the " + MAPS[id].noun + " at this spot? (" + (mode === "find" ? "find " : "name ") + s.name + ")", a: s.name, accept: ALIASES[s.name] || [], hint: M.source, ok: false, cert: "guess" }));
+      send({ game: "map", puzzle: id + ":" + mode, ok, score: right, ms: Date.now() - t0, hints: 0, items: [] });
+      msg.replaceChildren(reveal({ ok, verdict: right + " of " + deck.length, keep: missed.length ? "Missed: " + missed.map((s) => s.name).join(", ") : "Clean sweep.", meta: "Shapes: " + M.source,
+        next: { text: "Again ›", fn: () => mapGame(id, mode) } }));
+    }
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: MAPS[id].title }), prompt, m.svg, m.controls,
+      mode === "find" ? confirm : input, msg, el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Maps");
+    next();
+  }
+
+  // Outline: a country's silhouette; type guesses. Each miss shows the distance and direction from
+  // your guess to the answer (Worldle-style). A fixed daily rotation (never drawn from tragedy stories).
+  async function outlineGame() {
+    let M;
+    try { M = await loadMap("world"); } catch (e) { openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Outline" }), el("p", { class: "fine", text: e.message }), el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Outline"); return; }
+    const t0 = Date.now();
+    const pool = M.shapes.filter((s) => s.area > 0.0004);
+    const day = nyDay();
+    const target = shuffle(pool, "outline" + day.slice(0, 7))[Number(day.slice(8)) % pool.length];
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "gm-outline");
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", target.d);
+    svg.appendChild(p);
+    const tries = [];
+    const list = el("ul", { class: "gm-hints" });
+    const input = answerInput("Guess a country");
+    keepVisible(input);
+    const rad = (x) => x * Math.PI / 180;
+    function km(a, b) { const [l1, p1] = a.map(rad), [l2, p2] = b.map(rad); const h = Math.sin((p2 - p1) / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin((l2 - l1) / 2) ** 2; return Math.round(12742 * Math.asin(Math.sqrt(h))); }
+    function arrow(a, b) { const [l1, p1] = a.map(rad), [l2, p2] = b.map(rad); const y = Math.sin(l2 - l1) * Math.cos(p2), x = Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(l2 - l1); const br = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; return ["↑", "↗", "→", "↘", "↓", "↙", "←", "↖"][Math.round(br / 45) % 8]; }
+    const end = (ok) => {
+      send({ game: "outline", puzzle: "ol" + day, ok, score: ok ? 7 - tries.length : 0, ms: Date.now() - t0, hints: 0, items: [] });
+      input.disabled = true;
+      list.after(reveal({ ok, verdict: ok ? "In " + tries.length : "It was " + target.name, keep: target.name, meta: "Natural Earth (public domain); de facto borders", next: { text: "‹ Library", fn: openLibrary } }));
+    };
+    input.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || input.disabled) return;
+      const g = M.shapes.find((s) => accepts(input.value, s.name, ALIASES[s.name] || []));
+      if (!g) { input.select(); return; }
+      input.value = "";
+      tries.push(g);
+      if (g.id === target.id) { list.append(el("li", { text: "✓ " + g.name })); return end(true); }
+      list.append(el("li", { text: "✗ " + g.name + " · " + km(g.ll, target.ll).toLocaleString() + " km " + arrow(g.ll, target.ll) }));
+      if (tries.length >= 6) end(false);
+    });
+    // Fit the silhouette into its own box.
+    requestAnimationFrame(() => { try { const b = p.getBBox(); const pad = Math.max(b.width, b.height) * 0.08; svg.setAttribute("viewBox", [b.x - pad, b.y - pad, b.width + 2 * pad, b.height + 2 * pad].join(" ")); } catch (e) { /* hidden */ } });
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Outline · today's country" }), svg, el("p", { class: "fine", text: "Six guesses. Each miss shows how far and which way." }), input, list, el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Outline");
     setTimeout(() => input.focus(), 50);
   }
 

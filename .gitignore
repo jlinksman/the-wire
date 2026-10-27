@@ -13,3 +13,4 @@ share/ballot-data.json
 share/wrangler.toml
 site/vendor/puzzles/
 .games/
+site/vendor/maps/
