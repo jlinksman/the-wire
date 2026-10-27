@@ -325,6 +325,7 @@
           out.items.push({ id: "el:" + c.id + ":" + j, type: "element", q: c.title + ": " + others, a: e.text, accept: e.keys, hint: c.cite, link: c.source, ok, cert: ok ? cert : "think", hinted: false });
         });
         openSheet([...header(c, k), el("ol", { class: "gm-hints" }, ...c.elements.map((e, j) => el("li", { text: (got.has(j) ? "✓ " : "✗ ") + e.text }))),
+          c.note ? el("p", { class: "fine", text: "Note: " + c.note }) : null,
           reveal({ ok: got.size === c.elements.length, verdict: got.size + " of " + c.elements.length + " elements", keep: c.cite, meta: "Our wording from the cited authority · verified " + c.verified,
             link: c.source, linkText: "Primary source ↗", thread: feat[c.id] && feat[c.id].thread, next: k + 1 < P.cards.length ? { text: "Next card ›", fn: () => card(k + 1) } : { text: "Finish ›", fn: () => finishAll() } })], "Law");
       }

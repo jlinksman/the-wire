@@ -3,16 +3,19 @@
 # Rules (approved 2026-10-27):
 # - Elements are stated in our own words from primary authority (statute text, controlling cases)
 #   and cited. Never PJI, Restatement or bar-prep text. Refreshers, not advice.
-# - Every card is labeled NY / federal / majority, carries a "verified" date, and is second-checked
-#   against the cited sources before it ships (status: verified). Unverified cards never reach
-#   the page.
+# - Every card is labeled NY / federal, carries a "verified" date, and is second-checked against
+#   the cited sources before it ships (status: verified). Draft cards never reach the page.
 # - One element per review item: each element gets its own schedule.
 # - News tie-in: `news` is a regex on story titles; a matching story features the card.
 # - Syllabus order: environmental, then torts. Later areas wait for a month of use.
 #
-# Card fields: id, area, title, jurisdiction, cite, source (URL), verified (YYYY-MM-DD or null),
-# status (draft | verified), news, elements [{text, keys: [accepted keywords]}], and optional
-# cloze {text (with ___), answer, accept, source}.
+# Second check 2026-10-27 (independent reviewer, against statute text on nysenate.gov and Cornell
+# LII, and star-paged case copies from the Caselaw Access Project): corrections applied below.
+# Still draft: trespass (elements 2–3 need their own NY authority) and CPLR 1411 (amended
+# 2026-05-29; confirm the amending chapter's effective date and scope first).
+#
+# Card fields: id, area, title, jurisdiction, cite, source (URL), verified, status, news,
+# note (variants to remember), elements [{text, keys}], optional cloze {text, answer, accept, source}.
 
 cards:
   # ------------------------------------------------------------ NY spill and environmental
@@ -20,20 +23,20 @@ cards:
     area: environmental
     title: "Navigation Law § 181 — strict liability for a petroleum discharge"
     jurisdiction: NY
-    cite: "N.Y. Navigation Law § 181(1), (5); State of New York v. Green, 96 N.Y.2d 403 (2001)"
+    cite: "N.Y. Navigation Law §§ 172(8), 181(1), (5); State of New York v. Green, 96 N.Y.2d 403, 405, 407 (2001)"
     source: https://www.nysenate.gov/legislation/laws/NAV/181
-    status: draft
-    verified: null
+    status: verified
+    verified: "2026-10-27"
     news: '\b(oil|petroleum|gasoline|fuel|heating oil|diesel) (spill|leak|discharge)|\bspill\b|navigation law'
     elements:
       - text: "A discharge of petroleum"
         keys: [discharge, petroleum, spill, release]
-      - text: "The defendant is a discharger (liability is strict, without regard to fault; under Green an owner who controlled the system and could have prevented the discharge qualifies)"
-        keys: [discharger, caused, control, owner]
+      - text: "The defendant is a discharger (liability is strict, without regard to fault; a discharge includes any intentional or unintentional act or omission, § 172(8); under Green, a landowner who can control activities on its property and has reason to believe petroleum will be stored there is a discharger, but mere ownership is not enough)"
+        keys: [discharger, caused, control]
       - text: "Cleanup and removal costs, or direct or indirect damages"
         keys: [cleanup, removal, costs, damages]
     cloze:
-      text: "Any person who has discharged petroleum shall be strictly liable, ___, for all cleanup and removal costs and all direct and indirect damages, no matter by whom sustained."
+      text: "Any person who has discharged petroleum shall be strictly liable, ___, for all cleanup and removal costs and all direct and indirect damages, no matter by whom sustained, as defined in this section."
       answer: "without regard to fault"
       accept: ["without regard to fault", "regardless of fault"]
       source: https://www.nysenate.gov/legislation/laws/NAV/181
@@ -43,11 +46,14 @@ cards:
     title: "CERCLA § 107(a) cost recovery — prima facie case"
     jurisdiction: federal
     cite: "42 U.S.C. § 9607(a); B.F. Goodrich Co. v. Murtha, 958 F.2d 1192, 1198 (2d Cir. 1992)"
-    source: https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title42-section9607&num=0&edition=prelim
-    status: draft
-    verified: null
+    source: https://www.law.cornell.edu/uscode/text/42/9607
+    status: verified
+    verified: "2026-10-27"
     news: '\b(cercla|superfund|hazardous (waste|substance)|contaminat\w+|remediation)\b'
+    note: "For a government plaintiff the costs need only be \"not inconsistent with\" the NCP, which puts the burden on the defendant (§ 9607(a)(4)(A) vs (B))."
     elements:
+      - text: "The defendant is within one of the four classes of responsible parties"
+        keys: [responsible party, prp, owner, operator, arranger, transporter, classes]
       - text: "The site is a facility"
         keys: [facility, site]
       - text: "A release or threatened release of a hazardous substance"
@@ -56,43 +62,42 @@ cards:
         keys: [response costs, costs, incur]
       - text: "The costs are consistent with the National Contingency Plan"
         keys: [national contingency plan, ncp, contingency]
-      - text: "The defendant is within one of the four classes of responsible parties"
-        keys: [responsible party, prp, owner, operator, arranger, transporter, classes]
 
   - id: cercla_prp
     area: environmental
     title: "CERCLA § 107(a) — the four classes of responsible parties"
     jurisdiction: federal
     cite: "42 U.S.C. § 9607(a)(1)–(4)"
-    source: https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title42-section9607&num=0&edition=prelim
-    status: draft
-    verified: null
+    source: https://www.law.cornell.edu/uscode/text/42/9607
+    status: verified
+    verified: "2026-10-27"
     news: '\b(cercla|superfund|responsible part(y|ies))\b'
     elements:
-      - text: "The current owner or operator of the facility"
+      - text: "The current owner or operator of the facility (or vessel)"
         keys: [current owner, current operator, current]
       - text: "The owner or operator at the time of disposal"
         keys: [time of disposal, past owner, former owner, prior owner]
-      - text: "Arrangers: those who arranged for disposal or treatment of hazardous substances"
+      - text: "Arrangers: those who arranged for disposal or treatment of hazardous substances they owned or possessed"
         keys: [arrange, arranger, generator]
-      - text: "Transporters who selected the disposal site"
+      - text: "Transporters: those who accepted hazardous substances for transport to disposal or treatment sites they selected"
         keys: [transport, transporter, selected]
 
   - id: cercla107b
     area: environmental
-    title: "CERCLA § 107(b) — the defenses"
+    title: "CERCLA § 107(b) — the statutory defenses"
     jurisdiction: federal
     cite: "42 U.S.C. § 9607(b)"
-    source: https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title42-section9607&num=0&edition=prelim
-    status: draft
-    verified: null
+    source: https://www.law.cornell.edu/uscode/text/42/9607
+    status: verified
+    verified: "2026-10-27"
     news: '\b(cercla|superfund)\b'
+    note: "The defendant proves by a preponderance that the release and resulting damages were caused solely by one of these. Innocent landowner, bona fide prospective purchaser and contiguous owner protections sit elsewhere (§§ 9601(35), 9607(q), (r))."
     elements:
       - text: "An act of God"
         keys: [act of god, god]
       - text: "An act of war"
         keys: [act of war, war]
-      - text: "An act or omission of an unrelated third party (no employment, agency or contractual relationship), where the defendant took due care and precautions"
+      - text: "An act or omission of a third party other than an employee or agent, or one in a direct or indirect contractual relationship with the defendant (common-carrier tariff excepted), where the defendant exercised due care and took precautions against foreseeable acts or omissions"
         keys: [third party, unrelated]
       - text: "Any combination of the above"
         keys: [combination]
@@ -101,28 +106,30 @@ cards:
     area: environmental
     title: "RCRA § 7002(a)(1)(B) — imminent and substantial endangerment citizen suit"
     jurisdiction: federal
-    cite: "42 U.S.C. § 6972(a)(1)(B)"
-    source: https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title42-section6972&num=0&edition=prelim
-    status: draft
-    verified: null
+    cite: "42 U.S.C. § 6972(a)(1)(B); Cordiano v. Metacon Gun Club, Inc., 575 F.3d 199, 210–11 (2d Cir. 2009)"
+    source: https://www.law.cornell.edu/uscode/text/42/6972
+    status: verified
+    verified: "2026-10-27"
     news: '\b(rcra|hazardous waste|solid waste|landfill)\b'
+    note: "\"Substantial\" means serious (Cordiano). Ninety days' notice before suit, § 6972(b)(2)(A)."
     elements:
-      - text: "The defendant is a past or present generator, transporter, or owner or operator of a treatment, storage or disposal facility"
-        keys: [generator, transporter, owner, operator]
-      - text: "The defendant has contributed or is contributing to the handling, storage, treatment, transportation or disposal of solid or hazardous waste"
+      - text: "The defendant is a person (including a past or present generator, transporter, or owner or operator of a treatment, storage or disposal facility)"
+        keys: [person, generator, transporter, owner, operator]
+      - text: "Who has contributed or is contributing to the past or present handling, storage, treatment, transportation or disposal of solid or hazardous waste"
         keys: [contributed, contributing, handling, disposal, waste]
-      - text: "The waste may present an imminent and substantial endangerment to health or the environment"
+      - text: "Which may present an imminent and substantial endangerment to health or the environment"
         keys: [imminent, substantial, endangerment]
 
   - id: cwa301
     area: environmental
     title: "Clean Water Act § 301(a) — unpermitted discharge"
     jurisdiction: federal
-    cite: "33 U.S.C. §§ 1311(a), 1362(12); Cordiano v. Metacon Gun Club, Inc., 575 F.3d 199, 221 (2d Cir. 2009)"
-    source: https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title33-section1311&num=0&edition=prelim
-    status: draft
-    verified: null
+    cite: "33 U.S.C. §§ 1311(a), 1362(12); Cordiano v. Metacon Gun Club, Inc., 575 F.3d 199, 215 (2d Cir. 2009)"
+    source: https://www.law.cornell.edu/uscode/text/33/1311
+    status: verified
+    verified: "2026-10-27"
     news: '\b(clean water act|stormwater|wastewater|npdes|discharge permit)\b'
+    note: "Sackett v. EPA (2023) narrowed \"navigable waters\"; County of Maui (2020) reaches the functional equivalent of a direct discharge through groundwater."
     elements:
       - text: "A discharge (an addition)"
         keys: [discharge, addition]
@@ -132,7 +139,7 @@ cards:
         keys: [navigable, waters]
       - text: "From a point source"
         keys: [point source]
-      - text: "Without a permit (NPDES)"
+      - text: "Without a permit (NPDES under § 1342, or § 404 dredge-and-fill under § 1344)"
         keys: [permit, npdes]
 
   # ------------------------------------------------------------ torts (NY)
@@ -140,34 +147,32 @@ cards:
     area: torts
     title: "Negligence (NY)"
     jurisdiction: NY
-    cite: "Pasternack v. Laboratory Corp. of America Holdings, 27 N.Y.3d 817, 825 (2016); Solomon v. City of New York, 66 N.Y.2d 1026, 1027 (1985)"
-    source: https://www.nycourts.gov/reporter/3dseries/2016/2016_04848.htm
-    status: draft
-    verified: null
+    cite: "Pasternack v. Laboratory Corp. of America Holdings, 27 N.Y.3d 817, 825 (2016) (quoting Solomon v. City of New York, 66 N.Y.2d 1026, 1027 (1985))"
+    source: https://www.nycourts.gov/reporter/3dseries/2016/2016_05179.htm
+    status: verified
+    verified: "2026-10-27"
     news: '\bnegligen\w+\b'
     elements:
       - text: "A duty owed by the defendant to the plaintiff"
         keys: [duty]
       - text: "A breach of that duty"
         keys: [breach]
-      - text: "The breach was a proximate cause"
-        keys: [proximate, cause, causation]
-      - text: "Of the plaintiff's injury"
-        keys: [injury, damages, harm, damage]
+      - text: "Injury proximately resulting from the breach"
+        keys: [proximate, cause, causation, injury, damages, harm]
 
   - id: private_nuisance
     area: torts
     title: "Private nuisance (NY)"
     jurisdiction: NY
-    cite: "Copart Industries, Inc. v. Consolidated Edison Co. of N.Y., 41 N.Y.2d 564, 570 (1977)"
-    source: https://law.justia.com/cases/new-york/court-of-appeals/1977/41-n-y-2d-564-0.html
-    status: draft
-    verified: null
+    cite: "Copart Industries, Inc. v. Consolidated Edison Co. of N.Y., 41 N.Y.2d 564, 569–70 (1977)"
+    source: https://static.case.law/ny-2d/41/html/0564-01.html
+    status: verified
+    verified: "2026-10-27"
     news: '\bnuisance\b'
     elements:
       - text: "An interference substantial in nature"
         keys: [substantial]
-      - text: "Intentional in origin (or negligent or from an abnormally dangerous activity)"
+      - text: "Intentional in origin (or negligent, or from an abnormally dangerous activity)"
         keys: [intentional, intent]
       - text: "Unreasonable in character"
         keys: [unreasonable]
@@ -181,12 +186,12 @@ cards:
     title: "Trespass to land (NY)"
     jurisdiction: NY
     cite: "Phillips v. Sun Oil Co., 307 N.Y. 328, 331 (1954)"
-    source: https://law.justia.com/cases/new-york/court-of-appeals/1954/307-n-y-328-0.html
-    status: draft
+    source: https://static.case.law/ny/307/html/0328-01.html
+    status: draft          # elements 2–3 need their own verified NY authority
     verified: null
     news: '\btrespass\w*\b'
     elements:
-      - text: "An intentional entry onto land (intent to do the act that produces the entry; the entry must be its immediate or inevitable consequence)"
+      - text: "An intentional entry onto land: the defendant intended the act, and the intrusion was its immediate or inevitable consequence (or followed from negligence amounting to willfulness), the act being substantially certain to result in the entry; for underground migration, the defendant had good reason to know or expect the passage"
         keys: [intentional, intent, entry, enter]
       - text: "Land in the plaintiff's possession"
         keys: [possession, land, property]
@@ -195,13 +200,14 @@ cards:
 
   - id: abnormally_dangerous
     area: torts
-    title: "Strict liability for abnormally dangerous activity — the factors (NY)"
+    title: "Abnormally dangerous activity — the factors (NY)"
     jurisdiction: NY
-    cite: "Doundoulakis v. Town of Hempstead, 42 N.Y.2d 440, 448 (1977) (adopting Restatement (Second) of Torts § 520 factors)"
-    source: https://law.justia.com/cases/new-york/court-of-appeals/1977/42-n-y-2d-440-0.html
-    status: draft
-    verified: null
+    cite: "Doundoulakis v. Town of Hempstead, 42 N.Y.2d 440, 448 (1977) (identifying Restatement (Second) of Torts § 520 factors as \"particularly useful\"; no single factor determinative)"
+    source: https://static.case.law/ny-2d/42/html/0440-01.html
+    status: verified
+    verified: "2026-10-27"
     news: '\b(blasting|explosives|strict liability)\b'
+    note: "These are factors to weigh, not elements; no single factor decides it."
     elements:
       - text: "A high degree of risk of harm"
         keys: [high degree, risk]
@@ -209,25 +215,26 @@ cards:
         keys: [great, severity, serious]
       - text: "Inability to eliminate the risk with reasonable care"
         keys: [reasonable care, eliminate]
-      - text: "The activity is not a matter of common usage"
+      - text: "The extent to which the activity is not a matter of common usage"
         keys: [common usage, uncommon]
-      - text: "Inappropriate to the place where it is carried on"
+      - text: "Inappropriateness of the activity to the place where it is carried on"
         keys: [place, location, inappropriate]
-      - text: "Its value to the community is outweighed by its dangerous attributes"
+      - text: "The extent to which its value to the community is outweighed by its dangerous attributes"
         keys: [value, community, outweigh]
 
   - id: defamation
     area: torts
     title: "Defamation (NY)"
     jurisdiction: NY
-    cite: "Dillon v. City of New York, 261 A.D.2d 34, 38 (1st Dep't 1999); Liberman v. Gelstein, 80 N.Y.2d 429, 435 (1992)"
-    source: https://law.justia.com/cases/new-york/appellate-division-first-department/1999/261-a-d-2d-34-0.html
-    status: draft
-    verified: null
+    cite: "Dillon v. City of New York, 261 A.D.2d 34, 38 (1st Dep't 1999)"
+    source: https://static.case.law/ad2d/261/html/0034-01.html
+    status: verified
+    verified: "2026-10-27"
     news: '\b(defam\w+|libel\w*|slander\w*)\b'
+    note: "Variants: a private plaintiff on a matter of public concern must show gross irresponsibility (Chapadeau v. Utica Observer-Dispatch, 38 N.Y.2d 196 (1975)); Civil Rights Law § 76-a (2020) requires actual malice for public-forum speech on an issue of public interest."
     elements:
-      - text: "A false statement"
-        keys: [false, falsity]
+      - text: "A false (and defamatory) statement"
+        keys: [false, falsity, defamatory]
       - text: "Published to a third party without privilege or authorization"
         keys: [published, publication, third party]
       - text: "Fault: at least negligence (actual malice for a public figure)"
@@ -235,15 +242,16 @@ cards:
       - text: "Special harm, or defamation per se"
         keys: [special harm, special damages, per se]
 
-  - id: defamation_per_se
+  - id: slander_per_se
     area: torts
-    title: "Defamation per se — the four categories (NY)"
+    title: "Slander per se — the four categories (NY)"
     jurisdiction: NY
     cite: "Liberman v. Gelstein, 80 N.Y.2d 429, 435 (1992)"
-    source: https://law.justia.com/cases/new-york/court-of-appeals/1992/80-n-y-2d-429-0.html
-    status: draft
-    verified: null
-    news: '\b(defam\w+|libel\w*|slander\w*)\b'
+    source: https://www.law.cornell.edu/nyctap/080_0429.htm
+    status: verified
+    verified: "2026-10-27"
+    news: '\b(defam\w+|slander\w*)\b'
+    note: "The law presumes damages in these four. \"Serious\" crime excludes minor offenses; Civil Rights Law § 77 codifies the unchastity category."
     elements:
       - text: "Charges the plaintiff with a serious crime"
         keys: [crime, criminal]
@@ -258,18 +266,20 @@ cards:
     area: torts
     title: "Comparative fault — CPLR 1411"
     jurisdiction: NY
-    cite: "N.Y. CPLR 1411"
+    cite: "N.Y. CPLR 1411(a), (b) (as amended, revision of 2026-05-29)"
     source: https://www.nysenate.gov/legislation/laws/CVP/1411
-    status: draft
+    status: draft          # amended 2026; confirm the chapter's effective date and scope first
     verified: null
     news: '\bcomparative (fault|negligence)\b'
     elements:
-      - text: "The claimant's own culpable conduct does not bar recovery"
+      - text: "The claimant's own culpable conduct does not bar recovery (§ 1411(a))"
         keys: [not bar, does not bar, no bar]
-      - text: "Damages are reduced in proportion to the claimant's share of the culpable conduct"
+      - text: "Damages are diminished in proportion to the claimant's share of the culpable conduct"
         keys: [proportion, diminished, reduced]
+      - text: "Exception, § 1411(b): in Insurance Law art. 51 (motor vehicle) personal injury actions, a claimant more at fault than the defendant or defendants combined is barred"
+        keys: [motor vehicle, article 51, no-fault, greater, modified]
     cloze:
-      text: "Culpable conduct attributable to the claimant … shall not bar recovery, but the amount of damages otherwise recoverable shall be ___ in the proportion which the culpable conduct attributable to the claimant … bears to the culpable conduct which caused the damages."
+      text: "The amount of damages otherwise recoverable shall be ___ in the proportion which the culpable conduct attributable to the claimant or decedent bears to the culpable conduct which caused the damages."
       answer: "diminished"
       accept: ["diminished", "reduced"]
       source: https://www.nysenate.gov/legislation/laws/CVP/1411

@@ -551,7 +551,7 @@ def legal(data, now, drops) -> dict:
         if c.get("status") != "verified" or not c.get("verified"):
             drops.append(("legal", "card not yet second-checked"))
             continue
-        cards.append({k: c.get(k) for k in ("id", "area", "title", "jurisdiction", "cite", "source", "verified", "elements", "cloze")})
+        cards.append({k: c.get(k) for k in ("id", "area", "title", "jurisdiction", "cite", "source", "verified", "elements", "cloze", "note")})
     cut = now - timedelta(days=7)
     featured = []
     items, threads, story_of = index(data)
