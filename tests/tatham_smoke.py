@@ -20,7 +20,7 @@ class Q(http.server.SimpleHTTPRequestHandler):
 srv = socketserver.TCPServer(("127.0.0.1", 8799), Q); threading.Thread(target=srv.serve_forever, daemon=True).start()
 fails = 0
 with sync_playwright() as p:
-    b = p.chromium.launch(); pg = b.new_page()
+    b = p.chromium.launch(); pg = b.new_page(viewport={"width": 620, "height": 720})
     pg.goto("http://127.0.0.1:8799/_smoke.html")
     for g, tiers in games.items():
         for t, params in enumerate(tiers, 1):
@@ -34,6 +34,9 @@ with sync_playwright() as p:
                 except Exception:
                     pass
             pg.wait_for_timeout(600)
+            if t == 2:
+                Path("shots").mkdir(exist_ok=True)
+                pg.screenshot(path=f"shots/{g}.png")
             err = [m for m in pg.evaluate("msgs") if isinstance(m, dict) and m.get("wireTatham") == "error"]
             try:
                 frame.evaluate("document.getElementById('solve').click()")

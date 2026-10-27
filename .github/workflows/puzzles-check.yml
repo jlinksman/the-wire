@@ -37,3 +37,10 @@ jobs:
           pip install -q playwright==1.48.0
           python -m playwright install --with-deps chromium >/dev/null 2>&1
           timeout 600 python tests/tatham_smoke.py site/vendor/puzzles
+      - name: Keep screenshots
+        if: always() && steps.tatham.outputs.cache-hit == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: puzzle-shots
+          path: shots/
+          retention-days: 7
