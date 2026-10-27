@@ -190,6 +190,59 @@ def test_pending_term_and_emergency():
     assert pending.term_start(datetime(2027, 3, 1, tzinfo=timezone.utc)) == "2026-10-01"
 
 
+def _wsi_data():
+    from datetime import datetime, timezone
+    now = datetime(2026, 10, 19, 20, tzinfo=timezone.utc)
+    q = lambda by, text: {"by": by, "text": text}
+    items = [
+        {"id": "i1", "t": "2026-10-18T12:00:00Z", "source": "DW", "scope": "world", "title": "Israel: Trump endorses Netanyahu ahead of elections", "summary": "",
+         "quotes": [q("Donald Trump", "If Israel has the wrong leader, which would be anyone other than Bibi, America will have a problem")]},
+        {"id": "i2", "t": "2026-10-18T13:00:00Z", "source": "ABC", "scope": "national", "title": "President signs farm bill", "summary": "",
+         "quotes": [q("Donald Trump", "This is a great bill for the farmers of this country and for the people who feed us all")]},
+        {"id": "i3", "t": "2026-10-16T13:00:00Z", "source": "Highlands Current", "scope": "local", "title": "Dutchess Votes to Cover Flock Cameras", "summary": "",
+         "quotes": [q("Chris Drago", "The conversation around Flock is a balancing act between privacy and safety for everyone here")]},
+        {"id": "i4", "t": "2026-10-17T13:00:00Z", "source": "ABC", "scope": "national", "title": "Senators split on tariffs", "summary": "",
+         "quotes": [q("John Cornyn", "Tariffs are a tax on the people of Texas, and I will keep saying so on the floor")]},
+    ]
+    reg = {"donald trump": {"name": "Donald Trump", "role": "President of the United States", "party": None, "aliases": [], "kind": "leader", "level": "national", "where": "United States"},
+           "chris drago": {"name": "Chris Drago", "role": "Dutchess County Legislator", "party": "Democratic", "aliases": [], "kind": "person", "level": "local", "where": "Dutchess County"},
+           "john cornyn": {"name": "John Cornyn", "role": "U.S. Senator", "party": "Republican", "aliases": [], "kind": "legislator", "level": "national", "where": "Texas"}}
+    return {"items": items, "threads": [], "stories": []}, reg, now
+
+
+def test_who_said_it_variety_and_hints():
+    data, reg, now = _wsi_data()
+    out = games.who_said_it(data, reg, now, [])
+    names = [q["answer"] for q in out]
+    assert names.count("Donald Trump") == 1, names                 # one quote per speaker
+    assert names[0] == "Chris Drago", names                         # local first
+    by = {q["answer"]: q for q in out}
+    assert by["Chris Drago"]["party"] is None                       # party only from the congress roster
+    assert by["John Cornyn"]["party"] == "Republican"
+    assert games.leaks("Israel: Trump endorses Netanyahu ahead of elections", reg["donald trump"])   # context dropped
+    assert not games.leaks("Dutchess Votes to Cover Flock Cameras", reg["chris drago"])
+    data["items"][1]["quotes"] = []
+    assert [q["context"] for q in games.who_said_it(data, reg, now, []) if q["answer"] == "Donald Trump"] == [None]
+    assert by["Chris Drago"]["hints"] == ["Dutchess County Legislator", "Dutchess County", "C. D."]
+    assert not any(h for q in out for h in q["hints"] if "October" in h)   # no date hint
+    # A speaker already quoted earlier this ISO week stays out.
+    out2 = games.who_said_it(data, reg, now, [], week_speakers={games.speaker_key("Donald Trump")})
+    assert "Donald Trump" not in [q["answer"] for q in out2]
+
+
+def test_quote_budget_two_games():
+    data, reg, now = _wsi_data()
+    wsi = games.who_said_it(data, reg, now, [])
+    b = games.QuoteBudget()
+    for q in wsi:
+        b.take(q["id"], "who_said_it")
+    b.take(wsi[0]["id"], "friday_quiz")
+    assert not b.ok(wsi[0]["id"], "meta")
+    cq = games.cryptoquotes(wsi, "s", [], b)
+    assert wsi[0]["id"] not in [c["source"] for c in cq] and cq
+    assert all(len(u) <= 2 for u in b.uses.values())
+
+
 def test_legal_yaml_scalars():
     import yaml
     cards = (yaml.safe_load((games.ROOT / "legal.yaml").read_text()) or {}).get("cards", [])

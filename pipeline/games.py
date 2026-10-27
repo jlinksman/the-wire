@@ -78,26 +78,77 @@ def institutional_only(it: dict, thread_title: str | None) -> bool:
 
 
 # ------------------------------------------------------------------ public-figure registry
+US_STATES = dict(x.split(":") for x in """AL:Alabama AK:Alaska AZ:Arizona AR:Arkansas CA:California CO:Colorado CT:Connecticut DE:Delaware
+FL:Florida GA:Georgia HI:Hawaii ID:Idaho IL:Illinois IN:Indiana IA:Iowa KS:Kansas KY:Kentucky LA:Louisiana ME:Maine MD:Maryland
+MA:Massachusetts MI:Michigan MN:Minnesota MS:Mississippi MO:Missouri MT:Montana NE:Nebraska NV:Nevada NH:New_Hampshire NJ:New_Jersey
+NM:New_Mexico NY:New_York NC:North_Carolina ND:North_Dakota OH:Ohio OK:Oklahoma OR:Oregon PA:Pennsylvania RI:Rhode_Island
+SC:South_Carolina SD:South_Dakota TN:Tennessee TX:Texas UT:Utah VT:Vermont VA:Virginia WA:Washington WV:West_Virginia WI:Wisconsin
+WY:Wyoming DC:District_of_Columbia PR:Puerto_Rico GU:Guam VI:Virgin_Islands AS:American_Samoa MP:Northern_Mariana_Islands""".split())
+US_STATES = {k: v.replace("_", " ") for k, v in US_STATES.items()}
+# Common short forms, so "Don Beyer" finds Donald S. Beyer, Jr. (accepted answers too).
+NICK = {"donald": "don", "michael": "mike", "william": "bill", "robert": "bob", "richard": "rick", "james": "jim", "thomas": "tom",
+        "charles": "chuck", "joseph": "joe", "christopher": "chris", "daniel": "dan", "edward": "ed", "stephen": "steve",
+        "steven": "steve", "patrick": "pat", "timothy": "tim", "anthony": "tony", "kenneth": "ken", "gregory": "greg",
+        "andrew": "andy", "nicholas": "nick", "jonathan": "jon", "benjamin": "ben", "matthew": "matt", "samuel": "sam",
+        "elizabeth": "liz", "katherine": "kathy", "jennifer": "jen", "margaret": "maggie", "theodore": "ted", "gerald": "jerry"}
+SUFFIX = re.compile(r",?\s+(Jr\.?|Sr\.?|II|III|IV)$", re.I)
+LEVEL_RANK = {"local": 0, "state": 1, "national": 2, "world": 3}
+
+
+def strip_suffix(name: str) -> str:
+    return SUFFIX.sub("", (name or "").strip())
+
+
+def _local_where(role: str) -> tuple[str, str] | None:
+    r = role or ""
+    if re.search(r"Beacon", r):
+        return "local", "City of Beacon"
+    if re.search(r"Dutchess|County Legislat|County Executive", r):
+        return "local", "Dutchess County"
+    if re.search(r"State Senat|Assembly|Governor|New York State|\bNYS\b", r):
+        return "state", "New York State"
+    return None
+
+
 def load_registry(rosters: Path | None) -> dict:
-    """name (folded) -> {name, role, party, aliases, kind}. Only public figures can be puzzle speakers."""
+    """name (folded) -> {name, role, party, aliases, kind, level, where}. Only public figures can be
+    puzzle speakers. `party` is set only for members of Congress (congress-legislators); everyone
+    else's is None, so the page never shows a party it can't source to the roster."""
     reg: dict[str, dict] = {}
 
-    def add(name, role, party=None, aliases=(), kind="person", **extra):
+    def add(name, role, party=None, aliases=(), kind="person", level=None, where=None, **extra):
         if not name:
             return
-        key = fold(name)
-        cur = reg.setdefault(key, {"name": name, "role": role, "party": party, "aliases": set(), "kind": kind})
+        key = fold(strip_suffix(name))
+        cur = reg.setdefault(key, {"name": strip_suffix(name), "role": role, "party": None, "aliases": set(), "kind": kind,
+                                   "level": level, "where": where})
+        if kind == "legislator":                            # the roster wins over any hand list
+            cur.update(kind=kind, role=role, party=party, level=level, where=where)
         cur["aliases"].update(fold(a) for a in aliases if a)
+        if not cur.get("level") and level:
+            cur.update(level=level, where=where)
         cur.update({k: v for k, v in extra.items() if v is not None})
 
     for p in (yaml.safe_load((ROOT / "watch_pool.yaml").read_text()) or {}).get("people", []):
-        add(p.get("name"), p.get("role"), p.get("party"))
+        grp = p.get("group")
+        lvl = {"beacon": "local", "dutchess": "local", "state": "state", "national": "national"}.get(grp, "world")
+        add(p.get("name"), p.get("role"), level=lvl, where=p.get("place"))
     lp = yaml.safe_load((ROOT / "local_politics.yaml").read_text()) or {}
     for p in lp.get("players", []) or []:
-        add(p.get("name"), p.get("role"), p.get("party"))
+        lw = _local_where(p.get("role")) or ("local", "Beacon area")
+        add(p.get("name"), p.get("role"), level=lw[0], where=lw[1])
     for p in (yaml.safe_load((ROOT / "people.yaml").read_text()) or {}).get("people", []):
         if p.get("perspective") or p.get("byline"):        # named public commentators
-            add(p.get("name"), p.get("role"), None, kind="commentator")
+            add(p.get("name"), p.get("role"), kind="commentator", level="national", where="U.S. media")
+    wp = ROOT / "world.yaml"
+    for c in ((yaml.safe_load(wp.read_text()) or {}).get("countries", []) if wp.exists() else []):
+        if c.get("status") == "unverified":
+            continue
+        for k in ("head_of_government", "head_of_state", "prime_minister"):
+            h = c.get(k) or {}
+            if h.get("name"):
+                add(h["name"], f"{h.get('title') or 'Leader'} of {'the ' if c['country'] in ('United States', 'United Kingdom', 'Netherlands', 'Philippines') else ''}{c['country']}", aliases=h.get("aliases", []),
+                    kind="leader", level="national" if c["country"] == "United States" else "world", where=c["country"])
     if rosters and (rosters / "legislators-current.json").exists():
         for m in json.loads((rosters / "legislators-current.json").read_text()):
             term = (m.get("terms") or [{}])[-1]
@@ -106,12 +157,14 @@ def load_registry(rosters: Path | None) -> dict:
             n = m.get("name", {})
             full = n.get("official_full") or f"{n.get('first', '')} {n.get('last', '')}".strip()
             st = term.get("state")
-            role = (f"U.S. Senator from {st}" if term.get("type") == "sen"
-                    else f"U.S. Representative, {st}-{term.get('district')}")
-            add(full, role, term.get("party"), aliases=[n.get("nickname") and f"{n.get('nickname')} {n.get('last')}",
-                                                       f"{n.get('first')} {n.get('last')}"],
-                kind="legislator", bioguide=m.get("id", {}).get("bioguide"), state=st,
-                chamber="senate" if term.get("type") == "sen" else "house", last=n.get("last"))
+            sen = term.get("type") == "sen"
+            role = "U.S. Senator" if sen else "U.S. Representative"
+            where = US_STATES.get(st, st) if sen else f"{US_STATES.get(st, st)}, district {term.get('district')}"
+            first, last = n.get("first") or "", n.get("last") or ""
+            als = [n.get("nickname") and f"{n.get('nickname')} {last}", f"{first} {last}",
+                   NICK.get(first.lower()) and f"{NICK[first.lower()]} {last}"]
+            add(full, role, term.get("party"), aliases=als, kind="legislator", level="state" if st == "NY" else "national", where=where,
+                bioguide=m.get("id", {}).get("bioguide"), state=st, chamber="senate" if sen else "house", last=last)
     for v in reg.values():
         v["aliases"] = sorted(a for a in v["aliases"] if a and a != fold(v["name"]))
     return reg
@@ -121,15 +174,28 @@ def load_registry(rosters: Path | None) -> dict:
 # Lamberth"). An office in front of a name marks a public official, so the quote can be a puzzle;
 # the office becomes the role hint. Fragments left by the extractor ("State Marco Rubio" from
 # "Secretary of State Marco Rubio") are recovered from the item's own text.
-TITLE = re.compile(r"^(?P<title>(?:(?:U\.?S\.?|US|UN|State|Deputy|Former|Acting|Interior|Foreign|Defense|Finance|Prime|Vice|Chief|District|Federal|Senior|Majority|Minority|House|Senate|Council|City|County|Assembly|FBI|CIA|Supreme Court|Appeals Court|Circuit)\s+)*"
-                   r"(?:President|Prime Minister|Minister|Secretary|Director|Speaker|Judge|Justice|Attorney General|Mayor|Governor|Gov\.?|Senator|Sen\.?|Rep\.?|Representative|Ambassador|Envoy|Chair(?:man|woman)?|Commissioner|Council Member|Councilmember|Leader|Spokes(?:person|man|woman)|Chancellor|King|Queen|Pope|General|Admiral|CEO|Lieutenant Governor|Comptroller|Assemblymember|Legislator|Supervisor|Superintendent))\s+"
+TITLE = re.compile(r"^(?:(?!(?:State|Deputy|Former|Acting|Interior|Foreign|Defense|Finance|Prime|Vice|Chief|District|Federal|Senior|Majority|Minority|House|Senate|Council|City|County|Town|Assembly|White|Press)\b)(?P<place>[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?=(?:[A-Z][\w.]*\s+)*?(?:President|Prime Minister|Premier|Minister|Secretary|Mayor|Governor|Senator|Congress(?:man|woman)|Supervisor|Legislator|Executive|Assemblymember)\b))?"
+                   r"(?P<title>(?:(?:U\.?S\.?|US|UN|State|Deputy|Former|Acting|Interior|Foreign|Defense|Finance|Prime|Vice|Chief|District|Federal|Senior|Majority|Minority|House|Senate|Council|City|County|Town|Assembly|White House|Press|FBI|CIA|Supreme Court|Appeals Court|Circuit)\s+)*"
+                   r"(?:President|Prime Minister|Premier|Minister|Secretary|Director|Speaker|Judge|Justice|Attorney General|Mayor|Governor|Gov\.?|Senator|Sen\.?|Rep\.?|Representative|Congress(?:man|woman|member)|Ambassador|Envoy|Chair(?:man|woman)?|Commissioner|Council Members?|Councilmember|Leader|Spokes(?:person|man|woman)|Chancellor|King|Queen|Pope|General|Admiral|CEO|Lieutenant Governor|Comptroller|Assemblymember|Legislator|Supervisor|Superintendent|Executive))\s+"
                    r"(?P<name>[A-Z][\w’'.-]+(?:\s+[A-Z][\w’'.-]+){1,3})$")
 FRAGMENT = re.compile(r"^(?P<frag>State|UN|U\.N\.|NATO|Ukraine|Russia|Israel|Treasury|Defense|Justice|Homeland Security)\s+(?P<name>[A-Z][\w’'.-]+(?:\s+[A-Z][\w’'.-]+){1,2})$")
+OFFICE = (r"(?:President|Prime Minister|Premier|Minister|Secretary|Press Secretary|Director|Speaker|Judge|Justice|Attorney General|Mayor|Governor|"
+          r"Senator|Representative|Congress(?:man|woman|member)|Ambassador|Envoy|Chair(?:man|woman)?|Commissioner|Council ?Member|Leader|"
+          r"Chancellor|Comptroller|Assemblymember|Assembly ?member|Legislator|Supervisor|Superintendent|County Executive)")
+# "White House press secretary Katie Zacharia said …": a bare name in the quote's "by", with the office
+# right before it in the item's own text.
+IN_TEXT = r"(?P<office>(?:(?:[A-Z][\w.]*|state|county|city|town|press|deputy|former)\s+){{0,3}}" + OFFICE + r")\s+{name}\b"
+# "Ukrainian President …", "Alberta Premier …", "Wallkill Supervisor …": the word before the office
+# says where. Demonyms map to the country for the "where" hint.
+DEMONYM = {"Ukrainian": "Ukraine", "Russian": "Russia", "Israeli": "Israel", "French": "France", "German": "Germany", "British": "United Kingdom",
+           "Canadian": "Canada", "Mexican": "Mexico", "Chinese": "China", "Japanese": "Japan", "Indian": "India", "Brazilian": "Brazil",
+           "Albanian": "Albania", "Italian": "Italy", "Spanish": "Spain", "Polish": "Poland", "Turkish": "Turkey", "Iranian": "Iran",
+           "Palestinian": "Palestine", "Australian": "Australia", "Venezuelan": "Venezuela", "Argentine": "Argentina", "Korean": "South Korea"}
 
 
 def find_speaker(reg: dict, by: str, text: str = "") -> dict | None:
     by = re.sub(r"\s+", " ", by or "").strip()
-    k = fold(by)
+    k = fold(strip_suffix(by))
     if k in reg:
         return reg[k]
     for v in reg.values():
@@ -137,9 +203,21 @@ def find_speaker(reg: dict, by: str, text: str = "") -> dict | None:
             return v
     m = TITLE.match(by)
     if m:
-        name, title = m.group("name"), m.group("title")
+        name, title, place = strip_suffix(m.group("name")), m.group("title"), m.group("place")
         known = find_speaker(reg, name) if fold(name) != k else None
-        return known or {"name": name, "role": title, "party": None, "aliases": [], "kind": "official"}
+        if known:
+            return known
+        where = DEMONYM.get(place, place) if place else None
+        lvl = "state" if where == "New York" else "world" if where in DEMONYM.values() else None
+        title = re.sub(r"\bMembers\b", "Member", title)
+        return {"name": name, "role": f"{place} {title}" if place and place not in DEMONYM else title, "party": None, "aliases": [],
+                "kind": "official", "level": lvl, "where": where}
+    if text and re.fullmatch(r"[A-Z][\w’'.-]+(?:\s+[A-Z][\w’'.-]+){1,2}", by):
+        m = re.search(IN_TEXT.format(name=re.escape(by)), text, re.I)
+        if m and not re.match(r"(former|ex-)", m.group("office"), re.I):
+            office = re.sub(r"\s+", " ", m.group("office")).strip()
+            office = office[0].upper() + office[1:]
+            return {"name": strip_suffix(by), "role": office, "party": None, "aliases": [], "kind": "official", "level": None, "where": None}
     m = FRAGMENT.match(by)
     if m and text:
         name = m.group("name")
@@ -177,11 +255,66 @@ def mask(text: str, names: list[str]) -> str:
 
 
 # ------------------------------------------------------------------ Who said it
-def who_said_it(data, reg, now, drops) -> list[dict]:
+_COUNTRIES: list[str] = []
+
+
+def countries() -> list[str]:
+    if not _COUNTRIES:
+        wp = ROOT / "world.yaml"
+        _COUNTRIES.extend(sorted((c["country"] for c in ((yaml.safe_load(wp.read_text()) or {}).get("countries", []) if wp.exists() else [])
+                                  if c.get("country") and c["country"] != "United States"), key=len, reverse=True))
+    return _COUNTRIES
+
+
+def initials(name: str) -> str:
+    parts = [p for p in re.findall(r"[A-Za-zÀ-ÿ’'-]+", strip_suffix(name)) if len(p) > 1 or p.isupper()]
+    if not parts:
+        return ""
+    return " ".join(p[0].upper() + "." for p in (parts[0], parts[-1]) if p) if len(parts) > 1 else parts[0][0].upper() + "."
+
+
+def speaker_key(name: str) -> str:
+    """A hash of the speaker, for "one quote per speaker per week" (hash log: hashes only)."""
+    return "spk" + pid("speaker", fold(strip_suffix(name)))
+
+
+def speaker_where(sp: dict, it: dict) -> tuple[str, str]:
+    """(level, where) for the second hint and the local-first ordering."""
+    if sp.get("level") and sp.get("where"):
+        return sp["level"], sp["where"]
+    scope = it.get("scope")
+    text = f"{it.get('title', '')} {it.get('summary', '')}"
+    if scope == "local":
+        return sp.get("level") or "local", sp.get("where") or "Hudson Valley"
+    if scope == "state":
+        return sp.get("level") or "state", sp.get("where") or "New York State"
+    if sp.get("where"):
+        return sp.get("level") or ("world" if scope == "world" else "national"), sp["where"]
+    if scope == "world":
+        c = next((c for c in countries() if re.search(rf"\b{re.escape(c)}\b", text)), None)
+        return "world", c or "outside the U.S."
+    return "national", "United States"
+
+
+def leaks(title: str, sp: dict) -> bool:
+    """A context line that names the speaker (or their office) gives the answer away."""
+    t = fold(title)
+    names = [fold(sp["name"]), *sp.get("aliases", [])]
+    parts = {w for n in names for w in n.split() if len(w) > 2}
+    if any(re.search(rf"\b{re.escape(w)}\b", t) for w in parts):
+        return True
+    role = fold(sp.get("role") or "")
+    return bool(role) and len(role) > 6 and role in t
+
+
+def who_said_it(data, reg, now, drops, week_speakers=frozenset()) -> list[dict]:
+    """One quote per speaker (and none from a speaker already offered earlier this ISO week),
+    local, state and followed speakers ahead of national and world ones, newest first within that.
+    Hints go role → where → initials; party is the roster's (members of Congress) or None."""
     c = CFG["who_said_it"]
     items, threads, story_of = index(data)
     cut = now - timedelta(days=c["window_days"])
-    out, seen = [], set()
+    cands, seen = [], set()
     for it in data.get("items", []):
         t = parse_t(it.get("t") or it.get("published"))
         if not t or t < cut or not it.get("quotes"):
@@ -209,21 +342,52 @@ def who_said_it(data, reg, now, drops) -> list[dict]:
             if key in seen:
                 continue
             seen.add(key)
+            level, where = speaker_where(sp, it)
             accept = sorted({fold(sp["name"]), fold(sp["name"].split()[-1]), *sp["aliases"]})
-            out.append({
+            title = it.get("title") or ""
+            cands.append({
                 "id": "w" + key, "quote": text, "answer": sp["name"], "accept": accept,
-                "role": sp.get("role"), "party": sp.get("party"),
-                "context": mask(it.get("title") or "", [sp["name"]]),
+                "role": sp.get("role"), "party": sp.get("party") if sp.get("kind") == "legislator" else None,
+                "level": level, "where": where, "speaker_key": speaker_key(sp["name"]),
+                "context": None if leaks(title, sp) else title,
                 "outlet": it.get("source"), "t": iso(t), "link": it.get("link"), "item": it["id"],
-                **ctx, "hints": [t.astimezone(NY).strftime("%A, %B %-d"), it.get("source") or "", sp.get("role") or ""],
+                **ctx, "hints": [sp.get("role") or "", where or "", initials(sp["name"])],
+                "hint_labels": ["Role", "Where", "Initials"],
             })
-    out.sort(key=lambda x: x["t"], reverse=True)          # newest first …
-    out.sort(key=lambda x: not x["followed"])              # … followed threads ahead (stable sort)
+    cands.sort(key=lambda x: x["t"], reverse=True)                       # newest first …
+    cands.sort(key=lambda x: (not x["followed"], LEVEL_RANK.get(x["level"], 2)))   # … followed, then local/state first
+    out, speakers = [], set()
+    for q in cands:
+        if q["speaker_key"] in week_speakers:
+            drops.append(("who_said_it", "speaker already quoted this week"))
+            continue
+        if q["speaker_key"] in speakers:
+            continue                                                        # one quote per speaker
+        speakers.add(q["speaker_key"])
+        out.append(q)
     return out[: c["pool_size"]]
 
 
 def iso(t: datetime) -> str:
     return t.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+class QuoteBudget:
+    """No single quote feeds more than two games (who said it, cryptoquote, Friday quiz, meta, keyed /
+    Patristocrat). Quote ids are burned once published, so the cap holds across the week too."""
+
+    def __init__(self, cap: int = 2):
+        self.cap, self.uses = cap, {}
+
+    def ok(self, qid: str, game: str) -> bool:
+        u = self.uses.get(qid, set())
+        return game in u or len(u) < self.cap
+
+    def take(self, qid: str, game: str) -> bool:
+        if not self.ok(qid, game):
+            return False
+        self.uses.setdefault(qid, set()).add(game)
+        return True
 
 
 # ------------------------------------------------------------------ Cryptoquote
@@ -292,10 +456,13 @@ def crypt_difficulty(f: dict) -> int:
     return 1 if score >= 6 else 2 if score >= 2 else 3
 
 
-def cryptoquotes(wsi: list[dict], seed: str, drops) -> list[dict]:
+def cryptoquotes(wsi: list[dict], seed: str, drops, budget: QuoteBudget | None = None) -> list[dict]:
     c = CFG["cryptoquote"]
     out = []
     for q in wsi:
+        if budget and not budget.ok(q["id"], "cryptoquote"):
+            drops.append(("cryptoquote", "quote already feeds two games"))
+            continue
         n = sum(ch.isalpha() for ch in q["quote"])
         if not (c["min_letters"] <= n <= c["max_letters"]):
             drops.append(("cryptoquote", f"length {n} letters outside {c['min_letters']}–{c['max_letters']}"))
@@ -316,7 +483,11 @@ def cryptoquotes(wsi: list[dict], seed: str, drops) -> list[dict]:
                     "given": next((p for p in sorted({ch for ch in plain.upper() if ch.isalpha()}, key=lambda ch: -plain.upper().count(ch))), None)})
         assert all(k != v for k, v in key.items())
     out.sort(key=lambda x: x["tier"])
-    return out[: c["pool_size"]]
+    out = out[: c["pool_size"]]
+    for x in out:
+        if budget:
+            budget.take(x["source"], "cryptoquote")
+    return out
 
 
 # ------------------------------------------------------------------ Weekend ciphers
@@ -357,38 +528,46 @@ def k1_key(word: str, rng: random.Random) -> dict | None:
     return None
 
 
-def weekend_ciphers(wsi: list[dict], seed: str, drops) -> dict:
+def weekend_ciphers(wsi: list[dict], seed: str, drops, budget: QuoteBudget | None = None, keyed: bool = True, patristocrat: bool = True) -> dict:
+    """Friday's keyed Aristocrat and Sunday's Patristocrat, each built on its own day only (so the
+    quote isn't spent on a day it can't be played). A null cipher carries its reason on the health row."""
     rng = random.Random(seed + "weekend")
-    words = [w for w in KEYWORDS if len(set(w)) == len(w)]
+    budget = budget or QuoteBudget()
     kw = week_keyword()
     out = {"keyed": None, "patristocrat": None}
-    # The quote must use every letter of the keyword, or the keyword can't fully appear in the worksheet.
-    long_q = sorted([q for q in wsi if 70 <= sum(c.isalpha() for c in q["quote"]) <= 160 and set(kw) <= set(q["quote"].upper())], key=lambda q: -len(q["quote"]))
-    if long_q:
-        q = long_q[0]
-        key = k1_key(kw, rng)
-        plain = q["quote"].replace("’", "'").upper()
-        out["keyed"] = {"id": "kk" + q["id"][1:], "keyword": kw, "cipher": "".join(key.get(c, c) for c in plain), "plain": plain,
-                        "speaker": q["answer"], "role": q.get("role"), "outlet": q.get("outlet"), "t": q.get("t"), "link": q.get("link"), "thread": q.get("thread"),
-                        "inverse": {v: k for k, v in key.items()}}
-        assert all(k != v for k, v in key.items())
-    else:
-        drops.append(("weekend_ciphers", "no quote of 70–160 letters for the keyed cipher"))
-    pat = [q for q in wsi if 70 <= sum(c.isalpha() for c in q["quote"]) <= 110 and (not long_q or q is not long_q[0])]
-    if pat:
-        q = pat[0]
-        key = derangement(rng)
-        letters = "".join(c for c in q["quote"].upper() if c.isalpha())
-        cipher = "".join(key[c] for c in letters)
-        groups = " ".join(cipher[i:i + 5] for i in range(0, len(cipher), 5))
-        words_ = [(m.start(), m.group(0)) for m in re.finditer(r"[A-Za-z]+", q["quote"])]
-        cw = max(words_, key=lambda w: len(w[1]))
-        at = sum(c.isalpha() for c in q["quote"][:cw[0]])
-        out["patristocrat"] = {"id": "pp" + q["id"][1:], "cipher": groups, "plain": letters, "speaker": q["answer"], "role": q.get("role"),
-                               "outlet": q.get("outlet"), "t": q.get("t"), "link": q.get("link"), "thread": q.get("thread"), "quote": q["quote"],
-                               "crib": {"word": cw[1].upper(), "at": at}}
-    else:
-        drops.append(("weekend_ciphers", "no quote of 70–110 letters for the Patristocrat"))
+    if keyed:
+        # The quote must use every letter of the keyword, or the keyword can't fully appear in the worksheet.
+        long_q = sorted([q for q in wsi if 70 <= sum(c.isalpha() for c in q["quote"]) <= 160 and set(kw) <= set(q["quote"].upper())
+                         and budget.ok(q["id"], "keyed")], key=lambda q: -len(q["quote"]))
+        if long_q:
+            q = long_q[0]
+            budget.take(q["id"], "keyed")
+            key = k1_key(kw, rng)
+            plain = q["quote"].replace("’", "'").upper()
+            out["keyed"] = {"id": "kk" + q["id"][1:], "source": q["id"], "keyword": kw, "cipher": "".join(key.get(c, c) for c in plain), "plain": plain,
+                            "speaker": q["answer"], "role": q.get("role"), "outlet": q.get("outlet"), "t": q.get("t"), "link": q.get("link"), "thread": q.get("thread"),
+                            "inverse": {v: k for k, v in key.items()}}
+            assert all(k != v for k, v in key.items())
+        else:
+            drops.append(("keyed", f"no quote of 70–160 letters uses every letter of {kw}"))
+    if patristocrat:
+        pat = [q for q in wsi if 70 <= sum(c.isalpha() for c in q["quote"]) <= 110 and budget.ok(q["id"], "patristocrat")
+               and not (out["keyed"] and out["keyed"]["source"] == q["id"])]
+        if pat:
+            q = pat[0]
+            budget.take(q["id"], "patristocrat")
+            key = derangement(rng)
+            letters = "".join(c for c in q["quote"].upper() if c.isalpha())
+            cipher = "".join(key[c] for c in letters)
+            groups = " ".join(cipher[i:i + 5] for i in range(0, len(cipher), 5))
+            words_ = [(m.start(), m.group(0)) for m in re.finditer(r"[A-Za-z]+", q["quote"])]
+            cw = max(words_, key=lambda w: len(w[1]))
+            at = sum(c.isalpha() for c in q["quote"][:cw[0]])
+            out["patristocrat"] = {"id": "pp" + q["id"][1:], "source": q["id"], "cipher": groups, "plain": letters, "speaker": q["answer"], "role": q.get("role"),
+                                   "outlet": q.get("outlet"), "t": q.get("t"), "link": q.get("link"), "thread": q.get("thread"), "quote": q["quote"],
+                                   "crib": {"word": cw[1].upper(), "at": at}}
+        else:
+            drops.append(("patristocrat", "no quote of 70–110 letters left this week"))
     return out
 
 
@@ -404,13 +583,14 @@ LAGRANGE UNIONVALE DOVER RHINEBECK REDHOOK CLINTON WASHINGTON KENT PUTNAM YORKTO
 CORTLANDT NYACK HAVERSTRAW PIERMONT SUFFERN NEWWINDSOR WOODBURY MONROE CHESTER FLORIDA""".split()
 
 
-def meta(wsi, dv, dk, seed, drops) -> dict | None:
+def meta(wsi, dv, dk, seed, drops, budget: QuoteBudget | None = None) -> dict | None:
     rng = random.Random(seed + "meta")
+    budget = budget or QuoteBudget()
     feeders = []
     kw = week_keyword()
     feeders.append({"clue": "Friday's keyword (it's in the keyed cipher's worksheet)", "answer": kw, "src": "keyed"})
-    for q in wsi[:8]:
-        feeders.append({"clue": f"Said this week: “{q['quote'][:120]}{'…' if len(q['quote']) > 120 else ''}” (surname)", "answer": fold(q["answer"]).split()[-1].upper(), "src": "who_said_it", "link": q.get("link")})
+    for q in [x for x in wsi if budget.ok(x["id"], "meta")][:8]:
+        feeders.append({"clue": f"Said this week: “{q['quote'][:120]}{'…' if len(q['quote']) > 120 else ''}” (surname)", "answer": fold(q["answer"]).split()[-1].upper(), "src": "who_said_it", "link": q.get("link"), "qid": q["id"]})
     for d in dv[:4]:
         for b in d["defectors"][:2]:
             feeders.append({"clue": f"Broke with the {'Republicans' if b['party'] == 'R' else 'Democrats'} on {d['bill'] or 'a House vote'} ({d['date']}), from {b['state']} (surname)",
@@ -454,6 +634,9 @@ def meta(wsi, dv, dk, seed, drops) -> dict | None:
                 break
         if not unique:
             continue
+        for c in chosen:
+            if c.get("qid"):
+                budget.take(c["qid"], "meta")
         return {"id": "mt" + pid(seed, ans), "category": "a Hudson Valley place", "length": need, "answer": ans,
                 "feeders": [{"clue": c["clue"], "answer": c["answer"], "index": c["index"], "link": c.get("link"), "src": c["src"]} for c in chosen],
                 "solvable_missing": k_hide}
@@ -927,11 +1110,13 @@ def ledger(votes_dv, rosters, seed, now, drops) -> list[dict]:
 # Ten templated questions from the week's verified data, each with its source; multiple choice so
 # it plays in a gap; distractors are the same kind of thing and checked not to also be true. The
 # last question carries a wager (sure / think / guess). No AI-written questions, no point loss.
-def friday_quiz(wsi, dv, lg, data, seed, drops) -> dict | None:
+def friday_quiz(wsi, dv, lg, data, seed, drops, budget: QuoteBudget | None = None) -> dict | None:
     rng = random.Random(seed + "friday")
+    budget = budget or QuoteBudget()
     qs = []
     speakers = sorted({q["answer"] for q in wsi})
-    for q in wsi[:4]:
+    for q in [x for x in wsi if budget.ok(x["id"], "friday_quiz")][:2]:
+        budget.take(q["id"], "friday_quiz")
         wrong = [x for x in speakers if x != q["answer"]]
         if len(wrong) < 3:
             break
@@ -1324,8 +1509,18 @@ def main(argv=None) -> int:
             keep.append(x)
         return keep
 
-    wsi = fresh(who_said_it(data, reg, now, drops), "who_said_it")
-    cq = fresh(cryptoquotes(wsi, seed, drops), "cryptoquote")
+    d0 = date.fromisoformat(day)
+    dow = d0.weekday()
+    fri = dow == 4 or bool(os.environ.get("WIRE_FRIDAY"))
+    sat = dow == 5 or bool(os.environ.get("WIRE_SATURDAY"))
+    sun = dow == 6 or bool(os.environ.get("WIRE_SUNDAY"))
+    WEEK["day"] = day
+    week_start = (d0 - timedelta(days=dow)).isoformat()
+    week_speakers = {k for k, d in used.items() if k.startswith("spk") and week_start <= d < day}
+    budget = QuoteBudget()
+    wsi = fresh(who_said_it(data, reg, now, drops, week_speakers), "who_said_it")
+    for q in wsi:
+        budget.take(q["id"], "who_said_it")
     grid = connections(data, reg, a.rosters, seed, now, drops)
     dv, vote_errors = [], {}
     if a.votes:
@@ -1369,17 +1564,19 @@ def main(argv=None) -> int:
     lib = library(a.rosters, [], data, now)
     left = who_left(lib, a.snapshots, day)
     lg = legal(data, now, drops, a.scotus.parent / "openleg.json" if a.scotus else None)
-    WEEK["day"] = day
-    wk = weekend_ciphers(wsi, seed, drops)
+    wk = weekend_ciphers(wsi, seed, drops, budget, keyed=fri, patristocrat=sun)
     cf = casefile(seed, drops)
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import tactics
     tx = tactics.pool(seed)
     if not tx:
         drops.append(("tactics", "no board passed the one-to-three-winning-lines test"))
-    mt = meta(wsi, dv, dk, seed, drops) if date.fromisoformat(day).weekday() == 5 or os.environ.get("WIRE_SATURDAY") else None
     ldg = fresh(ledger(dv, a.rosters, seed, now, drops), "ledger")
-    fq = friday_quiz(wsi, dv, lg, data, seed, drops) if date.fromisoformat(day).weekday() == 4 or os.environ.get("WIRE_FRIDAY") else None
+    fq = friday_quiz(wsi, dv, lg, data, seed, drops, budget) if fri else None
+    mt = meta(wsi, dv, dk, seed, drops, budget) if sat else None
+    if not WORDS:
+        drops.append(("cryptoquote", "word list missing (/usr/share/dict/words): difficulty grading and wordplay are off"))
+    cq = fresh(cryptoquotes(wsi, seed, drops, budget), "cryptoquote")
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
         "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left, "weekend": wk, "meta": mt, "casefile": cf, "tactics": tx,
@@ -1411,6 +1608,8 @@ def main(argv=None) -> int:
     if a.hashes:                                   # offered today = used; never back within 90 days
         for x in wsi + cq + dv + ldg + dk + tl + ([grid] if grid else []):
             used.setdefault(x["id"], day)
+        for q in wsi:                              # one quote per speaker per ISO week
+            used.setdefault(q["speaker_key"], day)
         a.hashes.write_text(json.dumps(used))
     print(f"[games] {day}: who said it {len(wsi)}, cryptoquote {len(cq)}, connections {'1 (shadow)' if grid else 'dropped'}; "
           f"{len(drops)} candidates dropped")
