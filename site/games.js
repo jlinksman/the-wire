@@ -115,7 +115,7 @@
   }
   function nyDay() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()); }
 
-  const NAMES = { legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
+  const NAMES = { ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
   const LOGIC_NAMES = { loopy: "Loopy", keen: "Keen", towers: "Towers", galaxies: "Galaxies", signpost: "Signpost", dominosa: "Dominosa", unequal: "Unequal", slant: "Slant", range: "Range", pattern: "Pattern" };
   function slotLine(s) {
     const p = s.puzzle || {};
@@ -123,6 +123,8 @@
     if (s.game === "chess") { const th = (p.themes || []).filter((t) => !/^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality)$/.test(t)).slice(0, 2); return "Puzzle rated " + p.rating + (th.length ? " · " + th.join(", ") : ""); }
     if (s.game === "cryptoquote") return ["", "Easy", "Medium", "Hard"][p.tier] + " · " + (p.cipher || "").replace(/[^A-Z]/g, "").length + " letters";
     if (s.game === "who_said_it") return p.outlet ? "From " + p.outlet : "This week's news";
+    if (s.game === "ledger") return "Estimate · " + ((p.estimate || {}).subject || "");
+    if (s.game === "friday_quiz") return (p.questions || []).length + " questions from the week";
     if (s.game === "legal") return (p.cards || []).map((c) => c.title.split(" — ")[0].split(" (")[0]).join(" · ");
     if (s.game === "defectors") return (p.chamber === "senate" ? "Senate" : "House") + " · " + (p.bill || "roll call " + p.num) + (p.in_news ? " · in the news" : "");
     return "";
@@ -158,7 +160,7 @@
       ...["logic", "chess"].map((b) => el("button", { class: "chip" + ((D.pick || "logic") === b ? " on" : ""), text: b === "logic" ? "Logic" : "Chess", onclick: async () => {
         try { await fetch("games", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "pick", brain: b }) }); D.pick = b; } catch (e) { /* later */ }
         openPuzzles(); } }))));
-    const bits = [st.played7 != null ? "played " + st.played7 + " of the last 7 days" : null, st.sure_right != null ? "when sure, right " + st.sure_right + "%" : null, st.chess ? "chess " + st.chess : null].filter(Boolean);
+    const bits = [st.played7 != null ? "played " + st.played7 + " of the last 7 days" : null, st.sure_right != null ? "when sure, right " + st.sure_right + "%" : null, st.chess ? "chess " + st.chess : null, st.ranges90 ? "90% ranges right " + st.ranges90.hit + " of " + st.ranges90.of : null].filter(Boolean);
     if (bits.length) nodes.push(el("p", { class: "fine", text: bits.join(" · ") }));
     const bad = (D.health || []).filter((h) => !h.made);
     if (bad.length) nodes.push(el("details", { class: "gm-health" }, el("summary", { text: "Puzzle health · " + bad.length + " generator" + (bad.length > 1 ? "s" : "") + " made nothing today" }),
@@ -173,6 +175,8 @@
     if (s.game === "logic") return logic(s);
     if (s.game === "defectors") return defectorsGame(s);
     if (s.game === "legal") return legalGame(s);
+    if (s.game === "ledger") return ledgerGame(s);
+    if (s.game === "friday_quiz") return fridayQuiz(s);
     openPuzzles();
   }
   const backBtn = () => el("button", { class: "sbtn wide", text: "‹ Puzzles", onclick: () => openPuzzles() });
@@ -416,6 +420,99 @@
     stage1();
   }
 
+  // ---------------------------------------------------------------- The Ledger
+  // A figure with a named source: give a range you're 90% sure contains it. Estimathon scoring:
+  // a hit scores ceil(high/low) − 1 (lower is better); a miss scores 10. Then "which is bigger?"
+  const fmtN = (n) => Number(n).toLocaleString("en-US");
+  function ledgerGame(s) {
+    const p = s.puzzle, f = p.estimate;
+    const t0 = Date.now();
+    const lo = el("input", { class: "tin gm-in", type: "text", inputmode: "numeric", placeholder: "Low", autocomplete: "off" });
+    const hi = el("input", { class: "tin gm-in", type: "text", inputmode: "numeric", placeholder: "High", autocomplete: "off" });
+    const msg = el("p", { class: "fine", text: "" });
+    let est = null;
+    const num = (x) => Number(String(x.value).replace(/[^0-9.]/g, ""));
+    function submit() {
+      const a = num(lo), b = num(hi);
+      if (!(a > 0) || !(b >= a)) { msg.textContent = "Give a low and a high (high ≥ low)."; return; }
+      const hit = f.a >= a && f.a <= b;
+      const score = hit ? Math.ceil(b / a) - 1 : 10;
+      est = { hit, score, a, b };
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "The Ledger" }), el("p", { class: "gm-keep", text: f.q }),
+        reveal({ ok: hit, verdict: (hit ? "Inside your range" : "Outside your range") + " · score " + score + (hit ? " (lower is better)" : ""),
+          keep: fmtN(f.a) + " " + (f.unit || ""), meta: "Your range: " + fmtN(a) + "–" + fmtN(b) + " · source: " + f.source, link: f.link, linkText: "Source ↗",
+          next: (p.pairs || []).length ? { text: "Which is bigger? ›", fn: () => pair(0, 0) } : { text: "Done ›", fn: () => finish(0) } })], "The Ledger");
+    }
+    function pair(k, right) {
+      const pr = p.pairs[k];
+      if (!pr) return finish(right);
+      const pick = (side) => {
+        const ok = (side === "a") === (pr.a.v >= pr.b.v);
+        openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Which is bigger?" }),
+          el("p", { class: "gm-keep", text: pr.a.q + ": " + fmtN(pr.a.v) }), el("p", { class: "gm-keep", text: pr.b.q + ": " + fmtN(pr.b.v) }),
+          reveal({ ok, verdict: ok ? "Right" : "Other way round", meta: "Sources: " + [...new Set([pr.a.source, pr.b.source])].join("; "), link: pr.a.link, linkText: "Source ↗",
+            next: { text: k + 1 < p.pairs.length ? "Next pair ›" : "Finish ›", fn: () => pair(k + 1, right + (ok ? 1 : 0)) } })], "The Ledger");
+      };
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Which is bigger? · " + (k + 1) + " of " + p.pairs.length }),
+        el("button", { class: "gm-slot", onclick: () => pick("a") }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: pr.a.q }))),
+        el("p", { class: "fine", text: "or" }),
+        el("button", { class: "gm-slot", onclick: () => pick("b") }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: pr.b.q }))), backBtn()], "The Ledger");
+    }
+    function finish(right) {
+      const ok = !!(est && est.hit);
+      const res = { ok, score: est ? est.score : 10, ms: Date.now() - t0, hints: 0, pairs: right };
+      send(Object.assign({ slot: s.slot, game: "ledger", puzzle: p.id, items: [] }, res));
+      markDone(s.slot, res);
+      openPuzzles();
+    }
+    [lo, hi].forEach((x) => x.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); }));
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "The Ledger" }), el("p", { class: "gm-keep", text: f.q }),
+      el("p", { class: "fine", text: "Give a range you're 90% sure contains the answer. Narrow and right scores best; a miss scores 10." }),
+      el("div", { class: "gm-range" }, lo, el("span", { text: "to" }), hi), msg,
+      el("button", { class: "sbtn primary wide", text: "Lock it in", onclick: submit }), backBtn()], "The Ledger");
+    setTimeout(() => lo.focus(), 50);
+  }
+
+  // ---------------------------------------------------------------- Friday quiz
+  // Ten questions from the week's verified data; tap an answer. The last one carries a wager:
+  // say how sure you are first (sure +3/−6, think +2/−2, guess +1/0). Every answer shows its source.
+  function fridayQuiz(s) {
+    const P = s.puzzle;
+    const t0 = Date.now();
+    let right = 0, wager = 0;
+    function q(i) {
+      const Q = P.questions[i];
+      if (!Q) return finish();
+      const last = i === P.questions.length - 1;
+      const ask = (cert) => {
+        openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz · " + (i + 1) + " of " + P.questions.length + (last ? " · wager: " + cert : "") }),
+          el("p", { class: "gm-keep", text: Q.q }),
+          ...Q.options.map((o) => el("button", { class: "gm-slot", onclick: () => answer(o, cert) }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: o })))), backBtn()], "Friday quiz");
+      };
+      const answer = (o, cert) => {
+        const ok = o === Q.answer;
+        if (ok) right += 1;
+        if (last) wager = cbm(ok, cert);
+        openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz · " + (i + 1) + " of " + P.questions.length }),
+          el("p", { class: "gm-keep", text: Q.q }),
+          reveal({ ok, verdict: ok ? "Right" : "It was " + Q.answer, keep: Q.answer, why: Q.why || null, meta: Q.source ? "Source: " + Q.source : null, link: Q.link, thread: Q.thread,
+            next: { text: last ? "Finish ›" : "Next ›", fn: () => q(i + 1) } })], "Friday quiz");
+      };
+      if (last) openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Last one: the wager" }), el("p", { class: "fine", text: "Before you see it: how sure are you that you'll get the last question?" }),
+        certButtons(ask, "Sure +3/−6 · Think so +2/−2 · Guess +1/0"), backBtn()], "Friday quiz");
+      else ask("think");
+    }
+    function finish() {
+      const ok = right / P.questions.length >= 0.6;
+      const res = { ok, score: right + wager, ms: Date.now() - t0, hints: 0 };
+      send(Object.assign({ slot: s.slot, game: "friday_quiz", puzzle: P.id, items: [] }, res));
+      markDone(s.slot, res);
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz" }),
+        reveal({ ok, verdict: right + " of " + P.questions.length + (wager ? " · wager " + (wager > 0 ? "+" : "") + wager : ""), keep: "That's the week.", next: earlierNext() })], "Friday quiz");
+    }
+    q(0);
+  }
+
   // ---------------------------------------------------------------- Cryptoquote
   // Tap a letter, type its replacement: it fills every instance; a letter already used elsewhere
   // moves here. Hints: a letter → a crib (a word and its position) → the speaker. Check costs a point.
@@ -626,6 +723,6 @@
         el("span", { class: "bc-s", text: n + " today" + (done ? " · " + done + " done" : "") + " · a break from reading" })));
   }
 
-  window.WireGames = { openPuzzles, homeCard, accepts, flush };
+  window.WireGames = { openPuzzles, homeCard, accepts, flush, play };
   flush();
 })();

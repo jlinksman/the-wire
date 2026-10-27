@@ -569,6 +569,165 @@ def legal(data, now, drops) -> dict:
     return {"cards": cards, "featured": featured[:5], "order": ["environmental", "torts"]}
 
 
+# ------------------------------------------------------------------ The Ledger
+# Estimation on figures with a named public source: Beacon enrollment and results (Board of
+# Elections), House roll-call tallies, members' years in office (congress-legislators). Joe gives a
+# range; Estimathon scoring. "Which is bigger" pairs always differ by at least 2x. Figures are spread
+# across subjects; nothing contested is framed as a misconception.
+def ledger_figures(votes_dv, rosters, now) -> list[dict]:
+    figs = []
+    be = yaml.safe_load((ROOT / "beacon_elections.yaml").read_text()) or {}
+    enr = (be.get("enrollment") or [])[-1:]
+    for e in enr:
+        ds = e.get("districts") or []
+        if ds:
+            act = sum(sum(d["active"].values()) for d in ds)
+            figs.append({"q": f"How many active registered voters did the City of Beacon have on {e['as_of']}?", "a": act, "unit": "voters",
+                         "subject": "Beacon voters", "source": "NYS Board of Elections enrollment by election district", "link": e["source"].split(" ")[0]})
+            blank = sum(d["active"].get("BLANK", 0) for d in ds)
+            figs.append({"q": f"How many of Beacon's active voters were enrolled in no party on {e['as_of']}?", "a": blank, "unit": "voters",
+                         "subject": "Beacon voters", "source": "NYS Board of Elections enrollment by election district", "link": e["source"].split(" ")[0]})
+            for w in sorted({d["ward"] for d in ds}):
+                n = sum(sum(d["active"].values()) for d in ds if d["ward"] == w)
+                figs.append({"q": f"Active voters in Beacon's Ward {w} ({e['as_of']})", "a": n, "unit": "voters", "subject": "Beacon wards", "pair_only": True,
+                             "source": "NYS Board of Elections", "link": e["source"].split(" ")[0]})
+    for r in be.get("results") or []:
+        tot = (r.get("beacon_totals") or {}).get("total_votes")
+        cands = sorted(r.get("candidates") or [], key=lambda c: -(c.get("votes") or 0))
+        if cands and cands[0].get("votes"):
+            figs.append({"q": f"In Beacon's {r['year']} race for {r['office']}, how many votes did the top finisher ({cands[0]['name']}) receive in Beacon?",
+                         "a": cands[0]["votes"], "unit": "votes", "subject": f"Beacon {r['year']} election",
+                         "source": "Dutchess County Board of Elections certified results", "link": r["source"]})
+        if tot:
+            figs.append({"q": f"Total votes cast in Beacon for {r['office']}, {r['year']}", "a": tot, "unit": "votes", "subject": f"Beacon {r['year']} election", "pair_only": True,
+                         "source": "Dutchess County Board of Elections", "link": r["source"]})
+    for d in votes_dv[:6]:
+        yea = sum(t["yea"] for t in d["tally"].values())
+        nay = sum(t["nay"] for t in d["tally"].values())
+        figs.append({"q": f"How many members voted yes on {d['bill'] or 'roll call ' + str(d['num'])} ({d['desc'][:90]}) on {d['date']}?",
+                     "a": yea, "unit": "votes", "subject": "House votes", "source": "House Clerk roll call", "link": d["link"]})
+        if nay:
+            figs.append({"q": f"No votes on {d['bill'] or 'roll call ' + str(d['num'])}, {d['date']}", "a": nay, "unit": "votes", "subject": "House votes", "pair_only": True,
+                         "source": "House Clerk roll call", "link": d["link"]})
+    if rosters and (rosters / "legislators-current.json").exists():
+        for m in json.loads((rosters / "legislators-current.json").read_text()):
+            terms = m.get("terms") or []
+            if terms and terms[-1].get("state") == "NY":
+                start = min(t["start"] for t in terms)
+                yrs = now.year - int(start[:4])
+                if yrs >= 2:
+                    nm = m["name"].get("official_full") or m["name"]["last"]
+                    kind = "Senator" if terms[-1]["type"] == "sen" else "Rep."
+                    figs.append({"q": f"How many years has {kind} {nm} served in Congress (counting from first swearing-in)?", "a": yrs, "unit": "years",
+                                 "subject": "NY delegation", "source": "congress-legislators (CC0)", "link": f"https://bioguide.congress.gov/search/bio/{m['id']['bioguide']}"})
+    return [f for f in figs if f["a"] and f["a"] > 0]
+
+
+def ledger(votes_dv, rosters, seed, now, drops) -> list[dict]:
+    figs = ledger_figures(votes_dv, rosters, now)
+    rng = random.Random(seed + "ledger")
+    single = [f for f in figs if not f.get("pair_only")]
+    out = []
+    rng.shuffle(single)
+    subjects = set()
+    for f in single:
+        if f["subject"] in subjects:
+            continue
+        subjects.add(f["subject"])
+        pairs = []
+        others = [g for g in figs if g is not f and g["subject"] != f["subject"]]
+        rng.shuffle(others)
+        for a in others:
+            for b in others:
+                if a is b or a["unit"] != b["unit"] or a in [p[0] for p in pairs] or b in [p[1] for p in pairs]:
+                    continue
+                hi, lo = max(a["a"], b["a"]), min(a["a"], b["a"])
+                if lo and hi / lo >= 2:
+                    pairs.append((a, b))
+                    break
+            if len(pairs) >= 2:
+                break
+        pid_ = "l" + pid(seed, f["q"])
+        out.append({"id": pid_, "estimate": f, "pairs": [{"a": {"q": a["q"], "v": a["a"], "source": a["source"], "link": a["link"]},
+                                                         "b": {"q": b["q"], "v": b["a"], "source": b["source"], "link": b["link"]}} for a, b in pairs]})
+        if len(out) >= 6:
+            break
+    if not out:
+        drops.append(("ledger", "no sourced figures"))
+    return out
+
+
+# ------------------------------------------------------------------ Friday quiz
+# Ten templated questions from the week's verified data, each with its source; multiple choice so
+# it plays in a gap; distractors are the same kind of thing and checked not to also be true. The
+# last question carries a wager (sure / think / guess). No AI-written questions, no point loss.
+def friday_quiz(wsi, dv, lg, data, seed, drops) -> dict | None:
+    rng = random.Random(seed + "friday")
+    qs = []
+    speakers = sorted({q["answer"] for q in wsi})
+    for q in wsi[:4]:
+        wrong = [x for x in speakers if x != q["answer"]]
+        if len(wrong) < 3:
+            break
+        opts = rng.sample(wrong, 3) + [q["answer"]]
+        rng.shuffle(opts)
+        qs.append({"kind": "who", "q": f"Who said: “{q['quote']}”", "options": opts, "answer": q["answer"], "why": q.get("role") or "",
+                   "source": q.get("outlet"), "link": q.get("link"), "thread": q.get("thread"), "followed": q.get("followed")})
+    for d in dv[:2]:
+        broke = {b["name"] for b in d["defectors"]}
+        party = d["defectors"][0]["party"]
+        loyal = [m for m in d.get("ny", []) if m["name"] not in broke]
+        pool_names = [b["name"] for b in d["defectors"]][:1]
+        # Distractors: same-party members who voted with their party on this roll call (from the record).
+        same = [m["name"] for m in d.get("ny", []) if m["party"] == party and m["name"] not in broke]
+        if len(same) < 3:
+            continue
+        opts = rng.sample(same, 3) + pool_names
+        rng.shuffle(opts)
+        qs.append({"kind": "defector", "q": f"On {d['bill'] or 'the House vote'} ({d['desc'][:80]}), which of these {'Republicans' if party == 'R' else 'Democrats'} broke with their party?",
+                   "options": opts, "answer": pool_names[0], "why": d["yea_meant"], "source": "House Clerk roll call", "link": d["link"], "thread": d.get("thread")})
+    cards = (lg or {}).get("cards") or []
+    if len(cards) >= 2:
+        for c in rng.sample(cards, min(2, len(cards))):
+            short = lambda t: re.sub(r"\s*\([^()]*\)\s*$", "", t)
+            other = [short(e["text"]) for x in cards if x["id"] != c["id"] for e in x["elements"]]
+            mine = [short(e["text"]) for e in c["elements"]]
+            if len(mine) < 3 or not other:
+                continue
+            odd = rng.choice(other)
+            if odd in mine:
+                continue
+            opts = rng.sample(mine, 3) + [odd]
+            rng.shuffle(opts)
+            qs.append({"kind": "law", "q": f"{c['title']}: which of these does NOT belong?", "options": opts, "answer": odd,
+                       "why": c["cite"], "source": "legal refresher card (second-checked)", "link": c["source"]})
+    items, threads, story_of = index(data)
+    outlets = sorted({it.get("source") for it in data.get("items", []) if it.get("source")})
+    for th in [t for t in data.get("threads", []) if t.get("followed")] + [t for t in data.get("threads", []) if not t.get("followed")]:
+        if len([q for q in qs if q["kind"] == "first"]) >= 2:
+            break
+        if blocked(th.get("title")) or INSTITUTIONAL.search(th.get("title") or "") or len(th.get("title") or "") < 30 or th.get("kind") not in (None, "event", "story"):
+            continue
+        mem = sorted((items[m] for m in th.get("members", []) if m in items), key=lambda it: it.get("t") or "")
+        if len(mem) < 3 or not mem[0].get("source"):
+            continue
+        first = mem[0]["source"]
+        later = sorted({it.get("source") for it in mem[1:] if it.get("source") and it.get("source") != first})
+        if len(later) < 3:
+            continue
+        opts = rng.sample(later, 3) + [first]
+        rng.shuffle(opts)
+        qs.append({"kind": "first", "q": f"Of the outlets The Wire follows, which reported this first: “{th['title']}”?", "options": opts, "answer": first,
+                   "why": "First item in the thread, " + (mem[0].get("t") or "")[:16].replace("T", " ") + " UTC", "source": first, "link": mem[0].get("link"),
+                   "thread": th["id"], "followed": th.get("followed")})
+    if len(qs) < 6:
+        drops.append(("friday_quiz", f"only {len(qs)} questions"))
+        return None
+    # The two hardest come from followed threads when there are any; the last carries the wager.
+    qs.sort(key=lambda q: (bool(q.get("followed")), q["kind"] == "law"))
+    return {"id": "fq" + pid(seed), "questions": qs[:10]}
+
+
 # ------------------------------------------------------------------ run
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
@@ -621,10 +780,12 @@ def main(argv=None) -> int:
         for ch, err in vote_errors.items():
             drops.append(("defectors", f"{ch} votes unavailable: {err}"))
     lg = legal(data, now, drops)
+    ldg = fresh(ledger(dv, a.rosters, seed, now, drops), "ledger")
+    fq = friday_quiz(wsi, dv, lg, data, seed, drops) if date.fromisoformat(day).weekday() == 4 or os.environ.get("WIRE_FRIDAY") else None
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
-        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg,
-        "health": health(wsi, cq, grid, drops, dv, lg),
+        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq,
+        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq),
     }
     if a.quiz:
         try:
@@ -638,7 +799,7 @@ def main(argv=None) -> int:
             print(f"[games] audio quiz skipped: {type(exc).__name__}")
     Path(a.out).write_text(json.dumps(pool, ensure_ascii=False, separators=(",", ":")))
     if a.hashes:                                   # offered today = used; never back within 90 days
-        for x in wsi + cq + dv + ([grid] if grid else []):
+        for x in wsi + cq + dv + ldg + ([grid] if grid else []):
             used.setdefault(x["id"], day)
         a.hashes.write_text(json.dumps(used))
     print(f"[games] {day}: who said it {len(wsi)}, cryptoquote {len(cq)}, connections {'1 (shadow)' if grid else 'dropped'}; "
@@ -646,10 +807,10 @@ def main(argv=None) -> int:
     return 0
 
 
-def health(wsi, cq, grid, drops, dv=(), lg=None) -> list[dict]:
+def health(wsi, cq, grid, drops, dv=(), lg=None, ldg=None, fq=None) -> list[dict]:
     lg = lg or {"cards": []}
     rows = []
-    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv)), ("legal", len(lg["cards"]))):
+    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv)), ("legal", len(lg["cards"])), ("ledger", len(ldg or [])), ("friday_quiz", 1 if fq else 0)):
         why = {}
         for g, r in drops:
             if g == game:

@@ -109,6 +109,8 @@ function assemble(st, pool, chess, today) {
   const dow = weekday(today);
   let news = null;
   if (dow === 2) { const d = pickDefectors(st, pool, today); if (d) news = { game: "defectors", puzzle: d }; }
+  if (dow === 4) { const l = ((pool && pool.ledger) || []).find((x) => !st.served[x.id]); if (l) news = { game: "ledger", puzzle: l }; }
+  if (dow === 5 && pool && pool.friday_quiz && !st.served[pool.friday_quiz.id]) news = { game: "friday_quiz", puzzle: pool.friday_quiz };
   let wsi = null;
   if (!news) { wsi = pickWho(st, pool, today); if (wsi) news = { game: "who_said_it", puzzle: wsi }; }
   if (!news) { const d = pickDefectors(st, pool, today); if (d) news = { game: "defectors", puzzle: d }; }
@@ -288,6 +290,7 @@ function stats(st, today) {
     chess: (st.ladder.chess || {}).rating || null,
     tiers: Object.fromEntries(Object.entries(st.ladder).filter(([k]) => k !== "chess").map(([k, v]) => [k, v.tier])),
     due: Object.values(st.items).filter((x) => !x.retired && x.due && x.due <= today).length,
+    ranges90: (() => { const L = st.results.filter((r) => r.game === "ledger" && r.day >= addDays(today, -60)); return L.length >= 3 ? { hit: L.filter((r) => r.ok).length, of: L.length } : null; })(),
   };
 }
 
