@@ -47,11 +47,14 @@ lunch, 20 minutes at night, the car). Separate from the political Quizzes.
    quiet weekly line "when sure, right 91%". Hints shrink the cue and cost points.
 7. **Editorial guardrails** (hard exclusion list in the generator). Never a puzzle: death,
    casualty or injury counts; victims, hostages, the bereaved; disasters while ongoing;
-   suicides; private individuals (blotter, minors, defendants who aren't officials); anyone
-   speaking of their own loss; Joe's own business or litigation. War / attack / disaster
-   threads (flag in editorial.yaml) get games only on their institutional side. Who said it:
-   quotes for substance; hints never give party; no side over 60% of a week's speakers (counted
-   in KV only). Defectors alternate between the parties across each month (share checked in KV).
+   suicides; fires, deadly outbreaks, riots and unrest while they're news; private individuals
+   (blotter, minors, defendants who aren't officials, agenda applicants who are people);
+   anyone speaking of their own loss; Joe's own business or litigation. War / attack / disaster
+   threads (flag in editorial.yaml) get games only on their institutional side; a story with no
+   thread is judged on its own title and summary. Who said it: quotes for substance; hints never
+   give party (party comes only from the congress roster, else none); one quote per speaker a
+   week; no context line that names the speaker; no quote in more than two games; no side over
+   60% of a week's speakers (counted in KV only). Defectors alternate between the parties across each month (share checked in KV).
    Fictional fact patterns never resemble an Optima job. Geography never draws from tragedy stories; disputed borders follow Natural
    Earth's de facto view, said on the reveal. Games performance never feeds relevance.
 8. **Privacy.** Results only in KV (`games.json`, in privacy_check). The build never receives
@@ -103,7 +106,8 @@ Listen queue every day.
 
 ### 2. News slot
 - **Who said it (Mon).** The quote with its surrounding sentence shown up front (fair cold).
-  Three tries; hints date → outlet → role. Win at 2-of-3 on a three-quote day. Joe's own hit rate,
+  Three tries; hints role → where (level or country) → initials. Local, state and followed
+  speakers first. Win at 2-of-3 on a three-quote day. Joe's own hit rate,
   never an invented crowd. Library variant: **Lightning** (60 s fill-the-blank on quotes).
 - **Defectors (Tue).** Crossover roll calls only (passage, cloture, amendments), defections
   alternating between the parties across the month, with a mandatory
@@ -121,9 +125,12 @@ Listen queue every day.
   Each figure carries outlet, time and document; figures outlets disagree on are excluded; no
   contested-issue figure framed as "people get this wrong"; picks spread across subjects. Ranges
   never pre-rounded. Also "which is bigger" pairs that differ by at least 2× (Beacon budget vs a
-  county line item) and per-capita conversions.
+  county line item) and per-capita conversions; never a part against its whole (a ward against
+  the city, a winner against the race's total). Puzzle ids are the figure itself.
 - **Friday quiz.** Ten templated questions from the week's data, each linked to a thread; Beacon
-  capped at ~2; two hardest from followed threads; a final **wager** (sure/think/guess). ("Spot the
+  capped at ~2; at most two "who said it"; three or four typed answers; the law odd-one-out a near
+  miss from a card of the same area and family; two hardest from followed threads; a final
+  **wager** (sure/think/guess). ("Spot the
   altered detail" was cut: The Wire never writes something false in its own voice.)
 - **Timeline (Sat).** One card at a time, tap the gap, three lives, every card links out. Dates
   are event dates from primary documents. Difficulty from close dates within one thread. Includes
@@ -131,6 +138,9 @@ Listen queue every day.
   the steps of a bill or case).
 - **Beacon Agenda (Sun).** What council/planning/ZBA did with item X, and **What happens next?**:
   Joe predicts the next required step for an application; it resolves when the next agenda posts.
+  Never a private person (person-applicants, appointments, private homes); one entry per
+  application; meetings from the last three weeks; board-giveaway words taken out of the question;
+  the reveal carries the agenda's status line.
 
 ### 3. Ciphers
 - **Cryptoquote.** Verified quotes ranked by distinctiveness, 60+ letters. ACA conventions: no
@@ -145,7 +155,7 @@ Listen queue every day.
   row; keyword has no repeated letters and leaves no self-maps. It feeds the meta. The keyword echoes Thursday's purple category.
 - **Patristocrat (Sun).** ~80 letters in five-letter groups, crib from the week's top headline.
 - **Saturday meta.** Answer chosen first: a real, thematic word; instruction is the answer category
-  only ("a Hudson Valley town"). 7–9 feeders from the week's answers (keyed Aristocrat keyword,
+  only ("a Hudson Valley town"). 7–9 feeders (no two alike, from at least three games) from the week's answers (keyed Aristocrat keyword,
   Connections purple, Docket split, Defectors margin…), visible from Monday on the Puzzle Page as
   a shell that fills in (never on the home card); solvable at ~75% of feeders; skipped feeders
   unlock Saturday. Sunday night the build picks the answer and a feeder plan; each daily
@@ -189,9 +199,12 @@ Listen queue every day.
   hazards, pushes. Generator brute-forces every action order and keeps boards with 1–3 winning
   lines (after merging move orders that reach the same outcome) where the greedy line loses.
   Moves shown in coordinates beside the other winning lines. Built late (it's its own project).
-- **Case-file logic grid (Sun)**: fictional entities; minimal clue set with one solution; graded
-  by a human-style solver's highest technique tier; hints come from that solver's trace with a
-  reason.
+- **Case-file logic grid (Sun)**: fictional entities; minimal clue set with one solution; clues
+  must tie people to projects and projects to times (at most two before/after clues); graded by a
+  human-style solver's highest technique tier (1 direct facts, elimination and cross-grid; 2
+  either/or, "of these two" and order clues read against what's open; 3 a short contradiction
+  chain), never anything that needs a guess; target tier follows the monthly ramp; hints come
+  from that solver's trace with a reason.
 
 ### Library (anytime)
 - **Name them all**, local first (Beacon council, Dutchess Legislature, Joe's state legislators,
@@ -282,6 +295,18 @@ Steps 1–7 are built, tested and deployed; step 8's tactics is built. What diff
 - **Tactics** (pipeline/tactics.py): 6×6, two units, three enemies; boards with one to three winning
   outcomes where the greedy line loses; tiered by how many outcomes win. The page engine is
   cross-checked against the generator in CI.
+- **Generator fixes (2026-10-27, after the design review)**: guardrails widened (fires, outbreaks,
+  riots, unrest; no-thread items held to the institutional-only rule); Who said it varied (one quote
+  per speaker a week, local first, roster party only, hints role → where → initials, no leaking
+  context, no quote in more than two games); Beacon Agenda never names a private person, dedupes
+  applications and drops stale meetings; the case file rebuilt with cross clues and a human-style
+  grader (60 Sundays' worth: tiers 1/2/3 = 14/28/18, where it was 0/5/55 with order clues only);
+  Ledger figures widened and part-vs-whole pairs refused; Friday quiz ten questions with typed
+  answers; legal tie-ins match the card's own statute (`news_not`); Connections draws people,
+  countries, places and agencies with no committee trivia and a near-miss decoy; the pending docket
+  drops last term's cases and emergency applications; only what is published for a game served
+  that day is burned, so thin days carry over; health rows for every weekend game and a loud row
+  when the word list is missing.
 - Not built (by plan): pass the phone and the UFCB pack (after a month of use), variants (on request).
 
 ## Open items for Joe
