@@ -1110,7 +1110,8 @@ def _acc(name: str, extra=()) -> list[str]:
 
 # When a roster's team is in the week's news (folded text). Israel and the Rangers need sport context:
 # the country and the Texas club are in the news for other reasons.
-TEAM_NEWS = {"NYCFC": r"\bnycfc\b|new york city fc", "Mets": r"\bmets\b", "USMNT": r"\busmnt\b|men's national team|world cup",
+TEAM_NEWS = {"NYCFC": r"\bnycfc\b|new york city fc", "Mets": r"\bmets\b", "USMNT": r"\busmnt\b|(?<!wo)men.?s national team|(?<!women.s )(?<!women s )world cup",
+             "USWNT": r"\buswnt\b|women.?s national team|women.?s world cup",
              "Rangers": r"new york rangers|rangers.{0,40}\b(nhl|hockey|stanley cup)\b",
              "Israel": r"israel.{0,40}\b(soccer|football|nations league|national team)\b"}
 
@@ -1168,10 +1169,14 @@ def library(rosters, scotus_rows, data, now) -> list[dict]:
                       "items": [{"answer": x["answer"], "accept": _acc(x["answer"], x.get("aliases", [])), "clue": x.get("clue", "")} for x in R["items"]]})
     lists += world_lists()
     week = fold(" ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in data.get("items", [])))
+    newest = {}                                     # a team in the news features its most recent list
+    for L in lists:
+        if L.get("team"):
+            newest[L["team"]] = max(newest.get(L["team"], ""), str(L.get("as_of", "")))
     for L in lists:
         L["mentions"] = sum(1 for x in L["items"] if fold(x["answer"]) in week)
         tn = TEAM_NEWS.get(L.get("team", ""))
-        if tn and re.search(tn, week):
+        if tn and str(L.get("as_of", "")) == newest.get(L["team"]) and re.search(tn, week):
             L["mentions"] += 3                      # the team itself is in the news
         L.setdefault("as_of", "2026")
         L["n"] = len(L["items"])

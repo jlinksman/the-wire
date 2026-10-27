@@ -224,3 +224,201 @@ rosters:
       - {answer: "Folarin Balogun", clue: "ST", aliases: ["Flo Balogun", "Balogun"]}
       - {answer: "Ricardo Pepi", clue: "ST", aliases: ["Pepi"]}
       - {answer: "Haji Wright", clue: "ST", aliases: ["Wright"]}
+
+  - id: uswnt_1991_wwc
+    title: "USWNT — 1991 Women's World Cup champions"
+    group: Sports
+    as_of: "1991-11-30"
+    sources:
+      - "https://ussoccer.com/stories/2021/11/the-first-star"
+      - "https://en.wikipedia.org/wiki/1991_FIFA_Women%27s_World_Cup_squads"
+    note: "Full 18-player tournament squad (coach Anson Dorrance). The USA beat Norway 2-1 in the final in Guangzhou on Nov. 30, 1991. Wikipedia lists all 18 with positions. U.S. Soccer's 30th-anniversary story names every player, Heinrichs as captain, Harvey starting every game, and Akers winning the Golden Boot. Answers use each player's best-known name. The name she played under in 1991 is an alias. Shirt numbers are left off because only Wikipedia gives them."
+    items:
+      - {answer: "Mary Harvey", clue: "GK, started every game", aliases: ["Harvey"]}
+      - {answer: "Amy Griffin", clue: "GK (then Amy Allmann)", aliases: ["Amy Allmann", "Allmann", "Griffin"]}
+      - {answer: "Kim Maslin-Kammerdeiner", clue: "GK", aliases: ["Kim Maslin", "Maslin-Kammerdeiner", "Maslin"]}
+      - {answer: "Carla Overbeck", clue: "DF (then Carla Werden)", aliases: ["Carla Werden", "Werden", "Overbeck"]}
+      - {answer: "Joy Fawcett", clue: "DF (then Joy Biefeld)", aliases: ["Joy Biefeld", "Biefeld", "Fawcett"]}
+      - {answer: "Linda Hamilton", clue: "DF", aliases: ["Hamilton"]}
+      - {answer: "Lori Henry", clue: "DF", aliases: ["Henry"]}
+      - {answer: "Debbie Belkin", clue: "DF (later Debbie Rademacher)", aliases: ["Debbie Rademacher", "Belkin", "Rademacher"]}
+      - {answer: "Shannon Higgins", clue: "MF", aliases: ["Shannon Higgins-Cirovski", "Higgins"]}
+      - {answer: "Tracey Bates", clue: "MF (later Tracey Leone)", aliases: ["Tracey Leone", "Bates", "Leone"]}
+      - {answer: "Julie Foudy", clue: "MF", aliases: ["Foudy"]}
+      - {answer: "Mia Hamm", clue: "MF, the squad's youngest player", aliases: ["Hamm", "Mia Garciaparra"]}
+      - {answer: "Kristine Lilly", clue: "MF", aliases: ["Lilly", "Kristine Heavey"]}
+      - {answer: "April Heinrichs", clue: "FW, captain (one of the 'Triple-Edged Sword')", aliases: ["Heinrichs"]}
+      - {answer: "Carin Jennings", clue: "FW, Golden Ball winner (one of the 'Triple-Edged Sword')", aliases: ["Carin Gabarra", "Carin Jennings-Gabarra", "Jennings", "Gabarra"]}
+      - {answer: "Michelle Akers", clue: "FW, Golden Boot; scored both goals in the final", aliases: ["Michelle Akers-Stahl", "Akers"]}
+      - {answer: "Brandi Chastain", clue: "FW", aliases: ["Chastain"]}
+      - {answer: "Wendy Gebauer", clue: "FW", aliases: ["Gebauer"]}
+
+  - id: uswnt_1999_wwc
+    title: "USWNT — 1999 Women's World Cup champions"
+    group: Sports
+    as_of: "1999-07-10"
+    sources:
+      - "https://www.soccerwire.com/news/u-s-wnt-1999-world-cup-winners-to-be-honored-sunday/"
+      - "https://www.today.com/today/amp/rcna144609"
+      - "https://en.wikipedia.org/wiki/1999_FIFA_Women%27s_World_Cup_squads"
+    note: "Full 20-player squad (coach Tony DiCicco). The USA beat China 0-0, 5-4 on penalties, at the Rose Bowl on July 10, 1999. Positions and later married names come from U.S. Soccer's 2019 reunion release (via SoccerWire), which also gives the shootout order: Overbeck, Fawcett, Lilly, Hamm, Chastain. TODAY and Wikipedia list the same 20. Scurry's save in the shootout and Lilly's goal-line clearance in extra time are widely reported but not stated in the cited sources. Shirt numbers are left off."
+    items:
+      - {answer: "Briana Scurry", clue: "GK, made the save in the final's shootout", aliases: ["Scurry"]}
+      - {answer: "Tracy Ducar", clue: "GK", aliases: ["Tracy Noonan", "Ducar", "Noonan"]}
+      - {answer: "Saskia Webber", clue: "GK", aliases: ["Webber"]}
+      - {answer: "Carla Overbeck", clue: "DF, captain; took the first shootout kick in the final", aliases: ["Carla Werden", "Overbeck"]}
+      - {answer: "Brandi Chastain", clue: "DF, scored the winning penalty in the final", aliases: ["Chastain"]}
+      - {answer: "Joy Fawcett", clue: "DF, scored in the final's shootout", aliases: ["Joy Biefeld", "Fawcett"]}
+      - {answer: "Christie Rampone", clue: "DF (then Christie Pearce)", aliases: ["Christie Pearce", "Pearce", "Rampone"]}
+      - {answer: "Kate Markgraf", clue: "DF (then Kate Sobrero)", aliases: ["Kate Sobrero", "Sobrero", "Markgraf"]}
+      - {answer: "Sara Whalen", clue: "DF", aliases: ["Sara Hess", "Whalen", "Hess"]}
+      - {answer: "Michelle Akers", clue: "MF", aliases: ["Akers"]}
+      - {answer: "Lorrie Fair", clue: "MF", aliases: ["Fair"]}
+      - {answer: "Julie Foudy", clue: "MF", aliases: ["Foudy"]}
+      - {answer: "Kristine Lilly", clue: "MF, scored in the final's shootout", aliases: ["Kristine Heavey", "Lilly"]}
+      - {answer: "Tiffany Roberts", clue: "MF", aliases: ["Tiffany Sahaydak", "Roberts", "Sahaydak"]}
+      - {answer: "Tisha Venturini", clue: "MF", aliases: ["Tisha Hoch", "Venturini", "Hoch"]}
+      - {answer: "Mia Hamm", clue: "FW, scored in the final's shootout", aliases: ["Mia Garciaparra", "Hamm"]}
+      - {answer: "Shannon MacMillan", clue: "FW", aliases: ["MacMillan", "Shannon Macmillan"]}
+      - {answer: "Tiffeny Milbrett", clue: "FW", aliases: ["Milbrett", "Tiffany Milbrett"]}
+      - {answer: "Cindy Parlow", clue: "FW", aliases: ["Cindy Parlow Cone", "Cindy Cone", "Parlow"]}
+      - {answer: "Danielle Fotopoulos", clue: "FW", aliases: ["Fotopoulos"]}
+
+  - id: uswnt_2015_wwc
+    title: "USWNT — 2015 Women's World Cup champions"
+    group: Sports
+    as_of: "2015-07-05"
+    sources:
+      - "https://ussoccer.com/stories/2015/04/ellis-names-us-roster-for-2015-fifa-womens-world-cup-team"
+      - "https://ussoccer.com/stories/2015/07/world-champions-usa-wins-2015-fifa-womens-world-cup"
+      - "https://en.wikipedia.org/wiki/2015_FIFA_Women%27s_World_Cup_squads"
+    note: "Full 23 (coach Jill Ellis), named April 14, 2015. Positions follow U.S. Soccer's roster release. The USA beat Japan 5-2 in Vancouver on July 5, 2015. The facts about the final come from U.S. Soccer's match report: Lloyd's hat trick and armband, goals by Holiday and Heath, the subs used, Lloyd's Golden Ball and Solo's Golden Glove. Shirt numbers are left off."
+    items:
+      - {answer: "Hope Solo", clue: "GK, Golden Glove winner", aliases: ["Solo"]}
+      - {answer: "Ashlyn Harris", clue: "GK", aliases: ["Harris"]}
+      - {answer: "Alyssa Naeher", clue: "GK", aliases: ["Naeher"]}
+      - {answer: "Christie Rampone", clue: "DF, her fifth World Cup; sub in the final", aliases: ["Christie Pearce", "Rampone", "Pearce"]}
+      - {answer: "Becky Sauerbrunn", clue: "DF, started the final", aliases: ["Sauerbrunn"]}
+      - {answer: "Julie Johnston", clue: "DF (later Julie Ertz)", aliases: ["Julie Ertz", "Johnston", "Ertz", "JJ"]}
+      - {answer: "Meghan Klingenberg", clue: "DF, started the final", aliases: ["Klingenberg", "Kling"]}
+      - {answer: "Ali Krieger", clue: "DF, started the final", aliases: ["Krieger"]}
+      - {answer: "Kelley O'Hara", clue: "DF, sub in the final", aliases: ["O'Hara", "OHara", "Kelley OHara"]}
+      - {answer: "Lori Chalupny", clue: "DF", aliases: ["Chalupny"]}
+      - {answer: "Whitney Engen", clue: "DF", aliases: ["Engen"]}
+      - {answer: "Carli Lloyd", clue: "MF, hat trick in the final; Golden Ball", aliases: ["Lloyd"]}
+      - {answer: "Lauren Holiday", clue: "MF, scored in the final", aliases: ["Lauren Cheney", "Holiday", "Cheney"]}
+      - {answer: "Tobin Heath", clue: "MF, scored in the final", aliases: ["Heath"]}
+      - {answer: "Morgan Brian", clue: "MF, started the final", aliases: ["Morgan Gautrat", "Brian", "Gautrat"]}
+      - {answer: "Megan Rapinoe", clue: "MF, started the final", aliases: ["Rapinoe", "Pinoe"]}
+      - {answer: "Shannon Boxx", clue: "MF, her fourth World Cup", aliases: ["Boxx"]}
+      - {answer: "Heather O'Reilly", clue: "MF", aliases: ["O'Reilly", "OReilly", "HAO"]}
+      - {answer: "Abby Wambach", clue: "FW, her fourth World Cup; sub in the final", aliases: ["Wambach"]}
+      - {answer: "Alex Morgan", clue: "FW, started the final", aliases: ["Morgan"]}
+      - {answer: "Sydney Leroux", clue: "FW", aliases: ["Leroux", "Sydney Leroux Dwyer"]}
+      - {answer: "Christen Press", clue: "FW", aliases: ["Press"]}
+      - {answer: "Amy Rodriguez", clue: "FW", aliases: ["Rodriguez", "A-Rod"]}
+
+  - id: uswnt_2019_wwc
+    title: "USWNT — 2019 Women's World Cup champions"
+    group: Sports
+    as_of: "2019-07-07"
+    sources:
+      - "https://equalizersoccer.com/2019/05/02/uswnt-2019-womens-world-cup-roster-23-players-jill-ellis-announcement/"
+      - "https://www.cbssports.com/soccer/news/megan-rapinoe-wins-golden-boot-golden-ball-at-2019-womens-world-cup-edges-alex-morgan-on-tiebreaker/"
+      - "https://en.wikipedia.org/wiki/2019_FIFA_Women%27s_World_Cup_squads"
+    note: "Full 23 (coach Jill Ellis), named May 1–2, 2019. Positions follow the Equalizer's list of the roster announcement. The USA beat the Netherlands 2-0 in Lyon on July 7, 2019. CBS Sports confirms Rapinoe's Golden Ball and Golden Boot, and that Lavelle scored in the final and was third for the Golden Ball. Wikipedia names Lloyd, Morgan and Rapinoe as co-captains. Shirt numbers are left off."
+    items:
+      - {answer: "Alyssa Naeher", clue: "GK, the starter", aliases: ["Naeher"]}
+      - {answer: "Ashlyn Harris", clue: "GK", aliases: ["Harris"]}
+      - {answer: "Adrianna Franch", clue: "GK", aliases: ["Franch", "AD Franch"]}
+      - {answer: "Becky Sauerbrunn", clue: "DF", aliases: ["Sauerbrunn"]}
+      - {answer: "Abby Dahlkemper", clue: "DF", aliases: ["Dahlkemper"]}
+      - {answer: "Crystal Dunn", clue: "DF", aliases: ["Dunn"]}
+      - {answer: "Kelley O'Hara", clue: "DF", aliases: ["O'Hara", "OHara", "Kelley OHara"]}
+      - {answer: "Ali Krieger", clue: "DF", aliases: ["Krieger"]}
+      - {answer: "Tierna Davidson", clue: "DF", aliases: ["Davidson"]}
+      - {answer: "Emily Sonnett", clue: "DF", aliases: ["Sonnett"]}
+      - {answer: "Julie Ertz", clue: "MF (née Johnston)", aliases: ["Julie Johnston", "Ertz", "Johnston"]}
+      - {answer: "Rose Lavelle", clue: "MF, scored in the final; third for the Golden Ball", aliases: ["Lavelle"]}
+      - {answer: "Samantha Mewis", clue: "MF", aliases: ["Sam Mewis", "Mewis"]}
+      - {answer: "Lindsey Horan", clue: "MF (later Lindsey Heaps)", aliases: ["Lindsey Heaps", "Horan", "Heaps"]}
+      - {answer: "Morgan Brian", clue: "MF (later Morgan Gautrat)", aliases: ["Morgan Gautrat", "Brian", "Gautrat"]}
+      - {answer: "Allie Long", clue: "MF", aliases: ["Long"]}
+      - {answer: "Megan Rapinoe", clue: "FW, co-captain; Golden Ball and Golden Boot; scored a penalty in the final", aliases: ["Rapinoe", "Pinoe"]}
+      - {answer: "Alex Morgan", clue: "FW, co-captain", aliases: ["Morgan"]}
+      - {answer: "Carli Lloyd", clue: "FW, co-captain", aliases: ["Lloyd"]}
+      - {answer: "Tobin Heath", clue: "FW", aliases: ["Heath"]}
+      - {answer: "Christen Press", clue: "FW", aliases: ["Press"]}
+      - {answer: "Mallory Pugh", clue: "FW (later Mallory Swanson)", aliases: ["Mallory Swanson", "Mal Pugh", "Pugh", "Swanson"]}
+      - {answer: "Jessica McDonald", clue: "FW", aliases: ["McDonald"]}
+
+  - id: uswnt_2024_olympics
+    title: "USWNT — 2024 Olympic gold medal squad (Paris)"
+    group: Sports
+    as_of: "2024-08-10"
+    sources:
+      - "https://www.ussoccer.com/stories/2024/06/emma-hayes-names-uswnt-roster-for-the-2024-paris-olympics"
+      - "https://www.hawaiitribune-herald.com/2024/08/11/sports/usa-1-brazil-0-mal-swansons-goal-wins-first-uswnt-olympic-gold-in-12-years/"
+      - "https://en.wikipedia.org/wiki/Football_at_the_2024_Summer_Olympics_%E2%80%93_Women%27s_team_squads"
+    note: "The 18-player roster (coach Emma Hayes) plus four alternates, each marked 'alternate' in the clue. U.S. Soccer named the roster on June 26, 2024. On July 12, Catarina Macario withdrew injured. Alternate Lynn Williams replaced her and Emily Sams was added as an alternate (per Wikipedia, citing U.S. Soccer). The USA beat Brazil 1-0 in the final at Parc des Princes on Aug. 10, 2024. The Athletic (via Hawaii Tribune-Herald) confirms Swanson's goal, Naeher's late save and Horan as captain. Positions follow U.S. Soccer's release. The quarterfinal and semifinal extra-time winners (Rodman, Smith) are widely reported but not stated in the cited sources. Shirt numbers are left off."
+    items:
+      - {answer: "Alyssa Naeher", clue: "GK, made a late save to seal the final", aliases: ["Naeher"]}
+      - {answer: "Casey Murphy", clue: "GK", aliases: ["Murphy"]}
+      - {answer: "Tierna Davidson", clue: "DF", aliases: ["Davidson"]}
+      - {answer: "Emily Fox", clue: "DF", aliases: ["Fox"]}
+      - {answer: "Naomi Girma", clue: "DF", aliases: ["Girma"]}
+      - {answer: "Casey Krueger", clue: "DF", aliases: ["Casey Short", "Krueger"]}
+      - {answer: "Jenna Nighswonger", clue: "DF", aliases: ["Nighswonger"]}
+      - {answer: "Emily Sonnett", clue: "DF", aliases: ["Sonnett"]}
+      - {answer: "Lindsey Horan", clue: "MF, captain", aliases: ["Lindsey Heaps", "Horan", "Heaps"]}
+      - {answer: "Korbin Albert", clue: "MF", aliases: ["Albert"]}
+      - {answer: "Sam Coffey", clue: "MF", aliases: ["Samantha Coffey", "Coffey"]}
+      - {answer: "Rose Lavelle", clue: "MF", aliases: ["Lavelle"]}
+      - {answer: "Mallory Swanson", clue: "FW, scored the winner in the final", aliases: ["Mallory Pugh", "Mal Swanson", "Swanson", "Pugh"]}
+      - {answer: "Sophia Smith", clue: "FW (later Sophia Wilson)", aliases: ["Sophia Wilson", "Smith", "Wilson"]}
+      - {answer: "Trinity Rodman", clue: "FW", aliases: ["Rodman"]}
+      - {answer: "Crystal Dunn", clue: "FW", aliases: ["Dunn"]}
+      - {answer: "Jaedyn Shaw", clue: "FW", aliases: ["Shaw"]}
+      - {answer: "Lynn Williams", clue: "FW, replaced the injured Catarina Macario", aliases: ["Williams"]}
+      - {answer: "Jane Campbell", clue: "GK, alternate", aliases: ["Campbell"]}
+      - {answer: "Hal Hershfelt", clue: "MF, alternate", aliases: ["Hershfelt"]}
+      - {answer: "Croix Bethune", clue: "MF, alternate", aliases: ["Bethune"]}
+      - {answer: "Emily Sams", clue: "DF, alternate (added July 12)", aliases: ["Sams"]}
+
+  - id: uswnt_2026_oct_camp
+    title: "USWNT — October 2026 camp roster (vs. Spain)"
+    group: Sports
+    as_of: "2026-10-27"
+    sources:
+      - "https://www.ussoccer.com/stories/2026/09/uswnt/hayes-names-26-player-training-camp-roster-october-matches-against-spain-washington-dc-chester-pa"
+      - "https://justwomenssports.com/reads/uswnt-roster-changes-spain-friendlies/"
+      - "https://equalizersoccer.com/2026/10/05/sam-coffey-ruled-out-for-uswnt-october-matches-replaced-by-jaelin-howell/"
+      - "https://www.inquirer.com/soccer/naomi-girma-us-soccer-spain-kate-del-fava-20261004.html"
+    note: "Emma Hayes's 26-player roster for the friendlies against Spain on Oct. 10 (Audi Field) and Oct. 13 (Subaru Park), as it stood after the camp's injury changes. U.S. Soccer announced it on Sept. 29, 2026. Sam Coffey (injured Oct. 4 with Manchester City) was replaced by Jaelin Howell, and Naomi Girma (muscle injury) by Kate Del Fava, called up from U-23 camp (Just Women's Sports, Equalizer, Inquirer). Clubs and positions come from U.S. Soccer. This was the most recent senior call-up found as of Oct. 27, 2026, and searches turned up no newer roster."
+    items:
+      - {answer: "Claudia Dickey", clue: "GK, Seattle Reign", aliases: ["Dickey"]}
+      - {answer: "Jordan Silkowitz", clue: "GK, Bay FC (uncapped)", aliases: ["Silkowitz"]}
+      - {answer: "Phallon Tullis-Joyce", clue: "GK, Manchester United", aliases: ["Tullis-Joyce"]}
+      - {answer: "Tierna Davidson", clue: "DF, Gotham FC", aliases: ["Davidson"]}
+      - {answer: "Emily Fox", clue: "DF, Arsenal", aliases: ["Fox"]}
+      - {answer: "Kate Del Fava", clue: "DF, Utah Royals (replaced Girma; uncapped)", aliases: ["Del Fava"]}
+      - {answer: "Avery Patterson", clue: "DF, Houston Dash", aliases: ["Patterson"]}
+      - {answer: "Lilly Reale", clue: "DF, Boston Legacy", aliases: ["Reale"]}
+      - {answer: "Tara Rudd", clue: "DF, Washington Spirit", aliases: ["Rudd"]}
+      - {answer: "Gisele Thompson", clue: "DF, Angel City", aliases: ["G. Thompson"]}
+      - {answer: "Kennedy Wesley", clue: "DF, San Diego Wave", aliases: ["Wesley"]}
+      - {answer: "Lindsey Heaps", clue: "MF, Denver Summit", aliases: ["Lindsey Horan", "Heaps", "Horan"]}
+      - {answer: "Claire Hutton", clue: "MF, Bay FC", aliases: ["Hutton"]}
+      - {answer: "Jaelin Howell", clue: "MF, Gotham FC (replaced Coffey)", aliases: ["Howell"]}
+      - {answer: "Rose Lavelle", clue: "MF, Gotham FC", aliases: ["Lavelle"]}
+      - {answer: "Evelyn Shores", clue: "MF, Angel City (first call-up)", aliases: ["Shores"]}
+      - {answer: "Mallory Swanson", clue: "MF, Chicago Stars", aliases: ["Mallory Pugh", "Swanson", "Pugh"]}
+      - {answer: "Lily Yohannes", clue: "MF, OL Lyonnes", aliases: ["Yohannes"]}
+      - {answer: "Trinity Byars", clue: "FW, San Diego Wave (first call-up)", aliases: ["Byars"]}
+      - {answer: "Michelle Cooper", clue: "FW, Kansas City Current", aliases: ["Cooper"]}
+      - {answer: "Trinity Rodman", clue: "FW, Washington Spirit", aliases: ["Rodman"]}
+      - {answer: "Emma Sears", clue: "FW, Racing Louisville", aliases: ["Sears"]}
+      - {answer: "Ashley Sanchez", clue: "FW, North Carolina Courage", aliases: ["Sanchez"]}
+      - {answer: "Pietra Tordin", clue: "FW, Portland Thorns (first call-up)", aliases: ["Tordin"]}
+      - {answer: "Alyssa Thompson", clue: "FW, Chelsea", aliases: ["A. Thompson"]}
+      - {answer: "Sophia Wilson", clue: "FW, Portland Thorns", aliases: ["Sophia Smith", "Wilson", "Smith"]}
