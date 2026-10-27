@@ -11,7 +11,8 @@ set -euo pipefail
 VERSION="20260923.616da16"
 SHA256="${TATHAM_SHA256:-}"
 GAMES="loopy keen towers galaxies signpost dominosa unequal slant range pattern"
-OUT="${1:-site/vendor/puzzles}"
+OUT="$(realpath -m "${1:-site/vendor/puzzles}")"
+BRIDGE="$(realpath .github/scripts/tatham-bridge.html)"
 WORK="$(mktemp -d)"
 UA="TheWire/1.0 (personal news reader; ${GITHUB_SERVER_URL:-}/${GITHUB_REPOSITORY:-})"
 
@@ -57,7 +58,7 @@ done
 cp LICENCE "$OUT/LICENCE"
 cd - >/dev/null
 for g in $GAMES; do
-  python3 - "$OUT/$g.html" .github/scripts/tatham-bridge.html <<'PY'
+  python3 - "$OUT/$g.html" "$BRIDGE" <<'PY'
 import sys, pathlib
 p = pathlib.Path(sys.argv[1]); bridge = pathlib.Path(sys.argv[2]).read_text()
 s = p.read_text()
