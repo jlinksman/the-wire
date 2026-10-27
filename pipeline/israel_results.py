@@ -19,11 +19,17 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from bs4 import BeautifulSoup
+from protego import Protego
+from urllib.parse import urlsplit
 
 POLLS_CLOSE = datetime(2026, 10, 27, 20, 0, tzinfo=timezone.utc)   # 10 PM Israel time (UTC+2 after DST ends Oct 25)
 STOP_AFTER = datetime(2026, 11, 20, tzinfo=timezone.utc)
-CEC_URLS = ["https://votes26.bechirot.gov.il/nationalresults"]
-CEC_HOME = "https://votes26.bechirot.gov.il/"
+# Election night: the live site turned out to be cdn-votes26.bechirot.gov.il (votes26.bechirot.gov.il
+# returns 404). Its robots.txt disallows automated reads, so it's only fetched if that changes;
+# until then the Wikipedia table (edited from the committee's count) is the source.
+CEC_URLS = ["https://cdn-votes26.bechirot.gov.il/nationalresults", "https://votes26.bechirot.gov.il/nationalresults"]
+CEC_HOME = "https://cdn-votes26.bechirot.gov.il/"
+UA = "TheWire/1.0 (personal news reader; https://github.com/jlinksman/the-wire)"
 WIKI_PAGE = "2026_Israeli_legislative_election"
 WIKI_URL = f"https://en.wikipedia.org/api/rest_v1/page/html/{WIKI_PAGE}"
 WIKI_LINK = f"https://en.wikipedia.org/wiki/{WIKI_PAGE}"
@@ -143,6 +149,24 @@ def parse_wiki(html: str) -> dict | None:
     return None
 
 
+def robots_ok(url: str, rec: dict, session) -> bool:
+    """CLAUDE.md rule 5: honor robots.txt. Cached for an hour; an unreachable robots.txt means no."""
+    host = urlsplit(url).netloc
+    cache = rec.setdefault("robots", {})
+    c = cache.get(host)
+    now = datetime.now(timezone.utc)
+    if not c or now - datetime.fromisoformat(c["at"]) > timedelta(hours=1):
+        try:
+            r = session.get(f"https://{host}/robots.txt", timeout=20, headers={"User-Agent": UA})
+            body = r.text if r.status_code == 200 else ("" if r.status_code == 404 else None)
+        except Exception:
+            body = None
+        c = cache[host] = {"at": now.isoformat(), "body": body}
+    if c["body"] is None:
+        return False
+    return Protego.parse(c["body"]).can_fetch(url, UA)
+
+
 def run(state: dict, data: dict, session, log) -> dict | None:
     now = datetime.now(timezone.utc)
     if now < POLLS_CLOSE - timedelta(minutes=30) or now > STOP_AFTER:
@@ -155,8 +179,11 @@ def run(state: dict, data: dict, session, log) -> dict | None:
     if not last or now - datetime.fromisoformat(last) >= every:
         rec["tried"] = now.isoformat()
         for url in CEC_URLS:
+            if not robots_ok(url, rec, session):
+                err = "CEC robots.txt disallows automated reads (" + urlsplit(url).netloc + ")"
+                continue
             try:
-                r = session.get(url, timeout=30)
+                r = session.get(url, timeout=30, headers={"User-Agent": UA})
                 if r.status_code == 200:
                     got = parse_cec(r.text)
                     if got:
@@ -172,6 +199,8 @@ def run(state: dict, data: dict, session, log) -> dict | None:
                     got = parse_wiki(r.text)
                     if got:
                         src = {"name": "Wikipedia (crowd-edited, from the committee's count)", "link": WIKI_LINK, "official": False}
+                    else:
+                        err = (err + "; " if err else "") + "Wikipedia has no results table yet"
                 else:
                     err = (err + "; " if err else "") + f"Wikipedia HTTP {r.status_code}"
             except Exception as exc:
