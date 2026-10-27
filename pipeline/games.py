@@ -311,6 +311,230 @@ def cryptoquotes(wsi: list[dict], seed: str, drops) -> list[dict]:
     return out[: c["pool_size"]]
 
 
+# ------------------------------------------------------------------ Weekend ciphers
+# Keyed Aristocrat (Friday), K1: the plaintext alphabet is keyed (keyword first, then the rest of the
+# alphabet), the ciphertext alphabet runs A–Z shifted. Solving recovers the keyed row, so the keyword
+# appears as Joe fills the worksheet — a second "aha" that feeds the Saturday meta. No repeated letters
+# in the keyword; no letter enciphers to itself. Patristocrat (Sunday): ~80 letters, spaces and
+# punctuation removed, five-letter groups.
+KEYWORDS = """SENATOR JUSTICE COUNTY MAYOR CAPITOL BUDGET DOCKET CHAMBER CLERK GAVEL VETO WARDS""".split()
+
+
+def keyed_alphabet(word: str) -> str:
+    seen = []
+    for ch in word.upper() + string.ascii_uppercase:
+        if ch.isalpha() and ch not in seen:
+            seen.append(ch)
+    return "".join(seen)
+
+
+WEEK = {"day": None}
+
+
+def week_keyword() -> str:
+    """Friday's keyword is fixed for the whole week, so Saturday's meta can use it."""
+    d = date.fromisoformat(WEEK["day"]) if WEEK["day"] else date.today()
+    y, w, _ = d.isocalendar()
+    words = [x for x in KEYWORDS if len(set(x)) == len(x)]
+    return words[random.Random(f"kw-{y}-{w}").randrange(len(words))]
+
+
+def k1_key(word: str, rng: random.Random) -> dict | None:
+    plain = keyed_alphabet(word)
+    for shift in rng.sample(range(1, 26), 25):
+        cipher = string.ascii_uppercase[shift:] + string.ascii_uppercase[:shift]
+        key = dict(zip(plain, cipher))
+        if all(k != v for k, v in key.items()):
+            return key
+    return None
+
+
+def weekend_ciphers(wsi: list[dict], seed: str, drops) -> dict:
+    rng = random.Random(seed + "weekend")
+    words = [w for w in KEYWORDS if len(set(w)) == len(w)]
+    kw = week_keyword()
+    out = {"keyed": None, "patristocrat": None}
+    # The quote must use every letter of the keyword, or the keyword can't fully appear in the worksheet.
+    long_q = sorted([q for q in wsi if 70 <= sum(c.isalpha() for c in q["quote"]) <= 160 and set(kw) <= set(q["quote"].upper())], key=lambda q: -len(q["quote"]))
+    if long_q:
+        q = long_q[0]
+        key = k1_key(kw, rng)
+        plain = q["quote"].replace("’", "'").upper()
+        out["keyed"] = {"id": "kk" + q["id"][1:], "keyword": kw, "cipher": "".join(key.get(c, c) for c in plain), "plain": plain,
+                        "speaker": q["answer"], "role": q.get("role"), "outlet": q.get("outlet"), "t": q.get("t"), "link": q.get("link"), "thread": q.get("thread"),
+                        "inverse": {v: k for k, v in key.items()}}
+        assert all(k != v for k, v in key.items())
+    else:
+        drops.append(("weekend_ciphers", "no quote of 70–160 letters for the keyed cipher"))
+    pat = [q for q in wsi if 70 <= sum(c.isalpha() for c in q["quote"]) <= 110 and (not long_q or q is not long_q[0])]
+    if pat:
+        q = pat[0]
+        key = derangement(rng)
+        letters = "".join(c for c in q["quote"].upper() if c.isalpha())
+        cipher = "".join(key[c] for c in letters)
+        groups = " ".join(cipher[i:i + 5] for i in range(0, len(cipher), 5))
+        words_ = [(m.start(), m.group(0)) for m in re.finditer(r"[A-Za-z]+", q["quote"])]
+        cw = max(words_, key=lambda w: len(w[1]))
+        at = sum(c.isalpha() for c in q["quote"][:cw[0]])
+        out["patristocrat"] = {"id": "pp" + q["id"][1:], "cipher": groups, "plain": letters, "speaker": q["answer"], "role": q.get("role"),
+                               "outlet": q.get("outlet"), "t": q.get("t"), "link": q.get("link"), "thread": q.get("thread"), "quote": q["quote"],
+                               "crib": {"word": cw[1].upper(), "at": at}}
+    else:
+        drops.append(("weekend_ciphers", "no quote of 70–110 letters for the Patristocrat"))
+    return out
+
+
+# ------------------------------------------------------------------ Saturday meta
+# The answer is chosen first: a real Hudson Valley place name. Seven or eight feeders come from the
+# week's verified puzzles (Friday's keyword, people quoted, members who broke ranks, opinion
+# authors); each gives one letter at a stated position, in order. Before it ships, every way of
+# hiding a quarter of the feeders must still leave exactly one place in the list that fits.
+HV_PLACES = """BEACON GOSHEN CARMEL CROTON TIVOLI AMENIA PAWLING CHESTER WARWICK KINGSTON FISHKILL NEWBURGH GARRISON
+CORNWALL HIGHLAND MARLBORO OSSINING BREWSTER HYDEPARK NEWPALTZ PATTERSON MAHOPAC MONTGOMERY WALDEN
+MAYBROOK SHAWANGUNK ELLENVILLE CATSKILL HUDSON ATHENS COXSACKIE STANFORD MILLERTON PINEPLAINS
+LAGRANGE UNIONVALE DOVER RHINEBECK REDHOOK CLINTON WASHINGTON KENT PUTNAM YORKTOWN PEEKSKILL
+CORTLANDT NYACK HAVERSTRAW PIERMONT SUFFERN NEWWINDSOR WOODBURY MONROE CHESTER FLORIDA""".split()
+
+
+def meta(wsi, dv, dk, seed, drops) -> dict | None:
+    rng = random.Random(seed + "meta")
+    feeders = []
+    kw = week_keyword()
+    feeders.append({"clue": "Friday's keyword (it's in the keyed cipher's worksheet)", "answer": kw, "src": "keyed"})
+    for q in wsi[:8]:
+        feeders.append({"clue": f"Said this week: “{q['quote'][:120]}{'…' if len(q['quote']) > 120 else ''}” (surname)", "answer": fold(q["answer"]).split()[-1].upper(), "src": "who_said_it", "link": q.get("link")})
+    for d in dv[:4]:
+        for b in d["defectors"][:2]:
+            feeders.append({"clue": f"Broke with the {'Republicans' if b['party'] == 'R' else 'Democrats'} on {d['bill'] or 'a House vote'} ({d['date']}), from {b['state']} (surname)",
+                            "answer": fold(b["last"] or b["name"]).replace(" ", "").upper(), "src": "defectors", "link": d.get("link")})
+    for k in dk[:4]:
+        if k.get("author") and k.get("author_code") not in ("PC", "D"):
+            feeders.append({"clue": f"Wrote the Court's opinion in {k['name']} (surname)", "answer": fold(k["author"]).split()[-1].upper(), "src": "docket", "link": k.get("pdf")})
+    feeders = [f for f in feeders if f["answer"].isalpha() and len(f["answer"]) >= 4]
+    if len(feeders) < 7:
+        drops.append(("meta", f"only {len(feeders)} feeders this week"))
+        return None
+    places = [p for p in HV_PLACES if 6 <= len(p) <= 8]
+    rng.shuffle(places)
+    for ans in places:
+        need = len(ans)
+        chosen, used = [], set()
+        ok = True
+        # Friday's keyword always feeds first if it can.
+        for i, ch in enumerate(ans):
+            cands = [f for j, f in enumerate(feeders) if j not in used and ch in f["answer"]]
+            if i == 0:
+                kwc = [f for f in cands if f["src"] == "keyed"]
+                cands = kwc or cands
+            if not cands:
+                ok = False
+                break
+            f = rng.choice(cands)
+            used.add(feeders.index(f))
+            pos = [k for k, c in enumerate(f["answer"]) if c == ch]
+            chosen.append(dict(f, index=rng.choice(pos) + 1))
+        if not ok:
+            continue
+        # Uniqueness with a quarter of the feeders missing.
+        k_hide = max(1, need // 4)
+        unique = True
+        for hide in itertools.combinations(range(need), k_hide):
+            pat = "".join("." if i in hide else ans[i] for i in range(need))
+            fits = [p for p in HV_PLACES if len(p) == need and re.fullmatch(pat, p)]
+            if len(fits) != 1:
+                unique = False
+                break
+        if not unique:
+            continue
+        return {"id": "mt" + pid(seed, ans), "category": "a Hudson Valley place", "length": need, "answer": ans,
+                "feeders": [{"clue": c["clue"], "answer": c["answer"], "index": c["index"], "link": c.get("link"), "src": c["src"]} for c in chosen],
+                "solvable_missing": k_hide}
+    drops.append(("meta", "no place name could be built with a unique answer"))
+    return None
+
+
+# ------------------------------------------------------------------ Case file (Sunday logic grid)
+# Fictional applicants before a fictional board, their projects and hearing times. A random solution,
+# a pool of true clues, clues added until exactly one solution remains (checked by brute force), then
+# removed one by one while it stays unique, so the set is minimal. Graded by the clue types it needs.
+# Nothing about spills or remediation (never resembles an Optima job).
+CASE_PEOPLE = ["Abernathy", "Brennan", "Castillo", "Dunleavy", "Esposito", "Fairbanks", "Galloway", "Hollis"]
+CASE_PROJECTS = ["bakery", "bike shop", "gallery", "recording studio", "bookshop", "climbing gym", "tea room", "print shop"]
+CASE_TIMES = ["6:00", "6:30", "7:00", "7:30"]
+
+
+def _solutions(n, clues):
+    out = []
+    for proj in itertools.permutations(range(n)):
+        for tm in itertools.permutations(range(n)):
+            if all(c["test"](proj, tm) for c in clues):
+                out.append((proj, tm))
+                if len(out) > 1:
+                    return out
+    return out
+
+
+def casefile(seed, drops) -> dict | None:
+    rng = random.Random(seed + "case")
+    n = 4
+    people = rng.sample(CASE_PEOPLE, n)
+    projects = rng.sample(CASE_PROJECTS, n)
+    times = CASE_TIMES[:n]
+    proj = list(range(n)); rng.shuffle(proj)          # person i -> project proj[i]
+    tm = list(range(n)); rng.shuffle(tm)              # person i -> time tm[i]
+    who_proj = {proj[i]: i for i in range(n)}
+    pool = []
+    for i in range(n):
+        for j in range(n):
+            if proj[i] == j:
+                pool.append({"t": f"{people[i]} brought the {projects[j]}.", "kind": "pos", "test": (lambda i, j: lambda P, T: P[i] == j)(i, j)})
+            else:
+                pool.append({"t": f"{people[i]} didn't bring the {projects[j]}.", "kind": "neg", "test": (lambda i, j: lambda P, T: P[i] != j)(i, j)})
+            if tm[i] == j:
+                pool.append({"t": f"{people[i]} was heard at {times[j]}.", "kind": "pos", "test": (lambda i, j: lambda P, T: T[i] == j)(i, j)})
+            else:
+                pool.append({"t": f"{people[i]} wasn't heard at {times[j]}.", "kind": "neg", "test": (lambda i, j: lambda P, T: T[i] != j)(i, j)})
+    for a in range(n):
+        for b in range(n):
+            if a == b:
+                continue
+            if tm[a] < tm[b]:
+                pool.append({"t": f"{people[a]} was heard before {people[b]}.", "kind": "order", "test": (lambda a, b: lambda P, T: T[a] < T[b])(a, b)})
+            if tm[a] + 1 == tm[b]:
+                pool.append({"t": f"{people[a]} was heard exactly half an hour before {people[b]}.", "kind": "adjacent", "test": (lambda a, b: lambda P, T: T[a] + 1 == T[b])(a, b)})
+            pa, pb = projects[proj[a]], projects[proj[b]]
+            if tm[a] < tm[b]:
+                pool.append({"t": f"The {pa} was heard before the {pb}.", "kind": "order",
+                             "test": (lambda ja, jb: lambda P, T: T[P.index(ja)] < T[P.index(jb)])(proj[a], proj[b])})
+    for j in range(n):
+        i = who_proj[j]
+        other = rng.choice([x for x in range(n) if x != i])
+        pool.append({"t": f"The {projects[j]} was either {people[i]}'s or {people[other]}'s.", "kind": "either",
+                     "test": (lambda i, o, j: lambda P, T: P[i] == j or P[o] == j)(i, other, j)})
+    rng.shuffle(pool)
+    # Prefer the interesting clue types; positives last (they make it too easy).
+    pool.sort(key=lambda c: {"order": 0, "adjacent": 0, "either": 1, "neg": 2, "pos": 3}[c["kind"]])
+    clues = []
+    for c in pool:
+        clues.append(c)
+        if len(_solutions(n, clues)) == 1:
+            break
+    if len(_solutions(n, clues)) != 1:
+        drops.append(("casefile", "clue pool didn't pin down one solution"))
+        return None
+    for c in list(clues):                              # minimal: drop any clue that isn't needed
+        trial = [x for x in clues if x is not c]
+        if len(_solutions(n, trial)) == 1:
+            clues = trial
+    kinds = {c["kind"] for c in clues}
+    tier = 3 if {"either", "adjacent"} & kinds else 2 if "order" in kinds else 1
+    rng.shuffle(clues)
+    return {"id": "cf" + pid(seed, *people), "people": people, "projects": projects, "times": times,
+            "clues": [c["t"] for c in clues], "tier": tier,
+            "solution": {people[i]: {"project": projects[proj[i]], "time": times[tm[i]]} for i in range(n)},
+            "story": "Four applicants came before a fictional town board one evening. Who brought which project, and when was each heard?"}
+
+
 # ------------------------------------------------------------------ Connections (shadow mode)
 # Groups come only from complete sources (full rosters, full committee lists) plus one purple
 # wordplay test run against every item. Uniqueness: every predicate that 4+ of the 16 satisfy is
@@ -1030,11 +1254,15 @@ def main(argv=None) -> int:
     lib = library(a.rosters, [], data, now)
     left = who_left(lib, a.snapshots, day)
     lg = legal(data, now, drops)
+    WEEK["day"] = day
+    wk = weekend_ciphers(wsi, seed, drops)
+    cf = casefile(seed, drops)
+    mt = meta(wsi, dv, dk, seed, drops) if date.fromisoformat(day).weekday() == 5 or os.environ.get("WIRE_SATURDAY") else None
     ldg = fresh(ledger(dv, a.rosters, seed, now, drops), "ledger")
     fq = friday_quiz(wsi, dv, lg, data, seed, drops) if date.fromisoformat(day).weekday() == 4 or os.environ.get("WIRE_FRIDAY") else None
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
-        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left,
+        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left, "weekend": wk, "meta": mt, "casefile": cf,
         "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba),
     }
     if a.quiz:

@@ -115,12 +115,16 @@
   }
   function nyDay() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()); }
 
-  const NAMES = { timeline: "Timeline", beacon_agenda: "Beacon Agenda", docket: "The Docket", ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
+  const NAMES = { keyed: "Keyed cipher", patristocrat: "Patristocrat", meta: "Saturday meta", casefile: "Case file", timeline: "Timeline", beacon_agenda: "Beacon Agenda", docket: "The Docket", ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
   const LOGIC_NAMES = { loopy: "Loopy", keen: "Keen", towers: "Towers", galaxies: "Galaxies", signpost: "Signpost", dominosa: "Dominosa", unequal: "Unequal", slant: "Slant", range: "Range", pattern: "Pattern" };
   function slotLine(s) {
     const p = s.puzzle || {};
     if (s.game === "logic") return (LOGIC_NAMES[p.game] || p.game) + " · tier " + p.tier;
     if (s.game === "chess") { const th = (p.themes || []).filter((t) => !/^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality)$/.test(t)).slice(0, 2); return "Puzzle rated " + p.rating + (th.length ? " · " + th.join(", ") : ""); }
+    if (s.game === "keyed") return "Friday cipher · the keyword feeds the meta";
+    if (s.game === "casefile") return "Logic grid · tier " + p.tier + " · " + (p.clues || []).length + " clues";
+    if (s.game === "meta") return (p.feeders || []).length + " feeders from the week · " + p.category;
+    if (s.game === "patristocrat") return "Sunday long cipher · five-letter groups";
     if (s.game === "cryptoquote") return ["", "Easy", "Medium", "Hard"][p.tier] + " · " + (p.cipher || "").replace(/[^A-Z]/g, "").length + " letters";
     if (s.game === "who_said_it") return p.outlet ? "From " + p.outlet : "This week's news";
     if (s.game === "timeline") return (p.cards || []).length + " events · votes and decisions";
@@ -174,7 +178,7 @@
 
   function play(s) {
     if (s.game === "who_said_it") return whoSaidIt(s);
-    if (s.game === "cryptoquote") return cryptoquote(s);
+    if (s.game === "cryptoquote" || s.game === "keyed" || s.game === "patristocrat") return cryptoquote(s);
     if (s.game === "chess") return chess(s);
     if (s.game === "logic") return logic(s);
     if (s.game === "defectors") return defectorsGame(s);
@@ -182,6 +186,8 @@
     if (s.game === "ledger") return ledgerGame(s);
     if (s.game === "docket") return docketGame(s);
     if (s.game === "timeline") return timelineGame(s);
+    if (s.game === "meta") return metaGame(s);
+    if (s.game === "casefile") return caseFile(s);
     if (s.game === "beacon_agenda") return agendaGame(s);
     if (s.game === "friday_quiz") return fridayQuiz(s);
     openPuzzles();
@@ -507,6 +513,136 @@
     q(0);
   }
 
+  // ---------------------------------------------------------------- Saturday meta
+  // Each feeder answer gives one letter (at the position shown); the letters, in order, spell the
+  // answer: a Hudson Valley place. It's built so you can still get it with a quarter of the feeders
+  // missing. Partial guesses get "keep going"; hints reveal a feeder, one at a time.
+  function metaGame(s) {
+    const P = s.puzzle;
+    const t0 = Date.now();
+    const S = get(PKEY + P.id, null) || { got: {}, hints: 0 };
+    const kw = get("wire.games.keyword", null);
+    P.feeders.forEach((f, i) => { if (f.src === "keyed" && kw && kw.word === f.answer) S.got[i] = true; });
+    const slots = el("div", { class: "gm-metaslots" });
+    const rows = el("ol", { class: "gm-feeders" });
+    const final = answerInput("The answer");
+    keepVisible(final);
+    const msg = el("p", { class: "fine", text: "" });
+    const save = () => put(PKEY + P.id, S);
+    function draw() {
+      slots.replaceChildren(...P.feeders.map((f, i) => el("span", { class: "gm-mslot" + (S.got[i] ? " got" : ""), text: S.got[i] ? f.answer[f.index - 1] : "_" })));
+      rows.replaceChildren(...P.feeders.map((f, i) => {
+        const inp = answerInput("Answer");
+        inp.value = S.got[i] ? f.answer : "";
+        inp.disabled = !!S.got[i];
+        inp.addEventListener("input", () => {
+          if (fold(inp.value).replace(/ /g, "").toUpperCase() === f.answer) { S.got[i] = true; save(); draw(); }
+        });
+        return el("li", { class: "gm-feeder" + (S.got[i] ? " got" : "") }, el("span", { class: "fine", text: f.clue + " · letter " + f.index }), inp);
+      }));
+    }
+    const check = () => {
+      const g = fold(final.value).replace(/ /g, "").toUpperCase();
+      if (!g) return;
+      if (g === P.answer) return finish(true);
+      const same = [...g].filter((c, i) => P.answer[i] === c).length;
+      msg.textContent = g.length === P.answer.length && same >= P.answer.length / 2 ? "Keep going — you're close." : "Not it.";
+    };
+    final.addEventListener("keydown", (e) => { if (e.key === "Enter") check(); });
+    function finish(ok) {
+      store.removeItem(PKEY + P.id);
+      const n = Object.keys(S.got).length;
+      const res = { ok, score: ok ? Math.max(1, 10 - S.hints * 2) : 0, ms: Date.now() - t0, hints: S.hints };
+      send(Object.assign({ slot: s.slot, game: "meta", puzzle: P.id, items: [] }, res));
+      markDone(s.slot, res);
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Saturday meta" }),
+        reveal({ ok, verdict: ok ? "Solved with " + n + " of " + P.feeders.length + " feeders" : "It was " + P.answer, keep: P.answer + " — " + P.category,
+          meta: "Feeders: " + P.feeders.map((f) => f.answer + "[" + f.index + "]=" + f.answer[f.index - 1]).join(" · "), next: { text: "Done ›", fn: () => openPuzzles() } })], "Saturday meta");
+    }
+    draw();
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Saturday meta" }),
+      el("p", { class: "gm-keep", text: "The answer is " + P.category + ", " + P.length + " letters (spaces dropped)." }),
+      el("p", { class: "fine", text: "Each answer below gives one letter, at the position shown, in order. You can get it with " + P.solvable_missing + " feeder" + (P.solvable_missing > 1 ? "s" : "") + " missing." }),
+      slots, final, msg,
+      el("div", { class: "sactions" },
+        el("button", { class: "sbtn primary", text: "Check", onclick: check }),
+        el("button", { class: "sbtn", text: "Hint: reveal a feeder", onclick: () => { const i = P.feeders.findIndex((_, k) => !S.got[k]); if (i >= 0) { S.got[i] = true; S.hints += 1; save(); draw(); } } }),
+        el("button", { class: "unsave", text: "Give up", onclick: () => finish(false) })),
+      rows, backBtn()], "Saturday meta");
+  }
+
+  // ---------------------------------------------------------------- Case file (Sunday logic grid)
+  // Tap a cell: blank → ✗ → ● → blank. A ● crosses out the rest of its row and column. Tap a clue to
+  // strike it. Every case has exactly one answer, reachable by deduction alone.
+  function caseFile(s) {
+    const P = s.puzzle;
+    const t0 = Date.now();
+    const S = get(PKEY + P.id, null) || { m: {}, checks: 0, hints: 0, struck: {} };
+    const save = () => put(PKEY + P.id, S);
+    const grids = [["project", P.projects], ["time", P.times]];
+    const wrap = el("div", {});
+    const msg = el("p", { class: "fine", text: "" });
+    const key = (g, r, c) => g + "|" + r + "|" + c;
+    function tap(g, r, c, cols) {
+      const k = key(g, r, c);
+      const v = S.m[k] || "";
+      const nv = v === "" ? "x" : v === "x" ? "o" : "";
+      S.m[k] = nv;
+      if (nv === "o") {                                // cross out the rest of the row and column
+        P.people.forEach((p, rr) => { if (rr !== r && S.m[key(g, rr, c)] !== "o") S.m[key(g, rr, c)] = "x"; });
+        cols.forEach((_, cc) => { if (cc !== c && S.m[key(g, r, cc)] !== "o") S.m[key(g, r, cc)] = "x"; });
+      }
+      save(); draw();
+      if (solved()) finish(true);
+    }
+    function solved() {
+      return P.people.every((p, r) => grids.every(([g, cols]) => cols.every((c, ci) => (S.m[key(g, r, ci)] === "o") === (P.solution[p][g] === c))));
+    }
+    function wrong() {
+      let n = 0;
+      P.people.forEach((p, r) => grids.forEach(([g, cols]) => cols.forEach((c, ci) => {
+        const v = S.m[key(g, r, ci)], truth = P.solution[p][g] === c;
+        if ((v === "o" && !truth) || (v === "x" && truth)) n += 1;
+      })));
+      return n;
+    }
+    function draw() {
+      wrap.replaceChildren(...grids.map(([g, cols]) => el("table", { class: "gm-grid" },
+        el("tr", {}, el("th", {}), ...cols.map((c) => el("th", { text: c }))),
+        ...P.people.map((p, r) => el("tr", {}, el("th", { text: p }), ...cols.map((c, ci) => {
+          const v = S.m[key(g, r, ci)] || "";
+          return el("td", {}, el("button", { class: "gm-cell2 " + v, "aria-label": p + " " + c, text: v === "o" ? "●" : v === "x" ? "✗" : "", onclick: () => tap(g, r, ci, cols) }));
+        }))))));
+    }
+    function finish(ok) {
+      store.removeItem(PKEY + P.id);
+      const res = { ok, score: ok ? Math.max(1, 10 - S.checks - S.hints * 2) : 0, ms: Date.now() - t0, hints: S.hints + S.checks };
+      send(Object.assign({ slot: s.slot, game: "casefile", puzzle: P.id, items: [] }, res));
+      markDone(s.slot, res);
+      msg.replaceChildren(reveal({ ok, verdict: ok ? "Case closed in " + mmss(Math.round((Date.now() - t0) / 1000)) : "Here's the answer",
+        keep: P.people.map((p) => p + ": " + P.solution[p].project + " at " + P.solution[p].time).join(" · "), meta: "Every step could be deduced; no guessing needed.", next: { text: "Done ›", fn: () => openPuzzles() } }));
+    }
+    const clues = el("ol", { class: "gm-clues" }, ...P.clues.map((c, i) => {
+      const li = el("li", { class: S.struck[i] ? "struck" : "", text: c, onclick: () => { S.struck[i] = !S.struck[i]; li.classList.toggle("struck", !!S.struck[i]); save(); } });
+      return li;
+    }));
+    draw();
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Case file · tier " + P.tier }), el("p", { class: "fine", text: P.story }),
+      clues, wrap, msg,
+      el("div", { class: "sactions" },
+        el("button", { class: "sbtn", text: "Check (−1)", onclick: () => { S.checks += 1; save(); const w = wrong(); msg.textContent = w ? w + " mark" + (w > 1 ? "s are" : " is") + " wrong." : "Everything marked so far is right."; } }),
+        el("button", { class: "sbtn", text: "Hint (−2)", onclick: () => {
+          const p = P.people.find((pp, r) => grids.some(([g, cols]) => S.m[key(g, r, cols.indexOf(P.solution[pp][g]))] !== "o"));
+          if (!p) return;
+          const r = P.people.indexOf(p);
+          const [g, cols] = grids.find(([g2, cols2]) => S.m[key(g2, r, cols2.indexOf(P.solution[p][g2]))] !== "o");
+          S.hints += 1; tap(g, r, cols.indexOf(P.solution[p][g]), cols);
+          if (S.m[key(g, r, cols.indexOf(P.solution[p][g]))] !== "o") tap(g, r, cols.indexOf(P.solution[p][g]), cols);
+        } }),
+        el("button", { class: "unsave", text: "Give up", onclick: () => finish(false) })),
+      backBtn()], "Case file");
+  }
+
   // ---------------------------------------------------------------- The Docket
   // A decided Supreme Court case: the Court's own one-line holding (party names masked) — which
   // case is it? Then, for a signed opinion, who wrote it? Always after decision; never criminal
@@ -656,13 +792,17 @@
     const S = saved || { map: {}, hints: 0, checks: 0, t0: null, ms: 0, speaker: false, crib: false };
     const cipher = p.cipher, plain = p.plain;
     const truth = {};
-    for (let i = 0; i < cipher.length; i++) if (/[A-Z]/.test(cipher[i])) truth[cipher[i]] = plain[i];
+    const cl = cipher.replace(/[^A-Z]/g, ""), pl = plain.replace(/[^A-Z]/g, "");   // letter by letter (Patristocrat groups too)
+    for (let i = 0; i < cl.length; i++) truth[cl[i]] = pl[i];
+    const kind = s.game === "keyed" ? "Keyed cipher" : s.game === "patristocrat" ? "Patristocrat" : "Cryptoquote";
     if (p.give && !saved) { const c = Object.keys(truth).find((k) => truth[k] === p.given); if (c) S.map[c] = p.given; }
     let sel = null;
     const input = el("input", { class: "gm-hidden", type: "text", autocomplete: "off", autocorrect: "off", autocapitalize: "characters", spellcheck: "false", maxlength: "1", "aria-label": "Letter" });
     const board = el("div", { class: "gm-crypt" });
     const strip = el("div", { class: "gm-strip" });
     const msg = el("p", { class: "fine", text: "" });
+    const sheetRow = el("div", { class: "gm-sheetrow" });
+    const cribAt = () => (s.game === "patristocrat" ? p.crib.at : cipher.slice(0, p.crib.at).replace(/[^A-Z]/g, "").length) + 1;
     const save = () => put(PKEY + p.id, S);
     function solved() { return Object.keys(truth).every((c) => S.map[c] === truth[c]); }
     function draw() {
@@ -674,6 +814,10 @@
       }))));
       const used = new Set(Object.values(S.map));
       strip.replaceChildren(...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((L) => el("span", { class: "gm-l" + (used.has(L) ? " used" : ""), text: L }))));
+      // Keyed cipher worksheet: ciphertext A–Z with what you've recovered beneath; the keyword shows up here.
+      if (s.game === "keyed") sheetRow.replaceChildren(
+        el("div", { class: "gm-ws" }, ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((c) => el("span", { text: c }))),
+        el("div", { class: "gm-ws plain" }, ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((c) => el("span", { text: S.map[c] || "·" }))));
     }
     function nextOpen(from) {
       const order = cipher.replace(/[^A-Z]/g, "").split("");
@@ -699,16 +843,18 @@
       // Revealing more than a third of the alphabet in play isn't a solve.
       if (ok && S.hints > Math.max(2, Object.keys(truth).length / 3)) ok = false;
       const res = { ok, score: ok ? Math.max(1, 10 - S.hints * 2 - S.checks) : 0, ms, hints: S.hints + S.checks };
-      send(Object.assign({ slot: s.slot, game: "cryptoquote", puzzle: p.id, items: [] }, res));
+      send(Object.assign({ slot: s.slot, game: s.game, puzzle: p.id, items: [] }, res));
       markDone(s.slot, res);
       store.removeItem(PKEY + p.id);
+      if (p.keyword) put("wire.games.keyword", { day: nyDay(), word: p.keyword });
       openSheet([
-        el("h2", { id: "sheet-title", class: "stitle", text: "Cryptoquote" }),
-        el("blockquote", { class: "gm-quote", text: plain }),
+        el("h2", { id: "sheet-title", class: "stitle", text: kind }),
+        p.keyword ? el("p", { class: "gm-keep" }, el("b", { text: "The keyword: " + p.keyword }), el("span", { class: "fine", text: " — read it in the worksheet's bottom row. It feeds Saturday's meta." })) : null,
+        el("blockquote", { class: "gm-quote", text: p.quote || plain }),
         reveal({ ok, verdict: !ok && S.hints ? "Mostly revealed" : ok ? "Solved in " + Math.max(1, Math.round(ms / 60000)) + " min" + (S.hints ? " · " + S.hints + " hint" + (S.hints > 1 ? "s" : "") : "") : "Revealed",
           keep: "— " + p.speaker + (p.role ? ", " + p.role : ""), meta: [p.outlet, p.t ? when(p.t) : null].filter(Boolean).join(" · "),
           link: p.link, thread: p.thread, next: { text: "Done ›", fn: () => openPuzzles() } }),
-      ], "Cryptoquote");
+      ], kind);
     }
     const hintRow = el("div", { class: "sactions" },
       el("button", { class: "sbtn", text: "Reveal a letter", onclick: () => {
@@ -718,17 +864,20 @@
         S.map[c] = truth[c]; S.hints += 1; save();
         if (solved()) return done(true);
         draw(); } }),
-      el("button", { class: "sbtn", text: "Crib", onclick: () => { S.crib = true; S.hints += 1; save(); msg.textContent = "Crib: the word " + p.crib.word + " starts at letter " + (cipher.slice(0, p.crib.at).replace(/[^A-Z]/g, "").length + 1) + "."; } }),
+      el("button", { class: "sbtn", text: "Crib", onclick: () => { S.crib = true; S.hints += 1; save(); msg.textContent = "Crib: the word " + p.crib.word + " starts at letter " + cribAt() + "."; } }),
       el("button", { class: "sbtn", text: "Speaker", onclick: () => { S.speaker = true; S.hints += 1; save(); msg.textContent = "Said by " + p.speaker + (p.role ? ", " + p.role : "") + "."; } }),
       el("button", { class: "sbtn", text: "Check", onclick: () => { S.checks += 1; save(); const wrong = Object.keys(S.map).filter((k) => S.map[k] !== truth[k]).length; msg.textContent = wrong ? wrong + " letter" + (wrong > 1 ? "s are" : " is") + " wrong." : "Everything so far is right."; } }),
       el("button", { class: "unsave", text: "Give up", onclick: () => { for (const k of Object.keys(truth)) S.map[k] = truth[k]; done(false); } }));
-    if (S.crib) msg.textContent = "Crib: the word " + p.crib.word + " starts at letter " + (cipher.slice(0, p.crib.at).replace(/[^A-Z]/g, "").length + 1) + ".";
+    if (S.crib) msg.textContent = "Crib: the word " + p.crib.word + " starts at letter " + cribAt() + ".";
     sel = nextOpen(null);
     draw();
+    const intro = s.game === "keyed" ? "Friday · a keyed cipher: solve the quote, and the worksheet's bottom row spells a keyword."
+      : s.game === "patristocrat" ? "Sunday · a Patristocrat: no spaces, letters in groups of five. Long and hard on purpose."
+      : ["", "Easy", "Medium", "Hard"][p.tier] + " · a quote from this week's news, letters swapped. Speaker hidden." + (p.give ? " One letter is given." : "");
     openSheet([
-      el("h2", { id: "sheet-title", class: "stitle", text: "Cryptoquote" }),
-      el("p", { class: "asrc", text: ["", "Easy", "Medium", "Hard"][p.tier] + " · a quote from this week's news, letters swapped. Speaker hidden." + (p.give ? " One letter is given." : "") }),
-      board, strip, input, msg, hintRow,
+      el("h2", { id: "sheet-title", class: "stitle", text: kind }),
+      el("p", { class: "asrc", text: intro }),
+      board, strip, sheetRow, input, msg, hintRow,
       el("p", { class: "fine", text: "Progress saves on this device, so you can stop and pick it up later." }),
       backBtn(),
     ], "Cryptoquote");

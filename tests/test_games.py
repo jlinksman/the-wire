@@ -94,6 +94,27 @@ def test_docket_excludes_minors_and_criminal():
     assert "West Virginia v. B. P. J." not in names and "United States v. Smith" not in names and len(out) == 5
 
 
+def test_keyed_aristocrat():
+    for w in games.KEYWORDS:
+        assert len(set(w)) == len(w), w
+        key = games.k1_key(w, random.Random(w))
+        assert key and all(k != v for k, v in key.items())
+        assert sorted(key.values()) == list(games.string.ascii_uppercase)
+        # Reading the plaintext under ciphertext A–Z (in cipher order, rotated) shows the keyword in sequence.
+        inv = {v: k for k, v in key.items()}
+        row = "".join(inv[c] for c in games.string.ascii_uppercase)
+        assert w in row + row, (w, row)
+
+
+def test_casefile_unique_and_minimal():
+    for k in range(6):
+        cf = games.casefile(f"seed{k}", [])
+        assert cf and 3 <= len(cf["clues"]) <= 16
+        sol = cf["solution"]
+        assert sorted(v["project"] for v in sol.values()) == sorted(cf["projects"])
+        assert sorted(v["time"] for v in sol.values()) == sorted(cf["times"])
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):

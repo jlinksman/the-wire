@@ -127,14 +127,19 @@ function assemble(st, pool, chess, today) {
   // Slot 3: Tue/Thu a legal refresher session; otherwise the cipher (graded tier near Joe's ladder,
   // never the same quote as slot 2). A refresher day with no verified cards falls back to the cipher.
   const lg = (dow === 2 || dow === 4) ? pickLegal(st, pool, today) : null;
+  const wk = (pool && pool.weekend) || {};
   if (lg) slots.push({ slot: 3, label: "Law", game: "legal", puzzle: lg });
+  else if (dow === 5 && wk.keyed && !st.served[wk.keyed.id]) slots.push({ slot: 3, label: "Cipher", game: "keyed", puzzle: wk.keyed });
+  else if (dow === 0 && wk.patristocrat && !st.served[wk.patristocrat.id]) slots.push({ slot: 3, label: "Cipher", game: "patristocrat", puzzle: wk.patristocrat });
+  else if (dow === 6 && pool && pool.meta && !st.served[pool.meta.id]) slots.push({ slot: 3, label: "Meta", game: "meta", puzzle: pool.meta });
   else {
     const cq = pickCipher(st, pool, today, tier("cryptoquote"), wsi && wsi.id);
     if (cq) slots.push({ slot: 3, label: "Cipher", game: "cryptoquote", puzzle: cq });
   }
 
-  // Slot 4: Joe's brain break (defaults to his last pick).
-  slots.push(Object.assign({ slot: 4, label: "Brain break" }, brainBreak(brain, st, chess, today, rng, health)));
+  // Slot 4: Joe's brain break (defaults to his last pick); on Sunday the case-file grid takes it.
+  if (dow === 0 && pool && pool.casefile && !st.served[pool.casefile.id]) slots.push({ slot: 4, label: "Case file", game: "casefile", puzzle: pool.casefile });
+  else slots.push(Object.assign({ slot: 4, label: "Brain break" }, brainBreak(brain, st, chess, today, rng, health)));
 
   // Never fewer than four: fill from logic and chess.
   let k = 0;

@@ -896,3 +896,21 @@ select.tin { width: 100%; }
 .gm-zoom { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
 .gm-outline { width: 100%; height: 38vh; }
 .gm-outline path { fill: #d9a441; stroke: none; }
+.gm-sheetrow { margin: 6px 0; }
+.gm-ws { display: grid; grid-template-columns: repeat(26, 1fr); font-family: var(--mono, ui-monospace, monospace); font-size: 0.7rem; text-align: center; color: var(--text2); }
+.gm-ws.plain { color: var(--text); font-weight: 700; }
+.gm-metaslots { display: flex; gap: 6px; font-family: var(--mono, ui-monospace, monospace); font-size: 1.4rem; margin: 10px 0; flex-wrap: wrap; }
+.gm-mslot { min-width: 1.2em; text-align: center; border-bottom: 2px solid var(--text2); }
+.gm-mslot.got { color: var(--good, #5c5); }
+.gm-feeders { padding-left: 1.2em; }
+.gm-feeder { margin: 8px 0; }
+.gm-feeder.got .fine { text-decoration: line-through; opacity: 0.6; }
+.gm-grid { border-collapse: collapse; margin: 10px 0; font-size: 0.74rem; width: 100%; table-layout: fixed; }
+.gm-grid th { font-weight: 500; color: var(--text2); padding: 2px; text-align: center; word-break: break-word; }
+.gm-grid tr th:first-child { text-align: left; width: 28%; color: var(--text); }
+.gm-grid td { border: 1px solid var(--line, #333); padding: 0; }
+.gm-cell2 { width: 100%; min-height: 38px; font-size: 1rem; }
+.gm-cell2.x { color: var(--text2); }
+.gm-cell2.o { color: var(--good, #5c5); font-weight: 700; }
+.gm-clues li { margin: 4px 0; cursor: pointer; }
+.gm-clues li.struck { text-decoration: line-through; opacity: 0.5; }
