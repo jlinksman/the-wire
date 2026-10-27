@@ -34,6 +34,7 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const pool = (await env.WIRE.get("games-today.json", "json")) || null;
   if (url.searchParams.get("shadow")) return json({ pool_day: pool && pool.day, connections: pool && pool.connections_shadow, health: pool && pool.health });
+  if (url.searchParams.get("library")) return json({ day: pool && pool.day, lists: (pool && pool.library) || [], who_left: (pool && pool.who_left) || [] });
   if (url.searchParams.get("quiz")) return json({ day: pool && pool.day, quiz: (pool && pool.wirequiz) || null });
   const st = await load(env);
   const today = nyDay();
@@ -236,7 +237,7 @@ function record(st, b, today) {
 }
 
 function ladder(st, game, r, b) {
-  if (game === "callback") return;
+  if (["callback", "name_all", "match"].includes(game)) return;
   if (game === "chess") {
     const L = st.ladder.chess || (st.ladder.chess = { rating: 1200, n: 0 });
     const pr = num(b.rating) || L.rating;

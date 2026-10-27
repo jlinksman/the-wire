@@ -864,6 +864,98 @@ def beacon_agenda(data, seed, drops) -> list[dict]:
     return out[:12]
 
 
+# ------------------------------------------------------------------ Library: Name them all / Match
+# Lists from complete sources only: local_politics.yaml (each entry sourced), congress-legislators
+# (CC0), the Supreme Court's own opinion list. Local lists first. Each list carries its as-of date
+# and source. The featured list is the one the week's news mentions most. "Who left the list"
+# compares with last week's snapshot (Actions cache).
+SCOTUS_NOW = ["John Roberts", "Clarence Thomas", "Samuel Alito", "Sonia Sotomayor", "Elena Kagan",
+              "Neil Gorsuch", "Brett Kavanaugh", "Amy Coney Barrett", "Ketanji Brown Jackson"]
+STATE_NAMES = None
+
+
+def _acc(name: str, extra=()) -> list[str]:
+    parts = name.replace(",", " ").split()
+    last = parts[-1] if parts else name
+    if last.lower() in ("jr", "jr.", "ii", "iii", "iv") and len(parts) > 1:
+        last = parts[-2]
+    first_last = f"{parts[0]} {last}" if len(parts) > 2 else None              # "Andrew Garbarino"
+    last_two = " ".join(parts[-2:]) if len(parts) >= 3 and not re.search(r"\.$", parts[-2]) else None   # "Valdes Smith"
+    return sorted({fold(name), fold(last), *[fold(x) for x in (first_last, last_two, *extra) if x]} - {""})
+
+
+def library(rosters, scotus_rows, data, now) -> list[dict]:
+    lp = yaml.safe_load((ROOT / "local_politics.yaml").read_text()) or {}
+    off = lp.get("officials", {})
+    lists = []
+    cb = off.get("city_of_beacon", {})
+    council = [{"answer": c["name"], "accept": _acc(c["name"]), "clue": c["seat"]} for c in cb.get("council", []) if c.get("name")]
+    if cb.get("mayor", {}).get("name"):
+        council = [{"answer": cb["mayor"]["name"], "accept": _acc(cb["mayor"]["name"]), "clue": "Mayor"}] + council
+    lists.append({"id": "beacon_council", "group": "Beacon", "title": "Beacon's mayor and City Council", "items": council,
+                  "source": "local_politics.yaml (city website, county election results)", "as_of": "2026"})
+    city = [(k.replace("_", " ").title().replace("Zba", "ZBA"), v) for k, v in cb.items() if isinstance(v, dict) and v.get("name") and k not in ("mayor",)]
+    lists.append({"id": "beacon_officials", "group": "Beacon", "title": "Who runs Beacon's offices and boards", "items":
+                  [{"answer": v["name"], "accept": _acc(v["name"]), "clue": k} for k, v in city], "source": "local_politics.yaml"})
+    reps = [{"answer": r["name"], "accept": _acc(r["name"]), "clue": r["office"]} for r in off.get("state_and_federal_for_beacon", []) or []]
+    dc = off.get("dutchess_county", {})
+    reps += [{"answer": r["name"], "accept": _acc(r["name"]), "clue": f"County Legislature District {r['district']}"} for r in dc.get("legislators_for_beacon", []) or []]
+    reps += [{"answer": r["name"], "accept": _acc(r["name"]), "clue": "Dutchess " + r["office"]} for r in dc.get("countywide", []) or [] if r.get("name")]
+    lists.append({"id": "your_reps", "group": "Beacon", "title": "Who represents Beacon", "items": reps, "source": "local_politics.yaml"})
+    lead = [{"answer": r["name"], "accept": _acc(r["name"]), "clue": f"{r['role']} (District {r.get('district')})"} for r in dc.get("legislature_leaders", []) or [] if r.get("name")]
+    if lead:
+        lists.append({"id": "dutchess_leaders", "group": "Dutchess", "title": "Dutchess County Legislature leaders", "items": lead, "source": "local_politics.yaml"})
+    if rosters and (rosters / "legislators-current.json").exists():
+        today = now.date().isoformat()
+        ny, sen = [], []
+        for m in json.loads((rosters / "legislators-current.json").read_text()):
+            t = (m.get("terms") or [{}])[-1]
+            if t.get("end", "9") < today:
+                continue
+            nm = m["name"].get("official_full") or f"{m['name']['first']} {m['name']['last']}"
+            acc = _acc(nm, [m["name"].get("last"), m["name"].get("nickname") and f"{m['name']['nickname']} {m['name']['last']}"])
+            if t.get("type") == "rep" and t.get("state") == "NY":
+                ny.append({"answer": nm, "accept": acc, "clue": f"NY-{t.get('district')}", "order": t.get("district") or 0})
+            if t.get("type") == "sen":
+                sen.append({"answer": nm, "accept": acc, "clue": t.get("state"), "order": t.get("state")})
+        ny.sort(key=lambda x: x["order"])
+        sen.sort(key=lambda x: (x["order"], x["answer"]))
+        lists.append({"id": "ny_house", "group": "New York", "title": "New York's House delegation", "items": ny, "source": "congress-legislators (CC0)", "as_of": today})
+        lists.append({"id": "senators", "group": "Congress", "title": "All 100 U.S. senators", "items": sen, "source": "congress-legislators (CC0)", "as_of": today, "minutes": 12})
+        nysen = [x for x in sen if x["clue"] == "NY"]
+        if nysen:
+            lists[2]["items"] += [dict(x, clue="U.S. Senator, NY") for x in nysen]
+    lists.append({"id": "scotus", "group": "Courts", "title": "The Supreme Court", "items": [{"answer": n, "accept": _acc(n), "clue": "Chief Justice" if n == "John Roberts" else "Associate Justice"} for n in SCOTUS_NOW],
+                  "source": "supremecourt.gov (every justice wrote an opinion this term)", "as_of": now.date().isoformat()})
+    week = fold(" ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in data.get("items", [])))
+    for L in lists:
+        L["mentions"] = sum(1 for x in L["items"] if fold(x["answer"]) in week)
+        L.setdefault("as_of", "2026")
+        L["n"] = len(L["items"])
+    return [L for L in lists if L["items"]]
+
+
+def who_left(lists, snap_path: Path | None, day: str) -> list[dict]:
+    """Members who left a list since last week's snapshot, and who's new (Actions cache, public data only)."""
+    if not snap_path:
+        return []
+    prev = json.loads(snap_path.read_text()) if snap_path.exists() else {}
+    out = []
+    cur = {L["id"]: {x["answer"]: x.get("clue") for x in L["items"]} for L in lists}
+    for lid, now_ in cur.items():
+        before = (prev.get("lists") or {}).get(lid)
+        if before is None:
+            continue
+        gone = sorted(set(before) - set(now_))
+        new = sorted(set(now_) - set(before))
+        if gone or new:
+            out.append({"list": lid, "since": prev.get("day"), "gone": [{"name": g, "clue": before[g]} for g in gone],
+                        "new": [{"name": n, "clue": now_[n]} for n in new]})
+    if not prev or prev.get("day", "") <= (date.fromisoformat(day) - timedelta(days=7)).isoformat():
+        snap_path.write_text(json.dumps({"day": day, "lists": cur}))
+    return out
+
+
 # ------------------------------------------------------------------ run
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
@@ -876,6 +968,7 @@ def main(argv=None) -> int:
     ap.add_argument("--fetch-votes", action="store_true", help="fetch new roll calls before generating")
     ap.add_argument("--scotus", type=Path, help="Supreme Court opinion-list cache directory (Actions cache)")
     ap.add_argument("--fetch-scotus", action="store_true", help="make today's one request to supremecourt.gov")
+    ap.add_argument("--snapshots", type=Path, help="weekly list snapshot for Who left the list (Actions cache)")
     ap.add_argument("--quiz", type=Path, help="write the audio Wire Quiz MP3 into this directory (needs Cloudflare credentials)")
     a = ap.parse_args(argv)
     load_words()
@@ -934,12 +1027,14 @@ def main(argv=None) -> int:
         srows = scotus.rows(a.scotus) if a.scotus else []
         tl = fresh(timeline(vlist, srows, seed, now, drops), "timeline")
     ba = fresh(beacon_agenda(data, seed, drops), "beacon_agenda")
+    lib = library(a.rosters, [], data, now)
+    left = who_left(lib, a.snapshots, day)
     lg = legal(data, now, drops)
     ldg = fresh(ledger(dv, a.rosters, seed, now, drops), "ledger")
     fq = friday_quiz(wsi, dv, lg, data, seed, drops) if date.fromisoformat(day).weekday() == 4 or os.environ.get("WIRE_FRIDAY") else None
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
-        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba,
+        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left,
         "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba),
     }
     if a.quiz:
