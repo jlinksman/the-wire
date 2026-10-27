@@ -252,7 +252,7 @@ function record(st, b, today) {
 }
 
 function ladder(st, game, r, b) {
-  if (["callback", "name_all", "match"].includes(game)) return;
+  if (["callback", "name_all", "match", "forms"].includes(game)) return;
   if (game === "chess") {
     const L = st.ladder.chess || (st.ladder.chess = { rating: 1200, n: 0 });
     const pr = num(b.rating) || L.rating;

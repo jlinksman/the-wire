@@ -1234,8 +1234,8 @@
       if (L.group !== group) { group = L.group; nodes.push(el("h3", { class: "sh3", text: group })); }
       nodes.push(el("div", { class: "gm-libl" },
         el("span", { class: "gm-t", text: L.title + " · " + L.n }),
-        el("button", { class: "chip", text: "Name them", onclick: () => nameAll(L) }),
-        L.n <= 14 ? el("button", { class: "chip", text: "Match", onclick: () => matchGame(L) }) : null));
+        L.kind === "forms" ? el("button", { class: "chip", text: "Sort them", onclick: () => formsGame(L) }) : el("button", { class: "chip", text: "Name them", onclick: () => nameAll(L) }),
+        L.n <= 14 && L.kind !== "forms" ? el("button", { class: "chip", text: "Match", onclick: () => matchGame(L) }) : null));
     }
     nodes.push(el("h3", { class: "sh3", text: "Maps" }));
     for (const id of Object.keys(MAPS)) nodes.push(el("div", { class: "gm-libl" },
@@ -1245,6 +1245,42 @@
     nodes.push(el("div", { class: "gm-libl" }, el("span", { class: "gm-t", text: "Outline: today's country" }), el("button", { class: "chip", text: "Play", onclick: outlineGame })));
     nodes.push(el("button", { class: "sbtn wide", text: "‹ Puzzles", onclick: () => openPuzzles() }));
     openSheet(nodes, "Library");
+  }
+
+  // Forms of government: ten countries, tap the form for each. Misses enter the review schedule.
+  function formsGame(L) {
+    const t0 = Date.now();
+    const pool = L.items.slice();
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    const round = pool.slice(0, 10);
+    let k = 0, right = 0;
+    const misses = [];
+    const q = el("p", { class: "gm-keep" });
+    const fb = el("p", { class: "fine" });
+    const chips = el("div", { class: "gm-chips" });
+    const done = el("div", {});
+    function show() {
+      if (k >= round.length) return finish();
+      q.replaceChildren(el("b", { text: round[k].clue }), el("span", { class: "asrc", text: "  " + (k + 1) + " of " + round.length }));
+      chips.replaceChildren(...(L.choices || []).map((c) => el("button", { class: "chip", text: c, onclick: () => pick(c) })));
+    }
+    function pick(c) {
+      const it = round[k];
+      if (c === it.answer) { right += 1; fb.textContent = "✓ " + it.clue + ": " + it.answer; }
+      else { misses.push(it); fb.textContent = "✗ " + it.clue + " is a " + it.answer.toLowerCase() + " (not " + c.toLowerCase() + ")"; }
+      k += 1; show();
+    }
+    function finish() {
+      chips.replaceChildren(); q.replaceChildren();
+      const items = misses.map((x) => ({ id: "fm:" + fold(x.clue).replace(/ /g, "_").slice(0, 30), type: "form", q: "Form of government: " + x.clue, a: x.answer, accept: x.accept, hint: L.source, ok: false, cert: "guess" }));
+      send({ game: "forms", puzzle: L.id, ok: right >= 8, score: right, ms: Date.now() - t0, hints: 0, items });
+      done.replaceChildren(reveal({ ok: right >= 8, verdict: right + " of " + round.length, keep: misses.length ? "Missed ones come back in the next few days." : "All of them.",
+        meta: "Source: " + L.source + (L.as_of ? " · as of " + L.as_of : ""), next: { text: "Another ten ›", fn: () => formsGame(L) } }));
+    }
+    show();
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Forms of government" }),
+      el("p", { class: "fine", text: "Tap the form of government for each country. Who holds power, not how they got it." }), q, chips, fb, done,
+      el("button", { class: "sbtn wide", text: "‹ Library", onclick: () => openLibrary() })], "Forms of government");
   }
 
   function nameAll(L) {

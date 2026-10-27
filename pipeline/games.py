@@ -1166,6 +1166,7 @@ def library(rosters, scotus_rows, data, now) -> list[dict]:
         lists.append({"id": R["id"], "group": R.get("group", "Sports"), "title": R["title"], "as_of": R.get("as_of", "2026"),
                       "source": "; ".join(R.get("sources", [])[:3]), "team": R["title"].split(" — ")[0],
                       "items": [{"answer": x["answer"], "accept": _acc(x["answer"], x.get("aliases", [])), "clue": x.get("clue", "")} for x in R["items"]]})
+    lists += world_lists()
     week = fold(" ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in data.get("items", [])))
     for L in lists:
         L["mentions"] = sum(1 for x in L["items"] if fold(x["answer"]) in week)
@@ -1177,13 +1178,47 @@ def library(rosters, scotus_rows, data, now) -> list[dict]:
     return [L for L in lists if L["items"]]
 
 
+FORMS = ["Presidential republic", "Semi-presidential republic", "Parliamentary republic", "Parliamentary constitutional monarchy",
+         "Absolute monarchy", "One-party state", "Theocratic republic", "Directorial republic", "Military-led government"]
+
+
+def world_lists() -> list[dict]:
+    """World leaders and forms of government (world.yaml, hand-checked against recent sources).
+    Leaders marked unverified stay out; forms of government change rarely, so every country plays."""
+    wp = ROOT / "world.yaml"
+    if not wp.exists():
+        return []
+    W = yaml.safe_load(wp.read_text()) or {}
+    C = W.get("countries", [])
+    asof = str(W.get("as_of", "2026"))
+    src = "world.yaml (hand-checked against official and news sources)"
+    hog, hos = [], []
+    for c in C:
+        if c.get("status") == "unverified":
+            continue
+        g, h = c.get("head_of_government") or {}, c.get("head_of_state") or {}
+        if g.get("name"):
+            hog.append({"answer": g["name"], "accept": _acc(g["name"], g.get("aliases", [])), "clue": f"{c['country']} · {g.get('title', '')}".strip(" ·")})
+        if h.get("name") and h.get("name") != g.get("name"):
+            hos.append({"answer": h["name"], "accept": _acc(h["name"], h.get("aliases", [])), "clue": f"{c['country']} · {h.get('title', '')}".strip(" ·")})
+    forms = [{"answer": c["form"], "accept": [fold(c["form"])], "clue": c["country"]} for c in C if c.get("form") in FORMS]
+    out = []
+    if hog:
+        out.append({"id": "world_hog", "group": "World", "title": "Who runs the government", "items": sorted(hog, key=lambda x: x["clue"]), "source": src, "as_of": asof, "minutes": 8})
+    if hos:
+        out.append({"id": "world_hos", "group": "World", "title": "Heads of state (where they're someone else)", "items": sorted(hos, key=lambda x: x["clue"]), "source": src, "as_of": asof, "minutes": 6})
+    if forms:
+        out.append({"id": "world_forms", "group": "World", "title": "Forms of government", "kind": "forms", "items": forms, "choices": [f for f in FORMS if any(x["answer"] == f for x in forms)], "source": src, "as_of": asof})
+    return out
+
+
 def who_left(lists, snap_path: Path | None, day: str) -> list[dict]:
     """Members who left a list since last week's snapshot, and who's new (Actions cache, public data only)."""
     if not snap_path:
         return []
     prev = json.loads(snap_path.read_text()) if snap_path.exists() else {}
     out = []
-    cur = {L["id"]: {x["answer"]: x.get("clue") for x in L["items"]} for L in lists}
+    cur = {L["id"]: {x["answer"]: x.get("clue") for x in L["items"]} for L in lists if L.get("kind") != "forms"}
     for lid, now_ in cur.items():
         before = (prev.get("lists") or {}).get(lid)
         if before is None:
