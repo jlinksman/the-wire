@@ -1199,6 +1199,9 @@ def world_lists() -> list[dict]:
         g, h = c.get("head_of_government") or {}, c.get("head_of_state") or {}
         if g.get("name"):
             hog.append({"answer": g["name"], "accept": _acc(g["name"], g.get("aliases", [])), "clue": f"{c['country']} · {g.get('title', '')}".strip(" ·")})
+        pm = c.get("prime_minister") or {}                 # e.g. South Korea: the President heads the government
+        if pm.get("name") and pm.get("name") != g.get("name"):
+            hog.append({"answer": pm["name"], "accept": _acc(pm["name"], pm.get("aliases", [])), "clue": f"{c['country']} · {pm.get('title', 'Prime Minister')}"})
         if h.get("name") and h.get("name") != g.get("name"):
             hos.append({"answer": h["name"], "accept": _acc(h["name"], h.get("aliases", [])), "clue": f"{c['country']} · {h.get('title', '')}".strip(" ·")})
     forms = [{"answer": c["form"], "accept": [fold(c["form"])], "clue": c["country"]} for c in C if c.get("form") in FORMS]

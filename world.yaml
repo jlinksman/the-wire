@@ -1,0 +1,415 @@
+# world.yaml — hand-checked world leaders for the Puzzle Page library (GAMES.md). Public facts only.
+# Each entry was checked against news or official sources dated within the last ~3 months (searches run 2026-10-27).
+# Form vocabulary: Presidential republic | Semi-presidential republic | Parliamentary republic |
+#   Parliamentary constitutional monarchy | Absolute monarchy | One-party state | Theocratic republic |
+#   Directorial republic | Military-led government
+as_of: "2026-10-27"
+countries:
+  # ---------------- G20 members ----------------
+  - country: "Argentina"
+    form: "Presidential republic"
+    head_of_state: {name: "Javier Milei", title: "President", aliases: ["Milei"]}
+    head_of_government: {name: "Javier Milei", title: "President", since: "2023-12-10", aliases: ["Milei"]}
+    sources:
+      - "https://www.state.gov/releases/office-of-the-spokesman/2026/10/secretary-rubios-call-with-president-milei-of-argentina"
+      - "https://www.bloomberg.com/news/articles/2026-10-26/milei-is-lone-south-american-leader-yet-to-recognize-lula-s-win"
+    status: verified
+
+  - country: "Australia"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Charles III", title: "King", aliases: ["King Charles", "Charles"]}
+    head_of_government: {name: "Anthony Albanese", title: "Prime Minister", since: "2022-05-23", aliases: ["Albanese", "Albo"]}
+    sources:
+      - "https://www.washingtonpost.com/world/2026/10/19/australia-lawmaker-car-attack/fe251c90-cb98-11f1-ac04-9f58578a68b4_story.html"
+      - "https://abc.net.au/news/2026-10-27/federal-politics-live-blog-oct-27/107312378"
+    status: verified
+    note: "The King is represented in Australia by a Governor-General."
+
+  - country: "Brazil"
+    form: "Presidential republic"
+    head_of_state: {name: "Luiz Inácio Lula da Silva", title: "President", aliases: ["Lula", "Lula da Silva", "Luiz Inacio Lula da Silva"]}
+    head_of_government: {name: "Luiz Inácio Lula da Silva", title: "President", since: "2023-01-01", aliases: ["Lula", "Lula da Silva", "Luiz Inacio Lula da Silva"]}
+    sources:
+      - "https://www.cbsnews.com/news/brazil-presidential-runoff-lula-flavio-bolsonaro/"
+      - "https://www.cnbc.com/2026/10/26/brazil-lula-win-presidential-election-runoff-vote.html"
+    status: verified
+    note: "Won re-election in the 25 Oct 2026 runoff over Flávio Bolsonaro (51.8%); Bolsonaro has asked for the result to be annulled. Next term begins 5 Jan 2027."
+
+  - country: "Canada"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Charles III", title: "King", aliases: ["King Charles", "Charles"]}
+    head_of_government: {name: "Mark Carney", title: "Prime Minister", since: "2025-03-14", aliases: ["Carney"]}
+    sources:
+      - "https://www.pm.gc.ca/en/news/news-releases/2026/10/25/prime-minister-carney-host-canada-european-union-summit-montreal"
+      - "https://www.pm.gc.ca/en/news/readouts/2026/10/22/prime-minister-carney-meets-president-turkiye-recep-tayyip-erdogan"
+    status: verified
+    note: "The King is represented in Canada by a Governor General."
+
+  - country: "China"
+    form: "One-party state"
+    head_of_state: {name: "Xi Jinping", title: "General Secretary of the Chinese Communist Party and President", aliases: ["Xi"]}
+    head_of_government: {name: "Li Qiang", title: "Premier", since: "2023-03-11", aliases: ["Li"]}
+    sources:
+      - "https://us.china-embassy.gov.cn/eng/zgyw/202610/t20261025_12046415.htm"
+      - "https://www.npr.org/2026/10/26/g-s1-149918/what-to-know-about-chinas-plenum-as-xi-seeks-stronger-party-discipline"
+      - "https://news.cgtn.com/news/2026-10-15/Premier-Li-to-visit-Uzbekistan-Tajikistan-attend-meeting-in-Russia-1RgwbIKEKTm/p.html"
+    status: verified
+    note: "Xi is the de facto paramount leader through his party post (General Secretary since 2012); the state presidency is largely ceremonial."
+
+  - country: "France"
+    form: "Semi-presidential republic"
+    head_of_state: {name: "Emmanuel Macron", title: "President", aliases: ["Macron"]}
+    head_of_government: {name: "Sébastien Lecornu", title: "Prime Minister", since: "2025-09-09", aliases: ["Lecornu", "Sebastien Lecornu"]}
+    sources:
+      - "https://www.internazionale.it/ultime-notizie-reuters/2026/10/20/explainer-how-france-s-2027-budget-battle-could-play-out"
+      - "https://foreignpolicy.com/2026/10/01/france-budget-proposal-2027-violent-student-protests-lecornu-macron/"
+    status: verified
+    note: "Lecornu resigned 6 Oct 2025 and was reappointed 10 Oct 2025; leads a minority government. Survived no-confidence votes in Oct 2026."
+
+  - country: "Germany"
+    form: "Parliamentary republic"
+    head_of_state: {name: "Frank-Walter Steinmeier", title: "Federal President", aliases: ["Steinmeier"]}
+    head_of_government: {name: "Friedrich Merz", title: "Chancellor", since: "2025-05-06", aliases: ["Merz"]}
+    sources:
+      - "https://www.mfa.gov.sg/newsroom/press-statements-transcripts-and-photos/official-visit-by-federal-chancellor-of-the-federal-republic-of-germany-friedrich-merz--27-to-28-october-2026/"
+      - "https://www.bundespraesident.de/SharedDocs/Pressemitteilungen/DE/2026/10/261021-Staatsbesuch-China.html"
+    status: verified
+
+  - country: "India"
+    form: "Parliamentary republic"
+    head_of_state: {name: "Droupadi Murmu", title: "President", aliases: ["Murmu"]}
+    head_of_government: {name: "Narendra Modi", title: "Prime Minister", since: "2014-05-26", aliases: ["Modi"]}
+    sources:
+      - "https://www.aninews.in/news/national/general-news/pm-modi-to-visit-uttar-pradesh-and-odisha-on-october-2520261024143805/"
+      - "https://theprint.in/india/pm-modi-to-visit-odisha-on-oct-25-president-murmus-two-day-state-tour-starts-from-oct-28/3074484/"
+    status: verified
+
+  - country: "Indonesia"
+    form: "Presidential republic"
+    head_of_state: {name: "Prabowo Subianto", title: "President", aliases: ["Prabowo"]}
+    head_of_government: {name: "Prabowo Subianto", title: "President", since: "2024-10-20", aliases: ["Prabowo"]}
+    sources:
+      - "https://www.bloomberg.com/news/articles/2026-10-21/prabowo-says-indonesia-will-not-be-intimidated-by-msci"
+    status: verified
+
+  - country: "Italy"
+    form: "Parliamentary republic"
+    head_of_state: {name: "Sergio Mattarella", title: "President", aliases: ["Mattarella"]}
+    head_of_government: {name: "Giorgia Meloni", title: "Prime Minister", since: "2022-10-22", aliases: ["Meloni"]}
+    sources:
+      - "https://www.irishtimes.com/world/europe/2026/10/08/italys-giorgia-meloni-secures-final-approval-for-controversial-electoral-reform/"
+      - "https://www.bloomberg.com/news/articles/2026-10-21/meloni-won-t-run-with-italy-s-far-right-in-2027-minister-says"
+      - "https://www.primaonline.it/2026/10/21/486088/i-vertici-di-qn-media-dal-presidente-mattarella-al-quirinale/"
+    status: verified
+    note: "Formal title is President of the Council of Ministers."
+
+  - country: "Japan"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Naruhito", title: "Emperor", aliases: ["Emperor Naruhito"]}
+    head_of_government: {name: "Sanae Takaichi", title: "Prime Minister", since: "2025-10-21", aliases: ["Takaichi"]}
+    sources:
+      - "https://japan.kantei.go.jp/105/actions/202610/index.html"
+      - "https://www.japantimes.co.jp/news/2026/10/05/japan/politics/prime-minister-speech-autumn-diet/"
+      - "https://www.japantimes.co.jp/news/2026/10/27/japan/society/japan-emperor-empress-kochi-braille-library-visit/"
+    status: verified
+    note: "Reappointed by the Diet after the early-2026 general election; continuous in office since 2025-10-21."
+
+  - country: "Mexico"
+    form: "Presidential republic"
+    head_of_state: {name: "Claudia Sheinbaum", title: "President", aliases: ["Sheinbaum"]}
+    head_of_government: {name: "Claudia Sheinbaum", title: "President", since: "2024-10-01", aliases: ["Sheinbaum"]}
+    sources:
+      - "https://www.kjzz.org/fronteras-desk/2026-10-09/sheinbaum-signs-reform-to-bar-dual-citizens-from-running-for-president-governor-in-mexico"
+      - "https://www.democracynow.org/2026/10/6/headlines/mexican_president_sheinbaum_requests_evidence_after_us_claims_shots_targeted_us_coast_guard"
+    status: verified
+
+  - country: "Russia"
+    form: "Semi-presidential republic"
+    head_of_state: {name: "Vladimir Putin", title: "President", aliases: ["Putin"]}
+    head_of_government: {name: "Mikhail Mishustin", title: "Prime Minister", since: "2020-01-16", aliases: ["Mishustin"]}
+    sources:
+      - "https://meduza.io/en/news/2026/10/21/russian-lawmakers-approve-four-new-deputy-prime-ministers-and-a-transport-minister-in-mikhail-mishustin-s-cabinet-reshuffle"
+      - "https://www.themoscowtimes.com/2026/10/23/putin-says-renewed-peace-talks-must-focus-on-security-for-russia-ukraine-and-europe-overall-a94061"
+    status: verified
+    note: "Formal title is Chairman of the Government. Oct 2026 cabinet reshuffle replaced deputy PMs, not the PM."
+
+  - country: "Saudi Arabia"
+    form: "Absolute monarchy"
+    head_of_state: {name: "Salman bin Abdulaziz Al Saud", title: "King", aliases: ["King Salman", "Salman"]}
+    head_of_government: {name: "Mohammed bin Salman", title: "Prime Minister (Crown Prince)", since: "2022-09-27", aliases: ["MBS", "bin Salman", "Mohammed bin Salman Al Saud"]}
+    sources:
+      - "https://www.spa.gov.sa/en/N2699258"
+      - "https://thenationalnews.com/news/gulf/2026/08/13/saudi-king-reconstitutes-cabinet-under-crown-prince-mohammed-bin-salman"
+      - "https://english.aawsat.com/gulf/5333941-saudi-leadership-congratulates-brazilian-president-re-election"
+    status: verified
+    note: "The King also carries the title Custodian of the Two Holy Mosques."
+
+  - country: "South Africa"
+    form: "Parliamentary republic"
+    head_of_state: {name: "Cyril Ramaphosa", title: "President", aliases: ["Ramaphosa"]}
+    head_of_government: {name: "Cyril Ramaphosa", title: "President", since: "2018-02-15", aliases: ["Ramaphosa"]}
+    sources:
+      - "https://www.dailymaverick.co.za/article/2026-10-19-ramaphosa-signals-fuel-relief-and-warns-of-agoa-losses-as-elections-loom/"
+      - "https://www.france24.com/en/live-news/20261019-ramaphosa-tells-south-africa-to-prepare-for-loss-of-us-africa-trade-deal"
+    status: verified
+    note: "Executive president elected by Parliament. A parliamentary impeachment committee (Phala Phala) was set up in May 2026 and he has challenged it in court; he remains in office."
+
+  - country: "South Korea"
+    form: "Presidential republic"
+    head_of_state: {name: "Lee Jae-myung", title: "President", aliases: ["Lee", "Lee Jae Myung"]}
+    head_of_government: {name: "Lee Jae-myung", title: "President", since: "2025-06-04", aliases: ["Lee", "Lee Jae Myung"]}
+    prime_minister: {name: "Han Seong-sook", title: "Prime Minister", since: "2026-07-01", aliases: ["Han", "Han Sung-sook", "Han Seongsuk"]}
+    sources:
+      - "https://www.internazionale.it/ultime-notizie-reuters/2026/06/30/south-korea-parliament-confirms-former-naver-ceo-han-seong-sook-as-prime-minister"
+      - "https://thepeninsulaqatar.com/article/01/07/2026/republic-of-korea-president-approves-appointment-of-han-seong-sook-as-prime-minister"
+      - "https://view.asiae.co.kr/en/article/2026102516505423464"
+    status: verified
+    note: "CHANGED since mid-2026: Han Seong-sook replaced Kim Min-seok as Prime Minister on 1 Jul 2026. In the presidential system the President heads the government; the PM is the President's deputy, kept here as a separate field."
+
+  - country: "Turkey"
+    form: "Presidential republic"
+    head_of_state: {name: "Recep Tayyip Erdoğan", title: "President", aliases: ["Erdogan", "Erdoğan", "Recep Tayyip Erdogan"]}
+    head_of_government: {name: "Recep Tayyip Erdoğan", title: "President", since: "2018-07-09", aliases: ["Erdogan", "Erdoğan", "Recep Tayyip Erdogan"]}
+    sources:
+      - "https://www.pm.gc.ca/en/news/readouts/2026/10/22/prime-minister-carney-meets-president-turkiye-recep-tayyip-erdogan"
+      - "https://english.alarabiya.net/News/middle-east/2026/10/26/turkey-s-erdogan-says-criticism-of-libya-maritime-deal-has-no-legitimate-basis"
+    status: verified
+    note: "President since 2014-08-28; the office of prime minister was abolished on 2018-07-09, when he also became head of government. Official name Türkiye."
+
+  - country: "United Kingdom"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Charles III", title: "King", aliases: ["King Charles", "Charles"]}
+    head_of_government: {name: "Andy Burnham", title: "Prime Minister", since: "2026-07-20", aliases: ["Burnham", "Andrew Burnham"]}
+    sources:
+      - "https://www.aljazeera.com/news/2026/10/25/uk-pm-burnham-says-he-wants-to-discuss-a-return-to-eu-freedom-of-movement"
+      - "https://www.euronews.com/2026/10/25/uk-prime-minister-andy-burnham-wants-honest-discussion-on-return-to-eu-free-movement"
+      - "https://www.wvtf.org/2026-07-20/andy-burnham-takes-over-as-uk-prime-minister"
+      - "https://kaieteurnewsonline.com/2026/10/26/king-charles-iii-returns-to-guyana-thursday/"
+    status: verified
+    note: "CHANGED since mid-2026: Keir Starmer resigned after a Labour leadership crisis; Andy Burnham was appointed by the King on 20 Jul 2026."
+
+  - country: "United States"
+    form: "Presidential republic"
+    head_of_state: {name: "Donald Trump", title: "President", aliases: ["Trump", "Donald J. Trump"]}
+    head_of_government: {name: "Donald Trump", title: "President", since: "2025-01-20", aliases: ["Trump", "Donald J. Trump"]}
+    sources:
+      - "https://www.whitehouse.gov/videos/president-trump-gaggles-with-press-at-joint-base-andrews-oct-26-2026/"
+    status: verified
+
+  # ---------------- Other countries ----------------
+  - country: "Israel"
+    form: "Parliamentary republic"
+    head_of_state: {name: "Isaac Herzog", title: "President", aliases: ["Herzog"]}
+    head_of_government: {name: "Benjamin Netanyahu", title: "Prime Minister", since: "2022-12-29", aliases: ["Netanyahu", "Bibi"]}
+    sources:
+      - "https://www.haaretz.com/israel-news/elections/2026-10-27/ty-article/.premium/election-day-in-israel-polls-open-as-netanyahu-fights-to-stay-in-power/000001a1-799c-dfb9-a5a9-fbbd8aff0000"
+      - "https://www.npr.org/2026/10/27/g-s1-149944/israel-election-guide"
+      - "https://www.haaretz.com/israel-news/israel-politics/2026-10-22/ty-article/.premium/herzog-rejects-pardon-for-rabins-assassin-at-annual-memorial-service/000001a1-63e8-d995-a9f7-63edcea30000"
+    status: verified
+    note: "Knesset election held TODAY (27 Oct 2026). Netanyahu stays PM (transitional government) until a new government is sworn in; recheck after coalition talks. Earlier terms 1996–1999 and 2009–2021."
+
+  - country: "Ukraine"
+    form: "Semi-presidential republic"
+    head_of_state: {name: "Volodymyr Zelenskyy", title: "President", aliases: ["Zelensky", "Zelenskyy", "Zelenskiy"]}
+    head_of_government: {name: "Serhii Koretskyi", title: "Prime Minister", since: "2026-07-16", aliases: ["Koretskyi", "Sergii Koretskyi", "Sergei Koretsky", "Koretsky"]}
+    sources:
+      - "https://www.kmu.gov.ua/en/news/verkhovna-rada-pryznachyla-serhiia-koretskoho-premier-ministrom-ukrainy"
+      - "https://www.aljazeera.com/news/2026/10/21/witkoff-in-russia-for-putin-meeting-after-positive-talks-with-zelenskyy"
+    status: verified
+    note: "CHANGED since mid-2026: Yulia Svyrydenko resigned in a July 2026 reshuffle; the Rada appointed Koretskyi on 16 Jul 2026. Zelenskyy's term has been extended under martial law."
+
+  - country: "Iran"
+    form: "Theocratic republic"
+    head_of_state: {name: "Mojtaba Khamenei", title: "Supreme Leader", aliases: ["Khamenei", "Mojtaba"]}
+    head_of_government: {name: "Masoud Pezeshkian", title: "President", since: "2024-07-28", aliases: ["Pezeshkian"]}
+    sources:
+      - "https://www.iranintl.com/en/202610069326"
+      - "https://english.alarabiya.net/News/middle-east/2026/10/26/mecca-alliance-states-to-meet-iranian-officials-on-monday-for-deescalation-talks"
+      - "https://waateanews.com/2026/03/09/international-iran-names-mojtaba-khamenei-as-new-supreme-leader-after-death-of-ayatollah-ali-khamenei/"
+    status: verified
+    note: "Mojtaba Khamenei was named Supreme Leader in March 2026 after the death of his father Ali Khamenei. He has not appeared in public; statements are issued in writing or audio. Don't accept 'Ali Khamenei' as the answer."
+
+  - country: "Poland"
+    form: "Parliamentary republic"
+    head_of_state: {name: "Karol Nawrocki", title: "President", aliases: ["Nawrocki"]}
+    head_of_government: {name: "Donald Tusk", title: "Prime Minister", since: "2023-12-13", aliases: ["Tusk"]}
+    sources:
+      - "https://notesfrompoland.com/2026/10/26/poland-and-vietnam-announce-strategic-partnership-during-tusk-visit-to-hanoi/"
+      - "https://cathnews.com/2026/10/23/poland-president-expected-to-veto-bills-liberalising-abortion/"
+    status: verified
+    note: "Tusk also served as PM 2007–2014."
+
+  - country: "Netherlands"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Willem-Alexander", title: "King", aliases: ["King Willem-Alexander", "Willem Alexander"]}
+    head_of_government: {name: "Rob Jetten", title: "Prime Minister", since: "2026-02-23", aliases: ["Jetten"]}
+    sources:
+      - "https://www.consilium.europa.eu/en/press/press-releases/2026/10/09/press-statement-by-president-costa-following-the-meeting-with-prime-minister-of-the-netherlands-rob-jetten/"
+      - "https://nltimes.nl/2026/10/19/dutch-pm-jetten-fiance-nicolas-keenan-expecting-baby-via-surrogate-2027"
+    status: verified
+    note: "Leads a minority coalition sworn in 23 Feb 2026, succeeding Dick Schoof."
+
+  - country: "Spain"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Felipe VI", title: "King", aliases: ["King Felipe", "Felipe"]}
+    head_of_government: {name: "Pedro Sánchez", title: "Prime Minister", since: "2018-06-02", aliases: ["Sánchez", "Sanchez", "Pedro Sanchez"]}
+    sources:
+      - "https://www.aljazeera.com/news/2026/10/5/spanish-prime-minister-pedro-sanchez-announces-snap-election"
+      - "https://www.infobae.com/espana/2026/10/23/premios-princesa-de-asturias-2026-en-directo-ultima-hora-de-la-ceremonia-de-entrega-alfombra-roja-y-discursos/"
+    status: verified
+    note: "Snap general election called for 29 Nov 2026; recheck after. Formal title is President of the Government."
+
+  - country: "Sweden"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Carl XVI Gustaf", title: "King", aliases: ["King Carl Gustaf", "Carl Gustaf"]}
+    head_of_government: {name: "Ulf Kristersson", title: "Prime Minister", since: "2022-10-18", aliases: ["Kristersson"]}
+    sources:
+      - "https://www.riksdagen.se/en/news/articles/2026/oct/15/no-to-magdalena-andersson-socdem-as-prime_cmsd2ab1134-a03c-4be2-b345-af0aacff33d3en/"
+      - "https://www.devdiscourse.com/article/international/3994740-swedens-centre-party-leader-to-explore-forming-government"
+      - "https://www.thestar.com.my/news/world/2026/09/17/sweden039s-centre-left-opposition-wins-election-as-count-completed"
+      - "https://ethz.ch/en/news-and-events/eth-news/news/2026/10/king-of-sweden-visits-ezh-urich-to-explore-switzerlands-innovation-model.html"
+    status: verified
+    note: "CARETAKER: Kristersson resigned 17 Sep 2026 after the centre-left won the 13 Sep election, and stays on as caretaker. The Riksdag rejected Magdalena Andersson on 15 Oct; Centre Party leader Elisabeth Thand Ringqvist was asked to explore a government, and those talks reportedly failed on 26 Oct. Likely to change soon; recheck."
+
+  - country: "Norway"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Haakon VIII", title: "King", aliases: ["King Haakon", "Haakon"]}
+    head_of_government: {name: "Jonas Gahr Støre", title: "Prime Minister", since: "2021-10-14", aliases: ["Støre", "Store", "Jonas Gahr Store"]}
+    sources:
+      - "https://www.aljazeera.com/news/2026/8/28/norways-king-harald-v-dies-succeeded-by-son"
+      - "https://www.aljazeera.com/news/2026/8/29/norway-mourns-king-harald-as-new-era-begins-under-haakon-viii"
+      - "https://www.bloomberg.com/news/articles/2026-10-20/witkoff-to-meet-russian-leadership-on-ukraine-norway-pm-says"
+    status: verified
+    note: "CHANGED since mid-2026: King Harald V died 28 Aug 2026 and was succeeded by his son, King Haakon VIII. Don't accept 'Harald' as the answer."
+
+  - country: "Ireland"
+    form: "Parliamentary republic"
+    head_of_state: {name: "Catherine Connolly", title: "President", aliases: ["Connolly"]}
+    head_of_government: {name: "Micheál Martin", title: "Taoiseach", since: "2025-01-23", aliases: ["Martin", "Micheal Martin"]}
+    sources:
+      - "https://www.rte.ie/news/ireland/2026/1014/1595418-taoiseach-rejects-eu-budget-criticism-from-aid-groups/"
+      - "https://www.irishamerica.com/2026/10/president-connolly-greatly-privileged-to-host-irish-language-concert-at-aras-an-uachtarain/"
+    status: verified
+    note: "Taoiseach is the Irish title for Prime Minister. Martin also served as Taoiseach 2020–2022. Connolly has been President since 11 Nov 2025."
+
+  - country: "Greece"
+    form: "Parliamentary republic"
+    head_of_state: {name: "Konstantinos Tasoulas", title: "President", aliases: ["Tasoulas"]}
+    head_of_government: {name: "Kyriakos Mitsotakis", title: "Prime Minister", since: "2023-06-26", aliases: ["Mitsotakis"]}
+    sources:
+      - "https://www.primeminister.gr/en/2026/10/15/39536"
+      - "https://greekcitytimes.com/2026/10/27/greek-president-calls-for-freedom-and-prosperity-at-liberation-anniversary"
+    status: verified
+    note: "Mitsotakis was first PM 2019-07-08; the current term began 2023-06-26 after a brief caretaker interval."
+
+  - country: "Egypt"
+    form: "Semi-presidential republic"
+    head_of_state: {name: "Abdel Fattah el-Sisi", title: "President", aliases: ["Sisi", "el-Sisi", "al-Sisi", "el-Sissi"]}
+    head_of_government: {name: "Mostafa Madbouly", title: "Prime Minister", since: "2018-06-07", aliases: ["Madbouly", "Moustafa Madbouly"]}
+    sources:
+      - "https://www.presidency.eg/en/%D9%82%D8%B3%D9%85-%D8%A7%D9%84%D8%A3%D8%AE%D8%A8%D8%A7%D8%B1/%D8%A3%D8%AE%D8%A8%D8%A7%D8%B1-%D8%B1%D8%A6%D8%A7%D8%B3%D9%8A%D8%A9/news19102026/"
+      - "https://www.japantimes.co.jp/news/2026/10/18/world/politics/el-sissi-egypt-president-2030/"
+      - "https://www.egyptindependent.com/pm-outlines-government-priorities-for-economic-growth-public-services-at-egypt-forum-2026/"
+    status: verified
+
+  - country: "Nigeria"
+    form: "Presidential republic"
+    head_of_state: {name: "Bola Tinubu", title: "President", aliases: ["Tinubu", "Bola Ahmed Tinubu"]}
+    head_of_government: {name: "Bola Tinubu", title: "President", since: "2023-05-29", aliases: ["Tinubu", "Bola Ahmed Tinubu"]}
+    sources:
+      - "https://www.washingtonpost.com/world/2026/10/24/nigeria-election-tinubu-president-opposition/d3ddb242-cfe1-11f1-ac04-9f58578a68b4_story.html"
+      - "https://www.usnews.com/news/world/articles/2026-10-24/nigerias-tinubu-launches-re-election-campaign-as-economic-pain-tests-support"
+    status: verified
+
+  - country: "Pakistan"
+    form: "Parliamentary republic"
+    head_of_state: {name: "Asif Ali Zardari", title: "President", aliases: ["Zardari"]}
+    head_of_government: {name: "Shehbaz Sharif", title: "Prime Minister", since: "2024-03-04", aliases: ["Shehbaz", "Shahbaz Sharif", "Sharif"]}
+    sources:
+      - "https://www.radio.gov.pk/27-10-2026/president-pm-stress-peaceful-resolution-of-kashmir-dispute"
+      - "https://www.nation.com.pk/23-Oct-2026/president-zardari-s-germany-visit-boost-economic-trade-ties"
+      - "https://www.dawn.com/news/2038980/pm-shehbaz-reaches-peshawar-in-first-visit-after-imposition-of-governors-rule-in-kp"
+    status: verified
+    note: "Shehbaz Sharif also served as PM 2022–2023. Alias 'Sharif' is ambiguous with his brother Nawaz Sharif."
+
+  - country: "Venezuela"
+    form: "Presidential republic"
+    head_of_state: {name: "Delcy Rodríguez", title: "Acting President", aliases: ["Rodríguez", "Rodriguez", "Delcy Rodriguez", "Delcy"]}
+    head_of_government: {name: "Delcy Rodríguez", title: "Acting President", since: "2026-01-05", aliases: ["Rodríguez", "Rodriguez", "Delcy Rodriguez", "Delcy"]}
+    sources:
+      - "https://boereport.com/2026/10/26/after-return-of-opposition-leader-venezuelas-acting-president-says-hopes-dialogue-will-offer-space-for-all-voices"
+      - "https://www.cnn.com/2026/10/26/americas/machado-venezuela-return-analysis-latam-intl"
+      - "https://en.wikipedia.org/wiki/2026_in_Venezuela"
+    status: verified
+    note: "ACTING: in de facto control since Nicolás Maduro was seized by US forces on 3 Jan 2026; sworn in as acting president on 5 Jan 2026 on Supreme Tribunal orders. She has stayed in office past the initial 90-day term. The legitimacy of the government is contested (opposition leader María Corina Machado returned in Oct 2026), but who holds power isn't disputed. Don't accept 'Maduro' as the answer."
+
+  - country: "North Korea"
+    form: "One-party state"
+    head_of_state: {name: "Kim Jong Un", title: "General Secretary of the Workers' Party of Korea and President of State Affairs", aliases: ["Kim Jong-un", "Kim"]}
+    head_of_government: {name: "Pak Thae-song", title: "Premier", since: "2024-12-29", aliases: ["Pak Thae Song", "Pak"]}
+    sources:
+      - "https://www.aljazeera.com/news/2026/10/24/north-koreas-kim-jong-un-arrives-in-china-south-korean-media-says"
+      - "https://www.upi.com/Top_News/World-News/2026/07/10/China-Xi-Jinping-met-North-Korea-Premier-Pak-Thae-song-Beijing/3341783677513/"
+      - "https://en.wikipedia.org/wiki/Pak_Thae-song"
+    status: verified
+    note: "Kim Jong Un is the de facto supreme leader. Pak Thae-song was reappointed premier on 22 Mar 2026; the newest premier source found is from July 2026 (no reported change since)."
+
+  - country: "Switzerland"
+    form: "Directorial republic"
+    head_of_state: {name: "Guy Parmelin", title: "President of the Swiss Confederation", aliases: ["Parmelin"]}
+    head_of_government: {name: "Guy Parmelin", title: "President of the Swiss Confederation", since: "2026-01-01", aliases: ["Parmelin"]}
+    sources:
+      - "https://www.admin.ch/en/federal-presidency-2026"
+      - "https://www.bernama.com/en/world/news.php?id=2614765"
+    status: verified
+    note: "The seven-member Federal Council collectively serves as head of state and head of government. The presidency rotates yearly, so this changes on 1 Jan 2027; Parmelin has also announced he will leave the Federal Council at the end of 2026."
+
+  - country: "Belgium"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Philippe", title: "King", aliases: ["King Philippe"]}
+    head_of_government: {name: "Bart De Wever", title: "Prime Minister", since: "2025-02-03", aliases: ["De Wever", "Bart de Wever"]}
+    sources:
+      - "https://en.baochinhphu.vn/to-lam-holds-talks-with-belgian-prime-minister-bart-de-wever-111261024081730261.htm"
+      - "https://www.bloomberg.com/news/articles/2026-10-11/belgium-s-premier-cancels-policy-speech-citing-budget-deadlock"
+      - "https://www.newmyroyals.com/2026/10/belgiums-king-and-queen-receive.html"
+    status: verified
+
+  - country: "Denmark"
+    form: "Parliamentary constitutional monarchy"
+    head_of_state: {name: "Frederik X", title: "King", aliases: ["King Frederik", "Frederik"]}
+    head_of_government: {name: "Mette Frederiksen", title: "Prime Minister", since: "2019-06-27", aliases: ["Frederiksen"]}
+    sources:
+      - "https://stm.dk/statsministeren/taler/statsminister-mette-frederiksens-tale-ved-folketingets-aabning-den-6-oktober-2026/"
+      - "https://cphpost.dk/2026-10-06/news/round-up/denmarks-parliament-opens-new-year-with-royal-visit-and-prime-ministers-eighth-address/"
+    status: verified
+    note: "Re-elected after the 24 Mar 2026 early election; her third government took office on 3 Jun 2026."
+
+  - country: "Portugal"
+    form: "Semi-presidential republic"
+    head_of_state: {name: "António José Seguro", title: "President", aliases: ["Seguro", "Antonio Jose Seguro"]}
+    head_of_government: {name: "Luís Montenegro", title: "Prime Minister", since: "2024-04-02", aliases: ["Montenegro", "Luis Montenegro"]}
+    sources:
+      - "https://www.theportugalnews.com/news/2026-10-26/portugal-president-demands-action-on-housing-crisis/1106262"
+      - "https://www.theportugalnews.com/news/2026-10-26/portuguese-prime-minister-congratulates-lula-da-silva-on-his-reelection/1106460"
+    status: verified
+    note: "Seguro has been President since 9 Mar 2026, succeeding Marcelo Rebelo de Sousa."
+
+  - country: "Vietnam"
+    form: "One-party state"
+    head_of_state: {name: "To Lam", title: "General Secretary of the Communist Party of Vietnam and State President", aliases: ["Tô Lâm", "Lam"]}
+    head_of_government: {name: "Le Minh Hung", title: "Prime Minister", since: "2026-04-07", aliases: ["Lê Minh Hưng", "Hung"]}
+    sources:
+      - "https://en.baochinhphu.vn/print/top-four-leaders-of-viet-nam-111260408095328246.htm"
+      - "https://www.bloomberg.com/news/articles/2026-10-17/vietnam-prime-minister-targets-2027-gdp-growth-of-at-least-10"
+      - "https://en.baochinhphu.vn/to-lam-holds-talks-with-belgian-prime-minister-bart-de-wever-111261024081730261.htm"
+    status: verified
+    note: "To Lam holds both the party and state top posts (elected State President 7 Apr 2026). Le Minh Hung succeeded Pham Minh Chinh as PM on 7 Apr 2026. Both changes happened before mid-2026 but may be newer than older references."
+
+  - country: "Philippines"
+    form: "Presidential republic"
+    head_of_state: {name: "Ferdinand Marcos Jr.", title: "President", aliases: ["Marcos", "Bongbong Marcos", "BBM", "Ferdinand Romualdez Marcos Jr."]}
+    head_of_government: {name: "Ferdinand Marcos Jr.", title: "President", since: "2022-06-30", aliases: ["Marcos", "Bongbong Marcos", "BBM", "Ferdinand Romualdez Marcos Jr."]}
+    sources:
+      - "https://www.bloomberg.com/news/articles/2026-10-26/philippines-marcos-appoints-new-head-of-scandal-hit-public-works-department"
+      - "https://tribune.net.ph/2026/10/13/marcos-vows-to-protect-journalists-fight-fake-news"
+    status: verified

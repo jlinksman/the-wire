@@ -1275,6 +1275,7 @@
       const items = misses.map((x) => ({ id: "fm:" + fold(x.clue).replace(/ /g, "_").slice(0, 30), type: "form", q: "Form of government: " + x.clue, a: x.answer, accept: x.accept, hint: L.source, ok: false, cert: "guess" }));
       send({ game: "forms", puzzle: L.id, ok: right >= 8, score: right, ms: Date.now() - t0, hints: 0, items });
       done.replaceChildren(reveal({ ok: right >= 8, verdict: right + " of " + round.length, keep: misses.length ? "Missed ones come back in the next few days." : "All of them.",
+        why: misses.map((x) => x.clue + ": " + x.answer).join(" · ") || null,
         meta: "Source: " + L.source + (L.as_of ? " · as of " + L.as_of : ""), next: { text: "Another ten ›", fn: () => formsGame(L) } }));
     }
     show();
