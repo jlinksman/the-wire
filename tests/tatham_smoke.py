@@ -25,20 +25,20 @@ with sync_playwright() as p:
     for g, tiers in games.items():
         for t, params in enumerate(tiers, 1):
             pg.evaluate(f"load('{g}.html#{params}#20261027')")
-            fr = None
-            for _ in range(60):
+            err, frame = [], None
+            for _ in range(40):
                 pg.wait_for_timeout(250)
-                fr = pg.frame_locator("iframe")
+                frame = next((f for f in pg.frames if f.url.split("#")[0].endswith(f"/{g}.html")), None)
                 try:
-                    if fr.locator("#puzzlecanvas").count(): break
-                except Exception: pass
-            pg.wait_for_timeout(1500)
-            frame = pg.frames[1]
+                    if frame and frame.evaluate("!!document.getElementById('puzzlecanvas') && typeof Module !== 'undefined' && !!Module.calledRun"): break
+                except Exception:
+                    pass
+            pg.wait_for_timeout(600)
             err = [m for m in pg.evaluate("msgs") if isinstance(m, dict) and m.get("wireTatham") == "error"]
             try:
-                frame.evaluate("document.getElementById('solve') && document.getElementById('solve').click()")
+                frame.evaluate("document.getElementById('solve').click()")
             except Exception as e:
-                err.append(str(e))
+                err.append(str(e)[:200])
             pg.wait_for_timeout(800)
             solved = any(isinstance(m, dict) and m.get("wireTatham") == "solved" for m in pg.evaluate("msgs"))
             ok = not err and solved

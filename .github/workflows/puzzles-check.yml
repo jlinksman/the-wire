@@ -1,0 +1,39 @@
+name: Logic puzzles check
+
+# After a deploy (GAMES.md): every logic puzzle opens at each tier the Puzzle Page uses and
+# reports "solved" when Solve is pressed. Uses the same cached build as the deploy. Kept out of
+# the deploy itself so a slow browser install never holds up the news.
+on:
+  workflow_run:
+    workflows: ["Deploy site"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore logic puzzles
+        id: tatham
+        uses: actions/cache/restore@v4
+        with:
+          path: site/vendor/puzzles
+          key: tatham-${{ hashFiles('.github/scripts/build-tatham.sh', '.github/scripts/tatham-bridge.html') }}
+      - name: Stop if there's no build yet
+        if: steps.tatham.outputs.cache-hit != 'true'
+        run: echo "::warning::No cached logic-puzzle build for this script version yet." && exit 0
+      - name: Smoke test
+        if: steps.tatham.outputs.cache-hit == 'true'
+        run: |
+          pip install -q playwright==1.48.0
+          python -m playwright install --with-deps chromium >/dev/null 2>&1
+          timeout 600 python tests/tatham_smoke.py site/vendor/puzzles
