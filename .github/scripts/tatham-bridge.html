@@ -1,0 +1,31 @@
+<!-- The Wire: injected into each Tatham puzzle page at deploy time (build-tatham.sh). -->
+<style>
+  html, body { background: #0d0d0d !important; color: #cfcfcf !important; margin: 0; font: 14px ui-monospace, Menlo, monospace; }
+  /* Light canvas for each game's own palette, then inverted: dark and still readable. */
+  #puzzlecanvas { background-color: #e6e6e6 !important; filter: invert(0.9) hue-rotate(180deg); }
+  #puzzle { margin: 0 auto; }
+  h1, .footer, #apology, #permalinks-desc, #permalinks, #resizable, #gamemenu li:has(> a[href]) { display: none !important; }
+  #gamemenu, #gamemenu ul { background: #161616 !important; color: #ddd !important; }
+  #gamemenu li, #gamemenu input, #gamemenu button { color: #ddd !important; background: #161616 !important; }
+  #statusbar { background: #161616 !important; color: #ddd !important; }
+  a { color: #8ab4ff; }
+  p { line-height: 1.45; padding: 0 8px; }
+</style>
+<!--BODY-->
+<script>
+(function () {
+  // No blocking alert() boxes inside the page; report them to The Wire instead.
+  window.alert = function (m) { try { parent.postMessage({ wireTatham: "error", msg: String(m) }, location.origin); } catch (e) {} };
+  // "Mark" toggle: a tap becomes a Ctrl-click, which the front end treats as a right-click.
+  var mark = false;
+  window.addEventListener("message", function (ev) {
+    if (ev.origin !== location.origin || !ev.data || typeof ev.data.wireMark !== "boolean") return;
+    mark = ev.data.wireMark;
+  });
+  document.addEventListener("mousedown", function (e) {
+    if (!mark || !e.isTrusted || e.ctrlKey || !e.target || e.target.id !== "puzzlecanvas") return;
+    e.stopImmediatePropagation(); e.preventDefault();
+    e.target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, clientX: e.clientX, clientY: e.clientY, button: 0, buttons: 1, ctrlKey: true }));
+  }, true);
+})();
+</script>

@@ -1,0 +1,40 @@
+# games.yaml — Puzzle Page settings and editorial guardrails (GAMES.md). Public config only:
+# nothing here describes Joe's results, views or reading.
+
+# Hard exclusion list (GAMES.md rule 7). A story, quote or item whose text matches any of these
+# never becomes a puzzle. Case-insensitive regex, checked against the item title, summary, the
+# quote itself and its thread's title.
+exclude_patterns:
+  - '\b(killed|kills|killing|dead|death|deaths|died|dies|dying|fatal|fatalities|casualt\w*|injur\w*|wounded)\b'
+  - '\b(victim|victims|hostage\w*|bereaved|widow\w*|funeral|mourn\w*|grief|grieving|vigil|memorial service)\b'
+  - '\b(shooting|shooter|gunfire|gunman|shot|stabb\w*|massacre|mass killing|terror\w*|bomb\w*|explosion|attack\w*)\b'
+  - '\b(suicide|overdose|self-harm)\b'
+  - '\b(earthquake|hurricane|tornado|wildfire|flood\w*|tsunami|evacuat\w*|missing persons?|trapped|collapsed?|rescue\w*|crash\w*|derail\w*)\b'
+  - '(taken from (his|her|their) family|lost (his|her|their) li(fe|ves)|loved ones?|passed away)'
+  - '\b(child|children|minor|teen|teenager|student|students|kids?)\b'
+  - '\b(arrest\w*|charged with|indicted|defendant|suspect|police blotter|blotter)\b'
+  - '\b(abuse\w*|assault\w*|rape|harass\w*)\b'
+# Threads whose games stay on the institutional side only (votes, officials, borders): any thread
+# whose title matches gets no quote, cipher or grid items from its stories.
+institutional_only_threads:
+  - '\b(war|invasion|strike|strikes|airstrike\w*|ceasefire|gaza|hamas|hezbollah|ukraine|russia|iran|sudan|famine|genocide)\b'
+# Never a puzzle: Joe's own business or litigation (names that would appear in such stories).
+exclude_names:
+  - Optima Environmental
+  - JML Quarries
+
+who_said_it:
+  window_days: 7
+  min_chars: 40
+  max_chars: 260
+  pool_size: 20
+
+cryptoquote:
+  min_letters: 60
+  max_letters: 180
+  pool_size: 12
+
+connections:
+  window_days: 10
+  attempts: 4000
+  max_per_week: 2          # no item in more than two grids a week

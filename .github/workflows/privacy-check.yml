@@ -22,3 +22,6 @@ jobs:
       - run: pip install pyyaml
       - run: python pipeline/privacy_check.py
       - run: python pipeline/quiz_lint.py > /dev/null
+      # Puzzle Page generators must reject known-bad puzzles (GAMES.md rule 2).
+      - run: python tests/test_games.py
+      - run: node tests/games_answers.test.js

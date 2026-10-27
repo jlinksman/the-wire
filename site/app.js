@@ -339,6 +339,7 @@ function todayView() {
   if (pc) out.push(pc);
   const lc = listenCard();
   if (lc) out.push(lc);
+  out.push(puzzlesCard());
   out.push(el("button", { class: "briefcard", onclick: openBrief },
     el("span", { class: "bc-ico", "aria-hidden": "true", text: "▶" }),
     el("span", { class: "bc-txt" },
@@ -872,6 +873,34 @@ async function openShows() {
     el("button", { class: "sbtn wide", text: "‹ Back to the queue", onclick: () => openQueue() }),
   ].filter(Boolean), "Your shows");
 }
+// --------------------------------------------------------------- Puzzles (2026-10-27, GAMES.md)
+// The Puzzle Page lives in games.js, loaded only when it's opened. The card reads today's count
+// from this device (no fetch on every render) and never shows a checklist of what's not done.
+let gamesLoading = null;
+function loadGames() {
+  if (window.WireGames) return Promise.resolve(window.WireGames);
+  if (!gamesLoading) gamesLoading = new Promise((res, rej) => {
+    const sc = document.createElement("script");
+    sc.src = "games.js?v=" + ((document.querySelector("meta[name=wire-version]") || {}).content || "");
+    sc.onload = () => res(window.WireGames);
+    sc.onerror = () => { gamesLoading = null; rej(new Error("couldn't load the puzzles")); };
+    document.head.append(sc);
+  });
+  return gamesLoading;
+}
+function openPuzzles() { loadGames().then((W) => W.openPuzzles()).catch((e) => openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Puzzles" }), el("p", { class: "fine", text: e.message })], "Puzzles")); }
+function puzzlesCard() {
+  let t = null;
+  try { t = JSON.parse(store.get("wire.games.today") || "null"); } catch (e) { t = null; }
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+  const cur = t && t.day === today;
+  return el("button", { class: "briefcard gamescard", onclick: openPuzzles },
+    el("span", { class: "bc-ico", "aria-hidden": "true", text: "⌗" }),
+    el("span", { class: "bc-txt" },
+      el("span", { class: "bc-t", text: "Puzzles" }),
+      el("span", { class: "bc-s", text: (cur ? t.n : 4) + " today" + (cur && t.done ? " · " + t.done + " done" : "") + " · a break from reading" })));
+}
+
 function listenCard() {
   const ed = editionItem();
   if (!ed) return null;

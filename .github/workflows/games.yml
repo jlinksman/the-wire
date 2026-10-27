@@ -1,0 +1,78 @@
+name: Puzzle Page
+
+# Once a day, about 4 AM Eastern (GAMES.md): build the candidate pool for the Puzzle Page from the
+# published data.json and public rosters, and write games-today.json to Workers KV. The Pages
+# Function assembles Joe's four slots from it. This job never reads Joe's results, answers or
+# opens (CLAUDE.md rule 10), and its log prints only puzzle counts.
+on:
+  schedule:
+    - cron: "7 8 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: games
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  games:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
+      UA: "TheWire/1.0 (personal news reader; ${{ github.server_url }}/${{ github.repository }})"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Word list for cipher grading
+        run: sudo apt-get install -y -qq wamerican >/dev/null
+
+      # Rosters (with their ETags) and the puzzle-hash log live in the Actions cache. The hash log
+      # holds only hashes of puzzles offered, never results.
+      - name: Restore games state
+        uses: actions/cache/restore@v4
+        with:
+          path: .games
+          key: wire-games-${{ github.run_id }}
+          restore-keys: wire-games-
+
+      - name: Public rosters (congress-legislators, CC0)
+        run: |
+          mkdir -p .games/rosters
+          for f in legislators-current.json committee-membership-current.json committees-current.json; do
+            curl -sS -A "$UA" --etag-compare ".games/rosters/$f.etag" --etag-save ".games/rosters/$f.etag" \
+              -o ".games/rosters/$f.new" "https://unitedstates.github.io/congress-legislators/$f" || true
+            if [ -s ".games/rosters/$f.new" ]; then mv ".games/rosters/$f.new" ".games/rosters/$f"; else rm -f ".games/rosters/$f.new"; fi
+          done
+
+      - name: Latest data.json from Workers KV
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
+        run: npx --yes wrangler@4.152.0 kv key get data.json --namespace-id "$WIRE_KV_ID" --remote > data.json
+
+      - name: Generate the pool
+        run: |
+          mkdir -p dist
+          python pipeline/games.py data.json dist/games-today.json --rosters .games/rosters --hashes .games/hashes.json
+          rm -f data.json
+
+      - name: Publish to Workers KV
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
+        run: npx --yes wrangler@4.152.0 kv key put games-today.json --path dist/games-today.json --namespace-id "$WIRE_KV_ID" --remote
+
+      - name: Save games state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .games
+          key: wire-games-${{ github.run_id }}

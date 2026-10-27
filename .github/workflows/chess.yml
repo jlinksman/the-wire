@@ -1,0 +1,36 @@
+name: Chess puzzles
+
+# Monthly (GAMES.md): stream the Lichess puzzle database (CC0) and keep a stratified sample of
+# about 3,000 well-rated puzzles in Workers KV (chess.json). One download a month; nothing in git.
+on:
+  schedule:
+    - cron: "23 9 3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chess:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get install -y -qq zstd >/dev/null
+      - name: Sample the puzzle database
+        run: |
+          mkdir -p dist
+          set -o pipefail
+          curl -sSL -A "TheWire/1.0 (personal news reader; ${{ github.server_url }}/${{ github.repository }})" \
+            https://database.lichess.org/lichess_db_puzzle.csv.zst | zstd -dc | python pipeline/chess_sample.py > dist/chess.json
+          ls -la dist/chess.json
+      - name: Publish to Workers KV
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
+        run: npx --yes wrangler@4.152.0 kv key put chess.json --path dist/chess.json --namespace-id "$WIRE_KV_ID" --remote

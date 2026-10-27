@@ -11,3 +11,5 @@ ballot.json
 quiz.json
 share/ballot-data.json
 share/wrangler.toml
+site/vendor/puzzles/
+.games/

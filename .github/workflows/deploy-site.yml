@@ -10,6 +10,8 @@ on:
       - "functions/**"
       - ".github/workflows/deploy-site.yml"
       - ".github/scripts/public-kv.sh"
+      - ".github/scripts/build-tatham.sh"
+      - ".github/scripts/tatham-bridge.html"
   workflow_dispatch:
 
 permissions:
@@ -70,6 +72,25 @@ jobs:
           [ai]
           binding = "AI"
           EOF
+
+      # Logic puzzles (GAMES.md): Simon Tatham's collection (MIT), built for the web with a small
+      # patch, cached until the build script changes. Never committed to git.
+      - name: Restore logic puzzles
+        id: tatham
+        uses: actions/cache@v4
+        with:
+          path: site/vendor/puzzles
+          key: tatham-${{ hashFiles('.github/scripts/build-tatham.sh', '.github/scripts/tatham-bridge.html') }}
+
+      - name: Set up Emscripten
+        if: steps.tatham.outputs.cache-hit != 'true'
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.74
+
+      - name: Build logic puzzles
+        if: steps.tatham.outputs.cache-hit != 'true'
+        run: bash .github/scripts/build-tatham.sh site/vendor/puzzles
 
       - name: Deploy
         run: npx --yes wrangler@4.152.0 pages deploy site --project-name the-wire --branch main --commit-dirty=true

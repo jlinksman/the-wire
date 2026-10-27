@@ -8,6 +8,10 @@
   Cache-Control: no-cache
 /app.js
   Cache-Control: no-cache
+/games.js
+  Cache-Control: no-cache
+/vendor/*
+  Cache-Control: no-cache
 /style.css
   Cache-Control: no-cache
 /version.json
