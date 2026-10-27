@@ -85,6 +85,15 @@ def test_crypt_difficulty_monotone():
     assert games.crypt_difficulty(easy) <= games.crypt_difficulty(hard)
 
 
+def test_docket_excludes_minors_and_criminal():
+    rows = [{"name": "West Virginia v. B. P. J.", "holding": "Title IX allows separate teams.", "date": "2026-06-30", "docket": "24-43", "author_code": "BK", "author": "Brett Kavanaugh", "emergency": False, "pdf": "x", "term": 25},
+            {"name": "United States v. Smith", "holding": "The statute reaches the conduct.", "date": "2026-06-01", "docket": "24-1", "author_code": "R", "author": "John Roberts", "emergency": False, "pdf": "x", "term": 25}]
+    rows += [{"name": f"Agency {i} v. Company {i}", "holding": f"Holding {i}.", "date": f"2026-05-0{i}", "docket": f"24-{i}0", "author_code": "EK", "author": "Elena Kagan", "emergency": False, "pdf": "x", "term": 25} for i in range(1, 6)]
+    out = games.docket(rows, {"items": []}, "seed", None, [])
+    names = {d["name"] for d in out}
+    assert "West Virginia v. B. P. J." not in names and "United States v. Smith" not in names and len(out) == 5
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):

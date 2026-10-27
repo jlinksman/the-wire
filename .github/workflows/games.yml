@@ -65,7 +65,7 @@ jobs:
         run: |
           mkdir -p dist
           python pipeline/games.py data.json dist/games-today.json --rosters .games/rosters --hashes .games/hashes.json \
-            --votes .games/votes --fetch-votes --quiz dist
+            --votes .games/votes --fetch-votes --scotus .games/scotus --fetch-scotus --quiz dist
           rm -f data.json
 
       - name: Publish to Workers KV

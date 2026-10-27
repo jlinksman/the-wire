@@ -728,6 +728,53 @@ def friday_quiz(wsi, dv, lg, data, seed, drops) -> dict | None:
     return {"id": "fq" + pid(seed), "questions": qs[:10]}
 
 
+# ------------------------------------------------------------------ The Docket
+# Decided Supreme Court cases (and emergency-docket orders) from the Court's own opinion list: which
+# case held this, and who wrote it. Correct by construction: the holding sentence, the case names
+# and the author column are the Court's. Criminal cases and anything on the exclusion list are left
+# out (no private defendants as puzzle subjects). Only after decision, always.
+def docket(scotus_rows, data, seed, now, drops) -> list[dict]:
+    rng = random.Random(seed + "docket")
+    rows = [r for r in scotus_rows if r.get("holding") and r.get("name")]
+    ok = []
+    for r in rows:
+        why = blocked(r["holding"], r["name"])
+        if why:
+            drops.append(("docket", why))
+            continue
+        if re.search(r"(^|v\. )([A-Z]\. ?){2,4}($| v\.)|\bIn re [A-Z]\. ?[A-Z]\.|\bDoe\b|\bRoe\b", r["name"]):
+            drops.append(("docket", "party named by initials (often a minor)"))
+            continue
+        if re.search(r"\b(United States|People|State|Commonwealth) v\.", r["name"]) and not re.search(r"\bv\. (United States|[A-Z][a-z]+ (County|City|Department|Board|Commission))", r["name"]):
+            drops.append(("docket", "criminal case (private defendant)"))
+            continue
+        ok.append(r)
+    week = fold(" ".join(it.get("title", "") for it in data.get("items", [])))
+    out = []
+    recent = sorted(ok, key=lambda r: r["date"], reverse=True)
+    for r in recent[:30]:
+        others = [x["name"] for x in ok if x["name"] != r["name"] and x["emergency"] == r["emergency"]]
+        if len(others) < 3:
+            others = [x["name"] for x in ok if x["name"] != r["name"]]
+        if len(others) < 3:
+            continue
+        opts = rng.sample(others, 3) + [r["name"]]
+        rng.shuffle(opts)
+        parties = [w for w in re.findall(r"[A-Z][a-zA-Z’'.-]{3,}", r["name"]) if w not in ("United", "States", "Department", "Court")]
+        held = r["holding"]
+        for w in parties:
+            held = re.sub(rf"\b{re.escape(w)}\b", "▒▒▒", held)
+        in_news = any(len(w) >= 5 and fold(w) in week for w in parties)
+        last = (r.get("author") or "").split()[-1] if r.get("author_code") not in ("PC", "D") else None
+        out.append({"id": "k" + pid(r["docket"], r["date"]), "name": r["name"], "date": r["date"], "docket": r["docket"],
+                    "holding": held, "holding_full": r["holding"], "options": opts, "author": r.get("author"), "author_code": r["author_code"],
+                    "author_accept": sorted({fold(r["author"]), fold(last)}) if last else ["per curiam"], "emergency": r["emergency"],
+                    "pdf": r["pdf"], "in_news": in_news, "term": r["term"]})
+    out.sort(key=lambda x: x["date"], reverse=True)
+    out.sort(key=lambda x: (not x["in_news"], x["author_code"] in ("PC", "D")))   # in the news, then signed opinions
+    return out[:10]
+
+
 # ------------------------------------------------------------------ run
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
@@ -738,6 +785,8 @@ def main(argv=None) -> int:
     ap.add_argument("--hashes", type=Path, help="puzzle-hash log (Actions cache): hashes only, never results")
     ap.add_argument("--votes", type=Path, help="roll-call cache directory (Actions cache)")
     ap.add_argument("--fetch-votes", action="store_true", help="fetch new roll calls before generating")
+    ap.add_argument("--scotus", type=Path, help="Supreme Court opinion-list cache directory (Actions cache)")
+    ap.add_argument("--fetch-scotus", action="store_true", help="make today's one request to supremecourt.gov")
     ap.add_argument("--quiz", type=Path, help="write the audio Wire Quiz MP3 into this directory (needs Cloudflare credentials)")
     a = ap.parse_args(argv)
     load_words()
@@ -779,13 +828,23 @@ def main(argv=None) -> int:
         dv = fresh(defectors(data, rollcalls.parse(a.votes, legislator_index(a.rosters)), legislator_index(a.rosters), now, drops), "defectors")
         for ch, err in vote_errors.items():
             drops.append(("defectors", f"{ch} votes unavailable: {err}"))
+    dk = []
+    if a.scotus:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import scotus
+        if a.fetch_scotus:
+            import requests
+            res = scotus.fetch(a.scotus, requests.Session(), "TheWire/1.0 (personal news reader; " + os.environ.get("WIRE_CONTACT", "github") + ")", now)
+            if res.get("error"):
+                drops.append(("docket", f"supremecourt.gov: {res['error']}"))
+        dk = fresh(docket(scotus.rows(a.scotus), data, seed, now, drops), "docket")
     lg = legal(data, now, drops)
     ldg = fresh(ledger(dv, a.rosters, seed, now, drops), "ledger")
     fq = friday_quiz(wsi, dv, lg, data, seed, drops) if date.fromisoformat(day).weekday() == 4 or os.environ.get("WIRE_FRIDAY") else None
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
-        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq,
-        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq),
+        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk,
+        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk),
     }
     if a.quiz:
         try:
@@ -799,7 +858,7 @@ def main(argv=None) -> int:
             print(f"[games] audio quiz skipped: {type(exc).__name__}")
     Path(a.out).write_text(json.dumps(pool, ensure_ascii=False, separators=(",", ":")))
     if a.hashes:                                   # offered today = used; never back within 90 days
-        for x in wsi + cq + dv + ldg + ([grid] if grid else []):
+        for x in wsi + cq + dv + ldg + dk + ([grid] if grid else []):
             used.setdefault(x["id"], day)
         a.hashes.write_text(json.dumps(used))
     print(f"[games] {day}: who said it {len(wsi)}, cryptoquote {len(cq)}, connections {'1 (shadow)' if grid else 'dropped'}; "
@@ -807,10 +866,10 @@ def main(argv=None) -> int:
     return 0
 
 
-def health(wsi, cq, grid, drops, dv=(), lg=None, ldg=None, fq=None) -> list[dict]:
+def health(wsi, cq, grid, drops, dv=(), lg=None, ldg=None, fq=None, dk=None) -> list[dict]:
     lg = lg or {"cards": []}
     rows = []
-    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv)), ("legal", len(lg["cards"])), ("ledger", len(ldg or [])), ("friday_quiz", 1 if fq else 0)):
+    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv)), ("legal", len(lg["cards"])), ("ledger", len(ldg or [])), ("friday_quiz", 1 if fq else 0), ("docket", len(dk or []))):
         why = {}
         for g, r in drops:
             if g == game:

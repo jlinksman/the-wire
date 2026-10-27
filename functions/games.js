@@ -109,6 +109,7 @@ function assemble(st, pool, chess, today) {
   const dow = weekday(today);
   let news = null;
   if (dow === 2) { const d = pickDefectors(st, pool, today); if (d) news = { game: "defectors", puzzle: d }; }
+  if (dow === 3) { const k = ((pool && pool.docket) || []).find((x) => !st.served[x.id]); if (k) news = { game: "docket", puzzle: k }; }
   if (dow === 4) { const l = ((pool && pool.ledger) || []).find((x) => !st.served[x.id]); if (l) news = { game: "ledger", puzzle: l }; }
   if (dow === 5 && pool && pool.friday_quiz && !st.served[pool.friday_quiz.id]) news = { game: "friday_quiz", puzzle: pool.friday_quiz };
   let wsi = null;

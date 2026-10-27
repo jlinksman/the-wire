@@ -115,7 +115,7 @@
   }
   function nyDay() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()); }
 
-  const NAMES = { ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
+  const NAMES = { docket: "The Docket", ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
   const LOGIC_NAMES = { loopy: "Loopy", keen: "Keen", towers: "Towers", galaxies: "Galaxies", signpost: "Signpost", dominosa: "Dominosa", unequal: "Unequal", slant: "Slant", range: "Range", pattern: "Pattern" };
   function slotLine(s) {
     const p = s.puzzle || {};
@@ -123,6 +123,7 @@
     if (s.game === "chess") { const th = (p.themes || []).filter((t) => !/^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality)$/.test(t)).slice(0, 2); return "Puzzle rated " + p.rating + (th.length ? " · " + th.join(", ") : ""); }
     if (s.game === "cryptoquote") return ["", "Easy", "Medium", "Hard"][p.tier] + " · " + (p.cipher || "").replace(/[^A-Z]/g, "").length + " letters";
     if (s.game === "who_said_it") return p.outlet ? "From " + p.outlet : "This week's news";
+    if (s.game === "docket") return (p.emergency ? "Emergency docket" : "Decided case") + " · " + p.date + (p.in_news ? " · in the news" : "");
     if (s.game === "ledger") return "Estimate · " + ((p.estimate || {}).subject || "");
     if (s.game === "friday_quiz") return (p.questions || []).length + " questions from the week";
     if (s.game === "legal") return (p.cards || []).map((c) => c.title.split(" — ")[0].split(" (")[0]).join(" · ");
@@ -176,6 +177,7 @@
     if (s.game === "defectors") return defectorsGame(s);
     if (s.game === "legal") return legalGame(s);
     if (s.game === "ledger") return ledgerGame(s);
+    if (s.game === "docket") return docketGame(s);
     if (s.game === "friday_quiz") return fridayQuiz(s);
     openPuzzles();
   }
@@ -257,11 +259,12 @@
       const ok = c.type === "element" ? matchesKeys(v, c.accept) : accepts(v, c.a, c.accept);
       send({ game: "callback", puzzle: c.id, ok, score: cbm(ok, cert), ms: Date.now() - t0, cert, items: [Object.assign({}, c, { ok, cert })] });
       openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier" }),
-        c.type === "element" ? el("p", { class: "gm-keep", text: c.q }) : el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }),
+        c.type === "speaker" ? el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }) : el("p", { class: "gm-keep", text: c.q }),
         reveal({ ok, verdict: ok ? "Still there" : "Not quite", keep: c.a, meta: c.hint || null, link: c.link, linkText: c.type === "element" ? "Primary source ↗" : "Source ↗", thread: c.thread, back: ok ? "Spacing it out further." : "Back tomorrow.", next: nextBtn() })], "From earlier");
     };
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
     const prompt = c.type === "element" ? [el("p", { class: "gm-keep", text: c.q }), el("p", { class: "fine", text: "One element is missing. Which?" })]
+      : c.type === "author" ? [el("p", { class: "gm-keep", text: c.q }), el("p", { class: "fine", text: "Which justice?" })]
       : [el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }), el("p", { class: "fine", text: "Who said it?" })];
     openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier · " + (i + 1) + " of " + list.length }), ...prompt, input, certButtons(go, "Answer — how sure?"), backBtn()], "From earlier");
     setTimeout(() => input.focus(), 50);
@@ -418,6 +421,53 @@
       ], "Defectors");
     }
     stage1();
+  }
+
+  // ---------------------------------------------------------------- The Docket
+  // A decided Supreme Court case: the Court's own one-line holding (party names masked) — which
+  // case is it? Then, for a signed opinion, who wrote it? Always after decision; never criminal
+  // cases with private defendants. The reveal links the Court's PDF.
+  function docketGame(s) {
+    const p = s.puzzle;
+    const t0 = Date.now();
+    let caseOk = false;
+    const head = () => [el("h2", { id: "sheet-title", class: "stitle", text: "The Docket" }),
+      el("p", { class: "asrc", text: (p.emergency ? "Emergency application " : "Docket ") + p.docket + " · decided " + p.date }),
+      el("blockquote", { class: "gm-quote", text: p.holding })];
+    function pickCase() {
+      openSheet([...head(), el("p", { class: "fine", text: "Which case held this?" }),
+        ...p.options.map((o) => el("button", { class: "gm-slot", onclick: () => { caseOk = o === p.name; afterCase(o); } }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: o })))), backBtn()], "The Docket");
+    }
+    function afterCase(choice) {
+      const signed = p.author_code && !["PC", "D"].includes(p.author_code);
+      openSheet([...head(), reveal({ ok: caseOk, verdict: caseOk ? "Right case" : "It was " + p.name, keep: p.name,
+        meta: "Holding in the Court's words: " + p.holding_full,
+        next: signed ? { text: "Who wrote it? ›", fn: author } : { text: "Finish ›", fn: () => finish(null) } })], "The Docket");
+    }
+    function author() {
+      const input = answerInput("Justice's surname");
+      keepVisible(input);
+      const go = (cert) => {
+        const v = input.value.trim();
+        if (!v) return input.focus();
+        const ok = (p.author_accept || []).some((a) => fold(a) === fold(v) || fold(a).split(" ").pop() === fold(v).split(" ").pop());
+        finish({ ok, cert, guess: v });
+      };
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
+      openSheet([...head(), el("p", { class: "gm-keep", text: p.name }), el("p", { class: "fine", text: "Who wrote the opinion of the Court?" }), input, certButtons(go, "Answer — how sure?"), backBtn()], "The Docket");
+      setTimeout(() => input.focus(), 50);
+    }
+    function finish(au) {
+      const ok = caseOk && (!au || au.ok);
+      const score = (caseOk ? 1 : 0) + (au ? cbm(au.ok, au.cert) : 0);
+      const items = au ? [{ id: "au:" + p.id, type: "author", q: "Wrote the opinion in " + p.name + " (" + p.date + ")", a: p.author, accept: p.author_accept, hint: p.docket, link: p.pdf, ok: au.ok, cert: au.cert }] : [];
+      const res = { ok, score, ms: Date.now() - t0, hints: 0, cert: au && au.cert };
+      send(Object.assign({ slot: s.slot, game: "docket", puzzle: p.id, items }, res));
+      markDone(s.slot, res);
+      openSheet([...head(), reveal({ ok, verdict: (caseOk ? "Case ✓" : "Case ✗") + (au ? " · author " + (au.ok ? "✓" : "✗") : ""), keep: p.name + (p.author ? " · " + p.author : ""),
+        meta: "Supreme Court of the United States · " + p.date, link: p.pdf, linkText: "The opinion (PDF) ↗", next: earlierNext() })], "The Docket");
+    }
+    pickCase();
   }
 
   // ---------------------------------------------------------------- The Ledger
