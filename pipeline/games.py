@@ -1366,7 +1366,7 @@ def legal(data, now, drops, openleg_cache: Path | None = None) -> dict:
         if bad:
             drops.append(("legal", f"{c['id']}: {bad}"))
             continue
-        cards.append({k: c.get(k) for k in ("id", "area", "title", "jurisdiction", "cite", "source", "verified", "elements", "cloze", "note")})
+        cards.append({k: c.get(k) for k in ("id", "area", "family", "title", "jurisdiction", "cite", "source", "verified", "elements", "cloze", "note")})
     cut = now - timedelta(days=7)
     featured = []
     items, threads, story_of = index(data)
@@ -1567,73 +1567,149 @@ def ledger(votes_dv, rosters, seed, now, drops, data=None, is_used=lambda _id: F
 # Ten templated questions from the week's verified data, each with its source; multiple choice so
 # it plays in a gap; distractors are the same kind of thing and checked not to also be true. The
 # last question carries a wager (sure / think / guess). No AI-written questions, no point loss.
-def friday_quiz(wsi, dv, lg, data, seed, drops, budget: QuoteBudget | None = None) -> dict | None:
+def short_element(text: str) -> str:
+    """An element without its parentheticals (nested ones too) or trailing qualifiers."""
+    t = text
+    while True:
+        u = re.sub(r"\s*\([^()]*\)", "", t)
+        if u == t:
+            break
+        t = u
+    return re.sub(r"\s+", " ", re.split(r";|, (?:where|which|including)\b", t)[0]).strip(" ,")
+
+
+def _mc(rng, right, wrong, k=3):
+    opts = rng.sample(wrong, k) + [right]
+    rng.shuffle(opts)
+    return opts
+
+
+FQ_MAX = {"who": 2, "defector": 2, "law": 2, "cloze": 1, "docket": 1, "author": 1, "bigger": 2, "order": 1, "agenda": 1, "official": 2}
+
+
+def friday_quiz(wsi, dv, lg, data, seed, drops, budget: QuoteBudget | None = None, dk=(), ldg=(), tl=(), ba=(), lib=()) -> dict | None:
+    """Ten templated questions from the week's verified data, from as many sources as the week has.
+    Multiple choice (`options`) or typed (`type: "typed"`, with `accept`): three or four typed. At
+    most two "who said it", Beacon at most two, the law odd-one-out drawn from cards of the same area
+    and family. The last carries the wager; the two hardest come from followed threads."""
     rng = random.Random(seed + "friday")
     budget = budget or QuoteBudget()
     qs = []
+
+    def add(q, typed=False, beacon=False):
+        q.setdefault("followed", False)
+        q["type"] = "typed" if typed else "choice"
+        q["beacon"] = beacon
+        qs.append(q)
+
+    # Who said it: one multiple choice, one typed (surname is enough).
     speakers = sorted({q["answer"] for q in wsi})
-    for q in [x for x in wsi if budget.ok(x["id"], "friday_quiz")][:2]:
-        budget.take(q["id"], "friday_quiz")
+    for n, q in enumerate([x for x in wsi if budget.ok(x["id"], "friday_quiz")][:2]):
         wrong = [x for x in speakers if x != q["answer"]]
-        if len(wrong) < 3:
-            break
-        opts = rng.sample(wrong, 3) + [q["answer"]]
-        rng.shuffle(opts)
-        qs.append({"kind": "who", "q": f"Who said: “{q['quote']}”", "options": opts, "answer": q["answer"], "why": q.get("role") or "",
-                   "source": q.get("outlet"), "link": q.get("link"), "thread": q.get("thread"), "followed": q.get("followed")})
-    for d in dv[:2]:
+        if n == 0 and len(wrong) >= 3:
+            budget.take(q["id"], "friday_quiz")
+            add({"kind": "who", "q": f"Who said: “{q['quote']}”", "options": _mc(rng, q["answer"], wrong), "answer": q["answer"], "why": q.get("role") or "",
+                 "source": q.get("outlet"), "link": q.get("link"), "thread": q.get("thread"), "followed": q.get("followed"), "src": q["id"]}, beacon="Beacon" in f"{q.get('where')} {q.get('role')}")
+        elif n == 1 or len(wrong) < 3:
+            budget.take(q["id"], "friday_quiz")
+            add({"kind": "who", "q": f"Who said: “{q['quote']}” (surname is enough)", "answer": q["answer"], "accept": q["accept"], "why": q.get("role") or "",
+                 "source": q.get("outlet"), "link": q.get("link"), "thread": q.get("thread"), "followed": q.get("followed"), "src": q["id"]}, typed=True, beacon="Beacon" in f"{q.get('where')} {q.get('role')}")
+    # Defectors: which of these broke ranks (distractors voted with their party on the same roll call).
+    for d in list(dv)[:2]:
         broke = {b["name"] for b in d["defectors"]}
         party = d["defectors"][0]["party"]
-        loyal = [m for m in d.get("ny", []) if m["name"] not in broke]
-        pool_names = [b["name"] for b in d["defectors"]][:1]
-        # Distractors: same-party members who voted with their party on this roll call (from the record).
         same = [m["name"] for m in d.get("ny", []) if m["party"] == party and m["name"] not in broke]
         if len(same) < 3:
             continue
-        opts = rng.sample(same, 3) + pool_names
-        rng.shuffle(opts)
-        qs.append({"kind": "defector", "q": f"On {d['bill'] or 'the House vote'} ({d['desc'][:80]}), which of these {'Republicans' if party == 'R' else 'Democrats'} broke with their party?",
-                   "options": opts, "answer": pool_names[0], "why": d["yea_meant"], "source": "House Clerk roll call", "link": d["link"], "thread": d.get("thread")})
-    cards = (lg or {}).get("cards") or []
-    if len(cards) >= 2:
-        for c in rng.sample(cards, min(2, len(cards))):
-            short = lambda t: re.sub(r"\s*\([^()]*\)\s*$", "", t)
-            other = [short(e["text"]) for x in cards if x["id"] != c["id"] for e in x["elements"]]
-            mine = [short(e["text"]) for e in c["elements"]]
-            if len(mine) < 3 or not other:
-                continue
-            odd = rng.choice(other)
-            if odd in mine:
-                continue
-            opts = rng.sample(mine, 3) + [odd]
-            rng.shuffle(opts)
-            qs.append({"kind": "law", "q": f"{c['title']}: which of these does NOT belong?", "options": opts, "answer": odd,
-                       "why": c["cite"], "source": "legal refresher card (second-checked)", "link": c["source"]})
-    items, threads, story_of = index(data)
-    outlets = sorted({it.get("source") for it in data.get("items", []) if it.get("source")})
-    for th in [t for t in data.get("threads", []) if t.get("followed")] + [t for t in data.get("threads", []) if not t.get("followed")]:
-        if len([q for q in qs if q["kind"] == "first"]) >= 2:
+        ans = d["defectors"][0]["name"]
+        add({"kind": "defector", "q": f"On {d['bill'] or 'the House vote'} ({d['desc'][:80]}), which of these {'Republicans' if party == 'R' else 'Democrats'} broke with their party?",
+             "options": _mc(rng, ans, same), "answer": ans, "why": d["yea_meant"], "source": "House Clerk roll call", "link": d["link"], "thread": d.get("thread")})
+    # Law: odd one out, the odd element from another card of the same area and family (a near miss).
+    cards = [c for c in ((lg or {}).get("cards") or []) if c.get("family") == "elements"]
+    for c in rng.sample(cards, len(cards)):
+        if sum(q["kind"] == "law" for q in qs) >= 2:
             break
-        if blocked(th.get("title")) or INSTITUTIONAL.search(th.get("title") or "") or len(th.get("title") or "") < 30 or th.get("kind") not in (None, "event", "story"):
+        mine = [short_element(e["text"]) for e in c["elements"]]
+        mykeys = {k for e in c["elements"] for k in (e.get("keys") or []) if isinstance(k, str)}
+        near = [(short_element(e["text"]), x) for x in cards if x["id"] != c["id"] and x["area"] == c["area"] for e in x["elements"]
+                if not mykeys & {k for k in (e.get("keys") or []) if isinstance(k, str)}]
+        near = [(t, x) for t, x in near if t not in mine and len(t) <= 70]
+        mine = [t for t in mine if len(t) <= 70]
+        if len(mine) < 3 or not near:
             continue
-        mem = sorted((items[m] for m in th.get("members", []) if m in items), key=lambda it: it.get("t") or "")
-        if len(mem) < 3 or not mem[0].get("source"):
+        odd, src = rng.choice(near)
+        add({"kind": "law", "q": f"{c['title']}: which of these is NOT an element?", "options": None,
+             "answer": odd, "why": f"That one belongs to {src['title']}. {c['cite']}", "source": "legal refresher card (second-checked)", "link": c["source"]})
+        qs[-1]["options"] = rng.sample(mine, 3) + [odd]
+        rng.shuffle(qs[-1]["options"])
+    # Law: statute cloze, typed.
+    cz = [c for c in ((lg or {}).get("cards") or []) if c.get("cloze")]
+    if cz:
+        c = rng.choice(cz)
+        z = c["cloze"]
+        add({"kind": "cloze", "q": f"{c['title']}. Fill the blank: “{z['text']}”", "answer": z["answer"], "accept": sorted({fold(a) for a in (z.get("accept") or [z["answer"]])}),
+             "why": c["cite"], "source": "statute text (official)", "link": z.get("source") or c["source"]}, typed=True)
+    # The Docket: which case held this; who wrote it (typed).
+    for k in list(dk)[:1]:
+        add({"kind": "docket", "q": f"Which case held: “{k['holding']}”?", "options": k["options"], "answer": k["name"], "why": f"Decided {k['date']}",
+             "source": "Supreme Court of the United States", "link": k.get("pdf")})
+        if k.get("author") and k.get("author_code") not in ("PC", "D"):
+            add({"kind": "author", "q": f"Which justice wrote the opinion of the Court in {k['name']}? (surname)", "answer": k["author"], "accept": k["author_accept"],
+                 "why": f"Decided {k['date']}", "source": "Supreme Court of the United States", "link": k.get("pdf")}, typed=True)
+    # The Ledger: which is bigger (sourced, at least 2x apart).
+    for l in list(ldg)[:2]:
+        for p in l.get("pairs", [])[:1]:
+            big = p["a"] if p["a"]["v"] >= p["b"]["v"] else p["b"]
+            add({"kind": "bigger", "q": "Which is bigger?", "options": [p["a"]["q"], p["b"]["q"]], "answer": big["q"],
+                 "why": f"{p['a']['v']:,} vs {p['b']['v']:,}", "source": "; ".join(sorted({p["a"]["source"], p["b"]["source"]})), "link": big.get("link")},
+                beacon="Beacon" in big["q"])
+    # Timeline: which came first (event dates from the primary record).
+    for t in list(tl)[:1]:
+        c2 = sorted(rng.sample(t["cards"], 2), key=lambda c: c["date"])
+        if c2[0]["date"] != c2[1]["date"]:
+            opts = [c2[0]["text"], c2[1]["text"]]
+            rng.shuffle(opts)
+            add({"kind": "order", "q": "Which happened first?", "options": opts, "answer": c2[0]["text"], "why": f"{c2[0]['date']} vs {c2[1]['date']}",
+                 "source": "primary record", "link": c2[0].get("link")})
+    # Beacon Agenda: which board.
+    for b in list(ba)[:1]:
+        add({"kind": "agenda", "q": f"Which Beacon board had this on its agenda: “{b['text']}”?", "options": b["options"], "answer": b["answer"],
+             "why": b.get("status") or "", "source": b.get("meeting"), "link": b.get("link")}, beacon=True)
+    # Officials in this week's news (complete public lists): typed.
+    week = fold(" ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in data.get("items", [])))
+    for L in lib:
+        if L.get("group") not in ("Beacon", "Dutchess", "New York") or L.get("kind") == "forms":
             continue
-        first = mem[0]["source"]
-        later = sorted({it.get("source") for it in mem[1:] if it.get("source") and it.get("source") != first})
-        if len(later) < 3:
+        for x in L["items"]:
+            if fold(x["answer"]) in week and x.get("clue"):
+                add({"kind": "official", "q": f"{L['title']}: who is {x['clue']}? (in this week's news)", "answer": x["answer"], "accept": x["accept"],
+                     "why": L.get("source") or "", "source": L.get("source"), "link": None}, typed=True, beacon=L.get("group") == "Beacon")
+    # Pick: per-kind caps, Beacon at most two, typed three or four, mixed sources.
+    rng.shuffle(qs)
+    qs.sort(key=lambda q: q["type"] != "typed")
+    pick, per, typed, beacon = [], {}, 0, 0
+    for q in qs:
+        if per.get(q["kind"], 0) >= FQ_MAX.get(q["kind"], 1) or (q["beacon"] and beacon >= 2) or (q["type"] == "typed" and typed >= 4):
             continue
-        opts = rng.sample(later, 3) + [first]
-        rng.shuffle(opts)
-        qs.append({"kind": "first", "q": f"Of the outlets The Wire follows, which reported this first: “{th['title']}”?", "options": opts, "answer": first,
-                   "why": "First item in the thread, " + (mem[0].get("t") or "")[:16].replace("T", " ") + " UTC", "source": first, "link": mem[0].get("link"),
-                   "thread": th["id"], "followed": th.get("followed")})
-    if len(qs) < 6:
-        drops.append(("friday_quiz", f"only {len(qs)} questions"))
+        pick.append(q)
+        per[q["kind"]] = per.get(q["kind"], 0) + 1
+        typed += q["type"] == "typed"
+        beacon += q["beacon"]
+        if len(pick) == 10:
+            break
+    if typed < 3:
+        drops.append(("friday_quiz", f"only {typed} typed-answer questions"))
+    if len(pick) < 6:
+        drops.append(("friday_quiz", f"only {len(pick)} questions"))
         return None
-    # The two hardest come from followed threads when there are any; the last carries the wager.
-    qs.sort(key=lambda q: (bool(q.get("followed")), q["kind"] == "law"))
-    return {"id": "fq" + pid(seed), "questions": qs[:10]}
+    if len(pick) < 10:
+        drops.append(("friday_quiz", f"{len(pick)} of 10 questions this week"))
+    # Followed threads last (the hardest two), the very last carries the wager.
+    rng.shuffle(pick)
+    pick.sort(key=lambda q: (bool(q.get("followed")), q["kind"] in ("law", "cloze")))
+    for q in pick:
+        q.pop("beacon", None)
+    return {"id": "fq" + pid("friday", *sorted(q["q"] + "|" + q["answer"] for q in pick)), "questions": pick}
 
 
 # ------------------------------------------------------------------ The Docket
@@ -2141,7 +2217,7 @@ def main(argv=None) -> int:
     if not tx:
         drops.append(("tactics", "no board passed the one-to-three-winning-lines test"))
     ldg = ledger(dv, a.rosters, seed, now, drops, data, lambda i: i in used and used[i] != day)
-    fq = friday_quiz(wsi, dv, lg, data, seed, drops, budget) if fri else None
+    fq = friday_quiz(wsi, dv, lg, data, seed, drops, budget, dk=dk, ldg=ldg, tl=tl, ba=ba, lib=lib) if fri else None
     mt = meta(wsi, dv, dk, seed, drops, budget) if sat else None
     if not WORDS:
         drops.append(("cryptoquote", "word list missing (/usr/share/dict/words): difficulty grading and wordplay are off"))

@@ -338,6 +338,37 @@ def test_ledger_pairs_and_ids():
     assert not used & {x["id"] for x in c}
 
 
+def test_friday_quiz_shape():
+    import yaml
+    data, reg, now = _wsi_data()
+    wsi = games.who_said_it(data, reg, now, [])
+    cfg = yaml.safe_load((games.ROOT / "legal.yaml").read_text())
+    cards = [{k: c.get(k) for k in ("id", "area", "family", "title", "cite", "source", "elements", "cloze")} for c in cfg["cards"] if c.get("status") == "verified"]
+    lib = [{"id": "your_reps", "group": "Beacon", "title": "Who represents Beacon", "source": "x",
+            "items": [{"answer": "Chris Drago", "accept": ["chris drago", "drago"], "clue": "County Legislature District 17"}]}]
+    figs = [{"a": {"q": "A", "v": 10, "source": "s", "link": None}, "b": {"q": "B", "v": 50, "source": "s", "link": None}}]
+    ldg = [{"id": "l1", "estimate": {}, "pairs": figs}, {"id": "l2", "estimate": {}, "pairs": [{"a": {"q": "C", "v": 3, "source": "s", "link": None}, "b": {"q": "D", "v": 9, "source": "s", "link": None}}]}]
+    tl = [{"id": "t", "cards": [{"text": "X", "date": "2026-09-01"}, {"text": "Y", "date": "2026-10-01"}]}]
+    dk = [{"name": "A v. B", "holding": "Holding.", "options": ["A v. B", "C v. D", "E v. F", "G v. H"], "date": "2026-06-01", "pdf": "x",
+           "author": "Elena Kagan", "author_code": "EK", "author_accept": ["elena kagan", "kagan"]}]
+    fq = games.friday_quiz(wsi, [], {"cards": cards}, data, "s", [], None, dk=dk, ldg=ldg, tl=tl, ba=[], lib=lib)
+    qs = fq["questions"]
+    assert len(qs) == 10, [q["kind"] for q in qs]
+    assert not any(q["kind"] == "first" for q in qs)
+    assert sum(q["kind"] == "who" for q in qs) <= 2
+    typed = [q for q in qs if q["type"] == "typed"]
+    assert 3 <= len(typed) <= 4 and all(q.get("accept") and "options" not in q for q in typed)
+    assert all(q["answer"] in q["options"] for q in qs if q["type"] == "choice")
+    byid = {c["title"]: c for c in cards}
+    for q in qs:
+        if q["kind"] == "law":
+            c = byid[q["q"].split(": which")[0]]
+            assert all("(" not in o and len(o) <= 70 for o in q["options"])
+            src = next(x for x in cards if any(games.short_element(e["text"]) == q["answer"] for e in x["elements"]) and x["id"] != c["id"])
+            assert src["area"] == c["area"] and src["family"] == c["family"]
+    assert games.short_element("The defendant is a discharger (liability is strict (see § 172(8)); more)") == "The defendant is a discharger"
+
+
 def test_legal_yaml_scalars():
     import yaml
     cards = (yaml.safe_load((games.ROOT / "legal.yaml").read_text()) or {}).get("cards", [])

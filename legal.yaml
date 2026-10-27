@@ -14,7 +14,8 @@
 # Still draft: trespass (elements 2–3 need their own NY authority) and CPLR 1411 (amended
 # 2026-05-29; confirm the amending chapter's effective date and scope first).
 #
-# Card fields: id, area, title, jurisdiction, cite, source (URL), verified, status, news,
+# Card fields: id, area, family (elements / list / factors / rule: the Friday quiz's odd-one-out only
+# mixes elements from cards of the same area and family), title, jurisdiction, cite, source (URL), verified, status, news,
 # note (variants to remember), elements [{text, keys}], optional cloze {text, answer, accept, source},
 # openleg (NY sections to watch; otherwise the source URL's section). A watched section that changes
 # after `verified`, or a cloze that no longer matches the statute, holds the card (pipeline/openleg.py).
@@ -23,6 +24,7 @@ cards:
   # ------------------------------------------------------------ NY spill and environmental
   - id: nav181
     area: environmental
+    family: elements
     title: "Navigation Law § 181 — strict liability for a petroleum discharge"
     jurisdiction: NY
     cite: "N.Y. Navigation Law §§ 172(8), 181(1), (5); State of New York v. Green, 96 N.Y.2d 403, 405, 407 (2001)"
@@ -47,6 +49,7 @@ cards:
 
   - id: cercla107
     area: environmental
+    family: elements
     title: "CERCLA § 107(a) cost recovery — prima facie case"
     jurisdiction: federal
     cite: "42 U.S.C. § 9607(a); B.F. Goodrich Co. v. Murtha, 958 F.2d 1192, 1198 (2d Cir. 1992)"
@@ -69,6 +72,7 @@ cards:
 
   - id: cercla_prp
     area: environmental
+    family: list
     title: "CERCLA § 107(a) — the four classes of responsible parties"
     jurisdiction: federal
     cite: "42 U.S.C. § 9607(a)(1)–(4)"
@@ -88,6 +92,7 @@ cards:
 
   - id: cercla107b
     area: environmental
+    family: list
     title: "CERCLA § 107(b) — the statutory defenses"
     jurisdiction: federal
     cite: "42 U.S.C. § 9607(b)"
@@ -108,6 +113,7 @@ cards:
 
   - id: rcra7002
     area: environmental
+    family: elements
     title: "RCRA § 7002(a)(1)(B) — imminent and substantial endangerment citizen suit"
     jurisdiction: federal
     cite: "42 U.S.C. § 6972(a)(1)(B); Cordiano v. Metacon Gun Club, Inc., 575 F.3d 199, 210–11 (2d Cir. 2009)"
@@ -126,6 +132,7 @@ cards:
 
   - id: cwa301
     area: environmental
+    family: elements
     title: "Clean Water Act § 301(a) — unpermitted discharge"
     jurisdiction: federal
     cite: "33 U.S.C. §§ 1311(a), 1362(12); Cordiano v. Metacon Gun Club, Inc., 575 F.3d 199, 215 (2d Cir. 2009)"
@@ -149,6 +156,7 @@ cards:
   # ------------------------------------------------------------ torts (NY)
   - id: negligence
     area: torts
+    family: elements
     title: "Negligence (NY)"
     jurisdiction: NY
     cite: "Pasternack v. Laboratory Corp. of America Holdings, 27 N.Y.3d 817, 825 (2016) (quoting Solomon v. City of New York, 66 N.Y.2d 1026, 1027 (1985))"
@@ -166,6 +174,7 @@ cards:
 
   - id: private_nuisance
     area: torts
+    family: elements
     title: "Private nuisance (NY)"
     jurisdiction: NY
     cite: "Copart Industries, Inc. v. Consolidated Edison Co. of N.Y., 41 N.Y.2d 564, 569–70 (1977)"
@@ -187,6 +196,7 @@ cards:
 
   - id: trespass
     area: torts
+    family: elements
     title: "Trespass to land (NY)"
     jurisdiction: NY
     cite: "Phillips v. Sun Oil Co., 307 N.Y. 328, 331 (1954)"
@@ -204,6 +214,7 @@ cards:
 
   - id: abnormally_dangerous
     area: torts
+    family: factors
     title: "Abnormally dangerous activity — the factors (NY)"
     jurisdiction: NY
     cite: "Doundoulakis v. Town of Hempstead, 42 N.Y.2d 440, 448 (1977) (identifying Restatement (Second) of Torts § 520 factors as \"particularly useful\"; no single factor determinative)"
@@ -228,6 +239,7 @@ cards:
 
   - id: defamation
     area: torts
+    family: elements
     title: "Defamation (NY)"
     jurisdiction: NY
     cite: "Dillon v. City of New York, 261 A.D.2d 34, 38 (1st Dep't 1999)"
@@ -248,6 +260,7 @@ cards:
 
   - id: slander_per_se
     area: torts
+    family: list
     title: "Slander per se — the four categories (NY)"
     jurisdiction: NY
     cite: "Liberman v. Gelstein, 80 N.Y.2d 429, 435 (1992)"
@@ -268,6 +281,7 @@ cards:
 
   - id: cplr1411
     area: torts
+    family: rule
     title: "Comparative fault — CPLR 1411"
     jurisdiction: NY
     cite: "N.Y. CPLR 1411(a), (b) (as amended, revision of 2026-05-29)"
