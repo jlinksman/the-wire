@@ -1385,86 +1385,177 @@ def legal(data, now, drops, openleg_cache: Path | None = None) -> dict:
 
 
 # ------------------------------------------------------------------ The Ledger
-# Estimation on figures with a named public source: Beacon enrollment and results (Board of
-# Elections), House roll-call tallies, members' years in office (congress-legislators). Joe gives a
-# range; Estimathon scoring. "Which is bigger" pairs always differ by at least 2x. Figures are spread
-# across subjects; nothing contested is framed as a misconception.
-def ledger_figures(votes_dv, rosters, now) -> list[dict]:
+# Estimation on figures with a named public source: Beacon and Dutchess enrollment and results
+# (Boards of Elections), dollar amounts on Beacon's posted agendas (with the resolution number),
+# House roll-call tallies, members' years in office (congress-legislators), county party committees'
+# itemized receipts (NYS BOE via data.ny.gov). Joe gives a range; Estimathon scoring. "Which is
+# bigger" pairs differ by at least 2x, come from two different subjects and are never a part against
+# its whole (a ward against the city, a winner against the race's total). Each puzzle's id is the
+# figure itself, so the 90-day no-reuse rule holds whatever the date.
+MONEY = re.compile(r"\$\s?(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2}))?\s*(million|thousand|M\b|K\b)?", re.I)
+
+
+def agenda_money(data) -> list[dict]:
+    figs = []
+    for it in data.get("items", []):
+        if not it.get("agenda") or "council" not in (it.get("title") or "").lower():
+            continue
+        for a in it["agenda"]:
+            text = a.get("text") or ""
+            num = re.search(r"Resolution No\.?\s*(\d+)", text)
+            m = MONEY.search(text)
+            if not (num and m) or blocked(text):
+                continue
+            v = float(m.group(1).replace(",", "") + ("." + m.group(2) if m.group(2) else ""))
+            mult = (m.group(3) or "").lower()
+            v *= 1_000_000 if mult in ("million", "m") else 1_000 if mult in ("thousand", "k") else 1
+            what = re.sub(r"^Resolution No\.?\s*\d+\s*[-–—:]?\s*", "", text)
+            what = MONEY.sub("", what).strip(" ,-–—")[:110]
+            figs.append({"q": f"Beacon City Council Resolution No. {num.group(1)} ({what}): how many dollars?", "a": round(v), "unit": "dollars",
+                         "subject": "Beacon budget", "family": f"res-{num.group(1)}-{(it.get('t') or '')[:4]}",
+                         "source": f"City of Beacon agenda, {it.get('title')}", "link": it.get("link")})
+    return figs
+
+
+def ledger_figures(votes_dv, rosters, now, data=None) -> list[dict]:
     figs = []
     be = yaml.safe_load((ROOT / "beacon_elections.yaml").read_text()) or {}
     enr = (be.get("enrollment") or [])[-1:]
     for e in enr:
         ds = e.get("districts") or []
+        src = e["source"].split(" ")[0]
+        whole = f"beacon-active-{e['as_of']}"
         if ds:
             act = sum(sum(d["active"].values()) for d in ds)
             figs.append({"q": f"How many active registered voters did the City of Beacon have on {e['as_of']}?", "a": act, "unit": "voters",
-                         "subject": "Beacon voters", "source": "NYS Board of Elections enrollment by election district", "link": e["source"].split(" ")[0]})
+                         "subject": "Beacon voters", "family": whole, "part_of": f"county-active-{e['as_of']}",
+                         "source": "NYS Board of Elections enrollment by election district", "link": src})
             blank = sum(d["active"].get("BLANK", 0) for d in ds)
             figs.append({"q": f"How many of Beacon's active voters were enrolled in no party on {e['as_of']}?", "a": blank, "unit": "voters",
-                         "subject": "Beacon voters", "source": "NYS Board of Elections enrollment by election district", "link": e["source"].split(" ")[0]})
+                         "subject": "Beacon voters", "family": whole, "part_of": whole,
+                         "source": "NYS Board of Elections enrollment by election district", "link": src})
             for w in sorted({d["ward"] for d in ds}):
                 n = sum(sum(d["active"].values()) for d in ds if d["ward"] == w)
-                figs.append({"q": f"Active voters in Beacon's Ward {w} ({e['as_of']})", "a": n, "unit": "voters", "subject": "Beacon wards", "pair_only": True,
-                             "source": "NYS Board of Elections", "link": e["source"].split(" ")[0]})
+                figs.append({"q": f"Active voters in Beacon's Ward {w} ({e['as_of']})", "a": n, "unit": "voters", "subject": "Beacon voters", "pair_only": True,
+                             "family": whole, "part_of": whole, "source": "NYS Board of Elections", "link": src})
+        cty = ((e.get("totals") or {}) and (e.get("county") or {}).get("active")) or None
+        if cty:
+            figs.append({"q": f"How many active registered voters did Dutchess County have on {e['as_of']}?", "a": sum(cty.values()), "unit": "voters",
+                         "subject": "Dutchess voters", "family": f"county-active-{e['as_of']}",
+                         "source": "NYS Board of Elections enrollment by election district", "link": src})
     for r in be.get("results") or []:
         tot = (r.get("beacon_totals") or {}).get("total_votes")
         cands = sorted(r.get("candidates") or [], key=lambda c: -(c.get("votes") or 0))
+        fam = f"race-{r['year']}-{fold(r['office'])}"
         if cands and cands[0].get("votes"):
             figs.append({"q": f"In Beacon's {r['year']} race for {r['office']}, how many votes did the top finisher ({cands[0]['name']}) receive in Beacon?",
-                         "a": cands[0]["votes"], "unit": "votes", "subject": f"Beacon {r['year']} election",
+                         "a": cands[0]["votes"], "unit": "votes", "subject": "Beacon elections", "family": fam, "part_of": fam,
                          "source": "Dutchess County Board of Elections certified results", "link": r["source"]})
         if tot:
-            figs.append({"q": f"Total votes cast in Beacon for {r['office']}, {r['year']}", "a": tot, "unit": "votes", "subject": f"Beacon {r['year']} election", "pair_only": True,
-                         "source": "Dutchess County Board of Elections", "link": r["source"]})
+            figs.append({"q": f"Total votes cast in Beacon for {r['office']}, {r['year']}", "a": tot, "unit": "votes", "subject": "Beacon elections", "pair_only": True,
+                         "family": fam, "source": "Dutchess County Board of Elections", "link": r["source"]})
     for d in votes_dv[:6]:
         yea = sum(t["yea"] for t in d["tally"].values())
         nay = sum(t["nay"] for t in d["tally"].values())
-        figs.append({"q": f"How many members voted yes on {d['bill'] or 'roll call ' + str(d['num'])} ({d['desc'][:90]}) on {d['date']}?",
-                     "a": yea, "unit": "votes", "subject": "House votes", "source": "House Clerk roll call", "link": d["link"]})
+        fam = f"roll-{d['chamber']}-{d['date'][:4]}-{d['num']}"
+        what = d["bill"] or "roll call " + str(d["num"])
+        figs.append({"q": f"How many House members voted yes on {what} ({d['desc'][:90]}) on {d['date']}?",
+                     "a": yea, "unit": "votes", "subject": "House votes", "family": fam, "source": "House Clerk roll call", "link": d["link"]})
         if nay:
-            figs.append({"q": f"No votes on {d['bill'] or 'roll call ' + str(d['num'])}, {d['date']}", "a": nay, "unit": "votes", "subject": "House votes", "pair_only": True,
-                         "source": "House Clerk roll call", "link": d["link"]})
+            figs.append({"q": f"House no votes on {what}, {d['date']}", "a": nay, "unit": "votes", "subject": "House votes", "pair_only": True,
+                         "family": fam, "source": "House Clerk roll call", "link": d["link"]})
     if rosters and (rosters / "legislators-current.json").exists():
         for m in json.loads((rosters / "legislators-current.json").read_text()):
             terms = m.get("terms") or []
-            if terms and terms[-1].get("state") == "NY":
+            if terms and terms[-1].get("state") == "NY" and terms[-1].get("end", "9") >= now.date().isoformat():
                 start = min(t["start"] for t in terms)
                 yrs = now.year - int(start[:4])
                 if yrs >= 2:
-                    nm = m["name"].get("official_full") or m["name"]["last"]
+                    nm = strip_suffix(m["name"].get("official_full") or m["name"]["last"])
                     kind = "Senator" if terms[-1]["type"] == "sen" else "Rep."
                     figs.append({"q": f"How many years has {kind} {nm} served in Congress (counting from first swearing-in)?", "a": yrs, "unit": "years",
-                                 "subject": "NY delegation", "source": "congress-legislators (CC0)", "link": f"https://bioguide.congress.gov/search/bio/{m['id']['bioguide']}"})
+                                 "subject": "NY delegation", "family": "bio-" + m["id"]["bioguide"],
+                                 "source": "congress-legislators (CC0)", "link": f"https://bioguide.congress.gov/search/bio/{m['id']['bioguide']}"})
+    lp = yaml.safe_load((ROOT / "local_politics.yaml").read_text()) or {}
+    yr = str(now.year - 1)                                   # last complete year
+    for c in ((lp.get("money") or {}).get("party_committees") or []):
+        if "Dutchess County" not in c.get("name", ""):
+            continue
+        v = (c.get("itemized_raised_by_year") or {}).get(yr) or (c.get("itemized_raised_by_year") or {}).get(int(yr))
+        if v:
+            figs.append({"q": f"How much did the {c['name']} report in itemized contributions in {yr}?", "a": int(v), "unit": "dollars",
+                         "subject": "Dutchess party money", "family": f"money-{c.get('filer_id')}-{yr}",
+                         "source": "NYS Board of Elections campaign finance (data.ny.gov); itemized receipts only, a lower bound", "link": c.get("source")})
+    if data:
+        figs += agenda_money(data)
     return [f for f in figs if f["a"] and f["a"] > 0]
 
 
-def ledger(votes_dv, rosters, seed, now, drops) -> list[dict]:
-    figs = ledger_figures(votes_dv, rosters, now)
+def lineages(figs: list[dict]) -> None:
+    """Each figure's family plus every whole it sits inside (a ward → Beacon → Dutchess)."""
+    parent = {f["family"]: f["part_of"] for f in figs if f.get("part_of") and f["part_of"] != f.get("family")}
+    for f in figs:
+        line, todo = {f.get("family")}, [f.get("part_of"), parent.get(f.get("family"))]
+        while todo:
+            cur = todo.pop()
+            if cur and cur not in line:
+                line.add(cur)
+                todo.append(parent.get(cur))
+        f["lineage"] = line - {None}
+
+
+def pairable(a: dict, b: dict) -> bool:
+    """Two figures can face off: same unit, different subjects, neither inside the other (nor two
+    pieces of one whole), at least 2x apart."""
+    if a is b or a["unit"] != b["unit"] or a["subject"] == b["subject"]:
+        return False
+    la, lb = a.get("lineage") or {a.get("family")}, b.get("lineage") or {b.get("family")}
+    if la & lb:
+        return False
+    hi, lo = max(a["a"], b["a"]), min(a["a"], b["a"])
+    return lo > 0 and hi / lo >= 2
+
+
+def ledger_id(f: dict) -> str:
+    return "l" + pid("ledger", fold(f["q"]), f["a"])
+
+
+def ledger(votes_dv, rosters, seed, now, drops, data=None, is_used=lambda _id: False) -> list[dict]:
+    figs = ledger_figures(votes_dv, rosters, now, data)
+    lineages(figs)
     rng = random.Random(seed + "ledger")
-    single = [f for f in figs if not f.get("pair_only")]
-    out = []
+    single = [f for f in figs if not f.get("pair_only") and not is_used(ledger_id(f))]
     rng.shuffle(single)
-    subjects = set()
+    # Round-robin across subjects so one subject can't fill the week.
+    by_subject: dict[str, list] = {}
     for f in single:
-        if f["subject"] in subjects:
-            continue
-        subjects.add(f["subject"])
+        by_subject.setdefault(f["subject"], []).append(f)
+    order = []
+    subjects = list(by_subject)
+    rng.shuffle(subjects)
+    while any(by_subject.values()):
+        for sbj in subjects:
+            if by_subject[sbj]:
+                order.append(by_subject[sbj].pop())
+    out, used_pairs = [], set()
+    for f in order:
         pairs = []
-        others = [g for g in figs if g is not f and g["subject"] != f["subject"]]
+        others = [g for g in figs if g is not f and not (g["lineage"] & f["lineage"])]
         rng.shuffle(others)
+        others.sort(key=lambda g: g["subject"] == f["subject"])          # other subjects first
         for a in others:
             for b in others:
-                if a is b or a["unit"] != b["unit"] or a in [p[0] for p in pairs] or b in [p[1] for p in pairs]:
+                key = frozenset((id(a), id(b)))
+                if key in used_pairs or not pairable(a, b) or any(id(x) in (id(a), id(b)) for p in pairs for x in p):
                     continue
-                hi, lo = max(a["a"], b["a"]), min(a["a"], b["a"])
-                if lo and hi / lo >= 2:
-                    pairs.append((a, b))
-                    break
+                pairs.append((a, b))
+                used_pairs.add(key)
+                break
             if len(pairs) >= 2:
                 break
-        pid_ = "l" + pid(seed, f["q"])
-        out.append({"id": pid_, "estimate": f, "pairs": [{"a": {"q": a["q"], "v": a["a"], "source": a["source"], "link": a["link"]},
-                                                         "b": {"q": b["q"], "v": b["a"], "source": b["source"], "link": b["link"]}} for a, b in pairs]})
+        out.append({"id": ledger_id(f), "estimate": {k: v for k, v in f.items() if k not in ("family", "part_of", "pair_only", "lineage")},
+                    "pairs": [{"a": {"q": a["q"], "v": a["a"], "source": a["source"], "link": a["link"]},
+                               "b": {"q": b["q"], "v": b["a"], "source": b["source"], "link": b["link"]}} for a, b in pairs]})
         if len(out) >= 6:
             break
     if not out:
@@ -2049,7 +2140,7 @@ def main(argv=None) -> int:
     tx = tactics.pool(seed)
     if not tx:
         drops.append(("tactics", "no board passed the one-to-three-winning-lines test"))
-    ldg = fresh(ledger(dv, a.rosters, seed, now, drops), "ledger")
+    ldg = ledger(dv, a.rosters, seed, now, drops, data, lambda i: i in used and used[i] != day)
     fq = friday_quiz(wsi, dv, lg, data, seed, drops, budget) if fri else None
     mt = meta(wsi, dv, dk, seed, drops, budget) if sat else None
     if not WORDS:

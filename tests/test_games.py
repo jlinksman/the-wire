@@ -306,6 +306,38 @@ def test_beacon_agenda_rules():
     assert tio["date"] == "2026-10-09"                                         # the newest meeting wins
 
 
+def test_ledger_pairs_and_ids():
+    from datetime import datetime, timezone
+    now = datetime(2026, 10, 22, 12, tzinfo=timezone.utc)
+    data = {"items": [{"id": "cc", "title": "City Council - Oct 19, 2026", "t": "2026-10-16T09:00:00Z", "link": "x", "agenda": [
+        {"text": "Resolution No. 87 - Authorizing a Bond Issuance of $1,250,000 for the Construction of Mount Beacon Water Storage Tank"}]}]}
+    figs = games.ledger_figures([], None, now, data)
+    games.lineages(figs)
+    money = [f for f in figs if f["subject"] == "Beacon budget"]
+    assert money and money[0]["a"] == 1250000 and "Resolution No. 87" in money[0]["q"]
+    ward = next(f for f in figs if "Ward 1" in f["q"] and f["unit"] == "voters")
+    city = next(f for f in figs if f["q"].startswith("How many active registered voters did the City of Beacon"))
+    county = next(f for f in figs if "Dutchess County have" in f["q"])
+    assert not games.pairable(ward, city) and not games.pairable(ward, county) and not games.pairable(city, county)
+    race = [f for f in figs if f["subject"] == "Beacon elections"]
+    tot = next(f for f in race if f.get("pair_only"))
+    top = next(f for f in race if f.get("family") == tot["family"] and f is not tot)
+    assert not games.pairable(top, tot)                                   # a winner against the race's total
+    a = games.ledger([], None, "wire-games-2026-10-22", now, [], data)
+    b = games.ledger([], None, "wire-games-2026-10-29", now, [], data)
+    assert {x["id"] for x in a} & {x["id"] for x in b}                    # ids follow the figure, not the date
+    nsub = len({f["subject"] for f in figs if not f.get("pair_only")})
+    first = [x["estimate"]["subject"] for x in a][:nsub]
+    assert len(set(first)) == len(first)                                  # round-robin across subjects
+    for x in a:
+        for p in x["pairs"]:
+            hi, lo = max(p["a"]["v"], p["b"]["v"]), min(p["a"]["v"], p["b"]["v"])
+            assert hi / lo >= 2
+    used = {x["id"] for x in a}
+    c = games.ledger([], None, "wire-games-2026-10-22", now, [], data, lambda i: i in used)
+    assert not used & {x["id"] for x in c}
+
+
 def test_legal_yaml_scalars():
     import yaml
     cards = (yaml.safe_load((games.ROOT / "legal.yaml").read_text()) or {}).get("cards", [])
