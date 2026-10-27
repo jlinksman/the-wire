@@ -42,9 +42,17 @@ export async function onRequestGet({ request, env }) {
   const st = await load(env);
   const today = nyDay();
   let day = st.days[today];
+  // Opened before the morning build published today's pool: serve yesterday's pool for now, but
+  // re-assemble once today's arrives (unless something was already played from it).
+  const fresh = pool && pool.day === today;
+  if (day && day.stale && fresh && !Object.keys(day.done || {}).length) day = null;
+  const carried = day && !(day.slots || []).length ? day.done : null;   // a Library result came in before the page opened
+  if (carried) day = null;
   if (!day) {
     const chess = (await env.WIRE.get("chess.json", "json")) || null;
     day = assemble(st, pool, chess, today);
+    if (carried) day.done = Object.assign({}, carried, day.done);
+    if (!fresh) { day.stale = true; day.health.push({ game: "pool", made: 0, dropped: 0, why: [["today's puzzle build hadn't finished; these are from " + ((pool && pool.day) || "an earlier day") + " until it does", 1]] }); }
     st.days[today] = day;
     resolvePredictions(st, pool, today);
     trim(st, today);
@@ -69,6 +77,15 @@ export async function onRequestPost({ request, env }) {
   if (b.action === "pick") {
     if (!BRAINS.includes(b.brain)) return json({ error: "Unknown brain break." }, 400);
     st.pick = b.brain;
+    // Today's brain-break slot switches too, if it hasn't been played.
+    const day = st.days[today];
+    const bb = day && day.slots.find((x) => x.label === "Brain break" && x.slot === 4);
+    if (bb && !(day.done || {})[String(bb.slot)] && bb.game !== b.brain) {
+      POOL = await env.WIRE.get("games-today.json", "json");
+      const chess = b.brain === "chess" ? await env.WIRE.get("chess.json", "json") : null;
+      const repl = brainBreak(b.brain, st, chess, today, seeded("pick" + today + b.brain), day.health || (day.health = []), day.slots.filter((x) => x !== bb));
+      if (repl) { Object.assign(bb, repl, { id: repl.puzzle && repl.puzzle.id }); if (bb.id) st.served[bb.id] = today; }
+    }
   } else if (b.action === "predict") {
     const c = ((pool0(await env.WIRE.get("games-today.json", "json"))).pending_docket || []).find((x) => x.docket === b.docket);
     if (!c) return json({ error: "That case isn't pending (it may have been decided)." }, 400);
@@ -232,6 +249,12 @@ function pickLegal(st, pool, today) {
   const pick = [];
   for (const id of [...due, ...featured, ...fresh]) if (byId[id] && !pick.includes(id) && pick.length < 3) pick.push(id);
   if (!pick.length) return null;
+  // The session always opens on a statute fill-in (never cold on a type-in): if no picked card has
+  // one, the last pick gives way to the cloze card least recently seen.
+  if (!pick.some((id) => byId[id].cloze)) {
+    const cz = L.cards.filter((c) => c.cloze).sort((a, b) => ((st.items["cz:" + a.id] || {}).due || "").localeCompare((st.items["cz:" + b.id] || {}).due || ""))[0];
+    if (cz) { if (pick.length >= 3) pick.pop(); pick.unshift(cz.id); }
+  }
   const cards = pick.map((id) => byId[id]);
   cards.sort((a, b) => (b.cloze ? 1 : 0) - (a.cloze ? 1 : 0));
   return { id: "law" + today, cards, featured: (L.featured || []).filter((f) => pick.includes(f.card)) };
@@ -260,13 +283,17 @@ function brainBreak(kind, st, chess, today, rng, health, taken) {
     const r = ((st.ladder.chess || {}).rating) || 1200;
     const near = P.filter((p) => Math.abs(p[3] - r) <= 150 && !st.served["ch" + p[0]] && !(taken || []).some((s) => s.id === "ch" + p[0]));
     const pool = near.length ? near : P.filter((p) => !st.served["ch" + p[0]]);
+    if (!pool.length) {                      // every sampled puzzle served: say so, and play logic instead
+      health.push({ game: "chess", made: 0, dropped: 0, why: [["every puzzle in this month's sample has been served", 1]] });
+      return brainBreak("logic", st, chess, today, rng, health, taken);
+    }
     const p = pool[Math.floor(rng() * pool.length)];
     return { game: "chess", puzzle: { id: "ch" + p[0], fen: p[1], moves: p[2].split(" "), rating: p[3], themes: p[4].split(" "), url: "https://lichess.org/training/" + p[0] } };
   }
-  const t = ((st.ladder.logic || {}).tier) || 2;
   const used = (taken || []).filter((s) => s.game === "logic").map((s) => s.puzzle.game);
   const order = LOGIC_ORDER.filter((g) => !used.includes(g));
   const g = order[(dayNumber(today) + (taken ? taken.length : 0)) % order.length];
+  const t = ((st.ladder["logic:" + g] || st.ladder.logic || {}).tier) || 2;     // each puzzle type climbs on its own
   const seed = today.replace(/-/g, "") + (taken ? "x" + taken.length : "");
   return { game: "logic", puzzle: { id: "lg" + g + seed, game: g, params: LOGIC[g][t - 1], seed, tier: t } };
 }
@@ -286,7 +313,7 @@ function record(st, b, today) {
 }
 
 function ladder(st, game, r, b) {
-  if (["callback", "name_all", "match", "forms"].includes(game)) return;
+  if (["callback", "name_all", "match", "forms", "map", "who_left"].includes(game)) return;
   if (game === "chess") {
     const L = st.ladder.chess || (st.ladder.chess = { rating: 1200, n: 0 });
     const pr = num(b.rating) || L.rating;
@@ -296,8 +323,9 @@ function ladder(st, game, r, b) {
     L.n += 1;
     return;
   }
-  // Three clean solves up, one miss down (settles near 80%).
-  const L = st.ladder[game] || (st.ladder[game] = { tier: 2, clean: 0 });
+  // Three clean solves up, one miss down (settles near 80%). Logic keeps one ladder per puzzle type.
+  const lk = game === "logic" && /^[a-z]+$/.test(String(b.sub || "")) ? "logic:" + b.sub : game;
+  const L = st.ladder[lk] || (st.ladder[lk] = { tier: (st.ladder.logic || {}).tier || 2, clean: 0 });
   if (r.ok && !r.hints) { L.clean += 1; if (L.clean >= 3) { L.tier = Math.min(3, L.tier + 1); L.clean = 0; } }
   else if (!r.ok) { L.tier = Math.max(1, L.tier - 1); L.clean = 0; }
 }
@@ -310,7 +338,7 @@ function schedule(st, it, today) {
   const cur = st.items[id] || {
     id, type: String(it.type || "").slice(0, 20), q: clip(it.q, 300), a: clip(it.a, 120),
     accept: (Array.isArray(it.accept) ? it.accept : []).map((x) => clip(x, 60)).slice(0, 12),
-    hint: clip(it.hint, 120), link: clip(it.link, 400), story: clip(it.story, 40), thread: clip(it.thread, 40), iv: 0, hist: [], sure60: 0,
+    hint: clip(it.hint, 120), link: clip(it.link, 400), story: clip(it.story, 40), thread: clip(it.thread, 40), ref: clip(it.ref, 60), iv: 0, hist: [], sure60: 0,
   };
   const ok = !!it.ok, cert = it.cert, hinted = !!it.hinted;
   let iv = cur.iv || 0;
@@ -332,9 +360,12 @@ function schedule(st, it, today) {
 // lateness never counts against the interval. Items tied to a voided story are skipped.
 function callbacks(st, today, day) {
   const served = new Set(Object.keys((day && day.done) || {}));
-  const due = Object.values(st.items).filter((x) => !x.retired && !x.void && x.due && x.due <= today && x.lastAsked !== today)
+  // A law day already drills its own cards' elements, so those don't come back as callbacks too.
+  const lawCards = new Set(((day && day.slots) || []).filter((x) => x.game === "legal").flatMap((x) => ((x.puzzle || {}).cards || []).map((c) => c.id)));
+  const onLawCard = (x) => /^(el|cz):/.test(x.id) && lawCards.has(x.id.split(":")[1]);
+  const due = Object.values(st.items).filter((x) => !x.retired && !x.void && x.due && x.due <= today && !onLawCard(x))
     .sort((a, b) => a.due.localeCompare(b.due));
-  return due.slice(0, CALLBACK_CAP).map((x) => ({ id: x.id, type: x.type, q: x.q, a: x.a, accept: x.accept, hint: x.hint, link: x.link, thread: x.thread, served: served.size }));
+  return due.slice(0, CALLBACK_CAP).map((x) => ({ id: x.id, type: x.type, q: x.q, a: x.a, accept: x.accept, hint: x.hint, link: x.link, thread: x.thread, ref: x.ref, served: served.size }));
 }
 
 function stats(st, today) {
@@ -347,7 +378,28 @@ function stats(st, today) {
     tiers: Object.fromEntries(Object.entries(st.ladder).filter(([k]) => k !== "chess").map(([k, v]) => [k, v.tier])),
     due: Object.values(st.items).filter((x) => !x.retired && x.due && x.due <= today).length,
     ranges90: (() => { const L = st.results.filter((r) => r.game === "ledger" && r.day >= addDays(today, -60)); return L.length >= 3 ? { hit: L.filter((r) => r.ok).length, of: L.length } : null; })(),
+    week: week(st, today),
   };
+}
+
+// The weekly recap (GAMES.md): a 7-day strip, this week's time against your usual per game, the
+// "when sure" line, and the facts you kept (review items answered right this week).
+function week(st, today) {
+  const from = addDays(today, -6);
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = addDays(today, -i);
+    const D = st.days[d];
+    const n = D ? (D.slots || []).length : 0, done = D ? Object.keys(D.done || {}).length : 0;
+    days.push({ day: d, n, done, ok: D ? Object.values(D.done || {}).filter((x) => x.ok).length : 0 });
+  }
+  const med = (a) => { const b = a.slice().sort((x, y) => x - y); return b.length ? b[Math.floor(b.length / 2)] : null; };
+  const games = {};
+  for (const r of st.results) if (r.ms > 0 && !["callback", "name_all", "match", "map", "forms"].includes(r.game)) (games[r.game] = games[r.game] || { all: [], wk: [] }).all.push(r.ms), r.day >= from && games[r.game].wk.push(r.ms);
+  const pace = Object.entries(games).filter(([, v]) => v.wk.length && v.all.length >= 4).map(([g, v]) => ({ game: g, week: med(v.wk), usual: med(v.all) }));
+  const kept = Object.values(st.items).filter((x) => (x.hist || []).some((h) => h[0] >= from && h[1] === 1 && x.iv > 1));
+  const wk = st.results.filter((r) => r.day >= from);
+  return { days, pace, kept: kept.length, kept_examples: kept.slice(-5).map((x) => x.a), played: wk.length, right: wk.filter((r) => r.ok).length };
 }
 
 // ------------------------------------------------------------------ helpers

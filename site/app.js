@@ -1970,10 +1970,16 @@ function closeSheetTimer() {
 
 // --------------------------------------------------------------- detail sheet
 let sheetReturn = null;
-function openSheet(nodes, title) {
+// opts.game: a puzzle in progress. It opens full height, a tap outside or a swipe down doesn't close
+// it (only ✕ does), and the back button returns to the Puzzle Page or Library instead of leaving.
+let sheetGame = false, sheetHist = false, popIgnore = false;
+function openSheet(nodes, title, opts) {
   closeSheetTimer();
+  const wasOpen = !$("sheet").hidden;
   sheetOpen = { title: String(title || "").slice(0, 140), at: Date.now() };
-  sheetReturn = document.activeElement;
+  if (!wasOpen) sheetReturn = document.activeElement;
+  sheetGame = !!(opts && opts.game);
+  $("sheet").classList.toggle("game", sheetGame);
   $("sheet-body").replaceChildren(...nodes.filter((n) => n != null && n !== false));
   $("sheet").setAttribute("aria-label", title || "Details");
   $("scrim").hidden = false;
@@ -1981,10 +1987,22 @@ function openSheet(nodes, title) {
   $("sheet-body").scrollTop = 0;
   document.documentElement.classList.add("locked");
   requestAnimationFrame(() => $("sheet").classList.add("up"));
-  $("sheet-close").focus({ preventScroll: true });
+  if (sheetGame && !sheetHist) { try { history.pushState({ wireSheet: 1 }, ""); sheetHist = true; } catch (e) { /* ignore */ } }
+  // Focus the sheet itself (not ✕): an Enter that opened this sheet must not land on the close button.
+  if (!wasOpen) $("sheet").focus({ preventScroll: true });
 }
+window.addEventListener("popstate", () => {
+  if (popIgnore) { popIgnore = false; return; }
+  if (!sheetHist) return;
+  sheetHist = false;
+  if (!$("sheet").hidden && sheetGame && window.WireGames && window.WireGames.back) window.WireGames.back();
+  else if (!$("sheet").hidden) closeSheet();
+});
 function closeSheet() {
   closeSheetTimer();
+  if (sheetHist) { sheetHist = false; popIgnore = true; try { history.back(); } catch (e) { popIgnore = false; } }
+  sheetGame = false;
+  $("sheet").classList.remove("game");
   stopSpeech();
   $("sheet").classList.remove("up");
   $("scrim").hidden = true;
@@ -1993,13 +2011,13 @@ function closeSheet() {
   if (sheetReturn) sheetReturn.focus({ preventScroll: true });
 }
 $("sheet-close").addEventListener("click", closeSheet);
-$("scrim").addEventListener("click", closeSheet);
+$("scrim").addEventListener("click", () => { if (!sheetGame) closeSheet(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("sheet").hidden) closeSheet(); });
 // Swipe down on the handle (or the top of the sheet) to close.
 (() => {
   let y0 = null;
   const s = $("sheet");
-  s.addEventListener("touchstart", (e) => { if ($("sheet-body").scrollTop <= 0) y0 = e.touches[0].clientY; }, { passive: true });
+  s.addEventListener("touchstart", (e) => { if (!sheetGame && $("sheet-body").scrollTop <= 0) y0 = e.touches[0].clientY; }, { passive: true });
   s.addEventListener("touchmove", (e) => {
     if (y0 == null) return;
     const dy = e.touches[0].clientY - y0;

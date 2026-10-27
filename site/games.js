@@ -11,6 +11,25 @@
   const get = (k, d) => { try { const v = store.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
   const put = (k, v) => { try { store.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode */ } };
 
+  // ---------------------------------------------------------------- shared: sheets
+  // A game screen: full height, closes only with ✕, and the back button returns to the hub
+  // (Puzzles or Library) instead of leaving the app. Enter in a game input never reaches a button.
+  const openGame = (nodes, title) => openSheet(nodes, title, { game: true });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target && e.target.tagName === "INPUT" && e.target.closest && e.target.closest("#sheet")) e.preventDefault();
+  }, true);
+  // Give up asks once: the first tap arms it for three seconds.
+  function giveUpBtn(fn) {
+    const b = el("button", { class: "unsave", text: "Give up" });
+    let armed = 0;
+    b.addEventListener("click", () => {
+      if (Date.now() - armed < 3000) { armed = 0; return fn(); }
+      armed = Date.now(); b.textContent = "Tap again to give up";
+      setTimeout(() => { if (armed && Date.now() - armed >= 2900) { armed = 0; b.textContent = "Give up"; } }, 3000);
+    });
+    return b;
+  }
+
   // ---------------------------------------------------------------- shared: answers
   // Typed answers (rule 4): accents folded, punctuation ignored, filler words dropped, surname
   // alone accepted, one typo allowed on longer names. No autocomplete.
@@ -36,6 +55,26 @@
     return opts.some((o) => o === g || (o.length >= 5 && lev(o, g) <= 1));
   }
   window.wireAccepts = accepts;               // exposed for the CI test
+  // While typing, only an exact (folded) name, surname or listed alias counts, so "Smit" never
+  // fills "Smith"; Return applies the usual one-typo tolerance.
+  function exactly(guess, answer, accept) {
+    const g = fold(guess);
+    if (!g) return false;
+    const opts = [answer, ...(accept || [])].map(fold).filter(Boolean);
+    const last = fold(answer).split(" ").pop();
+    if (last && last.length >= 3) opts.push(last);
+    return opts.includes(g);
+  }
+  function liveNames(input, list, isOpen, onHit) {
+    const tryHit = (fuzzy) => {
+      const v = input.value;
+      const k = list.findIndex((x, i) => isOpen(i) && (fuzzy ? accepts(v, x.answer, x.accept) : exactly(v, x.answer, x.accept)));
+      if (k >= 0) { input.value = ""; onHit(k); return true; }
+      return false;
+    };
+    input.addEventListener("input", () => tryHit(false));
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !tryHit(true) && input.value.trim()) { input.classList.add("nope"); setTimeout(() => input.classList.remove("nope"), 400); input.select(); } });
+  }
 
   // Certainty-based marking (rule 6): sure +3/−6, think +2/−2, guess +1/0.
   const CBM = { sure: [3, -6], think: [2, -2], guess: [1, 0] };
@@ -117,11 +156,20 @@
 
   const NAMES = { keyed: "Keyed cipher", patristocrat: "Patristocrat", meta: "Saturday meta", casefile: "Case file", timeline: "Timeline", beacon_agenda: "Beacon Agenda", docket: "The Docket", ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections", tactics: "Tactics" };
   const LOGIC_NAMES = { loopy: "Loopy", keen: "Keen", towers: "Towers", galaxies: "Galaxies", signpost: "Signpost", dominosa: "Dominosa", unequal: "Unequal", slant: "Slant", range: "Range", pattern: "Pattern" };
+  // Rough time: quick games say minutes; brain breaks and long ciphers say "a few minutes" or "night".
+  function timeLabel(s) {
+    const g = s.game;
+    if (["who_said_it", "docket", "defectors", "beacon_agenda", "ledger"].includes(g)) return "2 min";
+    if (g === "chess") return ((s.puzzle || {}).moves || []).length > 4 ? "5 min" : "2 min";
+    if (["legal", "timeline", "cryptoquote", "tactics", "connections"].includes(g)) return "5 min";
+    if (["friday_quiz", "logic", "keyed"].includes(g)) return "10 min";
+    return "night";
+  }
   function slotLine(s) {
     const p = s.puzzle || {};
     if (s.game === "logic") return (LOGIC_NAMES[p.game] || p.game) + " · tier " + p.tier;
     if (s.game === "tactics") return "Save every building in one turn · tier " + p.tier;
-    if (s.game === "chess") { const th = (p.themes || []).filter((t) => !/^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality)$/.test(t)).slice(0, 2); return "Puzzle rated " + p.rating + (th.length ? " · " + th.join(", ") : ""); }
+    if (s.game === "chess") { const th = themeWords(p.themes).slice(0, 2); return "Puzzle rated " + p.rating + " · " + Math.ceil(((p.moves || []).length - 1) / 2) + " move" + ((p.moves || []).length > 3 ? "s" : "") + (th.length ? " · " + th.join(", ") : ""); }
     if (s.game === "keyed") return "Friday cipher · the keyword feeds the meta";
     if (s.game === "connections") return "Sixteen names from the week, four groups";
     if (s.game === "casefile") return "Logic grid · tier " + p.tier + " · " + (p.clues || []).length + " clues";
@@ -140,6 +188,7 @@
   }
 
   async function openPuzzles() {
+    G.hub = "puzzles";
     let D;
     openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Puzzles" }), el("p", { class: "fine", text: "Loading today's set…" })], "Puzzles");
     try { D = await load(true); } catch (e) {
@@ -160,29 +209,63 @@
         el("span", { class: "gm-n", text: String(s.slot) }),
         el("span", { class: "gm-txt" },
           el("span", { class: "gm-t", text: NAMES[s.game] || s.game }),
-          el("span", { class: "gm-s", text: (s.slot <= 2 ? "2 min · " : "night · ") + slotLine(s) })),
+          el("span", { class: "gm-s", text: timeLabel(s) + " · " + slotLine(s) })),
         el("span", { class: "gm-mark", text: d ? (d.ok ? "✓" : "·") : "›" })));
     }
+    const bb4 = D.slots.find((x) => x.slot === 4 && x.label === "Brain break");
+    nodes.push(el("div", { class: "sactions gm-picker" },
+      el("span", { class: "fine", text: "Brain break:" }),
+      ...["logic", "chess", "tactics"].map((b) => el("button", { class: "chip" + ((D.pick || "logic") === b ? " on" : ""), text: b[0].toUpperCase() + b.slice(1), onclick: async () => {
+        try { await fetch("games", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "pick", brain: b }) }); D.pick = b; } catch (e) { /* later */ }
+        openPuzzles(); } })),
+      el("span", { class: "fine", text: bb4 && done["4"] ? "today's is played; this sets tomorrow's" : "switches slot 4 now and stays your default" })));
     if ((D.callbacks || []).length) nodes.push(el("p", { class: "fine", text: "Woven in today: " + D.callbacks.length + " from earlier (they follow the news puzzle)." }));
     nodes.push(el("button", { class: "sbtn wide", text: "Library: name them all, match ›", onclick: () => openLibrary() }));
     const dv = D.docket;
     if (dv && ((dv.open || []).length || (dv.recent || []).length)) nodes.push(pendingDocket(dv));
-    nodes.push(el("div", { class: "sactions" },
-      el("span", { class: "fine", text: "Brain break:" }),
-      ...["logic", "chess", "tactics"].map((b) => el("button", { class: "chip" + ((D.pick || "logic") === b ? " on" : ""), text: b[0].toUpperCase() + b.slice(1), onclick: async () => {
-        try { await fetch("games", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "pick", brain: b }) }); D.pick = b; } catch (e) { /* later */ }
-        openPuzzles(); } }))));
+
+    // Spoiler-free line for Kelly: only games with no news or politics in them, results and times only.
+    const SHARE = { logic: "Logic", chess: "Chess", tactics: "Tactics", casefile: "Case file", cryptoquote: "Cipher", keyed: "Keyed cipher", patristocrat: "Patristocrat" };
+    const shareable = D.slots.filter((x) => SHARE[x.game] && done[String(x.slot)]);
+    const recapBtn = el("button", { class: "sbtn", text: "This week ›", onclick: () => openWeek(D) });
+    const shareBtn = shareable.length ? el("button", { class: "sbtn", text: "Share today's line", onclick: async () => {
+      const dt = new Date(D.day + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+      const line = "The Wire puzzles · " + dt + "\n" + shareable.map((x) => { const d = done[String(x.slot)]; return (d.ok ? "✅ " : "⬜ ") + SHARE[x.game] + (x.game === "logic" ? " (" + (LOGIC_NAMES[x.puzzle.game] || x.puzzle.game) + ")" : "") + (d.ms ? " " + Math.max(1, Math.round(d.ms / 60000)) + "m" : ""); }).join("\n");
+      try { if (navigator.share) await navigator.share({ text: line }); else { await navigator.clipboard.writeText(line); shareBtn.textContent = "Copied"; } } catch (e) { /* cancelled */ }
+    } }) : null;
+    nodes.push(el("div", { class: "sactions" }, recapBtn, shareBtn));
     const bits = [st.played7 != null ? "played " + st.played7 + " of the last 7 days" : null, st.sure_right != null ? "when sure, right " + st.sure_right + "%" : null, st.chess ? "chess " + st.chess : null, st.ranges90 ? "90% ranges right " + st.ranges90.hit + " of " + st.ranges90.of : null].filter(Boolean);
     if (bits.length) nodes.push(el("p", { class: "fine", text: bits.join(" · ") }));
     const bad = (D.health || []).filter((h) => !h.made);
-    if (bad.length) nodes.push(el("details", { class: "gm-health" }, el("summary", { text: "Puzzle health · " + bad.length + " generator" + (bad.length > 1 ? "s" : "") + " made nothing today" }),
+    if (bad.length) nodes.push(el("details", { class: "gm-health" }, el("summary", { text: "Puzzle notes · " + bad.length + " source" + (bad.length > 1 ? "s" : "") + " had nothing new today (details)" }),
       el("ul", { class: "admin" }, ...(D.health || []).map((h) => el("li", { text: (NAMES[h.game] || h.game) + ": made " + h.made + ", dropped " + h.dropped + ((h.why || []).length ? " (" + h.why.map((w) => w[0] + " ×" + w[1]).join("; ") + ")" : "") })))));
     openSheet(nodes, "Puzzles");
   }
 
+  // This week: a 7-day strip, pace against your usual, calibration, and the facts you kept.
+  function openWeek(D) {
+    const w = (D.stats || {}).week;
+    const back = el("button", { class: "sbtn wide", text: "‹ Puzzles", onclick: () => openPuzzles() });
+    if (!w) return openGame([el("h2", { id: "sheet-title", class: "stitle", text: "This week" }), el("p", { class: "fine", text: "Play a few days and the week fills in." }), back], "This week");
+    const strip = el("div", { class: "gm-week" }, ...w.days.map((d) => el("div", { class: "gm-wday" + (d.n && d.done >= d.n ? " all" : d.done ? " some" : "") },
+      el("span", { class: "asrc", text: new Date(d.day + "T12:00:00").toLocaleDateString("en-US", { weekday: "narrow" }) }),
+      el("b", { text: d.n ? d.done + "/" + d.n : "–" }))));
+    const mm = (ms) => (ms >= 60000 ? Math.round(ms / 60000) + "m" : Math.round(ms / 1000) + "s");
+    const pace = (w.pace || []).map((x) => el("li", { text: (NAMES[x.game] || x.game) + ": " + mm(x.week) + " this week · usual " + mm(x.usual) + (x.week < x.usual * 0.85 ? " · faster" : x.week > x.usual * 1.15 ? " · slower" : "") }));
+    const st = D.stats || {};
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "This week" }), strip,
+      el("p", { class: "gm-keep", text: w.right + " of " + w.played + " right" + (st.sure_right != null ? " · when sure, right " + st.sure_right + "%" : "") }),
+      pace.length ? el("h3", { class: "sh3", text: "Pace" }) : null, pace.length ? el("ul", { class: "gm-hints" }, ...pace) : null,
+      el("h3", { class: "sh3", text: "Kept this week" }),
+      el("p", { class: "fine", text: w.kept ? w.kept + " fact" + (w.kept > 1 ? "s" : "") + " held on review" + (w.kept_examples.length ? ": " + w.kept_examples.join(" · ") : "") + "." : "Nothing due for review came back yet; it starts the day after you miss or learn something." }),
+      back], "This week");
+  }
+
   // Pending docket: one optional call per argued Supreme Court case; scored when the Court rules.
   function pendingDocket(dv) {
-    const sec = el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Pending docket" }));
+    const nOpen = (dv.open || []).length;
+    const sec = el("details", { class: "ssec gm-pdock" }, el("summary", { class: "sh3", text: "Pending docket" + (nOpen ? " · " + nOpen + " to call" : "") + ((dv.recent || []).length ? " · " + dv.recent.length + " decided" : "") }));
+    if ((dv.recent || []).length) sec.open = true;
     const sideName = (x, side) => side === "petitioner" ? x.petitioner : side === "respondent" ? x.respondent : "split";
     for (const r of dv.recent || []) sec.appendChild(el("p", { class: "fine", text: (r.right === null ? "· " : r.right ? "✓ " : "✗ ") + r.name + ": you said " + sideName(r, r.side) + "; the Court: " + (r.line || r.court) + (r.right === null ? " (split; doesn't count)" : "") }));
     for (const c of dv.open || []) {
@@ -213,7 +296,20 @@
     return sec;
   }
 
+  // A finished slot is locked: today's result stands, so reopening shows it instead of a replay.
+  function doneCard(s, d) {
+    const p = s.puzzle || {};
+    const t = d.ms ? Math.max(1, Math.round(d.ms / 60000)) + " min" : null;
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: NAMES[s.game] || s.game }),
+      el("p", { class: "asrc", text: slotLine(s) }),
+      reveal({ ok: d.ok, verdict: (d.ok ? "Done" : "Finished") + (d.score != null ? " · score " + d.score : "") + (t ? " · " + t : ""),
+        keep: "Today's result is in. This one's locked so it stands; a new set arrives tomorrow.",
+        link: p.link || p.url || p.pdf || null, linkText: "Source ↗", thread: p.thread, next: { text: "‹ Puzzles", fn: () => openPuzzles() } })], NAMES[s.game] || "Puzzle");
+  }
+
   function play(s) {
+    const d = G.day && G.day.done && G.day.done[String(s.slot)];
+    if (d && s.slot <= 8) return doneCard(s, d);
     if (s.game === "who_said_it") return whoSaidIt(s);
     if (s.game === "cryptoquote" || s.game === "keyed" || s.game === "patristocrat") return cryptoquote(s);
     if (s.game === "chess") return chess(s);
@@ -239,29 +335,37 @@
   function whoSaidIt(s) {
     const p = s.puzzle;
     const t0 = Date.now();
-    let tries = 0, hintN = 0;
+    // Tries and hints persist on this device, so closing and reopening can't reset them.
+    const S = get(PKEY + p.id, null) || { tries: 0, hintN: 0, misses: [] };
+    let tries = S.tries, hintN = S.hintN;
     const input = answerInput("Who said it?");
     keepVisible(input);
     const hintBox = el("ul", { class: "gm-hints" });
-    const msg = el("p", { class: "fine", text: "" });
+    const msg = el("p", { class: "fine", text: S.misses.length ? "Tried: " + S.misses.join(", ") + ". " + (3 - tries) + " left." : "" });
+    const hintText = (k) => { const h = (p.hints || [])[k]; if (!h) return null; return typeof h === "object" ? h.label + ": " + h.text : (p.hint_labels ? p.hint_labels[k] + ": " : ["Said on ", "Reported by ", "Role: "][k]) + h; };
+    for (let k = 0; k < hintN; k++) { const t = hintText(k); if (t) hintBox.append(el("li", { text: t })); }
     const submit = (cert) => {
       const v = input.value.trim();
       if (!v) { input.focus(); return; }
       tries += 1;
       if (accepts(v, p.answer, p.accept)) return finish(true, cert);
       if (tries >= 3) return finish(false, cert);
+      S.misses.push(v);
       msg.textContent = "Not " + v + ". " + (3 - tries) + " left.";
       input.value = "";
-      if (p.hints[hintN]) hintBox.append(el("li", { text: ["Said on ", "Reported by ", "Role: "][hintN] + p.hints[hintN] }));
+      const t = hintText(hintN);
+      if (t) hintBox.append(el("li", { text: t }));
       hintN += 1;
+      S.tries = tries; S.hintN = hintN; put(PKEY + p.id, S);
       input.focus();
     };
     function finish(ok, cert) {
+      store.removeItem(PKEY + p.id);
       const score = cbm(ok, cert) - (ok ? Math.max(0, tries - 1) : 0);
       const res = { ok, score, ms: Date.now() - t0, hints: tries - 1, cert };
       send(Object.assign({ slot: s.slot, game: "who_said_it", puzzle: p.id, items: [{ id: p.id, type: "speaker", q: p.quote, a: p.answer, accept: p.accept, hint: p.role || "", link: p.link, story: p.story, thread: p.thread, ok, cert, hinted: tries > 1 }] }, res));
       markDone(s.slot, res);
-      openSheet([
+      openGame([
         el("h2", { id: "sheet-title", class: "stitle", text: "Who said it" }),
         el("blockquote", { class: "gm-quote", text: "“" + p.quote + "”" }),
         reveal({
@@ -269,13 +373,13 @@
           keep: p.answer + (p.role ? " · " + p.role : ""),
           meta: [p.outlet, p.t ? when(p.t) : null, p.thread_title ? "thread: " + p.thread_title : null].filter(Boolean).join(" · "),
           link: p.link, linkText: "Read where it was said ↗", thread: p.thread,
-          back: ok ? (cert === "sure" ? "Back in a few days to make it stick." : "Back soon.") : "Back tomorrow.",
+          back: "Back tomorrow, then further apart each time you get it.",
           next: earlierNext(),
         }),
       ], "Who said it");
     }
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit("think"); });
-    openSheet([
+    openGame([
       el("h2", { id: "sheet-title", class: "stitle", text: "Who said it" }),
       p.context ? el("p", { class: "asrc", text: "Story: " + p.context }) : null,
       el("blockquote", { class: "gm-quote", text: "“" + p.quote + "”" }),
@@ -300,7 +404,8 @@
     G.asked = G.asked || new Set();
     G.asked.add(c.id);
     const t0 = Date.now();
-    const input = answerInput(c.type === "element" ? "The missing element" : "Who said it?");
+    const PH = { element: "The missing element", speaker: "Who said it?", author: "Justice's surname", place: "Name it", form: "Form of government", roster: "Name", fact: "Your answer" };
+    const input = answerInput(PH[c.type] || "Your answer");
     keepVisible(input);
     const nextBtn = () => (i + 1 < list.length ? { text: "Next ›", fn: () => fromEarlier(list, i + 1) } : { text: "Done ›", fn: () => openPuzzles() });
     const go = (cert) => {
@@ -308,16 +413,21 @@
       if (!v) return input.focus();
       const ok = c.type === "element" ? matchesKeys(v, c.accept) : accepts(v, c.a, c.accept);
       send({ game: "callback", puzzle: c.id, ok, score: cbm(ok, cert), ms: Date.now() - t0, cert, items: [Object.assign({}, c, { ok, cert })] });
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier" }),
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier" }),
         c.type === "speaker" ? el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }) : el("p", { class: "gm-keep", text: c.q }),
         reveal({ ok, verdict: ok ? "Still there" : "Not quite", keep: c.a, meta: c.hint || null, link: c.link, linkText: c.type === "element" ? "Primary source ↗" : "Source ↗", thread: c.thread, back: ok ? "Spacing it out further." : "Back tomorrow.", next: nextBtn() })], "From earlier");
     };
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
-    const prompt = c.type === "element" ? [el("p", { class: "gm-keep", text: c.q }), el("p", { class: "fine", text: "One element is missing. Which?" })]
-      : c.type === "author" ? [el("p", { class: "gm-keep", text: c.q }), el("p", { class: "fine", text: "Which justice?" })]
-      : c.type === "roster" ? [el("p", { class: "gm-keep", text: c.q }), el("p", { class: "fine", text: "Who?" })]
-      : [el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }), el("p", { class: "fine", text: "Who said it?" })];
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier · " + (i + 1) + " of " + list.length }), ...prompt, input, certButtons(go, "Answer — how sure?"), backBtn()], "From earlier");
+    const ASK = { element: "One element is missing. Which?", author: "Which justice?", roster: "Who?", place: "Which one is highlighted?", form: "Which form of government?", fact: "" };
+    const prompt = c.type === "speaker" || !c.type ? [el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }), el("p", { class: "fine", text: "Who said it?" })]
+      : [el("p", { class: "gm-keep", text: c.q }), ASK[c.type] ? el("p", { class: "fine", text: ASK[c.type] }) : null];
+    if (c.type === "place" && c.ref) {                    // show the map with the missed shape highlighted
+      const [mid, sid] = c.ref.split("|");
+      const holder = el("div", {});
+      prompt.push(holder);
+      loadMap(mid).then((M) => { const m = svgMap(M, () => {}); if (m.paths[sid]) { m.paths[sid].classList.add("target"); try { const bb = m.paths[sid].getBBox(), vbw = Number(M.viewBox.split(" ")[2]); m.zoomTo([bb.x + bb.width / 2, bb.y + bb.height / 2], bb.width < vbw * 0.06 ? Math.min(6, (vbw * 0.25) / Math.max(bb.width, 1)) : 1); } catch (e) { /* not laid out */ } } holder.replaceChildren(m.svg); }).catch(() => {});
+    }
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier · " + (i + 1) + " of " + list.length }), ...prompt, input, certButtons(go, "Answer — how sure?"), backBtn()], "From earlier");
     setTimeout(() => input.focus(), 50);
   }
   function matchesKeys(v, keys) {
@@ -332,15 +442,18 @@
   function legalGame(s) {
     const P = s.puzzle;
     const t0 = Date.now();
-    const out = { right: 0, total: 0, items: [] };
+    // Each finished step is saved on this device, so leaving mid-session keeps what you've done.
+    const S = get(PKEY + P.id, null) || { k: 0, didCloze: {}, out: { right: 0, total: 0, items: [] } };
+    const out = S.out;
+    const save = () => put(PKEY + P.id, S);
     const feat = Object.fromEntries((P.featured || []).map((f) => [f.card, f]));
     function card(k) {
+      S.k = k; save();
       const c = P.cards[k];
       if (!c) return finishAll();
-      if (c.cloze && !card.didCloze?.[c.id]) return cloze(c, k);
+      if (c.cloze && !S.didCloze[c.id]) return cloze(c, k);
       return elements(c, k);
     }
-    card.didCloze = {};
     const header = (c, k) => [
       el("h2", { id: "sheet-title", class: "stitle", text: "Law · " + (k + 1) + " of " + P.cards.length }),
       feat[c.id] ? el("p", { class: "asrc", text: "From today: " + feat[c.id].title + (feat[c.id].outlet ? " (" + feat[c.id].outlet + ")" : "") }) : null,
@@ -355,12 +468,12 @@
         const ok = (c.cloze.accept || [c.cloze.answer]).some((a) => fold(a) === fold(v)) || matchesKeys(v, c.cloze.accept);
         out.total += 1; if (ok) out.right += 1;
         out.items.push({ id: "cz:" + c.id, type: "element", q: c.cloze.text, a: c.cloze.answer, accept: c.cloze.accept, hint: c.cite, link: c.cloze.source || c.source, ok, cert });
-        card.didCloze[c.id] = true;
-        openSheet([...header(c, k), el("blockquote", { class: "gm-quote", text: c.cloze.text.replace("___", c.cloze.answer.toUpperCase()) }),
+        S.didCloze[c.id] = true; save();
+        openGame([...header(c, k), el("blockquote", { class: "gm-quote", text: c.cloze.text.replace("___", c.cloze.answer.toUpperCase()) }),
           reveal({ ok, verdict: ok ? "Right" : "It's “" + c.cloze.answer + "”", keep: c.cite, meta: "Verified against the official text " + c.verified, link: c.cloze.source || c.source, linkText: "Official text ↗", next: { text: "Now the elements ›", fn: () => elements(c, k) } })], "Law");
       };
       input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
-      openSheet([...header(c, k), el("blockquote", { class: "gm-quote", text: c.cloze.text }), input, certButtons(go, "Answer — how sure?"), backBtn()], "Law");
+      openGame([...header(c, k), el("p", { class: "fine", text: "Fill in the blank from the statute's own words." }), el("blockquote", { class: "gm-quote", text: c.cloze.text }), input, certButtons(go, "Answer — how sure?"), backBtn()], "Law");
       setTimeout(() => input.focus(), 50);
     }
     function elements(c, k) {
@@ -368,41 +481,48 @@
       const input = answerInput("Type an element");
       keepVisible(input);
       const list = el("ol", { class: "gm-hints" });
+      const fb = el("p", { class: "fine", text: "" });
       const draw = () => list.replaceChildren(...c.elements.map((e, j) => el("li", { text: got.has(j) ? "✓ " + e.text : "▒▒▒" })));
       input.addEventListener("keydown", (e) => {
-        if (e.key !== "Enter") return;
-        const j = c.elements.findIndex((x, n) => !got.has(n) && matchesKeys(input.value, x.keys));
-        if (j >= 0) { got.add(j); input.value = ""; draw(); if (got.size === c.elements.length) done("sure"); }
-        else input.select();
+        if (e.key !== "Enter" || !input.value.trim()) return;
+        const v = input.value.trim();
+        const j = c.elements.findIndex((x, n) => !got.has(n) && matchesKeys(v, x.keys));
+        if (j >= 0) { got.add(j); input.value = ""; fb.textContent = "✓ Element " + (j + 1) + "."; draw(); if (got.size === c.elements.length) done("sure"); }
+        else if (c.elements.some((x, n) => got.has(n) && matchesKeys(v, x.keys))) { fb.textContent = "You already have that one."; input.select(); }
+        else { fb.textContent = "“" + v + "” isn't one of them. Try other key words, or tap Done."; input.select(); }
       });
       function done(cert) {
         c.elements.forEach((e, j) => {
           const ok = got.has(j);
           out.total += 1; if (ok) out.right += 1;
-          const others = c.elements.map((x, n) => (n === j ? "▒▒▒" : x.text.split(" (")[0])).join(" · ");
+          const others = c.elements.map((x, n) => (n === j ? "▒▒▒" : shortEl(x.text))).join(" · ");
           out.items.push({ id: "el:" + c.id + ":" + j, type: "element", q: c.title + ": " + others, a: e.text, accept: e.keys, hint: c.cite, link: c.source, ok, cert: ok ? cert : "think", hinted: false });
         });
-        openSheet([...header(c, k), el("ol", { class: "gm-hints" }, ...c.elements.map((e, j) => el("li", { text: (got.has(j) ? "✓ " : "✗ ") + e.text }))),
+        S.k = k + 1; save();
+        openGame([...header(c, k), el("ol", { class: "gm-hints" }, ...c.elements.map((e, j) => el("li", { text: (got.has(j) ? "✓ " : "✗ ") + e.text }))),
           c.note ? el("p", { class: "fine", text: "Note: " + c.note }) : null,
           reveal({ ok: got.size === c.elements.length, verdict: got.size + " of " + c.elements.length + " elements", keep: c.cite, meta: "Our wording from the cited authority · verified " + c.verified,
             link: c.source, linkText: "Primary source ↗", thread: feat[c.id] && feat[c.id].thread, next: k + 1 < P.cards.length ? { text: "Next card ›", fn: () => card(k + 1) } : { text: "Finish ›", fn: () => finishAll() } })], "Law");
       }
       draw();
-      openSheet([...header(c, k), el("p", { class: "fine", text: c.elements.length + " elements. Type one and press return; key words are enough." }), list, input,
+      openGame([...header(c, k), el("p", { class: "fine", text: c.elements.length + " elements. Type one and press return; key words are enough." }), list, input, fb,
         certButtons(done, "Done — how sure were you?"), backBtn()], "Law");
       setTimeout(() => input.focus(), 50);
     }
     function finishAll() {
+      store.removeItem(PKEY + P.id);
       const ok = out.right / Math.max(1, out.total) >= 0.75;
       const res = { ok, score: out.right, ms: Date.now() - t0, hints: 0 };
       send(Object.assign({ slot: s.slot, game: "legal", puzzle: P.id, items: out.items }, res));
       markDone(s.slot, res);
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Law" }),
-        reveal({ ok, verdict: out.right + " of " + out.total + " recalled", keep: "Missed elements come back tomorrow; the ones you knew, in a few days.",
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Law" }),
+        reveal({ ok, verdict: out.right + " of " + out.total + " recalled · score " + out.right, keep: "Missed elements come back tomorrow; the ones you knew, spaced further out.",
           meta: "Refreshers, not advice. Elements in our words from statutes and controlling cases, second-checked.", next: earlierNext() })], "Law");
     }
-    card(0);
+    card(S.k || 0);
   }
+  // An element's short form: drop parentheticals (nested too) for prompts and options.
+  function shortEl(t) { let x = String(t || ""), y; do { y = x; x = x.replace(/\s*\([^()]*\)/g, ""); } while (x !== y); return x.trim(); }
 
   // ---------------------------------------------------------------- Defectors
   // A crossover roll call: the result and the party split are shown; first call NY members' votes
@@ -435,7 +555,7 @@
       const rows = pickNy.map((m) => el("div", { class: "gm-vote" },
         el("span", { text: m.name + " (" + m.party + (m.district ? ", NY-" + m.district : ", NY") + ")" }),
         ...["Yea", "Nay"].map((v) => el("button", { class: "chip" + (guesses[m.name] === v ? " on" : ""), text: v, onclick: () => { guesses[m.name] = v; stage1(); } }))));
-      openSheet([...head, el("h3", { class: "sh3", text: "How did they vote?" }), ...rows,
+      openGame([...head, el("h3", { class: "sh3", text: "How did they vote?" }), ...rows,
         el("button", { class: "sbtn primary wide", text: "Next: who broke ranks ›", onclick: () => stage2() }), backBtn()], "Defectors");
     }
     function stage2() {
@@ -444,13 +564,10 @@
       const list = el("ul", { class: "gm-hints" });
       const draw = () => list.replaceChildren(...p.defectors.map((b) => el("li", { text: named.has(b) ? "✓ " + b.name + " (" + b.party + "-" + b.state + ") voted " + b.vote : "▒▒▒ (" + b.party + ") voted " + b.vote })));
       const msg = el("p", { class: "fine", text: "" });
-      input.addEventListener("input", () => {
-        const hit = p.defectors.find((b) => !named.has(b) && accepts(input.value, b.name, b.accept));
-        if (hit) { named.add(hit); input.value = ""; draw(); if (named.size === p.defectors.length) finish(); }
-      });
+      liveNames(input, p.defectors.map((b) => ({ answer: b.name, accept: b.accept })), (i) => !named.has(p.defectors[i]), (i) => { named.add(p.defectors[i]); draw(); if (named.size === p.defectors.length) finish(); });
       const need = Object.entries(byParty).map(([k, v]) => v.length + " " + (PN[k] || k) + " voted " + v[0].vote).join("; ");
       draw();
-      openSheet([...head, el("h3", { class: "sh3", text: "Who broke ranks?" }), el("p", { class: "fine", text: need + ". Type surnames; each match fills in." }),
+      openGame([...head, el("h3", { class: "sh3", text: "Who broke ranks?" }), el("p", { class: "fine", text: need + ". Type surnames; each match fills in." }),
         list, input, msg, el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Done naming", onclick: () => finish() })), backBtn()], "Defectors");
       setTimeout(() => input.focus(), 50);
     }
@@ -463,7 +580,7 @@
       send(Object.assign({ slot: s.slot, game: "defectors", puzzle: p.id, items: [] }, res));
       markDone(s.slot, res);
       const congressLink = p.bill ? "https://www.congress.gov/search?q=" + encodeURIComponent(JSON.stringify({ search: p.bill })) : null;
-      openSheet([...head,
+      openGame([...head,
         el("ul", { class: "gm-hints" }, ...pickNy.map((m) => el("li", { text: (guesses[m.name] === m.vote ? "✓ " : "✗ ") + m.name + " voted " + m.vote }))),
         el("ul", { class: "gm-hints" }, ...p.defectors.map((b) => el("li", { text: (named.has(b) ? "✓ " : "· ") + b.name + " (" + b.party + "-" + b.state + ") voted " + b.vote }))),
         reveal({ ok, verdict: got + " of " + total, keep: split, meta: p.in_news && p.news_title ? "In the news: " + p.news_title : "Official roll call",
@@ -493,7 +610,7 @@
         line.push(el("div", { class: "gm-card" }, el("span", { class: "gm-date", text: fmtD(c.date) }), el("span", { text: c.text })));
       });
       line.push(el("button", { class: "gm-gap", text: "＋ here", onclick: () => place(placed.length) }));
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Timeline · " + "♥".repeat(lives) }),
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Timeline · " + "♥".repeat(lives) }),
         el("div", { class: "gm-card gm-next" }, el("span", { class: "gm-date", text: "When?" }), el("span", { text: cur.text })),
         msgText ? el("p", { class: "fine", text: msgText }) : null,
         el("div", { class: "gm-line" }, ...line), backBtn()], "Timeline");
@@ -513,7 +630,7 @@
       const res = { ok, score: right, ms: Date.now() - t0, hints: 0 };
       send(Object.assign({ slot: s.slot, game: "timeline", puzzle: P.id, items: [] }, res));
       markDone(s.slot, res);
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Timeline" }),
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Timeline" }),
         reveal({ ok, verdict: right + " placed right" + (deck.length ? " · out of lives" : ""), next: earlierNext() }),
         el("div", { class: "gm-line" }, ...placed.concat(deck).sort((a, b) => a.date.localeCompare(b.date)).map((c) => el("a", { class: "gm-card", href: c.link, target: "_blank", rel: "noopener" },
           el("span", { class: "gm-date", text: fmtD(c.date) }), el("span", { text: c.text + " ↗" }))))], "Timeline");
@@ -530,14 +647,14 @@
     function q(i) {
       const it = P.items[i];
       if (!it) return finish();
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda · " + (i + 1) + " of " + P.items.length }),
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda · " + (i + 1) + " of " + P.items.length }),
         el("p", { class: "gm-keep", text: it.text }), el("p", { class: "fine", text: "Which board hears it?" }),
         ...it.options.map((o) => el("button", { class: "gm-slot", onclick: () => answer(it, o, i) }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: o })))), backBtn()], "Beacon Agenda");
     }
     function answer(it, o, i) {
       const ok = o === it.answer;
       if (ok) right += 1;
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda · " + (i + 1) + " of " + P.items.length }),
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda · " + (i + 1) + " of " + P.items.length }),
         el("p", { class: "gm-keep", text: it.text }),
         reveal({ ok, verdict: ok ? "Right" : "It's the " + it.answer, keep: it.answer, meta: it.meeting, link: it.link, linkText: "The agenda ↗",
           next: { text: i + 1 < P.items.length ? "Next ›" : "Finish ›", fn: () => q(i + 1) } })], "Beacon Agenda");
@@ -547,7 +664,7 @@
       const res = { ok, score: right, ms: Date.now() - t0, hints: 0 };
       send(Object.assign({ slot: s.slot, game: "beacon_agenda", puzzle: P.id, items: [] }, res));
       markDone(s.slot, res);
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda" }), reveal({ ok, verdict: right + " of " + P.items.length, next: earlierNext() })], "Beacon Agenda");
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda" }), reveal({ ok, verdict: right + " of " + P.items.length, next: earlierNext() })], "Beacon Agenda");
     }
     q(0);
   }
@@ -594,19 +711,19 @@
       const res = { ok, score: ok ? Math.max(1, 10 - S.hints * 2) : 0, ms: Date.now() - t0, hints: S.hints };
       send(Object.assign({ slot: s.slot, game: "meta", puzzle: P.id, items: [] }, res));
       markDone(s.slot, res);
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Saturday meta" }),
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Saturday meta" }),
         reveal({ ok, verdict: ok ? "Solved with " + n + " of " + P.feeders.length + " feeders" : "It was " + P.answer, keep: P.answer + " — " + P.category,
           meta: "Feeders: " + P.feeders.map((f) => f.answer + "[" + f.index + "]=" + f.answer[f.index - 1]).join(" · "), next: { text: "Done ›", fn: () => openPuzzles() } })], "Saturday meta");
     }
     draw();
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Saturday meta" }),
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Saturday meta" }),
       el("p", { class: "gm-keep", text: "The answer is " + P.category + ", " + P.length + " letters (spaces dropped)." }),
       el("p", { class: "fine", text: "Each answer below gives one letter, at the position shown, in order. You can get it with " + P.solvable_missing + " feeder" + (P.solvable_missing > 1 ? "s" : "") + " missing." }),
       slots, final, msg,
       el("div", { class: "sactions" },
         el("button", { class: "sbtn primary", text: "Check", onclick: check }),
         el("button", { class: "sbtn", text: "Hint: reveal a feeder", onclick: () => { const i = P.feeders.findIndex((_, k) => !S.got[k]); if (i >= 0) { S.got[i] = true; S.hints += 1; save(); draw(); } } }),
-        el("button", { class: "unsave", text: "Give up", onclick: () => finish(false) })),
+        giveUpBtn(() => finish(false))),
       rows, backBtn()], "Saturday meta");
   }
 
@@ -622,7 +739,9 @@
     const wrap = el("div", {});
     const msg = el("p", { class: "fine", text: "" });
     const key = (g, r, c) => g + "|" + r + "|" + c;
+    let over = false;
     function tap(g, r, c, cols) {
+      if (over) return;
       const k = key(g, r, c);
       const v = S.m[k] || "";
       const nv = v === "" ? "x" : v === "x" ? "o" : "";
@@ -654,6 +773,9 @@
         }))))));
     }
     function finish(ok) {
+      if (over) return;
+      over = true;
+      actions.replaceChildren();
       store.removeItem(PKEY + P.id);
       const res = { ok, score: ok ? Math.max(1, 10 - S.checks - S.hints * 2) : 0, ms: Date.now() - t0, hints: S.hints + S.checks };
       send(Object.assign({ slot: s.slot, game: "casefile", puzzle: P.id, items: [] }, res));
@@ -665,21 +787,22 @@
       const li = el("li", { class: S.struck[i] ? "struck" : "", text: c, onclick: () => { S.struck[i] = !S.struck[i]; li.classList.toggle("struck", !!S.struck[i]); save(); } });
       return li;
     }));
+    const actions = el("div", { class: "sactions" },
+      el("button", { class: "sbtn", text: "Check (−1)", onclick: () => { if (over) return; S.checks += 1; save(); const w = wrong(); msg.textContent = w ? w + " mark" + (w > 1 ? "s are" : " is") + " wrong." : "Everything marked so far is right."; } }),
+      el("button", { class: "sbtn", text: "Hint (−2)", onclick: () => {
+        if (over) return;
+        const p = P.people.find((pp, r) => grids.some(([g, cols]) => S.m[key(g, r, cols.indexOf(P.solution[pp][g]))] !== "o"));
+        if (!p) return;
+        const r = P.people.indexOf(p);
+        const [g, cols] = grids.find(([g2, cols2]) => S.m[key(g2, r, cols2.indexOf(P.solution[p][g2]))] !== "o");
+        S.hints += 1; tap(g, r, cols.indexOf(P.solution[p][g]), cols);
+        if (S.m[key(g, r, cols.indexOf(P.solution[p][g]))] !== "o") tap(g, r, cols.indexOf(P.solution[p][g]), cols);
+      } }),
+      giveUpBtn(() => finish(false)));
     draw();
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Case file · tier " + P.tier }), el("p", { class: "fine", text: P.story }),
-      clues, wrap, msg,
-      el("div", { class: "sactions" },
-        el("button", { class: "sbtn", text: "Check (−1)", onclick: () => { S.checks += 1; save(); const w = wrong(); msg.textContent = w ? w + " mark" + (w > 1 ? "s are" : " is") + " wrong." : "Everything marked so far is right."; } }),
-        el("button", { class: "sbtn", text: "Hint (−2)", onclick: () => {
-          const p = P.people.find((pp, r) => grids.some(([g, cols]) => S.m[key(g, r, cols.indexOf(P.solution[pp][g]))] !== "o"));
-          if (!p) return;
-          const r = P.people.indexOf(p);
-          const [g, cols] = grids.find(([g2, cols2]) => S.m[key(g2, r, cols2.indexOf(P.solution[p][g2]))] !== "o");
-          S.hints += 1; tap(g, r, cols.indexOf(P.solution[p][g]), cols);
-          if (S.m[key(g, r, cols.indexOf(P.solution[p][g]))] !== "o") tap(g, r, cols.indexOf(P.solution[p][g]), cols);
-        } }),
-        el("button", { class: "unsave", text: "Give up", onclick: () => finish(false) })),
-      backBtn()], "Case file");
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Case file · tier " + P.tier }), el("p", { class: "fine", text: P.story }),
+      el("p", { class: "asrc", text: "Tap a cell: blank → ✗ → ●. A ● crosses out the rest of its row and column. Tap a clue to strike it through." }),
+      clues, wrap, msg, actions, backBtn()], "Case file");
   }
 
   // ---------------------------------------------------------------- Connections
@@ -731,7 +854,7 @@
         keep: herring ? "Your herring: " + herring + " — a real pattern, but not one of the four." : null, meta: "Groups come from complete public rosters and committee lists.", next: earlierNext() }));
     }
     draw();
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Connections" }), el("p", { class: "fine", text: "Find four groups of four. Group names are facts." }),
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Connections" }), el("p", { class: "fine", text: "Find four groups of four. Group names are facts." }),
       done, grid, el("div", { class: "sactions" }, dots,
         el("button", { class: "chip", text: "Shuffle", onclick: () => { S.order = shuffle(S.order, Date.now()); save(); draw(); } }),
         el("button", { class: "chip", text: "Deselect", onclick: () => { sel = new Set(); draw(); } }),
@@ -750,12 +873,12 @@
       el("p", { class: "asrc", text: (p.emergency ? "Emergency application " : "Docket ") + p.docket + " · decided " + p.date }),
       el("blockquote", { class: "gm-quote", text: p.holding })];
     function pickCase() {
-      openSheet([...head(), el("p", { class: "fine", text: "Which case held this?" }),
+      openGame([...head(), el("p", { class: "fine", text: "Which case held this?" }),
         ...p.options.map((o) => el("button", { class: "gm-slot", onclick: () => { caseOk = o === p.name; afterCase(o); } }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: o })))), backBtn()], "The Docket");
     }
     function afterCase(choice) {
       const signed = p.author_code && !["PC", "D"].includes(p.author_code);
-      openSheet([...head(), reveal({ ok: caseOk, verdict: caseOk ? "Right case" : "It was " + p.name, keep: p.name,
+      openGame([...head(), reveal({ ok: caseOk, verdict: caseOk ? "Right case" : "It was " + p.name, keep: p.name,
         meta: "Holding in the Court's words: " + p.holding_full,
         next: signed ? { text: "Who wrote it? ›", fn: author } : { text: "Finish ›", fn: () => finish(null) } })], "The Docket");
     }
@@ -769,7 +892,7 @@
         finish({ ok, cert, guess: v });
       };
       input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
-      openSheet([...head(), el("p", { class: "gm-keep", text: p.name }), el("p", { class: "fine", text: "Who wrote the opinion of the Court?" }), input, certButtons(go, "Answer — how sure?"), backBtn()], "The Docket");
+      openGame([...head(), el("p", { class: "gm-keep", text: p.name }), el("p", { class: "fine", text: "Who wrote the opinion of the Court?" }), input, certButtons(go, "Answer — how sure?"), backBtn()], "The Docket");
       setTimeout(() => input.focus(), 50);
     }
     function finish(au) {
@@ -779,7 +902,7 @@
       const res = { ok, score, ms: Date.now() - t0, hints: 0, cert: au && au.cert };
       send(Object.assign({ slot: s.slot, game: "docket", puzzle: p.id, items }, res));
       markDone(s.slot, res);
-      openSheet([...head(), reveal({ ok, verdict: (caseOk ? "Case ✓" : "Case ✗") + (au ? " · author " + (au.ok ? "✓" : "✗") : ""), keep: p.name + (p.author ? " · " + p.author : ""),
+      openGame([...head(), reveal({ ok, verdict: (caseOk ? "Case ✓" : "Case ✗") + (au ? " · author " + (au.ok ? "✓" : "✗") : ""), keep: p.name + (p.author ? " · " + p.author : ""),
         meta: "Supreme Court of the United States · " + p.date, link: p.pdf, linkText: "The opinion (PDF) ↗", next: earlierNext() })], "The Docket");
     }
     pickCase();
@@ -792,18 +915,28 @@
   function ledgerGame(s) {
     const p = s.puzzle, f = p.estimate;
     const t0 = Date.now();
-    const lo = el("input", { class: "tin gm-in", type: "text", inputmode: "numeric", placeholder: "Low", autocomplete: "off" });
-    const hi = el("input", { class: "tin gm-in", type: "text", inputmode: "numeric", placeholder: "High", autocomplete: "off" });
+    const lo = el("input", { class: "tin gm-in", type: "text", inputmode: "decimal", placeholder: "Low", autocomplete: "off" });
+    const hi = el("input", { class: "tin gm-in", type: "text", inputmode: "decimal", placeholder: "High", autocomplete: "off" });
     const msg = el("p", { class: "fine", text: "" });
-    let est = null;
-    const num = (x) => Number(String(x.value).replace(/[^0-9.]/g, ""));
+    const S = get(PKEY + p.id, null) || {};            // the locked range and pair progress persist on this device
+    let est = S.est || null;
+    // "1.5k", "2M", "3 billion", "1,200" all read as numbers; the parsed range shows before you lock it.
+    const num = (x) => {
+      const m = String(x.value).toLowerCase().replace(/,/g, "").match(/(-?\d*\.?\d+)\s*(k|thousand|m|mn|million|b|bn|billion)?/);
+      if (!m) return NaN;
+      const mult = { k: 1e3, thousand: 1e3, m: 1e6, mn: 1e6, million: 1e6, b: 1e9, bn: 1e9, billion: 1e9 }[m[2]] || 1;
+      return Number(m[1]) * mult;
+    };
+    const preview = () => { const a = num(lo), b = num(hi); msg.textContent = a > 0 || b > 0 ? "Reads as " + (a > 0 ? fmtN(a) : "?") + " to " + (b > 0 ? fmtN(b) : "?") + (f.unit ? " " + f.unit : "") : ""; };
+    [lo, hi].forEach((x) => x.addEventListener("input", preview));
     function submit() {
       const a = num(lo), b = num(hi);
       if (!(a > 0) || !(b >= a)) { msg.textContent = "Give a low and a high (high ≥ low)."; return; }
       const hit = f.a >= a && f.a <= b;
       const score = hit ? Math.ceil(b / a) - 1 : 10;
       est = { hit, score, a, b };
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "The Ledger" }), el("p", { class: "gm-keep", text: f.q }),
+      S.est = est; S.k = 0; S.right = 0; put(PKEY + p.id, S);
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "The Ledger" }), el("p", { class: "gm-keep", text: f.q }),
         reveal({ ok: hit, verdict: (hit ? "Inside your range" : "Outside your range") + " · score " + score + (hit ? " (lower is better)" : ""),
           keep: fmtN(f.a) + " " + (f.unit || ""), meta: "Your range: " + fmtN(a) + "–" + fmtN(b) + " · source: " + f.source, link: f.link, linkText: "Source ↗",
           next: (p.pairs || []).length ? { text: "Which is bigger? ›", fn: () => pair(0, 0) } : { text: "Done ›", fn: () => finish(0) } })], "The Ledger");
@@ -813,25 +946,30 @@
       if (!pr) return finish(right);
       const pick = (side) => {
         const ok = (side === "a") === (pr.a.v >= pr.b.v);
-        openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Which is bigger?" }),
+        openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Which is bigger?" }),
           el("p", { class: "gm-keep", text: pr.a.q + ": " + fmtN(pr.a.v) }), el("p", { class: "gm-keep", text: pr.b.q + ": " + fmtN(pr.b.v) }),
           reveal({ ok, verdict: ok ? "Right" : "Other way round", meta: "Sources: " + [...new Set([pr.a.source, pr.b.source])].join("; "), link: pr.a.link, linkText: "Source ↗",
             next: { text: k + 1 < p.pairs.length ? "Next pair ›" : "Finish ›", fn: () => pair(k + 1, right + (ok ? 1 : 0)) } })], "The Ledger");
+        S.k = k + 1; S.right = right + (ok ? 1 : 0); put(PKEY + p.id, S);
       };
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Which is bigger? · " + (k + 1) + " of " + p.pairs.length }),
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Which is bigger? · " + (k + 1) + " of " + p.pairs.length }),
         el("button", { class: "gm-slot", onclick: () => pick("a") }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: pr.a.q }))),
         el("p", { class: "fine", text: "or" }),
         el("button", { class: "gm-slot", onclick: () => pick("b") }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: pr.b.q }))), backBtn()], "The Ledger");
     }
     function finish(right) {
+      store.removeItem(PKEY + p.id);
       const ok = !!(est && est.hit);
       const res = { ok, score: est ? est.score : 10, ms: Date.now() - t0, hints: 0, pairs: right };
       send(Object.assign({ slot: s.slot, game: "ledger", puzzle: p.id, items: [] }, res));
       markDone(s.slot, res);
-      openPuzzles();
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "The Ledger" }),
+        reveal({ ok, verdict: "Range score " + res.score + (ok ? " (lower is better)" : " · a miss") + ((p.pairs || []).length ? " · pairs " + right + " of " + p.pairs.length : ""),
+          keep: fmtN(f.a) + " " + (f.unit || "") + " — " + f.q, meta: "Source: " + f.source, link: f.link, linkText: "Source ↗", next: earlierNext() })], "The Ledger");
     }
     [lo, hi].forEach((x) => x.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); }));
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "The Ledger" }), el("p", { class: "gm-keep", text: f.q }),
+    if (est) return (p.pairs || []).length && (S.k || 0) < p.pairs.length ? pair(S.k || 0, S.right || 0) : finish(S.right || 0);
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "The Ledger" }), el("p", { class: "gm-keep", text: f.q }),
       el("p", { class: "fine", text: "Give a range you're 90% sure contains the answer. Narrow and right scores best; a miss scores 10." }),
       el("div", { class: "gm-range" }, lo, el("span", { text: "to" }), hi), msg,
       el("button", { class: "sbtn primary wide", text: "Lock it in", onclick: submit }), backBtn()], "The Ledger");
@@ -850,7 +988,7 @@
       if (!Q) return finish();
       const last = i === P.questions.length - 1;
       const ask = (cert) => {
-        openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz · " + (i + 1) + " of " + P.questions.length + (last ? " · wager: " + cert : "") }),
+        openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz · " + (i + 1) + " of " + P.questions.length + (last ? " · wager: " + cert : "") }),
           el("p", { class: "gm-keep", text: Q.q }),
           ...Q.options.map((o) => el("button", { class: "gm-slot", onclick: () => answer(o, cert) }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: o })))), backBtn()], "Friday quiz");
       };
@@ -858,12 +996,12 @@
         const ok = o === Q.answer;
         if (ok) right += 1;
         if (last) wager = cbm(ok, cert);
-        openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz · " + (i + 1) + " of " + P.questions.length }),
+        openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz · " + (i + 1) + " of " + P.questions.length }),
           el("p", { class: "gm-keep", text: Q.q }),
           reveal({ ok, verdict: ok ? "Right" : "It was " + Q.answer, keep: Q.answer, why: Q.why || null, meta: Q.source ? "Source: " + Q.source : null, link: Q.link, thread: Q.thread,
             next: { text: last ? "Finish ›" : "Next ›", fn: () => q(i + 1) } })], "Friday quiz");
       };
-      if (last) openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Last one: the wager" }), el("p", { class: "fine", text: "Before you see it: how sure are you that you'll get the last question?" }),
+      if (last) openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Last one: the wager" }), el("p", { class: "fine", text: "Before you see it: how sure are you that you'll get the last question?" }),
         certButtons(ask, "Sure +3/−6 · Think so +2/−2 · Guess +1/0"), backBtn()], "Friday quiz");
       else ask("think");
     }
@@ -872,7 +1010,7 @@
       const res = { ok, score: right + wager, ms: Date.now() - t0, hints: 0 };
       send(Object.assign({ slot: s.slot, game: "friday_quiz", puzzle: P.id, items: [] }, res));
       markDone(s.slot, res);
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz" }),
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz" }),
         reveal({ ok, verdict: right + " of " + P.questions.length + (wager ? " · wager " + (wager > 0 ? "+" : "") + wager : ""), keep: "That's the week.", next: earlierNext() })], "Friday quiz");
     }
     q(0);
@@ -890,7 +1028,8 @@
     const cl = cipher.replace(/[^A-Z]/g, ""), pl = plain.replace(/[^A-Z]/g, "");   // letter by letter (Patristocrat groups too)
     for (let i = 0; i < cl.length; i++) truth[cl[i]] = pl[i];
     const kind = s.game === "keyed" ? "Keyed cipher" : s.game === "patristocrat" ? "Patristocrat" : "Cryptoquote";
-    if (p.give && !saved) { const c = Object.keys(truth).find((k) => truth[k] === p.given); if (c) S.map[c] = p.given; }
+    if (p.give && !saved) { const c = Object.keys(truth).find((k) => truth[k] === p.given); if (c) { S.map[c] = p.given; S.given = c; } }
+    const isGiven = (c) => S.given === c;
     let sel = null;
     const input = el("input", { class: "gm-hidden", type: "text", autocomplete: "off", autocorrect: "off", autocapitalize: "characters", spellcheck: "false", maxlength: "1", "aria-label": "Letter" });
     const board = el("div", { class: "gm-crypt" });
@@ -903,7 +1042,7 @@
     function draw() {
       board.replaceChildren(...cipher.split(" ").map((word) => el("span", { class: "gm-word" }, ...word.split("").map((ch) => {
         if (!/[A-Z]/.test(ch)) return el("span", { class: "gm-punct", text: ch });
-        const b = el("button", { class: "gm-cell" + (ch === sel ? " sel" : "") + (S.map[ch] ? " filled" : ""), onclick: () => { sel = ch; draw(); input.value = ""; input.focus(); } },
+        const b = el("button", { class: "gm-cell" + (ch === sel ? " sel" : "") + (S.map[ch] ? " filled" : "") + (isGiven(ch) ? " given" : ""), onclick: () => { sel = ch; draw(); input.value = ""; input.focus(); } },
           el("span", { class: "gm-p", text: S.map[ch] || " " }), el("span", { class: "gm-c", text: ch }));
         return b;
       }))));
@@ -911,6 +1050,7 @@
       strip.replaceChildren(...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((L) => el("span", { class: "gm-l" + (used.has(L) ? " used" : ""), text: L }))));
       // Keyed cipher worksheet: ciphertext A–Z with what you've recovered beneath; the keyword shows up here.
       if (s.game === "keyed") sheetRow.replaceChildren(
+        el("p", { class: "asrc", text: "Worksheet · top: cipher letters A–Z · bottom: what each stands for (the keyword appears here)" }),
         el("div", { class: "gm-ws" }, ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((c) => el("span", { text: c }))),
         el("div", { class: "gm-ws plain" }, ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((c) => el("span", { text: S.map[c] || "·" }))));
     }
@@ -923,8 +1063,9 @@
     input.addEventListener("input", () => {
       const L = (input.value || "").toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
       input.value = "";
-      if (!sel || !L) return;
+      if (!sel || !L || isGiven(sel)) return;
       if (S.t0 == null) S.t0 = Date.now();
+      if (S.given && L === S.map[S.given]) { msg.textContent = L + " is the given letter."; return; }
       for (const k of Object.keys(S.map)) if (S.map[k] === L) delete S.map[k];   // reassigning moves it
       S.map[sel] = L;
       save();
@@ -932,7 +1073,7 @@
       sel = nextOpen(sel);
       draw();
     });
-    input.addEventListener("keydown", (e) => { if (e.key === "Backspace" && sel) { delete S.map[sel]; save(); draw(); } });
+    input.addEventListener("keydown", (e) => { if (e.key === "Backspace" && sel && !isGiven(sel)) { delete S.map[sel]; save(); draw(); } });
     function done(ok) {
       const ms = (S.t0 ? Date.now() - S.t0 : 0) + (S.ms || 0);
       // Revealing more than a third of the alphabet in play isn't a solve.
@@ -942,7 +1083,7 @@
       markDone(s.slot, res);
       store.removeItem(PKEY + p.id);
       if (p.keyword) put("wire.games.keyword", { day: nyDay(), word: p.keyword });
-      openSheet([
+      openGame([
         el("h2", { id: "sheet-title", class: "stitle", text: kind }),
         p.keyword ? el("p", { class: "gm-keep" }, el("b", { text: "The keyword: " + p.keyword }), el("span", { class: "fine", text: " — read it in the worksheet's bottom row. It feeds Saturday's meta." })) : null,
         el("blockquote", { class: "gm-quote", text: p.quote || plain }),
@@ -962,14 +1103,14 @@
       el("button", { class: "sbtn", text: "Crib", onclick: () => { S.crib = true; S.hints += 1; save(); msg.textContent = "Crib: the word " + p.crib.word + " starts at letter " + cribAt() + "."; } }),
       el("button", { class: "sbtn", text: "Speaker", onclick: () => { S.speaker = true; S.hints += 1; save(); msg.textContent = "Said by " + p.speaker + (p.role ? ", " + p.role : "") + "."; } }),
       el("button", { class: "sbtn", text: "Check", onclick: () => { S.checks += 1; save(); const wrong = Object.keys(S.map).filter((k) => S.map[k] !== truth[k]).length; msg.textContent = wrong ? wrong + " letter" + (wrong > 1 ? "s are" : " is") + " wrong." : "Everything so far is right."; } }),
-      el("button", { class: "unsave", text: "Give up", onclick: () => { for (const k of Object.keys(truth)) S.map[k] = truth[k]; done(false); } }));
+      giveUpBtn(() => { for (const k of Object.keys(truth)) S.map[k] = truth[k]; done(false); }));
     if (S.crib) msg.textContent = "Crib: the word " + p.crib.word + " starts at letter " + cribAt() + ".";
     sel = nextOpen(null);
     draw();
     const intro = s.game === "keyed" ? "Friday · a keyed cipher: solve the quote, and the worksheet's bottom row spells a keyword."
       : s.game === "patristocrat" ? "Sunday · a Patristocrat: no spaces, letters in groups of five. Long and hard on purpose."
       : ["", "Easy", "Medium", "Hard"][p.tier] + " · a quote from this week's news, letters swapped. Speaker hidden." + (p.give ? " One letter is given." : "");
-    openSheet([
+    openGame([
       el("h2", { id: "sheet-title", class: "stitle", text: kind }),
       el("p", { class: "asrc", text: intro }),
       board, strip, sheetRow, input, msg, hintRow,
@@ -983,6 +1124,9 @@
   // one is accepted). Drag a piece, or tap it and then its square; legal squares are marked. One
   // wrong move fails the puzzle. Pieces: Cburnett's Wikimedia set via cm-chessboard (CC BY-SA 3.0).
   let ChessMod = null;
+  const THEME = { mateIn1: "mate in 1", mateIn2: "mate in 2", mateIn3: "mate in 3", hangingPiece: "hanging piece", backRankMate: "back-rank mate", discoveredAttack: "discovered attack", doubleCheck: "double check", advancedPawn: "advanced pawn", kingsideAttack: "kingside attack", queensideAttack: "queenside attack", trappedPiece: "trapped piece", defensiveMove: "defensive move", quietMove: "quiet move", xRayAttack: "x-ray attack", capturingDefender: "capturing the defender", attackingF2F7: "attacking f2/f7", exposedKing: "exposed king", smotheredMate: "smothered mate", promotion: "promotion", underPromotion: "underpromotion", zugzwang: "zugzwang", interference: "interference", intermezzo: "in-between move", deflection: "deflection", attraction: "attraction", clearance: "clearance", sacrifice: "sacrifice", skewer: "skewer", fork: "fork", pin: "pin" };
+  const HIDE_THEMES = /^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality|superGM)$/;
+  const themeWords = (t) => (t || []).filter((x) => !HIDE_THEMES.test(x)).map((x) => THEME[x] || x.replace(/([a-z])([A-Z0-9])/g, "$1 $2").toLowerCase());
   const SVGNS = "http://www.w3.org/2000/svg";
   function pieceSvg(pc) {
     const svg = document.createElementNS(SVGNS, "svg");
@@ -998,14 +1142,14 @@
     const p = s.puzzle;
     if (!ChessMod) {
       try { ChessMod = await import("./vendor/chess/chess.js"); } catch (e) {
-        openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Chess" }), el("p", { class: "fine", text: "Couldn't load the chess engine (" + e.message + ")." }), backBtn()], "Chess");
+        openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Chess" }), el("p", { class: "fine", text: "Couldn't load the chess engine (" + e.message + ")." }), backBtn()], "Chess");
         return;
       }
     }
     const game = new ChessMod.Chess(p.fen);
     const moves = p.moves.slice();
     const t0 = Date.now();
-    let k = 0, from = null, over = false, last = null, busy = false;
+    let k = 0, from = null, over = false, last = null, busy = false, practice = false;
     const apply = (uci) => { const m = game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || "q" }); last = [uci.slice(0, 2), uci.slice(2, 4)]; return m; };
     apply(moves[0]);
     k = 1;
@@ -1077,24 +1221,46 @@
       const isLast = k === moves.length - 1;
       const m = apply(uci);
       const right = uci === want || (isLast && game.isCheckmate());
-      if (!right) { over = true; draw(); return finish(false, m && m.san); }
+      if (!right) { over = true; draw(); if (practice) { msg.textContent = (m && m.san) + " isn't it. Step through the line above, or try again."; return; } return finish(false, m && m.san); }
       k += 1;
       draw();
-      if (k >= moves.length) { over = true; return finish(true); }
+      if (k >= moves.length) { over = true; if (practice) { msg.textContent = "✓ That's the line."; return; } return finish(true); }
       msg.textContent = "Good. Opponent replies…";
       busy = true;
       setTimeout(() => { apply(moves[k]); k += 1; busy = false; msg.textContent = "Your move."; draw(); }, 450);
+    }
+    // The whole line in notation, steppable on the board; a miss can be retried (it doesn't rescore).
+    function solutionLine() {
+      const g = new ChessMod.Chess(p.fen), sans = [];
+      for (const u of moves) { const m = g.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || "q" }); sans.push(m ? m.san : u); }
+      return sans;
+    }
+    function stepTo(n) {
+      const g = new ChessMod.Chess(p.fen);
+      let lm = null;
+      for (let i = 0; i <= n && i < moves.length; i++) { const u = moves[i]; g.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || "q" }); lm = [u.slice(0, 2), u.slice(2, 4)]; }
+      game.load(g.fen()); last = lm; from = null; draw();
     }
     function finish(ok, bad) {
       const res = { ok, score: ok ? 1 : 0, ms: Date.now() - t0, hints: 0, rating: p.rating };
       send(Object.assign({ slot: s.slot, game: "chess", puzzle: p.id, items: [] }, res));
       markDone(s.slot, res);
-      msg.replaceChildren(reveal({ ok, verdict: ok ? "Solved" : (bad ? bad + " doesn't work" : "Missed"),
-        keep: "Themes: " + (p.themes || []).join(", "), meta: "Puzzle rated " + p.rating + " · Lichess puzzle database (CC0) · pieces: Cburnett, Wikimedia Commons (CC BY-SA 3.0)",
+      const sans = solutionLine();
+      let ply = moves.length - 1;
+      const lineEl = el("p", { class: "gm-keep" });
+      const showLine = () => lineEl.replaceChildren(...sans.map((m, i) => el("span", { class: "gm-ply" + (i === ply ? " on" : "") + (i === 0 ? " opp" : ""), text: (i === 0 ? "(" + m + ")" : m) + " " })));
+      const stepper = el("div", { class: "sactions" },
+        el("button", { class: "chip", text: "◀", "aria-label": "Back a move", onclick: () => { ply = Math.max(0, ply - 1); stepTo(ply); showLine(); } }),
+        el("button", { class: "chip", text: "▶", "aria-label": "Forward a move", onclick: () => { ply = Math.min(moves.length - 1, ply + 1); stepTo(ply); showLine(); } }),
+        !ok ? el("button", { class: "chip", text: "Try it again", onclick: () => { over = false; k = 1; stepTo(0); msg.textContent = "Again (practice; your result is already in)."; practice = true; } }) : null);
+      if (!ok) { ply = moves.length - 1; stepTo(ply); }
+      showLine();
+      msg.replaceChildren(lineEl, stepper, reveal({ ok, verdict: ok ? "Solved" : (bad ? bad + " doesn't work" : "Missed"),
+        keep: "Themes: " + themeWords(p.themes).join(", "), meta: "Puzzle rated " + p.rating + " · Lichess puzzle database (CC0) · pieces: Cburnett, Wikimedia Commons (CC BY-SA 3.0)",
         link: p.url, linkText: "See it on Lichess ↗", next: { text: "Done ›", fn: () => openPuzzles() } }));
     }
     draw();
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Chess" }), boardEl, msg, backBtn()], "Chess");
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Chess" }), boardEl, msg, backBtn()], "Chess");
   }
 
   // ---------------------------------------------------------------- Tactics (one turn, Into the Breach-style)
@@ -1197,7 +1363,7 @@
       grid.replaceChildren(...cells);
       const left = B.u.map((u, i) => i).filter((i) => !line.some((l) => l.unit === i));
       if (!over) msg.textContent = sel == null ? (left.length ? "Tap a unit (P punches and pushes; A shells 2–4 tiles away and pushes the four tiles around the hit). Red tiles get hit at the end of the turn." : "")
-        : !moved ? "Tap where " + (B.u[sel].kind === "punch" ? "the Puncher" : "the Artillery") + " moves (its own tile to stay)." : "Tap a target.";
+        : !moved ? "Tap where " + (B.u[sel].kind === "punch" ? "the Puncher" : "the Artillery") + " moves (tap it again to stay put)." : "Tap a target.";
       tools.replaceChildren(...[
         sel != null && moved ? el("button", { class: "sbtn", text: "Hold fire", onclick: () => fire(["hold", "N"]) }) : null,
         !over && (line.length || sel != null) ? el("button", { class: "sbtn", text: "Reset turn", onclick: () => { B = txBoard(P); line = []; sel = null; moved = null; draw(); } }) : null].filter(Boolean));
@@ -1206,6 +1372,10 @@
     function tap(x, y) {
       if (over) return;
       const ui = B.u.findIndex((u) => u.x === x && u.y === y);
+      if (sel != null && !moved && ui === sel) {          // its own tile: stay put, then aim
+        before = txCopy(B); moved = [x, y]; draw();
+        return;
+      }
       if (sel == null || (!moved && ui >= 0)) {
         if (ui >= 0 && !line.some((l) => l.unit === ui)) { sel = ui; moved = null; draw(); }
         return;
@@ -1244,7 +1414,7 @@
         next: { text: "Done ›", fn: () => openPuzzles() } }));
     }
     draw();
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Tactics" }),
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Tactics" }),
       el("p", { class: "fine", text: "▣ building · ↑2 enemy (attacks the way it points; number is health) · ≈ water drowns · ▲ mountain blocks. Pushing an enemy into something hurts both." }),
       grid, msg, tools, backBtn()], "Tactics");
   }
@@ -1259,7 +1429,7 @@
     let ok = false;
     try { ok = (await fetch("vendor/puzzles/" + p.game + ".html", { method: "HEAD" })).ok; } catch (e) { ok = false; }
     if (!ok) {
-      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Logic" }),
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Logic" }),
         el("p", { class: "fine", text: "The logic puzzles arrive with the next site deploy. Chess is ready now." }),
         el("button", { class: "sbtn primary", text: "Play chess instead", onclick: async () => { await fetch("games", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "pick", brain: "chess" }) }); G.day = null; openPuzzles(); } }), backBtn()], "Logic");
       return;
@@ -1275,7 +1445,7 @@
         finished = true;
         window.removeEventListener("message", onMsg);
         const res = { ok: true, score: 1, ms: Date.now() - t0, hints: 0 };
-        send(Object.assign({ slot: s.slot, game: "logic", puzzle: p.id, items: [] }, res));
+        send(Object.assign({ slot: s.slot, game: "logic", sub: p.game, puzzle: p.id, items: [] }, res));
         markDone(s.slot, res);
         msg.replaceChildren(reveal({ ok: true, verdict: "Solved in " + mmss(Math.round((Date.now() - t0) / 1000)), keep: (LOGIC_NAMES[p.game] || p.game) + " · tier " + p.tier,
           meta: "Simon Tatham's Portable Puzzle Collection (MIT licence)", next: { text: "Done ›", fn: () => openPuzzles() } }));
@@ -1287,7 +1457,7 @@
     const pad = ["keen", "towers", "unequal"].includes(p.game) && size ? el("div", { class: "gm-pad" },
       ...Array.from({ length: Math.min(9, size) }, (_, i) => String(i + 1)).concat(["Backspace"]).map((k) => el("button", { class: "sbtn", text: k === "Backspace" ? "⌫" : k,
         onclick: () => { try { frame.contentWindow.postMessage({ wireKey: k }, location.origin); } catch (e) { /* not ready */ } } }))) : null;
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: LOGIC_NAMES[p.game] || "Logic" }),
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: LOGIC_NAMES[p.game] || "Logic" }),
       el("div", { class: "sactions" }, markBtn, el("span", { class: "fine", text: pad ? "Tap a square, then a number. Mark + number = pencil mark. Rules under the puzzle." : "Rules are under the puzzle." })),
       frame, pad, msg, backBtn()], "Logic");
   }
@@ -1298,6 +1468,7 @@
   // Match is the first-exposure version for short lists. Local lists first; the featured list is
   // the one in the news this week.
   async function openLibrary() {
+    G.hub = "library";
     let lib = G.lib;
     if (!lib) {
       try { lib = G.lib = await (await fetch("games?library=1", { credentials: "same-origin" })).json(); } catch (e) { lib = { lists: [], who_left: [] }; }
@@ -1362,14 +1533,15 @@
       send({ game: "forms", puzzle: L.id, ok: right >= 8, score: right, ms: Date.now() - t0, hints: 0, items });
       done.replaceChildren(reveal({ ok: right >= 8, verdict: right + " of " + round.length, keep: misses.length ? "Missed ones come back in the next few days." : "All of them.",
         why: misses.map((x) => x.clue + ": " + x.answer).join(" · ") || null,
-        meta: "Source: " + L.source + (L.as_of ? " · as of " + L.as_of : ""), next: { text: "Another ten ›", fn: () => formsGame(L) } }));
+        meta: "Source: " + srcName(L.source) + (L.as_of ? " · as of " + L.as_of : ""), next: { text: "Another ten ›", fn: () => formsGame(L) } }));
     }
     show();
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Forms of government" }),
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Forms of government" }),
       el("p", { class: "fine", text: "Tap the form of government for each country. Who holds power, not how they got it." }), q, chips, fb, done,
       el("button", { class: "sbtn wide", text: "‹ Library", onclick: () => openLibrary() })], "Forms of government");
   }
 
+  const srcName = (x) => String(x || "").replace(/\b[a-z_]+\.yaml\b/g, "The Wire's checked list").replace(/\(\s*The Wire's checked list\s*\)/, "");
   function nameAll(L) {
     const t0 = Date.now();
     const limit = (L.minutes || Math.max(2, Math.ceil(L.n / 8))) * 60;
@@ -1389,15 +1561,10 @@
       clock.textContent = mmss(Math.ceil(left));
       if (!left && !over) finish();
     }, 250);
-    input.addEventListener("input", () => {
-      if (over) return;
-      const v = input.value;
-      const k = L.items.findIndex((x, i) => !got.has(i) && accepts(v, x.answer, x.accept));
-      if (k >= 0) {
-        got.add(k); rows[k].classList.add("got"); rows[k].lastChild.textContent = L.items[k].answer;
-        input.value = ""; count.textContent = got.size + " / " + L.n;
-        if (got.size === L.n) finish();
-      }
+    liveNames(input, L.items, (i) => !over && !got.has(i), (k) => {
+      got.add(k); rows[k].classList.add("got"); rows[k].lastChild.textContent = L.items[k].answer;
+      count.textContent = got.size + " / " + L.n;
+      if (got.size === L.n) finish();
     });
     function finish() {
       if (over) return;
@@ -1408,39 +1575,44 @@
         .filter((x) => !x.ok).slice(0, 12);                // only misses enter the review schedule
       send({ game: "name_all", puzzle: L.id, ok, score: got.size, ms: Date.now() - t0, hints: 0, items });
       done.replaceChildren(reveal({ ok, verdict: got.size + " of " + L.n + " in " + mmss(Math.round(used)), keep: L.n - got.size ? "Missed names come back in the next few days." : "All of them.",
-        meta: "Source: " + L.source + (L.as_of ? " · as of " + L.as_of : ""), next: { text: "‹ Library", fn: openLibrary } }));
+        meta: "Source: " + srcName(L.source) + (L.as_of ? " · as of " + L.as_of : ""), next: { text: "‹ Library", fn: openLibrary } }));
     }
     const done = el("div", {});
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: L.title }),
-      el("div", { class: "sactions" }, clock, count, pauseBtn, el("button", { class: "unsave", text: "Give up", onclick: finish })),
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: L.title }),
+      el("div", { class: "sactions" }, clock, count, pauseBtn, giveUpBtn(finish)),
       input, list, done, el("button", { class: "sbtn wide", text: "‹ Library", onclick: () => { over = true; clearInterval(tick); openLibrary(); } })], L.title);
     setTimeout(() => input.focus(), 50);
   }
 
+  // Seats can share a label (eight "Associate Justice" seats), so a pair is right when the person
+  // holds a seat with that label. A wrong pair says so.
   function matchGame(L) {
     const t0 = Date.now();
     const order = L.items.map((_, i) => i);
     const names = order.slice().sort(() => Math.random() - 0.5);
     let pick = null, right = 0, tries = 0;
-    const done = new Set();
+    const seatDone = new Set(), personDone = new Set();
     const left = el("div", { class: "gm-col" }), right_ = el("div", { class: "gm-col" });
+    const fb = el("p", { class: "fine", text: "" });
     function draw() {
-      left.replaceChildren(...order.map((i) => el("button", { class: "chip" + (done.has(i) ? " on" : "") + (pick === i ? " sel" : ""), text: L.items[i].clue || "?", disabled: done.has(i), onclick: () => { pick = i; draw(); } })));
-      right_.replaceChildren(...names.map((i) => el("button", { class: "chip" + (done.has(i) ? " on" : ""), text: L.items[i].answer, disabled: done.has(i), onclick: () => {
-        if (pick == null) return;
+      left.replaceChildren(...order.map((i) => el("button", { class: "chip" + (seatDone.has(i) ? " on" : "") + (pick === i ? " sel" : ""), text: L.items[i].clue || "?", disabled: seatDone.has(i), onclick: () => { pick = i; draw(); } })));
+      right_.replaceChildren(...names.map((i) => el("button", { class: "chip" + (personDone.has(i) ? " on" : ""), text: L.items[i].answer, disabled: personDone.has(i), onclick: () => {
+        if (pick == null) { fb.textContent = "Tap a seat first."; return; }
         tries += 1;
-        if (pick === i) { done.add(i); right += 1; }
+        if ((L.items[pick].clue || "") === (L.items[i].clue || "")) { seatDone.add(pick); personDone.add(i); right += 1; fb.textContent = "✓ " + L.items[i].answer + " · " + (L.items[i].clue || ""); }
+        else fb.textContent = "✗ " + L.items[i].answer + " isn't " + (L.items[pick].clue || "that seat") + ".";
         pick = null; draw();
-        if (done.size === L.n) {
-          send({ game: "match", puzzle: L.id, ok: tries <= L.n + 2, score: right, ms: Date.now() - t0, hints: 0, items: [] });
-          msg.replaceChildren(reveal({ ok: tries <= L.n + 2, verdict: "Matched in " + tries + " tries", keep: "Now try Name them.", next: { text: "Name them ›", fn: () => nameAll(L) } }));
+        if (personDone.size === L.n) {
+          const ok = tries <= L.n + 2;
+          send({ game: "match", puzzle: L.id, ok, score: right, ms: Date.now() - t0, hints: 0, items: [] });
+          msg.replaceChildren(reveal({ ok, verdict: "Matched in " + tries + " tries", keep: "Now try Name them.", next: { text: "Name them ›", fn: () => nameAll(L) } }));
         }
       } })));
     }
     const msg = el("div", {});
     draw();
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Match · " + L.title }), el("p", { class: "fine", text: "Tap a seat, then the person who holds it." }),
-      el("div", { class: "gm-match" }, left, right_), msg, el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Match");
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Match · " + L.title }), el("p", { class: "fine", text: "Tap a seat, then the person who holds it." }),
+      fb, el("div", { class: "gm-match" }, left, right_), msg, el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Match");
   }
 
   function whoLeft(w, L) {
@@ -1449,11 +1621,8 @@
     keepVisible(input);
     const got = new Set();
     const rows = people.map((p) => el("li", { class: "gm-row" }, el("span", { class: "gm-clue", text: (p.kind === "left" ? "Left · " : "New · ") + (p.clue || "") }), el("span", { class: "gm-name", text: "" })));
-    input.addEventListener("input", () => {
-      const k = people.findIndex((p, i) => !got.has(i) && accepts(input.value, p.name, []));
-      if (k >= 0) { got.add(k); rows[k].classList.add("got"); rows[k].lastChild.textContent = people[k].name; input.value = ""; }
-    });
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Who left the list" }), el("p", { class: "fine", text: (L ? L.title : w.list) + " · since " + w.since }),
+    liveNames(input, people.map((p) => ({ answer: p.name, accept: [] })), (i) => !got.has(i), (k) => { got.add(k); rows[k].classList.add("got"); rows[k].lastChild.textContent = people[k].name; });
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Who left the list" }), el("p", { class: "fine", text: (L ? L.title : w.list) + " · since " + w.since }),
       input, el("ol", { class: "gm-rows" }, ...rows),
       el("button", { class: "sbtn", text: "Show them", onclick: () => people.forEach((p, i) => { if (!got.has(i)) { rows[i].classList.add("miss"); rows[i].lastChild.textContent = p.name; } }) }),
       el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Who left the list");
@@ -1502,10 +1671,42 @@
       svg.appendChild(p);
       paths[sh.id] = p;
     }
-    let pinchAt = 0;
-    svg.addEventListener("touchstart", (e) => { if (e.touches.length > 1) pinchAt = Date.now(); }, { passive: true });
-    svg.addEventListener("click", (e) => { if (Date.now() - pinchAt < 400) e.stopPropagation(); }, true);   // ignore taps during a pinch
     const set = () => svg.setAttribute("viewBox", vb.join(" "));
+    // Pinch to zoom and drag to pan (pointer events); a drag or pinch never counts as a tap.
+    const pts = new Map();
+    let gesture = null, movedAt = 0;
+    const toVB = (x, y) => { const r = svg.getBoundingClientRect(); return [vb[0] + ((x - r.left) / r.width) * vb[2], vb[1] + ((y - r.top) / r.height) * vb[3]]; };
+    svg.addEventListener("pointerdown", (e) => {
+      pts.set(e.pointerId, [e.clientX, e.clientY]);
+      if (pts.size === 2) { const [a, b] = [...pts.values()]; gesture = { kind: "pinch", d: Math.hypot(a[0] - b[0], a[1] - b[1]), w: vb[2] }; }
+      else if (pts.size === 1) gesture = { kind: "pan", x: e.clientX, y: e.clientY, vb: vb.slice(), moved: false };
+    });
+    svg.addEventListener("pointermove", (e) => {
+      if (!pts.has(e.pointerId) || !gesture) return;
+      pts.set(e.pointerId, [e.clientX, e.clientY]);
+      const r = svg.getBoundingClientRect();
+      if (gesture.kind === "pinch" && pts.size === 2) {
+        const [a, b] = [...pts.values()];
+        const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+        const c = toVB((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+        const f = (vb0[2] / gesture.w) * (d / gesture.d) / (vb0[2] / vb[2]);
+        if (isFinite(f) && f > 0) zoom(f, c[0], c[1]);
+        movedAt = Date.now();
+      } else if (gesture.kind === "pan") {
+        const dx = e.clientX - gesture.x, dy = e.clientY - gesture.y;
+        if (!gesture.moved && Math.hypot(dx, dy) < 8) return;
+        gesture.moved = true; movedAt = Date.now();
+        const g = gesture.vb;
+        vb[0] = Math.max(vb0[0], Math.min(g[0] - (dx / r.width) * g[2], vb0[0] + vb0[2] - vb[2]));
+        vb[1] = Math.max(vb0[1], Math.min(g[1] - (dy / r.height) * g[3], vb0[1] + vb0[3] - vb[3]));
+        set();
+      }
+    });
+    const up = (e) => { pts.delete(e.pointerId); if (!pts.size) gesture = null; else if (pts.size === 1) { const [p0] = [...pts.values()]; gesture = { kind: "pan", x: p0[0], y: p0[1], vb: vb.slice(), moved: true }; } };
+    svg.addEventListener("pointerup", up);
+    svg.addEventListener("pointercancel", up);
+    svg.addEventListener("click", (e) => { if (Date.now() - movedAt < 350) e.stopPropagation(); }, true);
+    for (const t of ["touchstart", "touchmove", "touchend"]) svg.addEventListener(t, (e) => e.stopPropagation(), { passive: true });
     const zoom = (f, cx, cy) => {
       const w = Math.min(vb0[2], vb[2] / f), h = Math.min(vb0[3], vb[3] / f);
       cx = cx == null ? vb[0] + vb[2] / 2 : cx; cy = cy == null ? vb[1] + vb[3] / 2 : cy;
@@ -1524,7 +1725,7 @@
 
   async function mapGame(id, mode) {
     let M;
-    try { M = await loadMap(id); } catch (e) { openSheet([el("h2", { id: "sheet-title", class: "stitle", text: MAPS[id].title }), el("p", { class: "fine", text: e.message }), el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Maps"); return; }
+    try { M = await loadMap(id); } catch (e) { openGame([el("h2", { id: "sheet-title", class: "stitle", text: MAPS[id].title }), el("p", { class: "fine", text: e.message }), el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Maps"); return; }
     const t0 = Date.now();
     if (id === "beacon-wards") {                  // who holds each ward seat, from the Library's council list
       try {
@@ -1568,10 +1769,13 @@
     const judge = (ok, cur, shown) => {
       if (ok) right += 1; else missed.push(cur);
       m.paths[cur.id].classList.add(ok ? "right" : "wrong");
+      if (!ok) {                                   // show where it actually is, zoomed in if it's small
+        try { const bb = m.paths[cur.id].getBBox(), vbw = Number(M.viewBox.split(" ")[2]); m.zoomTo([bb.x + bb.width / 2, bb.y + bb.height / 2], bb.width < vbw * 0.08 ? Math.min(6, (vbw * 0.3) / Math.max(bb.width, 1)) : 1); } catch (e) { /* not laid out */ }
+      }
       const w = cur.who ? " · " + cur.who : "";
       msg.textContent = ok ? "✓ " + cur.name + w : "✗ " + (shown ? "That was " + shown.name + ". " : "") + "It's " + cur.name + w + " (shown in red).";
       k += 1;
-      setTimeout(next, ok ? 600 : 1600);
+      setTimeout(next, ok ? 600 : 2200);
     };
     confirm.addEventListener("click", () => { const cur = deck[k]; if (cur && pending) judge(pending.id === cur.id, cur, pending); });
     input.addEventListener("keydown", (e) => {
@@ -1582,16 +1786,20 @@
       const num = (x) => x.replace(/\D/g, "");
       const byNum = (id === "ny-districts" || MAPS[id].num) && num(input.value) && num(input.value) === num(cur.name);
       const byWho = cur.who && accepts(input.value, cur.who, []);
-      judge(accepts(input.value, cur.name, extra) || byNum || byWho, cur, null);
+      const ok = accepts(input.value, cur.name, extra) || byNum || byWho;
+      // Only a real place (or number/holder) on this map counts as an answer; anything else is a free retry.
+      const known = ok || shapes.some((sh) => accepts(input.value, sh.name, ALIASES[sh.name] || []) || (sh.who && accepts(input.value, sh.who, [])) || ((id === "ny-districts" || MAPS[id].num) && num(input.value) && num(input.value) === num(sh.name)));
+      if (!known) { msg.textContent = "“" + input.value + "” isn't a " + MAPS[id].noun + " on this map. Try again."; input.select(); return; }
+      judge(ok, cur, null);
     });
     function finish() {
       const ok = right / deck.length >= 0.8;
-      const items = missed.map((s) => ({ id: "pl:" + id + ":" + fold(s.name).replace(/ /g, "_").slice(0, 24), type: "roster", q: "On the map of " + MAPS[id].title.toLowerCase() + ": the " + MAPS[id].noun + " at this spot? (" + (mode === "find" ? "find " : "name ") + s.name + ")", a: s.name, accept: ALIASES[s.name] || [], hint: M.source, ok: false, cert: "guess" }));
-      send({ game: "map", puzzle: id + ":" + mode, ok, score: right, ms: Date.now() - t0, hints: 0, items: [] });
+      const items = missed.map((s) => ({ id: "pl:" + id + ":" + fold(s.name).replace(/ /g, "_").slice(0, 24), type: "place", q: MAPS[id].title + ": name the highlighted " + MAPS[id].noun, a: s.name, accept: (ALIASES[s.name] || []).concat(s.who ? [s.who] : []), hint: M.source, ref: id + "|" + s.id, ok: false, cert: "guess" }));
+      send({ game: "map", puzzle: id + ":" + mode, ok, score: right, ms: Date.now() - t0, hints: 0, items: items.slice(0, 10) });
       msg.replaceChildren(reveal({ ok, verdict: right + " of " + deck.length, keep: missed.length ? "Missed: " + missed.map((s) => s.name).join(", ") : "Clean sweep.", meta: "Shapes: " + M.source,
         next: { text: "Again ›", fn: () => mapGame(id, mode) } }));
     }
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: MAPS[id].title }), prompt, m.svg, m.controls,
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: MAPS[id].title }), prompt, m.svg, m.controls,
       mode === "find" ? confirm : input, msg, el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Maps");
     next();
   }
@@ -1600,7 +1808,7 @@
   // your guess to the answer (Worldle-style). A fixed daily rotation (never drawn from tragedy stories).
   async function outlineGame() {
     let M;
-    try { M = await loadMap("world"); } catch (e) { openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Outline" }), el("p", { class: "fine", text: e.message }), el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Outline"); return; }
+    try { M = await loadMap("world"); } catch (e) { openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Outline" }), el("p", { class: "fine", text: e.message }), el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Outline"); return; }
     const t0 = Date.now();
     const pool = M.shapes.filter((s) => s.area > 0.0004);
     const day = nyDay();
@@ -1634,7 +1842,7 @@
     });
     // Fit the silhouette into its own box.
     requestAnimationFrame(() => { try { const b = p.getBBox(); const pad = Math.max(b.width, b.height) * 0.08; svg.setAttribute("viewBox", [b.x - pad, b.y - pad, b.width + 2 * pad, b.height + 2 * pad].join(" ")); } catch (e) { /* hidden */ } });
-    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Outline · today's country" }), svg, el("p", { class: "fine", text: "Six guesses. Each miss shows how far and which way." }), input, list, el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Outline");
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Outline · today's country" }), svg, el("p", { class: "fine", text: "Six guesses. Each miss shows how far and which way." }), input, list, el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Outline");
     setTimeout(() => input.focus(), 50);
   }
 
@@ -1651,6 +1859,6 @@
         el("span", { class: "bc-s", text: n + " today" + (done ? " · " + done + " done" : "") + " · a break from reading" })));
   }
 
-  window.WireGames = { openPuzzles, openLibrary, homeCard, accepts, flush, play };
+  window.WireGames = { openPuzzles, openLibrary, homeCard, accepts, flush, play, back: () => (G.hub === "library" ? openLibrary() : openPuzzles()) };
   flush();
 })();
