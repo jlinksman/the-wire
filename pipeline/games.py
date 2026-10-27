@@ -69,6 +69,14 @@ def blocked(*texts) -> str | None:
     return f"exclusion list: {m.group(0).lower()}" if m else None
 
 
+def institutional_only(it: dict, thread_title: str | None) -> bool:
+    """War / attack / disaster coverage gets games only on its institutional side (GAMES.md rule 7).
+    The thread's title decides; an item with no thread is judged on its own title and summary."""
+    if thread_title:
+        return bool(INSTITUTIONAL.search(thread_title))
+    return bool(INSTITUTIONAL.search(f"{it.get('title') or ''} {it.get('summary') or ''}"))
+
+
 # ------------------------------------------------------------------ public-figure registry
 def load_registry(rosters: Path | None) -> dict:
     """name (folded) -> {name, role, party, aliases, kind}. Only public figures can be puzzle speakers."""
@@ -179,7 +187,7 @@ def who_said_it(data, reg, now, drops) -> list[dict]:
         if not t or t < cut or not it.get("quotes"):
             continue
         ctx = context_for(it, story_of, threads)
-        if ctx["thread_title"] and INSTITUTIONAL.search(ctx["thread_title"]):
+        if institutional_only(it, ctx["thread_title"]):
             drops.append(("who_said_it", "institutional-only thread"))
             continue
         for q in it["quotes"]:

@@ -14,10 +14,18 @@ exclude_patterns:
   - '\b(child|children|minor|teen|teenager|student|students|kids?)\b'
   - '\b(arrest\w*|charged with|indicted|defendant|suspect|police blotter|blotter)\b'
   - '\b(abuse\w*|assault\w*|rape|harass\w*)\b'
+  # Fires, outbreaks and unrest while they're news (2026-10-27). "Fire" only as a fire, never the
+  # verb or the fire department: "a major fire", "fires", "blaze", "on fire", "fire broke out".
+  - '\b(deadly|blazes?|flames|outbreaks?|riot\w*|unrest)\b'
+  - '\bfires\b(?!\s+(department|dept|district|code|codes|station|chief|safety|prevention|marshal|inspector|commissioner|company|companies))'
+  - '\b(a|the|major|massive|huge|large|serious|house|building|brush|forest|apartment|warehouse|chemical)\s+fire\b(?!\s+(department|dept|district|code|codes|station|chief|safety|prevention|marshal|inspector|commissioner|company|truck))'
+  - '\b(on fire|fire (broke|erupted|engulf\w*|spread|crews?|damage)|fire at)\b'
 # Threads whose games stay on the institutional side only (votes, officials, borders): any thread
-# whose title matches gets no quote, cipher or grid items from its stories.
+# whose title matches gets no quote, cipher or grid items from its stories. An item with no thread
+# is checked on its own title and summary instead.
 institutional_only_threads:
-  - '\b(war|invasion|strike|strikes|airstrike\w*|ceasefire|gaza|hamas|hezbollah|ukraine|russia|iran|sudan|famine|genocide)\b'
+  - '(?<!trade )(?<!price )(?<!culture )(?<!bidding )\bwars?\b'
+  - '\b(invasion|strike|strikes|airstrike\w*|ceasefire|gaza|hamas|hezbollah|ukraine|russia|iran|sudan|famine|genocide)\b'
 # Never a puzzle: Joe's own business or litigation (names that would appear in such stories).
 exclude_names:
   - Optima Environmental

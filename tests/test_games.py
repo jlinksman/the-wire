@@ -22,11 +22,30 @@ def test_guardrails():
     for title, quote in bad:
         assert games.blocked(title, quote), f"should be blocked: {title}"
     assert games.blocked("Senate passes farm bill", "This bill keeps family farms going") is None
+    # Known slips (2026-10-19 snapshot): a base fire, "deadly outbreaks", riots.
+    assert games.blocked("Canada: Major fire reported at military base in Alberta",
+                         "A serious incident creating a major fire has occurred at CFB Wainwright, in Alberta")
+    assert games.blocked("NYC Council to consider earlier Legionella reporting after deadly outbreaks",
+                         "We're trying to find ways to lower the opportunity for there to be outbreaks")
+    assert games.blocked("Riots in Albanian capital enter a fifth day as anti-government protests escalate",
+                         "I will not allow anyone to jeopardize the future of this country")
+    assert games.blocked("Flames engulf 19th-century City Hall")
+    assert games.blocked("Unrest spreads after the vote")
+    # … but the fire department, the verb and the fire code are fine.
+    for ok in ("Public Hearing for a Proposed Local Law Concerning Penalties for Violations of the City's Zoning, Fire Prevention, and Building Codes",
+               "Council approves new truck for the fire department", "President moves to fire the Fed chair",
+               "Ceasefire talks resume", "Senator comes under fire over vote"):
+        assert games.blocked(ok) is None, ok
 
 
 def test_institutional_threads():
     assert games.INSTITUTIONAL.search("Russia-Ukraine war")
     assert not games.INSTITUTIONAL.search("Beacon zoning rewrite")
+    assert not games.INSTITUTIONAL.search("The tariff trade war heats up")
+    # No thread: the item's own title and summary decide.
+    assert games.institutional_only({"title": "Trump waives sanctions on Russia", "summary": ""}, None)
+    assert not games.institutional_only({"title": "Dutchess votes to cover Flock cameras", "summary": ""}, None)
+    assert games.institutional_only({"title": "Dutchess votes", "summary": ""}, "Russia-Ukraine war")
 
 
 def test_speaker_titles():
