@@ -114,9 +114,14 @@ function assemble(st, pool, chess, today) {
   if (news) slots.push(Object.assign({ slot: 2, label: "News" }, news));
   else health.push({ game: "news", made: 0, dropped: 0, why: [["no fresh news puzzle today; filled with a logic puzzle", 1]] });
 
-  // Slot 3: the cipher. Graded tier near Joe's ladder; never the same quote as slot 2.
-  const cq = pickCipher(st, pool, today, tier("cryptoquote"), wsi && wsi.id);
-  if (cq) slots.push({ slot: 3, label: "Cipher", game: "cryptoquote", puzzle: cq });
+  // Slot 3: Tue/Thu a legal refresher session; otherwise the cipher (graded tier near Joe's ladder,
+  // never the same quote as slot 2). A refresher day with no verified cards falls back to the cipher.
+  const lg = (dow === 2 || dow === 4) ? pickLegal(st, pool, today) : null;
+  if (lg) slots.push({ slot: 3, label: "Law", game: "legal", puzzle: lg });
+  else {
+    const cq = pickCipher(st, pool, today, tier("cryptoquote"), wsi && wsi.id);
+    if (cq) slots.push({ slot: 3, label: "Cipher", game: "cryptoquote", puzzle: cq });
+  }
 
   // Slot 4: Joe's brain break (defaults to his last pick).
   slots.push(Object.assign({ slot: 4, label: "Brain break" }, brainBreak(brain, st, chess, today, rng, health)));
@@ -158,6 +163,26 @@ function pickDefectors(st, pool, today) {
   st.defect = st.defect || {};
   (st.defect[today] = st.defect[today] || []).push(...d.defect_party);
   return d;
+}
+
+// Legal refreshers: three cards a session. Cards with due elements first, then a card featured by
+// today's news, then the next card in syllabus order not started yet. A cloze card leads, so the
+// session never opens on a type-in.
+function pickLegal(st, pool, today) {
+  const L = pool && pool.legal;
+  if (!L || !(L.cards || []).length) return null;
+  const byId = Object.fromEntries(L.cards.map((c) => [c.id, c]));
+  const started = new Set(Object.keys(st.items).filter((k) => k.startsWith("el:")).map((k) => k.split(":")[1]));
+  const due = [...new Set(Object.values(st.items).filter((x) => x.type === "element" && !x.retired && x.due && x.due <= today).sort((a, b) => a.due.localeCompare(b.due)).map((x) => x.id.split(":")[1]))];
+  const featured = (L.featured || []).map((f) => f.card).filter((id) => byId[id] && !started.has(id));
+  const order = (L.order || []).flatMap((area) => L.cards.filter((c) => c.area === area).map((c) => c.id));
+  const fresh = order.filter((id) => !started.has(id));
+  const pick = [];
+  for (const id of [...due, ...featured, ...fresh]) if (byId[id] && !pick.includes(id) && pick.length < 3) pick.push(id);
+  if (!pick.length) return null;
+  const cards = pick.map((id) => byId[id]);
+  cards.sort((a, b) => (b.cloze ? 1 : 0) - (a.cloze ? 1 : 0));
+  return { id: "law" + today, cards, featured: (L.featured || []).filter((f) => pick.includes(f.card)) };
 }
 
 function pickCipher(st, pool, today, tier, avoid) {
@@ -202,6 +227,7 @@ function record(st, b, today) {
 }
 
 function ladder(st, game, r, b) {
+  if (game === "callback") return;
   if (game === "chess") {
     const L = st.ladder.chess || (st.ladder.chess = { rating: 1200, n: 0 });
     const pr = num(b.rating) || L.rating;

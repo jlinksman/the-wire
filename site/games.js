@@ -115,7 +115,7 @@
   }
   function nyDay() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()); }
 
-  const NAMES = { defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
+  const NAMES = { legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
   const LOGIC_NAMES = { loopy: "Loopy", keen: "Keen", towers: "Towers", galaxies: "Galaxies", signpost: "Signpost", dominosa: "Dominosa", unequal: "Unequal", slant: "Slant", range: "Range", pattern: "Pattern" };
   function slotLine(s) {
     const p = s.puzzle || {};
@@ -123,6 +123,7 @@
     if (s.game === "chess") { const th = (p.themes || []).filter((t) => !/^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality)$/.test(t)).slice(0, 2); return "Puzzle rated " + p.rating + (th.length ? " · " + th.join(", ") : ""); }
     if (s.game === "cryptoquote") return ["", "Easy", "Medium", "Hard"][p.tier] + " · " + (p.cipher || "").replace(/[^A-Z]/g, "").length + " letters";
     if (s.game === "who_said_it") return p.outlet ? "From " + p.outlet : "This week's news";
+    if (s.game === "legal") return (p.cards || []).map((c) => c.title.split(" — ")[0].split(" (")[0]).join(" · ");
     if (s.game === "defectors") return (p.chamber === "senate" ? "Senate" : "House") + " · " + (p.bill || "roll call " + p.num) + (p.in_news ? " · in the news" : "");
     return "";
   }
@@ -151,7 +152,7 @@
           el("span", { class: "gm-s", text: (s.slot <= 2 ? "2 min · " : "night · ") + slotLine(s) })),
         el("span", { class: "gm-mark", text: d ? (d.ok ? "✓" : "·") : "›" })));
     }
-    if ((D.callbacks || []).length) nodes.push(el("p", { class: "fine", text: "Woven in today: " + D.callbacks.length + " from earlier (they come up inside Who said it)." }));
+    if ((D.callbacks || []).length) nodes.push(el("p", { class: "fine", text: "Woven in today: " + D.callbacks.length + " from earlier (they follow the news puzzle)." }));
     nodes.push(el("div", { class: "sactions" },
       el("span", { class: "fine", text: "Brain break:" }),
       ...["logic", "chess"].map((b) => el("button", { class: "chip" + ((D.pick || "logic") === b ? " on" : ""), text: b === "logic" ? "Logic" : "Chess", onclick: async () => {
@@ -171,6 +172,7 @@
     if (s.game === "chess") return chess(s);
     if (s.game === "logic") return logic(s);
     if (s.game === "defectors") return defectorsGame(s);
+    if (s.game === "legal") return legalGame(s);
     openPuzzles();
   }
   const backBtn = () => el("button", { class: "sbtn wide", text: "‹ Puzzles", onclick: () => openPuzzles() });
@@ -180,67 +182,167 @@
   // shows the next hint: date → outlet → role. Then up to three items from earlier, woven in.
   function whoSaidIt(s) {
     const p = s.puzzle;
-    const rounds = [{ q: p.quote, a: p.answer, accept: p.accept, hints: p.hints, context: p.context, main: true }];
-    for (const c of (G.day && G.day.callbacks) || []) if (c.type === "speaker" && c.id !== p.id) rounds.push({ q: c.q, a: c.a, accept: c.accept, hints: [c.hint].filter(Boolean), id: c.id, link: c.link, thread: c.thread });
-    let r = 0, total = 0, mainRes = null;
     const t0 = Date.now();
-    const items = [];
-    function round() {
-      const R = rounds[r];
-      let tries = 0, hintN = 0;
-      const input = answerInput("Who said it?");
-      keepVisible(input);
-      const hintBox = el("ul", { class: "gm-hints" });
-      const msg = el("p", { class: "fine", text: "" });
-      const submit = (cert) => {
-        const v = input.value.trim();
-        if (!v) { input.focus(); return; }
-        tries += 1;
-        if (accepts(v, R.a, R.accept)) return finish(true, cert);
-        if (tries >= 3) return finish(false, cert);
-        msg.textContent = "Not " + v + ". " + (3 - tries) + " left.";
-        input.value = "";
-        if (R.hints[hintN]) hintBox.append(el("li", { text: ["Said on ", "Reported by ", "Role: "][hintN] + R.hints[hintN] }));
-        hintN += 1;
-        input.focus();
-      };
-      function finish(ok, cert) {
-        const pts = cbm(ok, cert) - (ok ? Math.max(0, tries - 1) : 0);
-        total += pts;
-        items.push({ id: R.main ? p.id : R.id, type: "speaker", q: R.q, a: R.a, accept: R.accept, hint: R.hints[R.hints.length - 1] || "", link: R.main ? p.link : R.link, story: R.main ? p.story : null, thread: R.main ? p.thread : R.thread, ok, cert, hinted: tries > 1 });
-        if (R.main) mainRes = { ok, cert, tries };
-        const more = r + 1 < rounds.length;
-        openSheet([
-          el("h2", { id: "sheet-title", class: "stitle", text: R.main ? "Who said it" : "From earlier" }),
-          el("blockquote", { class: "gm-quote", text: "“" + R.q + "”" }),
-          reveal({
-            ok, verdict: ok ? (tries === 1 ? "First try" : "Got it") : "It was " + R.a,
-            keep: R.a + (R.main && p.role ? " · " + p.role : ""),
-            meta: R.main ? [p.outlet, p.t ? when(p.t) : null, p.thread_title ? "thread: " + p.thread_title : null].filter(Boolean).join(" · ") : null,
-            link: R.main ? p.link : R.link, linkText: "Read where it was said ↗", thread: R.main ? p.thread : R.thread,
-            back: ok ? (cert === "sure" ? "Back in a few days to make it stick." : "Back soon.") : "Back tomorrow.",
-            next: more ? { text: "Next: one from earlier ›", fn: () => { r += 1; round(); } } : { text: "Done ›", fn: () => openPuzzles() },
-          }),
-        ], "Who said it");
-        if (!more) {
-          const res = { ok: mainRes ? mainRes.ok : ok, score: total, ms: Date.now() - t0, hints: mainRes ? mainRes.tries - 1 : 0, cert: mainRes && mainRes.cert };
-          send(Object.assign({ slot: s.slot, game: "who_said_it", puzzle: p.id, items }, res));
-          markDone(s.slot, res);
-        }
-      }
-      input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit("think"); });
+    let tries = 0, hintN = 0;
+    const input = answerInput("Who said it?");
+    keepVisible(input);
+    const hintBox = el("ul", { class: "gm-hints" });
+    const msg = el("p", { class: "fine", text: "" });
+    const submit = (cert) => {
+      const v = input.value.trim();
+      if (!v) { input.focus(); return; }
+      tries += 1;
+      if (accepts(v, p.answer, p.accept)) return finish(true, cert);
+      if (tries >= 3) return finish(false, cert);
+      msg.textContent = "Not " + v + ". " + (3 - tries) + " left.";
+      input.value = "";
+      if (p.hints[hintN]) hintBox.append(el("li", { text: ["Said on ", "Reported by ", "Role: "][hintN] + p.hints[hintN] }));
+      hintN += 1;
+      input.focus();
+    };
+    function finish(ok, cert) {
+      const score = cbm(ok, cert) - (ok ? Math.max(0, tries - 1) : 0);
+      const res = { ok, score, ms: Date.now() - t0, hints: tries - 1, cert };
+      send(Object.assign({ slot: s.slot, game: "who_said_it", puzzle: p.id, items: [{ id: p.id, type: "speaker", q: p.quote, a: p.answer, accept: p.accept, hint: p.role || "", link: p.link, story: p.story, thread: p.thread, ok, cert, hinted: tries > 1 }] }, res));
+      markDone(s.slot, res);
       openSheet([
-        el("h2", { id: "sheet-title", class: "stitle", text: R.main ? "Who said it" : "From earlier · " + r + " of " + (rounds.length - 1) }),
-        R.context ? el("p", { class: "asrc", text: "Story: " + R.context }) : null,
-        el("blockquote", { class: "gm-quote", text: "“" + R.q + "”" }),
-        hintBox, input, msg,
-        certButtons(submit, "Answer — how sure?"),
-        el("p", { class: "fine", text: "Surname is enough. Sure scores +3 (−6 if wrong), Think so +2/−2, Guess +1/0." }),
-        backBtn(),
+        el("h2", { id: "sheet-title", class: "stitle", text: "Who said it" }),
+        el("blockquote", { class: "gm-quote", text: "“" + p.quote + "”" }),
+        reveal({
+          ok, verdict: ok ? (tries === 1 ? "First try" : "Got it") : "It was " + p.answer,
+          keep: p.answer + (p.role ? " · " + p.role : ""),
+          meta: [p.outlet, p.t ? when(p.t) : null, p.thread_title ? "thread: " + p.thread_title : null].filter(Boolean).join(" · "),
+          link: p.link, linkText: "Read where it was said ↗", thread: p.thread,
+          back: ok ? (cert === "sure" ? "Back in a few days to make it stick." : "Back soon.") : "Back tomorrow.",
+          next: earlierNext(),
+        }),
       ], "Who said it");
+    }
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit("think"); });
+    openSheet([
+      el("h2", { id: "sheet-title", class: "stitle", text: "Who said it" }),
+      p.context ? el("p", { class: "asrc", text: "Story: " + p.context }) : null,
+      el("blockquote", { class: "gm-quote", text: "“" + p.quote + "”" }),
+      hintBox, input, msg,
+      certButtons(submit, "Answer — how sure?"),
+      el("p", { class: "fine", text: "Surname is enough. Sure scores +3 (−6 if wrong), Think so +2/−2, Guess +1/0." }),
+      backBtn(),
+    ], "Who said it");
+    setTimeout(() => input.focus(), 50);
+  }
+
+  // ---------------------------------------------------------------- From earlier (callbacks)
+  // Due review items, at most three a day, woven in after the news slot: a quote's speaker, or the
+  // missing element of a claim. Never a separate review screen.
+  function earlierNext() {
+    const list = ((G.day && G.day.callbacks) || []).filter((c) => !(G.asked || new Set()).has(c.id));
+    return list.length ? { text: "Next: " + list.length + " from earlier ›", fn: () => fromEarlier(list, 0) } : { text: "Done ›", fn: () => openPuzzles() };
+  }
+  function fromEarlier(list, i) {
+    const c = list[i];
+    if (!c) return openPuzzles();
+    G.asked = G.asked || new Set();
+    G.asked.add(c.id);
+    const t0 = Date.now();
+    const input = answerInput(c.type === "element" ? "The missing element" : "Who said it?");
+    keepVisible(input);
+    const nextBtn = () => (i + 1 < list.length ? { text: "Next ›", fn: () => fromEarlier(list, i + 1) } : { text: "Done ›", fn: () => openPuzzles() });
+    const go = (cert) => {
+      const v = input.value.trim();
+      if (!v) return input.focus();
+      const ok = c.type === "element" ? matchesKeys(v, c.accept) : accepts(v, c.a, c.accept);
+      send({ game: "callback", puzzle: c.id, ok, score: cbm(ok, cert), ms: Date.now() - t0, cert, items: [Object.assign({}, c, { ok, cert })] });
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier" }),
+        c.type === "element" ? el("p", { class: "gm-keep", text: c.q }) : el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }),
+        reveal({ ok, verdict: ok ? "Still there" : "Not quite", keep: c.a, meta: c.hint || null, link: c.link, linkText: c.type === "element" ? "Primary source ↗" : "Source ↗", thread: c.thread, back: ok ? "Spacing it out further." : "Back tomorrow.", next: nextBtn() })], "From earlier");
+    };
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
+    const prompt = c.type === "element" ? [el("p", { class: "gm-keep", text: c.q }), el("p", { class: "fine", text: "One element is missing. Which?" })]
+      : [el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }), el("p", { class: "fine", text: "Who said it?" })];
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier · " + (i + 1) + " of " + list.length }), ...prompt, input, certButtons(go, "Answer — how sure?"), backBtn()], "From earlier");
+    setTimeout(() => input.focus(), 50);
+  }
+  function matchesKeys(v, keys) {
+    const g = " " + fold(v) + " ";
+    return (keys || []).some((k) => { const f = fold(k); return f && g.includes(" " + f + " ") || (f.length >= 6 && g.includes(f)); });
+  }
+
+  // ---------------------------------------------------------------- Legal refreshers
+  // Three cards; a statute cloze leads (never opens on a type-in). Type the elements one at a time;
+  // each element is matched on its key words and becomes its own review item. Cited, with the
+  // primary source and "verified" date on every reveal.
+  function legalGame(s) {
+    const P = s.puzzle;
+    const t0 = Date.now();
+    const out = { right: 0, total: 0, items: [] };
+    const feat = Object.fromEntries((P.featured || []).map((f) => [f.card, f]));
+    function card(k) {
+      const c = P.cards[k];
+      if (!c) return finishAll();
+      if (c.cloze && !card.didCloze?.[c.id]) return cloze(c, k);
+      return elements(c, k);
+    }
+    card.didCloze = {};
+    const header = (c, k) => [
+      el("h2", { id: "sheet-title", class: "stitle", text: "Law · " + (k + 1) + " of " + P.cards.length }),
+      feat[c.id] ? el("p", { class: "asrc", text: "From today: " + feat[c.id].title + (feat[c.id].outlet ? " (" + feat[c.id].outlet + ")" : "") }) : null,
+      el("p", { class: "gm-keep" }, el("b", { text: c.title }), el("span", { class: "fine", text: " · " + c.jurisdiction })),
+    ];
+    function cloze(c, k) {
+      const input = answerInput("Fill the blank");
+      keepVisible(input);
+      const go = (cert) => {
+        const v = input.value.trim();
+        if (!v) return input.focus();
+        const ok = (c.cloze.accept || [c.cloze.answer]).some((a) => fold(a) === fold(v)) || matchesKeys(v, c.cloze.accept);
+        out.total += 1; if (ok) out.right += 1;
+        out.items.push({ id: "cz:" + c.id, type: "element", q: c.cloze.text, a: c.cloze.answer, accept: c.cloze.accept, hint: c.cite, link: c.cloze.source || c.source, ok, cert });
+        card.didCloze[c.id] = true;
+        openSheet([...header(c, k), el("blockquote", { class: "gm-quote", text: c.cloze.text.replace("___", c.cloze.answer.toUpperCase()) }),
+          reveal({ ok, verdict: ok ? "Right" : "It's “" + c.cloze.answer + "”", keep: c.cite, meta: "Verified against the official text " + c.verified, link: c.cloze.source || c.source, linkText: "Official text ↗", next: { text: "Now the elements ›", fn: () => elements(c, k) } })], "Law");
+      };
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
+      openSheet([...header(c, k), el("blockquote", { class: "gm-quote", text: c.cloze.text }), input, certButtons(go, "Answer — how sure?"), backBtn()], "Law");
       setTimeout(() => input.focus(), 50);
     }
-    round();
+    function elements(c, k) {
+      const got = new Set();
+      const input = answerInput("Type an element");
+      keepVisible(input);
+      const list = el("ol", { class: "gm-hints" });
+      const draw = () => list.replaceChildren(...c.elements.map((e, j) => el("li", { text: got.has(j) ? "✓ " + e.text : "▒▒▒" })));
+      input.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        const j = c.elements.findIndex((x, n) => !got.has(n) && matchesKeys(input.value, x.keys));
+        if (j >= 0) { got.add(j); input.value = ""; draw(); if (got.size === c.elements.length) done("sure"); }
+        else input.select();
+      });
+      function done(cert) {
+        c.elements.forEach((e, j) => {
+          const ok = got.has(j);
+          out.total += 1; if (ok) out.right += 1;
+          const others = c.elements.map((x, n) => (n === j ? "▒▒▒" : x.text.split(" (")[0])).join(" · ");
+          out.items.push({ id: "el:" + c.id + ":" + j, type: "element", q: c.title + ": " + others, a: e.text, accept: e.keys, hint: c.cite, link: c.source, ok, cert: ok ? cert : "think", hinted: false });
+        });
+        openSheet([...header(c, k), el("ol", { class: "gm-hints" }, ...c.elements.map((e, j) => el("li", { text: (got.has(j) ? "✓ " : "✗ ") + e.text }))),
+          reveal({ ok: got.size === c.elements.length, verdict: got.size + " of " + c.elements.length + " elements", keep: c.cite, meta: "Our wording from the cited authority · verified " + c.verified,
+            link: c.source, linkText: "Primary source ↗", thread: feat[c.id] && feat[c.id].thread, next: k + 1 < P.cards.length ? { text: "Next card ›", fn: () => card(k + 1) } : { text: "Finish ›", fn: () => finishAll() } })], "Law");
+      }
+      draw();
+      openSheet([...header(c, k), el("p", { class: "fine", text: c.elements.length + " elements. Type one and press return; key words are enough." }), list, input,
+        certButtons(done, "Done — how sure were you?"), backBtn()], "Law");
+      setTimeout(() => input.focus(), 50);
+    }
+    function finishAll() {
+      const ok = out.right / Math.max(1, out.total) >= 0.75;
+      const res = { ok, score: out.right, ms: Date.now() - t0, hints: 0 };
+      send(Object.assign({ slot: s.slot, game: "legal", puzzle: P.id, items: out.items }, res));
+      markDone(s.slot, res);
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Law" }),
+        reveal({ ok, verdict: out.right + " of " + out.total + " recalled", keep: "Missed elements come back tomorrow; the ones you knew, in a few days.",
+          meta: "Refreshers, not advice. Elements in our words from statutes and controlling cases, second-checked.", next: earlierNext() })], "Law");
+    }
+    card(0);
   }
 
   // ---------------------------------------------------------------- Defectors
@@ -306,7 +408,7 @@
         el("ul", { class: "gm-hints" }, ...pickNy.map((m) => el("li", { text: (guesses[m.name] === m.vote ? "✓ " : "✗ ") + m.name + " voted " + m.vote }))),
         el("ul", { class: "gm-hints" }, ...p.defectors.map((b) => el("li", { text: (named.has(b) ? "✓ " : "· ") + b.name + " (" + b.party + "-" + b.state + ") voted " + b.vote }))),
         reveal({ ok, verdict: got + " of " + total, keep: split, meta: p.in_news && p.news_title ? "In the news: " + p.news_title : "Official roll call",
-          link: p.link, linkText: "Official roll call ↗", thread: p.thread, next: { text: "Done ›", fn: () => openPuzzles() } }),
+          link: p.link, linkText: "Official roll call ↗", thread: p.thread, next: earlierNext() }),
         congressLink ? el("a", { class: "linkbtn", href: congressLink, target: "_blank", rel: "noopener", text: "The bill on congress.gov ↗" }) : null,
       ], "Defectors");
     }

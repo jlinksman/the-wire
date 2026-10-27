@@ -1952,7 +1952,7 @@ function openSheet(nodes, title) {
   closeSheetTimer();
   sheetOpen = { title: String(title || "").slice(0, 140), at: Date.now() };
   sheetReturn = document.activeElement;
-  $("sheet-body").replaceChildren(...nodes);
+  $("sheet-body").replaceChildren(...nodes.filter((n) => n != null && n !== false));
   $("sheet").setAttribute("aria-label", title || "Details");
   $("scrim").hidden = false;
   $("sheet").hidden = false;

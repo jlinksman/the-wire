@@ -541,6 +541,33 @@ def defectors(data, votes, legis, now, drops) -> list[dict]:
     return out[:12]
 
 
+# ------------------------------------------------------------------ Legal refreshers
+# Cards come from legal.yaml (our wording, cited, second-checked). Only status: verified ships.
+# A card whose `news` pattern matches a story from the last week is featured ("From today: …").
+def legal(data, now, drops) -> dict:
+    cfg = yaml.safe_load((ROOT / "legal.yaml").read_text()) or {}
+    cards = []
+    for c in cfg.get("cards", []):
+        if c.get("status") != "verified" or not c.get("verified"):
+            drops.append(("legal", "card not yet second-checked"))
+            continue
+        cards.append({k: c.get(k) for k in ("id", "area", "title", "jurisdiction", "cite", "source", "verified", "elements", "cloze")})
+    cut = now - timedelta(days=7)
+    featured = []
+    items, threads, story_of = index(data)
+    for c in cfg.get("cards", []):
+        if c.get("status") != "verified" or not c.get("news"):
+            continue
+        rx = re.compile(c["news"], re.I)
+        for it in data.get("items", []):
+            t = parse_t(it.get("t"))
+            if t and t >= cut and rx.search(it.get("title") or "") and not blocked(it.get("title")):
+                featured.append({"card": c["id"], "title": it.get("title"), "link": it.get("link"), "outlet": it.get("source"),
+                                 **context_for(it, story_of, threads)})
+                break
+    return {"cards": cards, "featured": featured[:5], "order": ["environmental", "torts"]}
+
+
 # ------------------------------------------------------------------ run
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
@@ -591,10 +618,11 @@ def main(argv=None) -> int:
         dv = fresh(defectors(data, rollcalls.parse(a.votes, legislator_index(a.rosters)), legislator_index(a.rosters), now, drops), "defectors")
         for ch, err in vote_errors.items():
             drops.append(("defectors", f"{ch} votes unavailable: {err}"))
+    lg = legal(data, now, drops)
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
-        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv,
-        "health": health(wsi, cq, grid, drops, dv),
+        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg,
+        "health": health(wsi, cq, grid, drops, dv, lg),
     }
     Path(a.out).write_text(json.dumps(pool, ensure_ascii=False, separators=(",", ":")))
     if a.hashes:                                   # offered today = used; never back within 90 days
@@ -606,9 +634,10 @@ def main(argv=None) -> int:
     return 0
 
 
-def health(wsi, cq, grid, drops, dv=()) -> list[dict]:
+def health(wsi, cq, grid, drops, dv=(), lg=None) -> list[dict]:
+    lg = lg or {"cards": []}
     rows = []
-    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv))):
+    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv)), ("legal", len(lg["cards"]))):
         why = {}
         for g, r in drops:
             if g == game:
