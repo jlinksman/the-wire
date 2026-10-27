@@ -272,7 +272,11 @@ Steps 1–7 are built, tested and deployed; step 8's tactics is built. What diff
 - **Pending docket** (2026-10-27): argued cases come from Oyez (one request a day); judgments come
   from each decided case's syllabus on supremecourt.gov, read by an hourly workflow at one PDF per
   run (Oyez's decision field is often empty). Calls lock when made; split judgments don't count.
-- **Statute-change flags** on legal cards wait for Joe's NY Open Legislation API key.
+- **Statute-change flags** (pipeline/openleg.py) are built; they switch on when the OPENLEG_KEY
+  secret is set. A card is held if a watched section changes after its `verified` date or its quote
+  stops matching.
+- **Beacon wards and County Legislature districts** come from Dutchess County GIS (the Board of
+  Elections' wards; the county's legislative districts), rebuilt monthly at deploy.
 - **Library rosters**: five hand-checked team lists (rosters.yaml). The current NYCFC roster is held
   as unverified until it's checked against the club's page.
 - **Tactics** (pipeline/tactics.py): 6×6, two units, three enemies; boards with one to three winning
@@ -282,8 +286,6 @@ Steps 1–7 are built, tested and deployed; step 8's tactics is built. What diff
 
 ## Open items for Joe
 - Register a free NY Open Legislation API key (walkthrough when we reach step 3).
-- Beacon ward shapes: build from Board of Elections district lists, or trace the city's ward
-  map by hand. Needs his OK either way.
 - Any public, news-free share for two-player play outside Access (like Ballot Match).
 
 ## Parked
