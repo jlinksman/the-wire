@@ -95,12 +95,17 @@ jobs:
 
       # Map shapes (GAMES.md): us-atlas, world-atlas (ISC; Census and Natural Earth, public domain) and
       # Census 2024 cartographic boundaries, turned into SVG paths. Cached until the script changes.
+      # The county's ward and legislative-district layers can change, so the cache also rolls monthly.
+      - name: Month
+        id: month
+        run: echo "m=$(date -u +%Y%m)" >> "$GITHUB_OUTPUT"
+
       - name: Restore maps
         id: maps
         uses: actions/cache@v4
         with:
           path: site/vendor/maps
-          key: maps-${{ hashFiles('.github/scripts/build-maps.mjs') }}
+          key: maps-${{ hashFiles('.github/scripts/build-maps.mjs') }}-${{ steps.month.outputs.m }}
 
       - name: Build maps
         if: steps.maps.outputs.cache-hit != 'true'
@@ -113,6 +118,11 @@ jobs:
             curl -sSL -A "TheWire/1.0 (personal news reader; ${{ github.server_url }}/${{ github.repository }})" -o "$W/$f.zip" "https://www2.census.gov/geo/tiger/GENZ2024/shp/$f.zip"
             python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])" "$W/$f.zip" "$W/census"
           done
+          G="https://services5.arcgis.com/3i1Ytxq3CWeA9q8g/arcgis/rest/services"
+          curl -sS -A "TheWire/1.0 (personal news reader; ${{ github.server_url }}/${{ github.repository }})" -o "$W/census/beacon-wards.geojson" \
+            "$G/County_Wards/FeatureServer/23/query?where=Municipality%3D%27City%20of%20Beacon%27&outFields=Ward&outSR=4326&f=geojson" || true
+          curl -sS -A "TheWire/1.0 (personal news reader; ${{ github.server_url }}/${{ github.repository }})" -o "$W/census/dutchess-ld.geojson" \
+            "$G/County_Legislative_Districts/FeatureServer/26/query?where=1%3D1&outFields=DISTRICT,REPRESENTATIVE&outSR=4326&f=geojson" || true
           ( cd "$W" && node build-maps.mjs "$GITHUB_WORKSPACE/site/vendor/maps" census )
 
       - name: Deploy

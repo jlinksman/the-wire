@@ -1418,6 +1418,8 @@
     "world": { title: "Countries of the world", noun: "country" },
     "ny-districts": { title: "New York's congressional districts", noun: "district" },
     "dutchess": { title: "Dutchess County towns and cities", noun: "town" },
+    "beacon-wards": { title: "Beacon's four wards", noun: "ward", num: true },
+    "dutchess-legislature": { title: "Dutchess County Legislature districts", noun: "district", num: true },
   };
   const ALIASES = { "United States of America": ["usa", "us", "united states", "america"], "United Kingdom": ["uk", "britain", "great britain"],
     "Dem. Rep. Congo": ["drc", "democratic republic of the congo", "congo kinshasa"], "Congo": ["republic of the congo", "congo brazzaville"],
@@ -1473,13 +1475,20 @@
     let M;
     try { M = await loadMap(id); } catch (e) { openSheet([el("h2", { id: "sheet-title", class: "stitle", text: MAPS[id].title }), el("p", { class: "fine", text: e.message }), el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Maps"); return; }
     const t0 = Date.now();
+    if (id === "beacon-wards") {                  // who holds each ward seat, from the Library's council list
+      try {
+        const lib = G.lib || (G.lib = await (await fetch("games?library=1", { credentials: "same-origin" })).json());
+        const council = ((lib.lists || []).find((x) => x.id === "beacon_council") || {}).items || [];
+        for (const sh of M.shapes) { const c = council.find((x) => x.clue === sh.name); if (c) sh.who = c.answer; }
+      } catch (e) { /* names are optional */ }
+    }
     const shapes = M.shapes.filter((s) => s.d && (id !== "world" || s.area > 0.00005));
     const deck = shuffle(shapes, Date.now()).slice(0, 10);
     let k = 0, right = 0, pending = null;
     const missed = [];
     const msg = el("p", { class: "fine", text: "" });
     const prompt = el("p", { class: "gm-keep", text: "" });
-    const input = answerInput("Name the highlighted " + MAPS[id].noun);
+    const input = answerInput("Name the highlighted " + MAPS[id].noun + (MAPS[id].num ? " (number or who holds it)" : ""));
     keepVisible(input);
     const confirm = el("button", { class: "sbtn primary", text: "That one", hidden: true });
     const m = svgMap(M, (sh, p) => {
@@ -1495,7 +1504,7 @@
       pending = null; confirm.hidden = true;
       const cur = deck[k];
       if (!cur) return finish();
-      if (mode === "find") prompt.textContent = (k + 1) + " of " + deck.length + " · Find: " + cur.name;
+      if (mode === "find") prompt.textContent = (k + 1) + " of " + deck.length + " · Find: " + cur.name + (cur.who ? " (" + cur.who + ")" : "");
       else {
         prompt.textContent = (k + 1) + " of " + deck.length + " · Name the highlighted " + MAPS[id].noun;
         m.paths[cur.id].classList.add("target"); input.value = "";
@@ -1508,7 +1517,8 @@
     const judge = (ok, cur, shown) => {
       if (ok) right += 1; else missed.push(cur);
       m.paths[cur.id].classList.add(ok ? "right" : "wrong");
-      msg.textContent = ok ? "✓ " + cur.name : "✗ That was " + (shown ? shown.name : "—") + ". It's " + cur.name + " (shown in red).";
+      const w = cur.who ? " · " + cur.who : "";
+      msg.textContent = ok ? "✓ " + cur.name + w : "✗ " + (shown ? "That was " + shown.name + ". " : "") + "It's " + cur.name + w + " (shown in red).";
       k += 1;
       setTimeout(next, ok ? 600 : 1600);
     };
@@ -1518,7 +1528,10 @@
       const cur = deck[k];
       if (!cur) return;
       const extra = id === "ny-districts" ? [cur.name.replace("NY-", ""), "district " + cur.name.replace("NY-", "")] : ALIASES[cur.name] || [];
-      judge(accepts(input.value, cur.name, extra) || (id === "ny-districts" && input.value.replace(/\D/g, "") === cur.name.replace("NY-", "")), cur, null);
+      const num = (x) => x.replace(/\D/g, "");
+      const byNum = (id === "ny-districts" || MAPS[id].num) && num(input.value) && num(input.value) === num(cur.name);
+      const byWho = cur.who && accepts(input.value, cur.who, []);
+      judge(accepts(input.value, cur.name, extra) || byNum || byWho, cur, null);
     });
     function finish() {
       const ok = right / deck.length >= 0.8;
