@@ -768,6 +768,22 @@ def defectors(data, votes, legis, now, drops) -> list[dict]:
 # ------------------------------------------------------------------ Legal refreshers
 # Cards come from legal.yaml (our wording, cited, second-checked). Only status: verified ships.
 # A card whose `news` pattern matches a story from the last week is featured ("From today: …").
+def card_scalars(c: dict) -> str | None:
+    """YAML turns bare false/no/yes/on/null into booleans or None: a key or text that isn't a string
+    would never match Joe's typed answer, so the card is held and the reason shown."""
+    for e in c.get("elements") or []:
+        if not isinstance(e.get("text"), str):
+            return f"element text {e.get('text')!r} is not text (quote it in legal.yaml)"
+        for k in e.get("keys") or []:
+            if not isinstance(k, str):
+                return f"key {k!r} is not text (quote it in legal.yaml)"
+    cz = c.get("cloze") or {}
+    for k in [cz.get("text"), cz.get("answer"), *(cz.get("accept") or [])] if cz else []:
+        if not isinstance(k, str):
+            return f"cloze value {k!r} is not text (quote it in legal.yaml)"
+    return None
+
+
 def legal(data, now, drops, openleg_cache: Path | None = None) -> dict:
     cfg = yaml.safe_load((ROOT / "legal.yaml").read_text()) or {}
     held = {}
@@ -788,6 +804,10 @@ def legal(data, now, drops, openleg_cache: Path | None = None) -> dict:
             continue
         if c["id"] in held:
             drops.append(("legal", f"{c['id']} held: {held[c['id']]}"))
+            continue
+        bad = card_scalars(c)
+        if bad:
+            drops.append(("legal", f"{c['id']}: {bad}"))
             continue
         cards.append({k: c.get(k) for k in ("id", "area", "title", "jurisdiction", "cite", "source", "verified", "elements", "cloze", "note")})
     cut = now - timedelta(days=7)

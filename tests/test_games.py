@@ -152,6 +152,17 @@ def test_openleg_holds():
     assert "no longer matches" in openleg.holds([card], p)["x"]
 
 
+def test_legal_yaml_scalars():
+    import yaml
+    cards = (yaml.safe_load((games.ROOT / "legal.yaml").read_text()) or {}).get("cards", [])
+    for c in cards:
+        assert games.card_scalars(c) is None, (c["id"], games.card_scalars(c))
+    d = next(c for c in cards if c["id"] == "defamation")
+    assert "false" in d["elements"][0]["keys"]
+    bad = {"id": "x", "elements": [{"text": "A false statement", "keys": [False, "falsity"]}]}
+    assert "not text" in games.card_scalars(bad)
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):

@@ -238,7 +238,7 @@ cards:
     note: "Variants: a private plaintiff on a matter of public concern must show gross irresponsibility (Chapadeau v. Utica Observer-Dispatch, 38 N.Y.2d 196 (1975)); Civil Rights Law § 76-a (2020) requires actual malice for public-forum speech on an issue of public interest."
     elements:
       - text: "A false (and defamatory) statement"
-        keys: [false, falsity, defamatory]
+        keys: ["false", falsity, defamatory]
       - text: "Published to a third party without privilege or authorization"
         keys: [published, publication, third party]
       - text: "Fault: at least negligence (actual malice for a public figure)"
