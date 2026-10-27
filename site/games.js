@@ -980,8 +980,20 @@
 
   // ---------------------------------------------------------------- Chess
   // Lichess puzzle: the opponent's move plays first, then find the only good move (any mate in
-  // one is accepted). Tap a piece, then its square. One wrong move fails the puzzle.
+  // one is accepted). Drag a piece, or tap it and then its square; legal squares are marked. One
+  // wrong move fails the puzzle. Pieces: Cburnett's Wikimedia set via cm-chessboard (CC BY-SA 3.0).
   let ChessMod = null;
+  const SVGNS = "http://www.w3.org/2000/svg";
+  function pieceSvg(pc) {
+    const svg = document.createElementNS(SVGNS, "svg");
+    svg.setAttribute("viewBox", "0 0 40 40");
+    svg.setAttribute("class", "gm-pc");
+    svg.setAttribute("aria-hidden", "true");
+    const use = document.createElementNS(SVGNS, "use");
+    use.setAttribute("href", "vendor/chess/pieces.svg#" + pc.color + pc.type);
+    svg.appendChild(use);
+    return svg;
+  }
   async function chess(s) {
     const p = s.puzzle;
     if (!ChessMod) {
@@ -993,53 +1005,92 @@
     const game = new ChessMod.Chess(p.fen);
     const moves = p.moves.slice();
     const t0 = Date.now();
-    let k = 0, from = null, failed = false, last = null;
-    const GLYPH = { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" };
+    let k = 0, from = null, over = false, last = null, busy = false;
     const apply = (uci) => { const m = game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || "q" }); last = [uci.slice(0, 2), uci.slice(2, 4)]; return m; };
     apply(moves[0]);
     k = 1;
     const me = game.turn();
-    const boardEl = el("div", { class: "gm-board" });
-    const msg = el("p", { class: "fine", text: (me === "w" ? "White" : "Black") + " to move. Find the best move." });
+    const files = me === "w" ? "abcdefgh" : "hgfedcba";
+    const ranks = me === "w" ? "87654321" : "12345678";
+    const boardEl = el("div", { class: "gm-board gm-chess" });
+    const msg = el("p", { class: "fine", text: (me === "w" ? "White" : "Black") + " to move. Find the best move. Drag a piece, or tap it and then a square." });
+    const targets = () => from ? game.moves({ square: from, verbose: true }).map((m) => m.to) : [];
     function draw() {
-      const files = me === "w" ? "abcdefgh" : "hgfedcba";
-      const ranks = me === "w" ? "87654321" : "12345678";
+      const tg = new Set(targets());
       const cells = [];
       for (const r of ranks) for (const f of files) {
         const sq = f + r, pc = game.get(sq);
         const dark = (files.indexOf(f) + ranks.indexOf(r)) % 2 === 1;
-        cells.push(el("button", { class: "gm-sq" + (dark ? " d" : "") + (sq === from ? " sel" : "") + (last && last.includes(sq) ? " last" : ""), "aria-label": sq + (pc ? " " + pc.color + pc.type : ""), onclick: () => tap(sq) },
-          pc ? el("span", { class: "gm-pc " + pc.color, text: GLYPH[pc.type] }) : null));
+        const cell = el("div", { class: "gm-sq" + (dark ? " d" : "") + (sq === from ? " sel" : "") + (last && last.includes(sq) ? " last" : "") + (tg.has(sq) ? (pc ? " gm-cap" : " gm-dot") : ""), "data-sq": sq, role: "button", "aria-label": sq + (pc ? " " + (pc.color === "w" ? "white " : "black ") + ({ k: "king", q: "queen", r: "rook", b: "bishop", n: "knight", p: "pawn" }[pc.type]) : "") });
+        if (pc) cell.appendChild(pieceSvg(pc));
+        if (f === files[0]) cell.appendChild(el("i", { class: "gm-co r", text: r }));
+        if (r === ranks[7]) cell.appendChild(el("i", { class: "gm-co f", text: f }));
+        cells.push(cell);
       }
       boardEl.replaceChildren(...cells);
     }
-    function tap(sq) {
-      if (k >= moves.length || failed) return;
+    const sqAt = (x, y) => { const t = document.elementFromPoint(x, y); const c = t && t.closest && t.closest(".gm-sq"); return c && boardEl.contains(c) ? c.dataset.sq : null; };
+    // Pointer handling: press on your piece selects it; release on another square tries the move
+    // (a drag); release on the same square keeps it selected for a second tap.
+    let drag = null;
+    boardEl.addEventListener("pointerdown", (e) => {
+      if (over || busy) return;
+      const sq = sqAt(e.clientX, e.clientY);
+      if (!sq) return;
       const pc = game.get(sq);
-      if (!from) { if (pc && pc.color === me) { from = sq; draw(); } return; }
-      if (pc && pc.color === me) { from = sq; draw(); return; }
-      const want = moves[k];
-      const promo = want.length > 4 && want.slice(0, 4) === from + sq ? want[4] : "q";
-      const tryMove = from + sq + (game.get(from) && game.get(from).type === "p" && /[18]$/.test(sq) ? promo : "");
-      const legal = game.moves({ verbose: true }).some((m) => m.from === from && m.to === sq);
+      if (pc && pc.color === me) {
+        from = sq; draw();
+        const ghost = pieceSvg(pc); ghost.classList.add("gm-ghost");
+        const size = boardEl.getBoundingClientRect().width / 8;
+        ghost.style.width = ghost.style.height = size + "px";
+        document.body.appendChild(ghost);
+        drag = { ghost, size, moved: false, x0: e.clientX, y0: e.clientY };
+        boardEl.setPointerCapture && boardEl.setPointerCapture(e.pointerId);
+        move(e);
+        e.preventDefault();
+      } else if (from) { tryMove(from, sq); }
+    });
+    function move(e) {
+      if (!drag) return;
+      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) > 6) drag.moved = true;
+      drag.ghost.style.opacity = drag.moved ? "1" : "0";
+      drag.ghost.style.transform = "translate(" + (e.clientX - drag.size / 2) + "px," + (e.clientY - drag.size / 2) + "px)";
+    }
+    boardEl.addEventListener("pointermove", move);
+    // Keep the sheet's swipe-to-close and the page's pull-to-refresh from seeing a piece drag.
+    for (const t of ["touchstart", "touchmove", "touchend"]) boardEl.addEventListener(t, (e) => e.stopPropagation(), { passive: true });
+    const endDrag = (e) => {
+      if (!drag) return;
+      const d = drag; drag = null; d.ghost.remove();
+      const sq = sqAt(e.clientX, e.clientY);
+      if (d.moved && sq && sq !== from) tryMove(from, sq);
+    };
+    boardEl.addEventListener("pointerup", endDrag);
+    boardEl.addEventListener("pointercancel", (e) => { if (drag) { drag.ghost.remove(); drag = null; } });
+    function tryMove(a, b) {
+      const legal = game.moves({ square: a, verbose: true }).find((m) => m.to === b);
+      if (!legal) { const pc = game.get(b); from = pc && pc.color === me ? b : null; draw(); return; }
       from = null;
-      if (!legal) { draw(); return; }
+      const want = moves[k];
+      const promo = legal.flags.includes("p") ? (want.slice(0, 4) === a + b && want[4] ? want[4] : "q") : "";
+      const uci = a + b + promo;
       const isLast = k === moves.length - 1;
-      const m = apply(tryMove);
-      const right = tryMove === want || (isLast && game.isCheckmate());
-      if (!right) { failed = true; draw(); return finish(false, m && m.san); }
+      const m = apply(uci);
+      const right = uci === want || (isLast && game.isCheckmate());
+      if (!right) { over = true; draw(); return finish(false, m && m.san); }
       k += 1;
       draw();
-      if (k >= moves.length) return finish(true);
+      if (k >= moves.length) { over = true; return finish(true); }
       msg.textContent = "Good. Opponent replies…";
-      setTimeout(() => { apply(moves[k]); k += 1; msg.textContent = "Your move."; draw(); }, 450);
+      busy = true;
+      setTimeout(() => { apply(moves[k]); k += 1; busy = false; msg.textContent = "Your move."; draw(); }, 450);
     }
     function finish(ok, bad) {
       const res = { ok, score: ok ? 1 : 0, ms: Date.now() - t0, hints: 0, rating: p.rating };
       send(Object.assign({ slot: s.slot, game: "chess", puzzle: p.id, items: [] }, res));
       markDone(s.slot, res);
       msg.replaceChildren(reveal({ ok, verdict: ok ? "Solved" : (bad ? bad + " doesn't work" : "Missed"),
-        keep: "Themes: " + (p.themes || []).join(", "), meta: "Puzzle rated " + p.rating + " · Lichess puzzle database (CC0)",
+        keep: "Themes: " + (p.themes || []).join(", "), meta: "Puzzle rated " + p.rating + " · Lichess puzzle database (CC0) · pieces: Cburnett, Wikimedia Commons (CC BY-SA 3.0)",
         link: p.url, linkText: "See it on Lichess ↗", next: { text: "Done ›", fn: () => openPuzzles() } }));
     }
     draw();

@@ -856,13 +856,23 @@ select.tin { width: 100%; }
 .gm-strip .gm-l.used { color: var(--text2); opacity: 0.35; text-decoration: line-through; }
 .gm-hidden { position: absolute; opacity: 0; width: 1px; height: 1px; font-size: 16px; }
 .gm-board { display: grid; grid-template-columns: repeat(8, 1fr); width: min(100%, 420px); aspect-ratio: 1; margin: 10px auto; border: 1px solid var(--line, #333); }
-.gm-sq { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #3a3a3a; padding: 0; }
+.gm-sq { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #3a3a3a; padding: 0; position: relative; }
 .gm-sq.d { background: #262626; }
 .gm-sq.last { box-shadow: inset 0 0 0 999px rgba(120, 160, 255, 0.18); }
 .gm-sq.sel { box-shadow: inset 0 0 0 3px var(--accent, #6cf); }
-.gm-pc { font-size: min(9vw, 40px); line-height: 1; }
-.gm-pc.w { color: #f2f2f2; text-shadow: 0 0 2px #000, 0 0 1px #000; }
-.gm-pc.b { color: #0c0c0c; text-shadow: 0 0 2px #bbb; }
+.gm-chess { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.gm-chess .gm-sq { background: #b58863; }
+.gm-chess .gm-sq:not(.d) { background: #f0d9b5; }
+.gm-chess .gm-sq.d { background: #b58863; }
+.gm-chess .gm-sq.last { box-shadow: inset 0 0 0 999px rgba(205, 210, 106, 0.5); }
+.gm-chess .gm-sq.sel { box-shadow: inset 0 0 0 999px rgba(20, 85, 30, 0.45); }
+.gm-chess .gm-sq.gm-dot::after { content: ""; width: 28%; height: 28%; border-radius: 50%; background: rgba(20, 85, 30, 0.5); }
+.gm-chess .gm-sq.gm-cap { box-shadow: inset 0 0 0 4px rgba(20, 85, 30, 0.6); }
+.gm-pc { width: 100%; height: 100%; display: block; pointer-events: none; }
+.gm-ghost { position: fixed; left: 0; top: 0; z-index: 9999; pointer-events: none; opacity: 0; }
+.gm-chess .gm-co { position: absolute; font: 600 9px/1 var(--mono, ui-monospace, monospace); font-style: normal; color: rgba(0, 0, 0, 0.55); pointer-events: none; }
+.gm-chess .gm-co.r { top: 2px; left: 2px; }
+.gm-chess .gm-co.f { top: auto; left: auto; bottom: 2px; right: 3px; }
 .gm-frame { width: 100%; height: min(75vh, 620px); border: 1px solid var(--line, #333); border-radius: 4px; background: #111; }
 .gm-health summary { color: var(--text2); font-size: 0.84rem; cursor: pointer; }
 .gm-vote { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--line, #333); }
