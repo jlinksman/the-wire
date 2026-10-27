@@ -3306,7 +3306,8 @@ async function openMatch(g) {
     nodes.push(el("section", { class: "ssec" }, el("h3", { class: "sh3", text: r.office + (r.district ? " · " + r.district : "") }),
       ...ms.map(({ c, m }) => el("details", { class: "race" },
         el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: c.name }), m.n >= 2 ? " · " + m.pct + "% agreement" + (ms.some((y) => y !== ms.find((z) => z.c === c) && y.m.n >= 2 && y.m.pct === m.pct) ? " · tied" : "") : " · too few stated positions"),
-          el("span", { class: "rsub", text: m.n + " statement" + (m.n === 1 ? "" : "s") + " in common" }), el("span", { class: "chev", text: "▾" })),
+          el("span", { class: "rsub", text: ((c.lines || []).length ? "On the " + c.lines.join(", ") + " line" + (c.lines.length > 1 ? "s" : "") + " · " : "") + m.n + " statement" + (m.n === 1 ? "" : "s") + " in common" }), el("span", { class: "chev", text: "▾" })),
+        (c.lines || []).length ? el("div", { class: "lines" }, ...c.lines.map((l) => el("span", { class: "line", text: l }))) : null,
         el("ul", { class: "cpos" }, ...m.rows.map((x) => el("li", {}, el("b", { text: x.agree >= 0.75 ? "Agree · " : x.agree <= 0.25 ? "Differ · " : "Partly · " }),
           "“" + text[x.q] + "” You: " + label(x.you) + (x.from ? " (from your proposal)" : "") + (x.w === 3 ? " (matters a lot)" : "") + ". " + c.name.split(" ").slice(-1)[0] + ": " + label(x.them) + (x.note ? " (" + x.note + ")" : "") + " ",
           x.source ? link(x.source, "↗", "srcl") : null)))))));
