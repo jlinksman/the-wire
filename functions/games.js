@@ -85,6 +85,7 @@ function trim(st, today) {
   st.results = st.results.filter((r) => r.day >= cut);
   for (const [id, d] of Object.entries(st.served)) if (d < cut) delete st.served[id];
   for (const d of Object.keys(st.side)) if (d < addDays(today, -35)) delete st.side[d];
+  for (const d of Object.keys(st.defect || {})) if (d < addDays(today, -35)) delete st.defect[d];
   const ids = Object.keys(st.items);
   if (ids.length > 3000) ids.sort((a, b) => (st.items[a].due || "").localeCompare(st.items[b].due || "")).slice(0, ids.length - 3000).forEach((k) => delete st.items[k]);
 }
@@ -102,10 +103,16 @@ function assemble(st, pool, chess, today) {
   slots.push(Object.assign({ slot: 1, label: "Grid" }, CONNECTIONS_LIVE && pool && pool.connections_shadow
     ? { game: "connections", puzzle: pool.connections_shadow } : brainBreak(other, st, chess, today, rng, health)));
 
-  // Slot 2: the news slot. Until the rest of the rotation is built, Who said it every day.
-  const wsi = pickWho(st, pool, today);
-  if (wsi) slots.push({ slot: 2, label: "News", game: "who_said_it", puzzle: wsi });
-  else health.push({ game: "who_said_it", made: 0, dropped: 0, why: [["no fresh quote today; filled with a logic puzzle", 1]] });
+  // Slot 2: the news slot, rotating by weekday (GAMES.md): Tue Defectors; the rest of the rotation
+  // falls back to Who said it until its games exist.
+  const dow = weekday(today);
+  let news = null;
+  if (dow === 2) { const d = pickDefectors(st, pool, today); if (d) news = { game: "defectors", puzzle: d }; }
+  let wsi = null;
+  if (!news) { wsi = pickWho(st, pool, today); if (wsi) news = { game: "who_said_it", puzzle: wsi }; }
+  if (!news) { const d = pickDefectors(st, pool, today); if (d) news = { game: "defectors", puzzle: d }; }
+  if (news) slots.push(Object.assign({ slot: 2, label: "News" }, news));
+  else health.push({ game: "news", made: 0, dropped: 0, why: [["no fresh news puzzle today; filled with a logic puzzle", 1]] });
 
   // Slot 3: the cipher. Graded tier near Joe's ladder; never the same quote as slot 2.
   const cq = pickCipher(st, pool, today, tier("cryptoquote"), wsi && wsi.id);
@@ -136,6 +143,21 @@ function pickWho(st, pool, today) {
   const q = (ok.length ? ok : cands)[0];
   (st.side[today] = st.side[today] || []).push(q.party || "none");
   return q;
+}
+
+// Defectors: in the news first; across the month, defections alternate between the parties
+// (counted here only).
+function pickDefectors(st, pool, today) {
+  const cands = ((pool && pool.defectors) || []).filter((d) => !st.served[d.id]);
+  if (!cands.length) return null;
+  const month = Object.entries(st.defect || {}).filter(([d]) => d >= addDays(today, -30)).flatMap(([, v]) => v);
+  const n = (p) => month.filter((x) => x === p).length;
+  const score = (d) => (d.in_news ? 10 : 0) - Math.min(...d.defect_party.map(n)) * 3;
+  cands.sort((a, b) => score(b) - score(a));
+  const d = cands[0];
+  st.defect = st.defect || {};
+  (st.defect[today] = st.defect[today] || []).push(...d.defect_party);
+  return d;
 }
 
 function pickCipher(st, pool, today, tier, avoid) {

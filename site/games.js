@@ -115,7 +115,7 @@
   }
   function nyDay() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()); }
 
-  const NAMES = { who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
+  const NAMES = { defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
   const LOGIC_NAMES = { loopy: "Loopy", keen: "Keen", towers: "Towers", galaxies: "Galaxies", signpost: "Signpost", dominosa: "Dominosa", unequal: "Unequal", slant: "Slant", range: "Range", pattern: "Pattern" };
   function slotLine(s) {
     const p = s.puzzle || {};
@@ -123,6 +123,7 @@
     if (s.game === "chess") { const th = (p.themes || []).filter((t) => !/^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality)$/.test(t)).slice(0, 2); return "Puzzle rated " + p.rating + (th.length ? " · " + th.join(", ") : ""); }
     if (s.game === "cryptoquote") return ["", "Easy", "Medium", "Hard"][p.tier] + " · " + (p.cipher || "").replace(/[^A-Z]/g, "").length + " letters";
     if (s.game === "who_said_it") return p.outlet ? "From " + p.outlet : "This week's news";
+    if (s.game === "defectors") return (p.chamber === "senate" ? "Senate" : "House") + " · " + (p.bill || "roll call " + p.num) + (p.in_news ? " · in the news" : "");
     return "";
   }
 
@@ -169,6 +170,7 @@
     if (s.game === "cryptoquote") return cryptoquote(s);
     if (s.game === "chess") return chess(s);
     if (s.game === "logic") return logic(s);
+    if (s.game === "defectors") return defectorsGame(s);
     openPuzzles();
   }
   const backBtn = () => el("button", { class: "sbtn wide", text: "‹ Puzzles", onclick: () => openPuzzles() });
@@ -239,6 +241,76 @@
       setTimeout(() => input.focus(), 50);
     }
     round();
+  }
+
+  // ---------------------------------------------------------------- Defectors
+  // A crossover roll call: the result and the party split are shown; first call NY members' votes
+  // (one tap each), then name who broke ranks. Plain words say what Yea meant. Scored per vote.
+  function defectorsGame(s) {
+    const p = s.puzzle;
+    const t0 = Date.now();
+    const PN = { R: "Republicans", D: "Democrats", I: "Independents" };
+    const split = Object.entries(p.tally || {}).map(([k, v]) => (PN[k] || k) + " " + v.yea + "–" + v.nay).join(" · ");
+    // NY members in play: the local district first (Beacon is NY-18), then one from each party.
+    const ny = (p.ny || []).slice();
+    const pickNy = [];
+    const local = ny.find((m) => String(m.district) === "18");
+    if (local) pickNy.push(local);
+    for (const party of ["D", "R"]) { const m = ny.find((x) => x.party === party && !pickNy.includes(x)); if (m) pickNy.push(m); }
+    for (const m of ny) if (pickNy.length < 3 && !pickNy.includes(m)) pickNy.push(m);
+    const guesses = {};
+    const byParty = {};
+    for (const b of p.defectors) (byParty[b.party] = byParty[b.party] || []).push(b);
+    const named = new Set();
+    const head = [
+      el("h2", { id: "sheet-title", class: "stitle", text: "Defectors" }),
+      el("p", { class: "asrc", text: (p.chamber === "senate" ? "Senate" : "House") + " roll call " + p.num + " · " + p.date + (p.bill ? " · " + p.bill : "") }),
+      el("p", { class: "gm-keep", text: p.desc }),
+      el("p", { class: "fine", text: p.question + " — " + p.yea_meant + "." }),
+      el("p", { class: "asrc", text: "Result: " + p.result + " · " + split }),
+    ];
+    function stage1() {
+      if (!pickNy.length) return stage2();
+      const rows = pickNy.map((m) => el("div", { class: "gm-vote" },
+        el("span", { text: m.name + " (" + m.party + (m.district ? ", NY-" + m.district : ", NY") + ")" }),
+        ...["Yea", "Nay"].map((v) => el("button", { class: "chip" + (guesses[m.name] === v ? " on" : ""), text: v, onclick: () => { guesses[m.name] = v; stage1(); } }))));
+      openSheet([...head, el("h3", { class: "sh3", text: "How did they vote?" }), ...rows,
+        el("button", { class: "sbtn primary wide", text: "Next: who broke ranks ›", onclick: () => stage2() }), backBtn()], "Defectors");
+    }
+    function stage2() {
+      const input = answerInput("Name a defector");
+      keepVisible(input);
+      const list = el("ul", { class: "gm-hints" });
+      const draw = () => list.replaceChildren(...p.defectors.map((b) => el("li", { text: named.has(b) ? "✓ " + b.name + " (" + b.party + "-" + b.state + ") voted " + b.vote : "▒▒▒ (" + b.party + ") voted " + b.vote })));
+      const msg = el("p", { class: "fine", text: "" });
+      input.addEventListener("input", () => {
+        const hit = p.defectors.find((b) => !named.has(b) && accepts(input.value, b.name, b.accept));
+        if (hit) { named.add(hit); input.value = ""; draw(); if (named.size === p.defectors.length) finish(); }
+      });
+      const need = Object.entries(byParty).map(([k, v]) => v.length + " " + (PN[k] || k) + " voted " + v[0].vote).join("; ");
+      draw();
+      openSheet([...head, el("h3", { class: "sh3", text: "Who broke ranks?" }), el("p", { class: "fine", text: need + ". Type surnames; each match fills in." }),
+        list, input, msg, el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "Done naming", onclick: () => finish() })), backBtn()], "Defectors");
+      setTimeout(() => input.focus(), 50);
+    }
+    function finish() {
+      const nyRight = pickNy.filter((m) => guesses[m.name] === m.vote).length;
+      const total = pickNy.length + p.defectors.length;
+      const got = nyRight + named.size;
+      const ok = got / Math.max(1, total) >= 0.6;
+      const res = { ok, score: got, ms: Date.now() - t0, hints: 0 };
+      send(Object.assign({ slot: s.slot, game: "defectors", puzzle: p.id, items: [] }, res));
+      markDone(s.slot, res);
+      const congressLink = p.bill ? "https://www.congress.gov/search?q=" + encodeURIComponent(JSON.stringify({ search: p.bill })) : null;
+      openSheet([...head,
+        el("ul", { class: "gm-hints" }, ...pickNy.map((m) => el("li", { text: (guesses[m.name] === m.vote ? "✓ " : "✗ ") + m.name + " voted " + m.vote }))),
+        el("ul", { class: "gm-hints" }, ...p.defectors.map((b) => el("li", { text: (named.has(b) ? "✓ " : "· ") + b.name + " (" + b.party + "-" + b.state + ") voted " + b.vote }))),
+        reveal({ ok, verdict: got + " of " + total, keep: split, meta: p.in_news && p.news_title ? "In the news: " + p.news_title : "Official roll call",
+          link: p.link, linkText: "Official roll call ↗", thread: p.thread, next: { text: "Done ›", fn: () => openPuzzles() } }),
+        congressLink ? el("a", { class: "linkbtn", href: congressLink, target: "_blank", rel: "noopener", text: "The bill on congress.gov ↗" }) : null,
+      ], "Defectors");
+    }
+    stage1();
   }
 
   // ---------------------------------------------------------------- Cryptoquote

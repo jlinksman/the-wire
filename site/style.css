@@ -865,3 +865,5 @@ select.tin { width: 100%; }
 .gm-pc.b { color: #0c0c0c; text-shadow: 0 0 2px #bbb; }
 .gm-frame { width: 100%; height: min(75vh, 620px); border: 1px solid var(--line, #333); border-radius: 4px; background: #111; }
 .gm-health summary { color: var(--text2); font-size: 0.84rem; cursor: pointer; }
+.gm-vote { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--line, #333); }
+.gm-vote > span { flex: 1; min-width: 0; }

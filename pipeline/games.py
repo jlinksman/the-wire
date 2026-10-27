@@ -14,6 +14,7 @@ Usage: python pipeline/games.py DATA_JSON OUT_JSON [--rosters DIR] [--date YYYY-
 from __future__ import annotations
 
 import argparse
+import os
 import hashlib
 import itertools
 import json
@@ -455,6 +456,91 @@ def connections(data, reg, rosters, seed, now, drops) -> dict | None:
     return None
 
 
+# ------------------------------------------------------------------ Defectors
+# Crossover roll calls only (passage, cloture, amendments, confirmations), each with a plain-words
+# "Yea meant". The page shows the result and the party split; Joe names who broke ranks. NY members
+# are always in play. Selection that balances the parties across the month happens in the Function.
+def legislator_index(rosters: Path | None) -> dict:
+    idx = {}
+    if rosters and (rosters / "legislators-current.json").exists():
+        for m in json.loads((rosters / "legislators-current.json").read_text()):
+            n, ids = m.get("name", {}), m.get("id", {})
+            term = (m.get("terms") or [{}])[-1]
+            info = {"name": n.get("official_full") or f"{n.get('first')} {n.get('last')}", "last": n.get("last"),
+                    "nick": n.get("nickname"), "bioguide": ids.get("bioguide"), "state": term.get("state"),
+                    "district": term.get("district"), "party": term.get("party")}
+            for k in (ids.get("bioguide"), ids.get("lis")):
+                if k:
+                    idx[k] = info
+    return idx
+
+
+BILL_STOP = set("""united states congress congressional providing purposes amend amended amendment chapter title
+section other certain disapproval relating federal national public senate house resolution joint support
+american america through under about their which would""".split())
+
+
+def defectors(data, votes, legis, now, drops) -> list[dict]:
+    import rollcalls
+    cut = (now - timedelta(days=45)).date().isoformat()
+    week = " ".join(f"{it.get('title', '')}" for it in data.get("items", []) if (parse_t(it.get("t")) or now) >= now - timedelta(days=10))
+    wk = set(re.findall(r"[a-z]{5,}", fold(week)))
+    items, threads, story_of = index(data)
+    out = []
+    for v in votes:
+        if v["date"] < cut:
+            continue
+        meant = rollcalls.yea_meant(v["question"], v["desc"])
+        if not meant:
+            drops.append(("defectors", "procedural vote"))
+            continue
+        why = blocked(v["desc"])
+        if why:
+            drops.append(("defectors", why))
+            continue
+        tally, broke = {}, []
+        for party in ("R", "D", "Republican", "Democrat", "Democratic"):
+            ms = [m for m in v["members"] if m["party"] == party and m["vote"] in ("Yea", "Nay")]
+            if len(ms) < 10:
+                continue
+            p = party[0]
+            ye = [m for m in ms if m["vote"] == "Yea"]
+            na = [m for m in ms if m["vote"] == "Nay"]
+            tally[p] = {"yea": len(ye), "nay": len(na)}
+            minority = ye if len(ye) < len(na) else na
+            if 1 <= len(minority) <= max(1, int(0.15 * len(ms))):
+                broke += [{"name": m["name"], "last": m["last"], "party": p, "state": m["state"], "vote": m["vote"],
+                           "accept": sorted({fold(m["name"]), fold(m["last"] or "")} - {""})} for m in minority]
+        if not broke:
+            drops.append(("defectors", "party-line vote"))
+            continue
+        if len(broke) > 8:
+            drops.append(("defectors", "too many defectors to name"))
+            continue
+        ny = [{"name": m["name"], "party": (m["party"] or "?")[0], "vote": m["vote"],
+               "district": (legis.get(m["id"]) or {}).get("district")} for m in v["members"] if m["state"] == "NY" and m["vote"] in ("Yea", "Nay")]
+        words = set(re.findall(r"[a-z]{5,}", fold(v["desc"]))) - BILL_STOP
+        overlap = len(words & wk)
+        hit = None
+        if overlap >= 2:
+            for it in data.get("items", []):
+                if len(words & set(re.findall(r"[a-z]{5,}", fold(it.get("title", ""))))) >= 3:
+                    hit = it
+                    break
+        ctx = context_for(hit, story_of, threads) if hit else {"story": None, "thread": None, "thread_title": None, "followed": False}
+        bill = v["bill"]
+        out.append({
+            "id": f"d{v['chamber'][0]}{v['date'][:4]}{v['num']}", "chamber": v["chamber"], "num": v["num"], "date": v["date"],
+            "question": v["question"], "yea_meant": meant, "result": v["result"], "bill": bill, "desc": v["desc"][:300],
+            "tally": tally, "defectors": broke, "defect_party": sorted({b["party"] for b in broke}),
+            "ny": ny[:30], "link": v["link"], "in_news": bool(hit), "news_title": hit.get("title") if hit else None,
+            "news_link": hit.get("link") if hit else None, **ctx,
+        })
+    out.sort(key=lambda x: x["date"], reverse=True)
+    out.sort(key=lambda x: not x["in_news"])
+    return out[:12]
+
+
 # ------------------------------------------------------------------ run
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
@@ -463,6 +549,8 @@ def main(argv=None) -> int:
     ap.add_argument("--rosters", type=Path)
     ap.add_argument("--date")
     ap.add_argument("--hashes", type=Path, help="puzzle-hash log (Actions cache): hashes only, never results")
+    ap.add_argument("--votes", type=Path, help="roll-call cache directory (Actions cache)")
+    ap.add_argument("--fetch-votes", action="store_true", help="fetch new roll calls before generating")
     a = ap.parse_args(argv)
     load_words()
     now = datetime.now(timezone.utc)
@@ -491,14 +579,26 @@ def main(argv=None) -> int:
     wsi = fresh(who_said_it(data, reg, now, drops), "who_said_it")
     cq = fresh(cryptoquotes(wsi, seed, drops), "cryptoquote")
     grid = connections(data, reg, a.rosters, seed, now, drops)
+    dv, vote_errors = [], {}
+    if a.votes:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import rollcalls
+        if a.fetch_votes:
+            import requests
+            res = rollcalls.fetch(a.votes, requests.Session(), "TheWire/1.0 (personal news reader; " + os.environ.get("WIRE_CONTACT", "github") + ")", now)
+            vote_errors = res["errors"]
+            print(f"[games] roll calls: {res['house']} new House, {res['senate']} new Senate" + (f"; {res['errors']}" if res["errors"] else ""))
+        dv = fresh(defectors(data, rollcalls.parse(a.votes, legislator_index(a.rosters)), legislator_index(a.rosters), now, drops), "defectors")
+        for ch, err in vote_errors.items():
+            drops.append(("defectors", f"{ch} votes unavailable: {err}"))
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
-        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid,
-        "health": health(wsi, cq, grid, drops),
+        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv,
+        "health": health(wsi, cq, grid, drops, dv),
     }
     Path(a.out).write_text(json.dumps(pool, ensure_ascii=False, separators=(",", ":")))
     if a.hashes:                                   # offered today = used; never back within 90 days
-        for x in wsi + cq + ([grid] if grid else []):
+        for x in wsi + cq + dv + ([grid] if grid else []):
             used.setdefault(x["id"], day)
         a.hashes.write_text(json.dumps(used))
     print(f"[games] {day}: who said it {len(wsi)}, cryptoquote {len(cq)}, connections {'1 (shadow)' if grid else 'dropped'}; "
@@ -506,9 +606,9 @@ def main(argv=None) -> int:
     return 0
 
 
-def health(wsi, cq, grid, drops) -> list[dict]:
+def health(wsi, cq, grid, drops, dv=()) -> list[dict]:
     rows = []
-    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0)):
+    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv))):
         why = {}
         for g, r in drops:
             if g == game:

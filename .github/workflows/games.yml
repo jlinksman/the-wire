@@ -24,6 +24,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
+      WIRE_CONTACT: ${{ github.server_url }}/${{ github.repository }}
       UA: "TheWire/1.0 (personal news reader; ${{ github.server_url }}/${{ github.repository }})"
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +64,8 @@ jobs:
       - name: Generate the pool
         run: |
           mkdir -p dist
-          python pipeline/games.py data.json dist/games-today.json --rosters .games/rosters --hashes .games/hashes.json
+          python pipeline/games.py data.json dist/games-today.json --rosters .games/rosters --hashes .games/hashes.json \
+            --votes .games/votes --fetch-votes
           rm -f data.json
 
       - name: Publish to Workers KV
