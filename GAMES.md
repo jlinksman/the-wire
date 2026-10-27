@@ -184,7 +184,7 @@ Listen queue every day.
 - **Chess** (Lichess CC0): monthly workflow keeps ~3,000 puzzles (popularity ≥80, ≥1,000 plays,
   low deviation, stratified by rating and theme). The opponent's first move animates, then Joe
   solves; only-move lines, any mate-in-1 accepted. Themes rotate.
-  chess.js (BSD) + cm-chessboard (MIT) with public-domain/CC0 pieces; tap-tap moves.
+  chess.js (BSD) with the Cburnett piece set from Wikimedia Commons (CC BY-SA 3.0, via cm-chessboard); drag or tap-tap moves.
 - **Tactics** (Into the Breach-style, one turn): 6×6 board, 2–3 units, telegraphed enemy attacks,
   hazards, pushes. Generator brute-forces every action order and keeps boards with 1–3 winning
   lines (after merging move orders that reach the same outcome) where the greedy line loses.
