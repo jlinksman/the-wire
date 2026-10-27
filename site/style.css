@@ -887,7 +887,7 @@ select.tin { width: 100%; }
 .gm-col { display: flex; flex-direction: column; gap: 6px; }
 .gm-col .chip.sel { outline: 2px solid var(--accent, #6cf); }
 .gm-col .chip[disabled] { opacity: 0.4; }
-.gm-map { width: 100%; height: auto; max-height: 60vh; background: var(--bg2, #111); border: 1px solid var(--line, #333); border-radius: 6px; touch-action: pinch-zoom; }
+.gm-map { width: 100%; height: auto; max-height: 60vh; background: #111; border: 1px solid var(--line, #333); border-radius: 6px; touch-action: pinch-zoom; }
 .gm-shape { fill: #2a2f36; stroke: #6b7480; stroke-width: 0.6; vector-effect: non-scaling-stroke; cursor: pointer; }
 .gm-shape.pick { fill: #4b6fa8; }
 .gm-shape.target { fill: #d9a441; }
@@ -914,3 +914,8 @@ select.tin { width: 100%; }
 .gm-cell2.o { color: var(--good, #5c5); font-weight: 700; }
 .gm-clues li { margin: 4px 0; cursor: pointer; }
 .gm-clues li.struck { text-decoration: line-through; opacity: 0.5; }
+.gm-conn { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0; }
+.gm-tile { min-height: 62px; padding: 4px; border-radius: 6px; background: rgba(127, 127, 127, 0.16); color: inherit; border: 1px solid var(--line, #333); font-size: 0.72rem; font-weight: 600; line-height: 1.15; word-break: break-word; }
+.gm-tile.sel { background: #4b6fa8; color: #fff; }
+.gm-group { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 6px; margin: 4px 0; color: #111; font-size: 0.8rem; }
+.gm-group.yellow { background: #e6c35c; } .gm-group.green { background: #8fbf6a; } .gm-group.blue { background: #8fb0dc; } .gm-group.purple { background: #b48ccc; }

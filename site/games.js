@@ -122,6 +122,7 @@
     if (s.game === "logic") return (LOGIC_NAMES[p.game] || p.game) + " · tier " + p.tier;
     if (s.game === "chess") { const th = (p.themes || []).filter((t) => !/^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality)$/.test(t)).slice(0, 2); return "Puzzle rated " + p.rating + (th.length ? " · " + th.join(", ") : ""); }
     if (s.game === "keyed") return "Friday cipher · the keyword feeds the meta";
+    if (s.game === "connections") return "Sixteen names from the week, four groups";
     if (s.game === "casefile") return "Logic grid · tier " + p.tier + " · " + (p.clues || []).length + " clues";
     if (s.game === "meta") return (p.feeders || []).length + " feeders from the week · " + p.category;
     if (s.game === "patristocrat") return "Sunday long cipher · five-letter groups";
@@ -188,6 +189,7 @@
     if (s.game === "timeline") return timelineGame(s);
     if (s.game === "meta") return metaGame(s);
     if (s.game === "casefile") return caseFile(s);
+    if (s.game === "connections") return connections(s);
     if (s.game === "beacon_agenda") return agendaGame(s);
     if (s.game === "friday_quiz") return fridayQuiz(s);
     openPuzzles();
@@ -641,6 +643,62 @@
         } }),
         el("button", { class: "unsave", text: "Give up", onclick: () => finish(false) })),
       backBtn()], "Case file");
+  }
+
+  // ---------------------------------------------------------------- Connections
+  // Sixteen names from the week; find the four groups. Four mistakes, "one away", repeat guesses
+  // are free, shuffle and deselect. Group names are facts and double as the reveal; the "Your
+  // herring" card names the decoy that caught you.
+  function connections(s) {
+    const P = s.puzzle;
+    const t0 = Date.now();
+    const S = get(PKEY + P.id, null) || { solved: [], mistakes: 0, tried: [], order: shuffle(P.board, Date.now()) };
+    let sel = new Set();
+    const save = () => put(PKEY + P.id, S);
+    const groupOf = (x) => P.groups.find((g) => g.members.includes(x));
+    const grid = el("div", { class: "gm-conn" });
+    const done = el("div", {});
+    const msg = el("p", { class: "fine", text: "" });
+    const dots = el("span", { class: "asrc", text: "" });
+    function draw() {
+      done.replaceChildren(...S.solved.map((c) => { const g = P.groups.find((x) => x.color === c); return el("div", { class: "gm-group " + c }, el("b", { text: g.name }), el("span", { text: g.members.join(" · ") })); }));
+      const left = S.order.filter((x) => !S.solved.some((c) => P.groups.find((g) => g.color === c).members.includes(x)));
+      grid.replaceChildren(...left.map((x) => el("button", { class: "gm-tile" + (sel.has(x) ? " sel" : ""), text: x, onclick: () => { if (sel.has(x)) sel.delete(x); else if (sel.size < 4) sel.add(x); draw(); } })));
+      dots.textContent = "Mistakes left: " + "●".repeat(4 - S.mistakes) + "○".repeat(S.mistakes);
+    }
+    function submit() {
+      if (sel.size !== 4) return;
+      const pick = [...sel].sort();
+      const sig = pick.join("|");
+      if (S.tried.includes(sig)) { msg.textContent = "Already tried that one (no penalty)."; return; }
+      S.tried.push(sig);
+      const counts = {};
+      pick.forEach((x) => { const g = groupOf(x); counts[g.color] = (counts[g.color] || 0) + 1; });
+      const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+      if (best[1] === 4) { S.solved.push(best[0]); sel = new Set(); msg.textContent = ""; }
+      else { S.mistakes += 1; msg.textContent = best[1] === 3 ? "One away…" : "Not a group."; }
+      save(); draw();
+      if (S.solved.length === 4) finish(true);
+      else if (S.mistakes >= 4) finish(false);
+    }
+    function finish(ok) {
+      store.removeItem(PKEY + P.id);
+      const res = { ok, score: ok ? 4 - S.mistakes : S.solved.length, ms: Date.now() - t0, hints: S.mistakes, purple_first: S.solved[0] === "purple" || S.solved[0] === "blue" };
+      send(Object.assign({ slot: s.slot, game: "connections", puzzle: P.id, items: [] }, res));
+      markDone(s.slot, res);
+      S.solved = P.groups.map((g) => g.color);
+      draw();
+      grid.replaceChildren();
+      const herring = (P.decoys || [])[0];
+      msg.replaceChildren(reveal({ ok, verdict: ok ? (S.mistakes ? "Solved with " + S.mistakes + " mistake" + (S.mistakes > 1 ? "s" : "") : "Perfect") : "Out of mistakes",
+        keep: herring ? "Your herring: " + herring + " — a real pattern, but not one of the four." : null, meta: "Groups come from complete public rosters and committee lists.", next: earlierNext() }));
+    }
+    draw();
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Connections" }), el("p", { class: "fine", text: "Find four groups of four. Group names are facts." }),
+      done, grid, el("div", { class: "sactions" }, dots,
+        el("button", { class: "chip", text: "Shuffle", onclick: () => { S.order = shuffle(S.order, Date.now()); save(); draw(); } }),
+        el("button", { class: "chip", text: "Deselect", onclick: () => { sel = new Set(); draw(); } }),
+        el("button", { class: "sbtn primary", text: "Submit", onclick: submit })), msg, backBtn()], "Connections");
   }
 
   // ---------------------------------------------------------------- The Docket

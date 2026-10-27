@@ -11,7 +11,7 @@ const KEY = "games.json";
 const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 const WRITE_CAP = 30;
 const CALLBACK_CAP = 3;
-const CONNECTIONS_LIVE = false;      // shadow mode until 10 of 14 days without a drop (GAMES.md)
+const CONNECTIONS_LIVE = false;      // force on; otherwise the pool turns it on after 10 of 14 days without a drop (GAMES.md)
 
 // Tatham puzzles at each game's top tier that needs no guessing, by Joe's ladder tier (1–3).
 // Params are Tatham game parameter strings; the seed comes from the date, so a reload is the same puzzle.
@@ -102,7 +102,7 @@ function assemble(st, pool, chess, today) {
   const tier = (g) => ((st.ladder[g] || {}).tier || (g === "cryptoquote" && weekday(today) === 1 ? 1 : 2));
 
   // Slot 1: the daily grid. Connections is in shadow mode, so the grid slot holds the other brain break.
-  slots.push(Object.assign({ slot: 1, label: "Grid" }, CONNECTIONS_LIVE && pool && pool.connections_shadow
+  slots.push(Object.assign({ slot: 1, label: "Grid" }, (CONNECTIONS_LIVE || (pool && pool.connections_live)) && pool && pool.connections_shadow && !st.served[pool.connections_shadow.id]
     ? { game: "connections", puzzle: pool.connections_shadow } : brainBreak(other, st, chess, today, rng, health)));
 
   // Slot 2: the news slot, rotating by weekday (GAMES.md): Tue Defectors; the rest of the rotation

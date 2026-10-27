@@ -1276,6 +1276,17 @@ def main(argv=None) -> int:
             pool["health"].append({"game": "wirequiz", "made": 0, "dropped": 1, "why": [[f"{type(exc).__name__}", 1]]})
             print(f"[games] audio quiz skipped: {type(exc).__name__}")
     Path(a.out).write_text(json.dumps(pool, ensure_ascii=False, separators=(",", ":")))
+    # Connections shadow mode (GAMES.md): it goes live once the generator has made a board on 10 of
+    # the last 14 days. The log (Actions cache) holds only made/dropped per day.
+    if a.hashes:
+        lp = a.hashes.parent / "connections_log.json"
+        log_ = json.loads(lp.read_text()) if lp.exists() else {}
+        log_[day] = 1 if grid else 0
+        cut14 = (date.fromisoformat(day) - timedelta(days=13)).isoformat()
+        log_ = {d: v for d, v in log_.items() if d >= cut14}
+        lp.write_text(json.dumps(log_))
+        pool["connections_live"] = sum(log_.values()) >= 10
+        pool["connections_record"] = f"{sum(log_.values())} of {len(log_)} days"
     if a.hashes:                                   # offered today = used; never back within 90 days
         for x in wsi + cq + dv + ldg + dk + tl + ([grid] if grid else []):
             used.setdefault(x["id"], day)
