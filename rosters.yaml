@@ -1,0 +1,226 @@
+# rosters.yaml — hand-checked team rosters for the Puzzle Page library (GAMES.md). Public facts only.
+rosters:
+  - id: nycfc_2021_cup
+    title: "NYCFC — 2021 MLS Cup final"
+    group: Sports
+    as_of: "2021-12-11"
+    sources:
+      - "https://www.90min.com/posts/nycfc-2021-mls-cup-winning-team-where-are-they-now"
+      - "https://www.soccerwire.com/news/new-york-city-fc-wins-first-mls-cup-in-club-history/"
+      - "https://www.mlssoccer.com/news/mls-cup-2021-lineups-sebastian-blanco-returns-for-portland-timbers-against-nycfc"
+    note: "Full gameday 20: starting XI plus the nine-man bench. Subs used: Tajouri-Shradi (80' for Rodríguez), Amundsen (92' for Thórarinsson), Talles Magno (extra time for Medina). The full XI and bench come from 90min. SoccerWire confirms the subs used, and MLSsoccer.com confirms Castellanos and Thórarinsson in the XI. The official MLS and club match pages could not be fetched."
+    items:
+      - {answer: "Sean Johnson", clue: "GK, starter", aliases: ["Johnson"]}
+      - {answer: "Tayvon Gray", clue: "RB, starter", aliases: ["Gray"]}
+      - {answer: "Maxime Chanot", clue: "CB, starter", aliases: ["Chanot"]}
+      - {answer: "Alexander Callens", clue: "CB, starter (scored the winning penalty)", aliases: ["Callens", "Alex Callens"]}
+      - {answer: "Gudmundur Thórarinsson", clue: "LB, starter", aliases: ["Gudmundur Thorarinsson", "Guðmundur Þórarinsson", "Gudi Thórarinsson", "Gudi", "Thorarinsson"]}
+      - {answer: "James Sands", clue: "CM, starter", aliases: ["Sands"]}
+      - {answer: "Alfredo Morales", clue: "CM, starter", aliases: ["Morales"]}
+      - {answer: "Maxi Moralez", clue: "CAM, starter", aliases: ["Maximiliano Moralez", "Moralez"]}
+      - {answer: "Jesús Medina", clue: "RW, starter", aliases: ["Jesus Medina", "Medina"]}
+      - {answer: "Valentín Castellanos", clue: "ST, starter", aliases: ["Taty Castellanos", "Valentin Castellanos", "Taty", "Castellanos"]}
+      - {answer: "Santiago Rodríguez", clue: "LW, starter", aliases: ["Santi Rodríguez", "Santiago Rodriguez", "Santi Rodriguez"]}
+      - {answer: "Ismael Tajouri-Shradi", clue: "FW, sub used (80')", aliases: ["Tajouri-Shradi", "Ismael Tajouri", "Tajouri"]}
+      - {answer: "Malte Amundsen", clue: "DF, sub used (92')", aliases: ["Amundsen"]}
+      - {answer: "Talles Magno", clue: "FW, sub used (extra time)", aliases: ["Magno", "Talles"]}
+      - {answer: "Luis Barraza", clue: "GK, unused sub", aliases: ["Barraza"]}
+      - {answer: "Tony Rocha", clue: "MF, unused sub", aliases: ["Rocha"]}
+      - {answer: "Gedion Zelalem", clue: "MF, unused sub", aliases: ["Zelalem"]}
+      - {answer: "Nicolás Acevedo", clue: "MF, unused sub", aliases: ["Nicolas Acevedo", "Acevedo"]}
+      - {answer: "Thiago Andrade", clue: "FW, unused sub", aliases: ["Andrade"]}
+      - {answer: "Héber", clue: "FW, unused sub", aliases: ["Heber", "Héber Araujo dos Santos"]}
+
+  - id: nycfc_2026_roster
+    title: "NYCFC — first-team roster, October 2026"
+    group: Sports
+    as_of: "2026-10-27"
+    status: unverified
+    sources:
+      - "https://en.wikipedia.org/wiki/2026_New_York_City_FC_season"
+      - "https://www.mlssoccer.com/news/james-sands-returns-to-new-york-city-fc-from-fc-st-pauli"
+      - "https://www.mlssoccer.com/news/new-york-city-fc-sign-luighi-on-loan-from-palmeiras"
+      - "https://fieldlevelmedia.com/?p=493417"
+    note: "UNVERIFIED. The official roster page (newyorkcityfc.com/roster) could not be fetched. This list combines the Wikipedia 2026 season squad table (dated about April 2026) with three later moves from MLSsoccer.com and Field Level Media: James Sands back from his St. Pauli loan (June 18, 2026), Luighi on loan from Palmeiras (summer 2026), and Matt Miazga claimed off waivers (Sept 22, 2026). Players out on loan are left off (Mijatović at Braunschweig through 2026, Julián Fernández, Ilenič). Other summer moves may be missing. Nico Fernández Mercau asked for a transfer in July 2026, but no move was found. Shirt numbers come from Wikipedia. Check against the club page before publishing."
+    items:
+      - {answer: "Matt Freese", clue: "GK, #49", aliases: ["Freese"]}
+      - {answer: "Greg Ranjitsingh", clue: "GK, #18", aliases: ["Ranjitsingh"]}
+      - {answer: "Tomás Romero", clue: "GK, #30", aliases: ["Tomas Romero", "Romero"]}
+      - {answer: "Mac Learned", clue: "GK, #31", aliases: ["Learned"]}
+      - {answer: "Nico Cavallo", clue: "DF, #2", aliases: ["Cavallo"]}
+      - {answer: "Kai Trewin", clue: "DF, #5", aliases: ["Trewin"]}
+      - {answer: "Thiago Martins", clue: "DF, #13 (captain)", aliases: ["Martins"]}
+      - {answer: "Strahinja Tanasijević", clue: "DF, #19", aliases: ["Strahinja Tanasijevic", "Tanasijević", "Tanasijevic"]}
+      - {answer: "Kevin O'Toole", clue: "DF, #22", aliases: ["O'Toole", "OToole"]}
+      - {answer: "Max Murray", clue: "DF, #23", aliases: ["Murray"]}
+      - {answer: "Tayvon Gray", clue: "DF, #24", aliases: ["Gray"]}
+      - {answer: "Raul Gustavo", clue: "DF, #34", aliases: ["Raúl Gustavo", "Gustavo"]}
+      - {answer: "Drew Baiera", clue: "DF, #38", aliases: ["Baiera"]}
+      - {answer: "Kamran Acito", clue: "DF, #45", aliases: ["Acito"]}
+      - {answer: "Matt Miazga", clue: "DF, claimed off waivers Sept 2026", aliases: ["Miazga"]}
+      - {answer: "James Sands", clue: "MF, #6", aliases: ["Sands"]}
+      - {answer: "Nicolás Fernández Mercau", clue: "MF, #7", aliases: ["Nico Fernández", "Nico Fernandez", "Nicolas Fernandez", "Fernández Mercau", "Fernandez Mercau"]}
+      - {answer: "Andrés Perea", clue: "MF, #8", aliases: ["Andres Perea", "Perea"]}
+      - {answer: "Maxi Moralez", clue: "MF, #10", aliases: ["Maximiliano Moralez", "Moralez"]}
+      - {answer: "Kevin Pierre", clue: "MF, #15", aliases: ["Pierre"]}
+      - {answer: "Hannes Wolf", clue: "MF, #17", aliases: ["Wolf"]}
+      - {answer: "Aiden O'Neill", clue: "MF, #21", aliases: ["O'Neill", "ONeill"]}
+      - {answer: "Cooper Flax", clue: "MF, #27", aliases: ["Flax"]}
+      - {answer: "Máximo Carrizo", clue: "MF, #29", aliases: ["Maximo Carrizo", "Carrizo"]}
+      - {answer: "Jonathan Shore", clue: "MF, #32", aliases: ["Shore"]}
+      - {answer: "Jacob Arroyave", clue: "MF, #47", aliases: ["Arroyave"]}
+      - {answer: "Keaton Parks", clue: "MF, #55", aliases: ["Parks"]}
+      - {answer: "Talles Magno", clue: "FW, #11", aliases: ["Magno", "Talles"]}
+      - {answer: "Alonso Martínez", clue: "FW, #16", aliases: ["Alonso Martinez"]}
+      - {answer: "Agustín Ojeda", clue: "FW, #26", aliases: ["Agustin Ojeda", "Ojeda"]}
+      - {answer: "Zidane Yáñez", clue: "FW, #36", aliases: ["Zidane Yanez", "Yáñez", "Yanez"]}
+      - {answer: "Arnau Farnós", clue: "FW, #87", aliases: ["Arnau Farnos", "Farnós", "Farnos"]}
+      - {answer: "Malachi Jones", clue: "FW, #88", aliases: ["Jones"]}
+      - {answer: "Seymour Garfield-Reid", clue: "FW, #99", aliases: ["Garfield-Reid"]}
+      - {answer: "Luighi", clue: "FW, on loan from Palmeiras", aliases: ["Luighi Hanri Sousa Santos"]}
+
+  - id: israel_2026_sep_nations_league
+    title: "Israel — Nations League squad, Sept/Oct 2026"
+    group: Sports
+    as_of: "2026-09-17"
+    sources:
+      - "https://www.c14.co.il/article/1706245"
+      - "https://www.one.co.il/Article/533664.html"
+      - "https://sport1.maariv.co.il/israeli-soccer/ligat-haal/article/1950940/"
+      - "https://www.ynet.co.il/sport/israelisoccer/article/ryve1qkyfl"
+    note: "The 27-man squad coach Ran Ben Shimon named on Sept 17, 2026 for the 2026-27 UEFA Nations League (League B) window: Austria 3-1 Israel (Sept 24), Israel 0-3 Ireland (Sept 27), Israel 0-0 Kosovo (Oct 1), Ireland 1-1 Israel (Oct 4). It is the most recent call-up found, since the November window hasn't been announced. Channel 14 and ONE agree on all 27 names. The Sport1 text left out Anan Khalaili, but ynet and the other two include him. The IFA's own site (football.org.il) could not be fetched. Positions follow Channel 14's GK/DF/MF/FW split. Aliases cover common English transliterations."
+    items:
+      - {answer: "Daniel Peretz", clue: "GK", aliases: ["דניאל פרץ", "D. Peretz"]}
+      - {answer: "Omri Glazer", clue: "GK", aliases: ["עומרי גלזר", "Glazer"]}
+      - {answer: "Asaf Tzur", clue: "GK", aliases: ["אסף צור", "Assaf Tzur", "Asaf Zur", "Tzur"]}
+      - {answer: "Eli Dasa", clue: "DF", aliases: ["אלי דסה", "Dasa"]}
+      - {answer: "Guy Mizrahi", clue: "DF", aliases: ["גיא מזרחי", "Guy Mizrachi", "Mizrahi", "Mizrachi"]}
+      - {answer: "Roy Revivo", clue: "DF", aliases: ["רוי רביבו", "Roy Rivivo", "Revivo"]}
+      - {answer: "Anan Khalaili", clue: "DF", aliases: ["ענאן חלאילי", "Anan Halaili", "Khalaili", "Halaili"]}
+      - {answer: "Idan Nachmias", clue: "DF", aliases: ["עידן נחמיאס", "Idan Nahmias", "Nachmias", "Nahmias"]}
+      - {answer: "Ilay Feingold", clue: "DF", aliases: ["עילי פיינגולד", "Ilai Feingold", "Eli Feingold", "Feingold"]}
+      - {answer: "Raz Shlomo", clue: "DF", aliases: ["רז שלמה", "Shlomo"]}
+      - {answer: "Nikita Stoinov", clue: "DF", aliases: ["ניקיטה סטוינוב", "Nikita Stoynov", "Nikita Stoyanov", "Stoinov"]}
+      - {answer: "Noam Shteifman", clue: "DF (first call-up)", aliases: ["נעם שטייפמן", "Noam Shteipman", "Noam Steifman", "Shteifman"]}
+      - {answer: "Yarin Levi", clue: "MF", aliases: ["ירין לוי", "Yarin Levy"]}
+      - {answer: "Eliel Peretz", clue: "MF", aliases: ["אליאל פרץ", "E. Peretz"]}
+      - {answer: "Gabi Kanikovski", clue: "MF", aliases: ["גבי קניקובסקי", "Gabi Kanikovsky", "Kanikovski", "Kanikovsky"]}
+      - {answer: "Mohammad Abu Fani", clue: "MF", aliases: ["מוחמד אבו פאני", "Mohammed Abu Fani", "Muhammad Abu Fani", "Abu Fani"]}
+      - {answer: "Omri Gandelman", clue: "MF", aliases: ["עמרי גאנדלמן", "Gandelman"]}
+      - {answer: "Eitan Azoulay", clue: "MF", aliases: ["איתן אזולאי", "Eitan Azulai", "Azoulay"]}
+      - {answer: "Dor Peretz", clue: "MF", aliases: ["דור פרץ"]}
+      - {answer: "Oscar Gloukh", clue: "MF", aliases: ["אוסקר גלוך", "Oscar Gloch", "Oskar Gloukh", "Gloukh"]}
+      - {answer: "Idan Toklomati", clue: "FW", aliases: ["עידן טוקלומטי", "Idan Tuklomati", "Toklomati"]}
+      - {answer: "Tai Baribo", clue: "FW", aliases: ["תאי בריבו", "Baribo"]}
+      - {answer: "Liel Abada", clue: "FW", aliases: ["ליאל עבדה", "Liel Abda", "Abada"]}
+      - {answer: "Manor Solomon", clue: "FW", aliases: ["מנור סולומון", "Solomon"]}
+      - {answer: "Dor Turgeman", clue: "FW", aliases: ["דור תורג'מן", "Turgeman"]}
+      - {answer: "Sayed Abu Farchi", clue: "FW", aliases: ["סייד אבו פרחי", "Saied Abu Farchi", "Sayed Abu Farhi", "Abu Farchi"]}
+      - {answer: "Yarden Shua", clue: "FW", aliases: ["ירדן שועה", "Jordan Shua", "Shua"]}
+
+  - id: rangers_1994_cup
+    title: "Rangers — 1994 Stanley Cup playoffs"
+    group: Sports
+    as_of: "1994-06-14"
+    sources:
+      - "https://www.hockey-reference.com/playoffs/1994-new-york-islanders-vs-new-york-rangers-eastern-conference-quarter-finals.html"
+      - "https://www.hockey-reference.com/playoffs/1994-new-york-rangers-vs-washington-capitals-eastern-conference-semi-finals.html"
+      - "https://www.hockey-reference.com/playoffs/1994-new-jersey-devils-vs-new-york-rangers-eastern-conference-finals.html"
+      - "https://www.hockey-reference.com/playoffs/1994-new-york-rangers-vs-vancouver-canucks-stanley-cup-final.html"
+    note: "All 23 players who played at least one 1994 playoff game for the Rangers. The list is the union of Hockey-Reference's stats tables for all four series. The team-season page (hockey-reference.com/teams/NYR/1994.html) could not be fetched. Positions are the players' usual ones."
+    items:
+      - {answer: "Mike Richter", clue: "G", aliases: ["Richter"]}
+      - {answer: "Glenn Healy", clue: "G", aliases: ["Healy"]}
+      - {answer: "Brian Leetch", clue: "D (Conn Smythe winner)", aliases: ["Leetch"]}
+      - {answer: "Sergei Zubov", clue: "D", aliases: ["Sergey Zubov", "Zubov"]}
+      - {answer: "Jeff Beukeboom", clue: "D", aliases: ["Beukeboom"]}
+      - {answer: "Kevin Lowe", clue: "D", aliases: ["Lowe"]}
+      - {answer: "Alexander Karpovtsev", clue: "D", aliases: ["Alexander Karpovtsov", "Karpovtsev", "Karpovtsov", "Karpo"]}
+      - {answer: "Doug Lidster", clue: "D", aliases: ["Lidster"]}
+      - {answer: "Jay Wells", clue: "D", aliases: ["Wells"]}
+      - {answer: "Mark Messier", clue: "C (captain)", aliases: ["Messier", "Moose"]}
+      - {answer: "Sergei Nemchinov", clue: "C", aliases: ["Sergey Nemchinov", "Nemchinov"]}
+      - {answer: "Craig MacTavish", clue: "C", aliases: ["MacTavish"]}
+      - {answer: "Eddie Olczyk", clue: "C/LW", aliases: ["Ed Olczyk", "Olczyk"]}
+      - {answer: "Adam Graves", clue: "LW", aliases: ["Graves"]}
+      - {answer: "Esa Tikkanen", clue: "LW", aliases: ["Tikkanen"]}
+      - {answer: "Stéphane Matteau", clue: "LW", aliases: ["Stephane Matteau", "Matteau"]}
+      - {answer: "Greg Gilbert", clue: "LW", aliases: ["Gilbert"]}
+      - {answer: "Nick Kypreos", clue: "LW", aliases: ["Kypreos"]}
+      - {answer: "Alexei Kovalev", clue: "RW", aliases: ["Alex Kovalev", "Kovalev"]}
+      - {answer: "Steve Larmer", clue: "RW", aliases: ["Larmer"]}
+      - {answer: "Brian Noonan", clue: "RW", aliases: ["Noonan"]}
+      - {answer: "Glenn Anderson", clue: "RW", aliases: ["Anderson"]}
+      - {answer: "Joe Kocur", clue: "RW", aliases: ["Kocur"]}
+
+  - id: mets_1986_ws
+    title: "Mets — 1986 World Series roster"
+    group: Sports
+    as_of: "1986-10-27"
+    sources:
+      - "https://www.mlb.com/mets/news/mets-1986-world-series-where-are-they-now/c-155569738"
+      - "https://en.wikipedia.org/wiki/Ed_Hearn_(baseball)"
+      - "https://www.amny.com/sports/mets-1986-looking-back-at-the-players-who-won-world-series-1-11842833"
+    note: "The 24-man World Series roster. Rosters were 24 players in 1986, not 25. MLB.com calls it a '24-man World Series roster' and names Randy Niemann and Ed Hearn as the only two who didn't play. Wikipedia confirms Hearn was on the roster. amNY confirms Barry Lyons was not on the postseason roster and George Foster had been released in August. The Baseball-Reference series page could not be fetched."
+    items:
+      - {answer: "Gary Carter", clue: "C", aliases: ["Carter", "The Kid"]}
+      - {answer: "Ed Hearn", clue: "C (did not play)", aliases: ["Hearn"]}
+      - {answer: "Keith Hernandez", clue: "1B", aliases: ["Hernandez", "Mex"]}
+      - {answer: "Wally Backman", clue: "2B", aliases: ["Backman"]}
+      - {answer: "Tim Teufel", clue: "2B", aliases: ["Teufel"]}
+      - {answer: "Rafael Santana", clue: "SS", aliases: ["Santana"]}
+      - {answer: "Kevin Elster", clue: "SS", aliases: ["Elster"]}
+      - {answer: "Ray Knight", clue: "3B (Series MVP)", aliases: ["Knight"]}
+      - {answer: "Howard Johnson", clue: "3B/SS", aliases: ["HoJo", "Johnson"]}
+      - {answer: "Darryl Strawberry", clue: "RF", aliases: ["Strawberry", "Straw"]}
+      - {answer: "Lenny Dykstra", clue: "CF", aliases: ["Dykstra", "Nails"]}
+      - {answer: "Mookie Wilson", clue: "LF/CF", aliases: ["William Wilson", "Mookie"]}
+      - {answer: "Kevin Mitchell", clue: "OF", aliases: ["Mitchell", "World"]}
+      - {answer: "Danny Heep", clue: "OF/DH", aliases: ["Heep"]}
+      - {answer: "Lee Mazzilli", clue: "OF/1B", aliases: ["Mazzilli", "Maz"]}
+      - {answer: "Ron Darling", clue: "SP", aliases: ["Darling"]}
+      - {answer: "Dwight Gooden", clue: "SP", aliases: ["Doc Gooden", "Gooden", "Doc"]}
+      - {answer: "Bob Ojeda", clue: "SP", aliases: ["Bobby Ojeda", "Ojeda"]}
+      - {answer: "Sid Fernandez", clue: "SP/RP", aliases: ["El Sid", "Fernandez"]}
+      - {answer: "Rick Aguilera", clue: "RP", aliases: ["Aguilera"]}
+      - {answer: "Roger McDowell", clue: "RP", aliases: ["McDowell"]}
+      - {answer: "Jesse Orosco", clue: "RP (closer)", aliases: ["Orosco"]}
+      - {answer: "Doug Sisk", clue: "RP", aliases: ["Sisk"]}
+      - {answer: "Randy Niemann", clue: "RP (did not play)", aliases: ["Niemann"]}
+
+  - id: usmnt_2026_wc
+    title: "USMNT — 2026 World Cup squad"
+    group: Sports
+    as_of: "2026-05-26"
+    sources:
+      - "https://ussoccer.com/stories/2026/05/usmnt/us-mens-national-team-head-coach-mauricio-pochettino-names-26-player-roster-for-fifa-world-cup-2026"
+      - "https://ussoccer.com/stories/2026/05/usmnt/behind-the-numbers-the-squad-representing-stars-and-stripes-at-fifa-world-cup-2026"
+      - "https://www.wabe.org/a-mix-of-veterans-and-newcomers-will-represent-the-united-states-at-the-world-cup/"
+    note: "The 26-man squad Mauricio Pochettino named on May 26, 2026. The full list with positions comes from WABE (NPR Atlanta). U.S. Soccer's 'Behind the Numbers' story names all 26 players, which matches WABE. No later injury replacement turned up in searches. Positions follow WABE's grouping. Clubs are as of the announcement."
+    items:
+      - {answer: "Matt Turner", clue: "GK", aliases: ["Turner"]}
+      - {answer: "Matt Freese", clue: "GK", aliases: ["Freese"]}
+      - {answer: "Chris Brady", clue: "GK", aliases: ["Brady"]}
+      - {answer: "Max Arfsten", clue: "DF", aliases: ["Arfsten"]}
+      - {answer: "Sergiño Dest", clue: "DF", aliases: ["Sergino Dest", "Dest"]}
+      - {answer: "Alex Freeman", clue: "DF", aliases: ["Freeman"]}
+      - {answer: "Mark McKenzie", clue: "DF", aliases: ["McKenzie"]}
+      - {answer: "Tim Ream", clue: "DF", aliases: ["Ream"]}
+      - {answer: "Chris Richards", clue: "DF", aliases: ["Richards"]}
+      - {answer: "Antonee Robinson", clue: "DF", aliases: ["Jedi", "Jedi Robinson", "A. Robinson"]}
+      - {answer: "Miles Robinson", clue: "DF", aliases: ["M. Robinson"]}
+      - {answer: "Joe Scally", clue: "DF", aliases: ["Scally"]}
+      - {answer: "Auston Trusty", clue: "DF", aliases: ["Trusty"]}
+      - {answer: "Tyler Adams", clue: "MF", aliases: ["Adams"]}
+      - {answer: "Sebastian Berhalter", clue: "MF", aliases: ["Berhalter"]}
+      - {answer: "Weston McKennie", clue: "MF", aliases: ["McKennie"]}
+      - {answer: "Cristian Roldan", clue: "MF", aliases: ["Roldan"]}
+      - {answer: "Brenden Aaronson", clue: "AM/W", aliases: ["Aaronson"]}
+      - {answer: "Christian Pulisic", clue: "AM/W", aliases: ["Pulisic", "Captain America"]}
+      - {answer: "Gio Reyna", clue: "AM/W", aliases: ["Giovanni Reyna", "Reyna"]}
+      - {answer: "Malik Tillman", clue: "AM/W", aliases: ["Tillman"]}
+      - {answer: "Tim Weah", clue: "AM/W", aliases: ["Timothy Weah", "Weah"]}
+      - {answer: "Alejandro Zendejas", clue: "AM/W", aliases: ["Alex Zendejas", "Zendejas"]}
+      - {answer: "Folarin Balogun", clue: "ST", aliases: ["Flo Balogun", "Balogun"]}
+      - {answer: "Ricardo Pepi", clue: "ST", aliases: ["Pepi"]}
+      - {answer: "Haji Wright", clue: "ST", aliases: ["Wright"]}

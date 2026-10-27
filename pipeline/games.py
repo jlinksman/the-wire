@@ -1108,6 +1108,13 @@ def _acc(name: str, extra=()) -> list[str]:
     return sorted({fold(name), fold(last), *[fold(x) for x in (first_last, last_two, *extra) if x]} - {""})
 
 
+# When a roster's team is in the week's news (folded text). Israel and the Rangers need sport context:
+# the country and the Texas club are in the news for other reasons.
+TEAM_NEWS = {"NYCFC": r"\bnycfc\b|new york city fc", "Mets": r"\bmets\b", "USMNT": r"\busmnt\b|men's national team|world cup",
+             "Rangers": r"new york rangers|rangers.{0,40}\b(nhl|hockey|stanley cup)\b",
+             "Israel": r"israel.{0,40}\b(soccer|football|nations league|national team)\b"}
+
+
 def library(rosters, scotus_rows, data, now) -> list[dict]:
     lp = yaml.safe_load((ROOT / "local_politics.yaml").read_text()) or {}
     off = lp.get("officials", {})
@@ -1151,9 +1158,20 @@ def library(rosters, scotus_rows, data, now) -> list[dict]:
             lists[2]["items"] += [dict(x, clue="U.S. Senator, NY") for x in nysen]
     lists.append({"id": "scotus", "group": "Courts", "title": "The Supreme Court", "items": [{"answer": n, "accept": _acc(n), "clue": "Chief Justice" if n == "John Roberts" else "Associate Justice"} for n in SCOTUS_NOW],
                   "source": "supremecourt.gov (every justice wrote an opinion this term)", "as_of": now.date().isoformat()})
+    # Team rosters (rosters.yaml, hand-checked). A list marked unverified stays out until it's checked.
+    rp = ROOT / "rosters.yaml"
+    for R in ((yaml.safe_load(rp.read_text()) or {}).get("rosters", []) if rp.exists() else []):
+        if R.get("status") == "unverified" or not R.get("items"):
+            continue
+        lists.append({"id": R["id"], "group": R.get("group", "Sports"), "title": R["title"], "as_of": R.get("as_of", "2026"),
+                      "source": "; ".join(R.get("sources", [])[:3]), "team": R["title"].split(" — ")[0],
+                      "items": [{"answer": x["answer"], "accept": _acc(x["answer"], x.get("aliases", [])), "clue": x.get("clue", "")} for x in R["items"]]})
     week = fold(" ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in data.get("items", [])))
     for L in lists:
         L["mentions"] = sum(1 for x in L["items"] if fold(x["answer"]) in week)
+        tn = TEAM_NEWS.get(L.get("team", ""))
+        if tn and re.search(tn, week):
+            L["mentions"] += 3                      # the team itself is in the news
         L.setdefault("as_of", "2026")
         L["n"] = len(L["items"])
     return [L for L in lists if L["items"]]
