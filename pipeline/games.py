@@ -1374,9 +1374,13 @@ def legal(data, now, drops, openleg_cache: Path | None = None) -> dict:
         if c.get("status") != "verified" or not c.get("news") or c["id"] in held:
             continue
         rx = re.compile(c["news"], re.I)
+        rx_not = re.compile(c["news_not"], re.I) if c.get("news_not") else None
         for it in data.get("items", []):
             t = parse_t(it.get("t"))
-            ny_ok = not c.get("news_ny") or it.get("scope") in ("local", "state") or re.search(r"New York|\bN\.?Y\.?\b|Hudson|Dutchess|Beacon|Albany", f"{it.get('title', '')} {it.get('summary', '')}")
+            both = f"{it.get('title', '')} {it.get('summary', '')}"
+            ny_ok = not c.get("news_ny") or it.get("scope") in ("local", "state") or re.search(r"New York|\bN\.?Y\.?\b|Hudson|Dutchess|Beacon|Albany", both)
+            if rx_not and rx_not.search(both):
+                continue                                  # a neighbouring statute's story, not this card's
             if t and t >= cut and ny_ok and rx.search(it.get("title") or "") and not blocked(it.get("title")):
                 featured.append({"card": c["id"], "title": it.get("title"), "link": it.get("link"), "outlet": it.get("source"),
                                  **context_for(it, story_of, threads)})

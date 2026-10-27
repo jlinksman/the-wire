@@ -6,7 +6,9 @@
 # - Every card is labeled NY / federal, carries a "verified" date, and is second-checked against
 #   the cited sources before it ships (status: verified). Draft cards never reach the page.
 # - One element per review item: each element gets its own schedule.
-# - News tie-in: `news` is a regex on story titles; a matching story features the card.
+# - News tie-in: `news` is a regex on story titles; a matching story features the card, unless
+#   `news_not` matches its title or summary (a story under a neighbouring statute: a CWA § 311
+#   response-plan rule is not § 301 or CERCLA; a household hazardous-waste drop-off is not RCRA § 7002).
 # - Syllabus order: environmental, then torts. Later areas wait for a month of use.
 #
 # Second check 2026-10-27 (independent reviewer, against statute text on nysenate.gov and Cornell
@@ -32,12 +34,14 @@ cards:
     openleg: [NAV/181, NAV/172]   # sections watched for amendments (Open Legislation)
     status: verified
     verified: "2026-10-27"
-    news: '\b(oil|petroleum|gasoline|fuel|heating oil|diesel) (spill|leak|discharge)|\bspill\b|navigation law'
+    news: '\b(oil|petroleum|gasoline|fuel|heating oil|diesel|kerosene) (spills?|leaks?|discharges?)\b|\bnavigation law\b'
+    news_not: '\b(clean water act|section 311|response plans?)\b'
     news_ny: true          # a NY statute: only New York stories feature it
+    note: "Liability is strict, without regard to fault. A discharge includes any intentional or unintentional act or omission (§ 172(8)). Under State v. Green, a landowner who can control activities on its property and has reason to believe petroleum will be stored there is a discharger; mere ownership is not enough."
     elements:
       - text: "A discharge of petroleum"
         keys: [discharge, petroleum, spill, release]
-      - text: "The defendant is a discharger (liability is strict, without regard to fault; a discharge includes any intentional or unintentional act or omission, § 172(8); under Green, a landowner who can control activities on its property and has reason to believe petroleum will be stored there is a discharger, but mere ownership is not enough)"
+      - text: "The defendant is a discharger"
         keys: [discharger, caused, control]
       - text: "Cleanup and removal costs, or direct or indirect damages"
         keys: [cleanup, removal, costs, damages]
@@ -56,7 +60,8 @@ cards:
     source: https://www.law.cornell.edu/uscode/text/42/9607
     status: verified
     verified: "2026-10-27"
-    news: '\b(cercla|superfund|hazardous (waste|substance)|contaminat\w+|remediation)\b'
+    news: '\b(cercla|superfund|cost recovery|potentially responsible part(y|ies))\b'
+    news_not: '\b(clean water act|section 311|response plans?|rcra)\b'
     note: "For a government plaintiff the costs need only be \"not inconsistent with\" the NCP, which puts the burden on the defendant (§ 9607(a)(4)(A) vs (B))."
     elements:
       - text: "The defendant is within one of the four classes of responsible parties"
@@ -79,7 +84,8 @@ cards:
     source: https://www.law.cornell.edu/uscode/text/42/9607
     status: verified
     verified: "2026-10-27"
-    news: '\b(cercla|superfund|responsible part(y|ies))\b'
+    news: '\b(cercla|superfund|potentially responsible part(y|ies)|PRPs?)\b'
+    news_not: '\b(clean water act|section 311|response plans?)\b'
     elements:
       - text: "The current owner or operator of the facility (or vessel)"
         keys: [current owner, current operator, current]
@@ -120,7 +126,8 @@ cards:
     source: https://www.law.cornell.edu/uscode/text/42/6972
     status: verified
     verified: "2026-10-27"
-    news: '\b(rcra|hazardous waste|solid waste|landfill)\b'
+    news: '\b(rcra|resource conservation and recovery act|imminent and substantial endangerment)\b'
+    news_not: '\b(household hazardous waste|collection (event|day)|drop-off)\b'
     note: "\"Substantial\" means serious (Cordiano). Ninety days' notice before suit, § 6972(b)(2)(A)."
     elements:
       - text: "The defendant is a person (including a past or present generator, transporter, or owner or operator of a treatment, storage or disposal facility)"
@@ -139,7 +146,8 @@ cards:
     source: https://www.law.cornell.edu/uscode/text/33/1311
     status: verified
     verified: "2026-10-27"
-    news: '\b(clean water act|stormwater|wastewater|npdes|discharge permit)\b'
+    news: '\b(npdes|spdes|discharge permit|unpermitted discharge|illegal discharge|waters of the united states|wotus|clean water act (permit|violation|lawsuit|suit|citizen suit|section 301))\b'
+    news_not: '\b(section 311|response plans?|oil spill prevention|hazardous substance facility)\b'
     note: "Sackett v. EPA (2023) narrowed \"navigable waters\"; County of Maui (2020) reaches the functional equivalent of a direct discharge through groundwater."
     elements:
       - text: "A discharge (an addition)"
@@ -221,7 +229,7 @@ cards:
     source: https://static.case.law/ny-2d/42/html/0440-01.html
     status: verified
     verified: "2026-10-27"
-    news: '\b(blasting|explosives|strict liability)\b'
+    news: '\b(blasting|abnormally dangerous|ultrahazardous)\b'
     note: "These are factors to weigh, not elements; no single factor decides it."
     elements:
       - text: "A high degree of risk of harm"
@@ -267,7 +275,7 @@ cards:
     source: https://www.law.cornell.edu/nyctap/080_0429.htm
     status: verified
     verified: "2026-10-27"
-    news: '\b(defam\w+|slander\w*)\b'
+    news: '\b(slander\w*|defamation per se)\b'
     note: "The law presumes damages in these four. \"Serious\" crime excludes minor offenses; Civil Rights Law § 77 codifies the unchastity category."
     elements:
       - text: "Charges the plaintiff with a serious crime"

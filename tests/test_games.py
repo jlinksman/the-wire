@@ -369,6 +369,24 @@ def test_friday_quiz_shape():
     assert games.short_element("The defendant is a discharger (liability is strict (see § 172(8)); more)") == "The defendant is a discharger"
 
 
+def test_legal_news_matches_statute():
+    from datetime import datetime, timezone
+    now = datetime(2026, 10, 19, 20, tzinfo=timezone.utc)
+    st = lambda title, summary="", scope="national": {"id": title[:8], "t": "2026-10-18T12:00:00Z", "title": title, "summary": summary, "scope": scope, "source": "x", "link": "y"}
+    feat = lambda *items: {(f["card"], f["title"][:20]) for f in games.legal({"items": list(items), "stories": [], "threads": []}, now, [])["featured"]}
+    got = feat(st("Final rule: Clean Water Act Hazardous Substance Facility Response Plans: Compliance Date Delay"))
+    assert not {c for c, _ in got} & {"cercla107", "cercla_prp", "cwa301"}, got
+    got = feat(st("Orange County to host free household hazardous waste collection event", scope="local"))
+    assert "rcra7002" not in {c for c, _ in got}, got
+    assert "cwa301" in {c for c, _ in feat(st("EPA sues plant over NPDES permit violations"))}
+    assert "cercla107" in {c for c, _ in feat(st("EPA seeks Superfund cost recovery from former owners"))}
+    assert "nav181" in {c for c, _ in feat(st("Heating oil spill reaches Fishkill Creek", scope="local"))}
+    assert "nav181" not in {c for c, _ in feat(st("Debate spills over into council meeting", scope="local"))}
+    import yaml
+    nav = next(c for c in yaml.safe_load((games.ROOT / "legal.yaml").read_text())["cards"] if c["id"] == "nav181")
+    assert nav["elements"][1]["text"] == "The defendant is a discharger" and "Green" in nav["note"]
+
+
 def test_legal_yaml_scalars():
     import yaml
     cards = (yaml.safe_load((games.ROOT / "legal.yaml").read_text()) or {}).get("cards", [])
