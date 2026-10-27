@@ -39,8 +39,8 @@ with sync_playwright() as p:
                 err.append("puzzle canvas not visible")
             if g in ("keen", "towers", "unequal") and t == 1 and frame:
                 before = frame.evaluate("document.getElementById('undo').disabled")
-                cw = frame.evaluate("(()=>{const c=document.getElementById('puzzlecanvas');const r=c.getBoundingClientRect();return [r.left+r.width*0.1, r.top+r.height*0.1]})()")
-                pg.mouse.click(pg.frame_locator("iframe").locator("#puzzlecanvas").bounding_box()["x"] + 25, pg.frame_locator("iframe").locator("#puzzlecanvas").bounding_box()["y"] + 25)
+                box = pg.frame_locator("iframe").locator("#puzzlecanvas").bounding_box()
+                pg.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)   # the middle cell, inside any clue border
                 pg.evaluate("document.querySelector('iframe').contentWindow.postMessage({wireKey:'1'}, location.origin)")
                 pg.wait_for_timeout(300)
                 if frame.evaluate("document.getElementById('undo').disabled") and before:
