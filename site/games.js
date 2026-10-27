@@ -658,7 +658,7 @@
       if (ok) right += 1;
       openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda · " + (i + 1) + " of " + P.items.length }),
         el("p", { class: "gm-keep", text: it.text }),
-        reveal({ ok, verdict: ok ? "Right" : "It's the " + it.answer, keep: it.answer, meta: it.meeting, link: it.link, linkText: "The agenda ↗",
+        reveal({ ok, verdict: ok ? "Right" : "It's the " + it.answer, keep: it.answer, why: it.status || null, meta: it.meeting, link: it.link, linkText: "The agenda ↗",
           next: { text: i + 1 < P.items.length ? "Next ›" : "Finish ›", fn: () => q(i + 1) } })], "Beacon Agenda");
     }
     function finish() {
@@ -737,42 +737,50 @@
     const t0 = Date.now();
     const S = get(PKEY + P.id, null) || { m: {}, checks: 0, hints: 0, struck: {} };
     const save = () => put(PKEY + P.id, S);
-    const grids = [["project", P.projects], ["time", P.times]];
+    const ptime = P.project_times || Object.fromEntries(P.people.map((pp) => [P.solution[pp].project, P.solution[pp].time]));
+    // Three grids, as the solver works them: people × projects, people × times, projects × times.
+    const grids = [
+      { id: "PJ", rows: P.people, cols: P.projects, truth: (r, c) => P.solution[r].project === c },
+      { id: "PT", rows: P.people, cols: P.times, truth: (r, c) => P.solution[r].time === c },
+      { id: "JT", rows: P.projects, cols: P.times, truth: (r, c) => ptime[r] === c },
+    ];
     const wrap = el("div", {});
     const msg = el("p", { class: "fine", text: "" });
     const key = (g, r, c) => g + "|" + r + "|" + c;
     let over = false;
-    function tap(g, r, c, cols) {
+    function tap(G, ri, ci, forceO) {
       if (over) return;
-      const k = key(g, r, c);
+      const k = key(G.id, ri, ci);
       const v = S.m[k] || "";
-      const nv = v === "" ? "x" : v === "x" ? "o" : "";
+      const nv = forceO ? "o" : v === "" ? "x" : v === "x" ? "o" : "";
       S.m[k] = nv;
       if (nv === "o") {                                // cross out the rest of the row and column
-        P.people.forEach((p, rr) => { if (rr !== r && S.m[key(g, rr, c)] !== "o") S.m[key(g, rr, c)] = "x"; });
-        cols.forEach((_, cc) => { if (cc !== c && S.m[key(g, r, cc)] !== "o") S.m[key(g, r, cc)] = "x"; });
+        G.rows.forEach((_, rr) => { if (rr !== ri && S.m[key(G.id, rr, ci)] !== "o") S.m[key(G.id, rr, ci)] = "x"; });
+        G.cols.forEach((_, cc) => { if (cc !== ci && S.m[key(G.id, ri, cc)] !== "o") S.m[key(G.id, ri, cc)] = "x"; });
       }
       save(); draw();
       if (solved()) finish(true);
     }
-    function solved() {
-      return P.people.every((p, r) => grids.every(([g, cols]) => cols.every((c, ci) => (S.m[key(g, r, ci)] === "o") === (P.solution[p][g] === c))));
-    }
-    function wrong() {
-      let n = 0;
-      P.people.forEach((p, r) => grids.forEach(([g, cols]) => cols.forEach((c, ci) => {
-        const v = S.m[key(g, r, ci)], truth = P.solution[p][g] === c;
-        if ((v === "o" && !truth) || (v === "x" && truth)) n += 1;
-      })));
-      return n;
-    }
+    const each = (fn) => grids.forEach((G) => G.rows.forEach((r, ri) => G.cols.forEach((c, ci) => fn(G, r, ri, c, ci))));
+    function solved() { let ok = true; each((G, r, ri, c, ci) => { if ((S.m[key(G.id, ri, ci)] === "o") !== G.truth(r, c)) ok = false; }); return ok; }
+    function wrong() { let n = 0; each((G, r, ri, c, ci) => { const v = S.m[key(G.id, ri, ci)], t = G.truth(r, c); if ((v === "o" && !t) || (v === "x" && t)) n += 1; }); return n; }
     function draw() {
-      wrap.replaceChildren(...grids.map(([g, cols]) => el("table", { class: "gm-grid" },
-        el("tr", {}, el("th", {}), ...cols.map((c) => el("th", { text: c }))),
-        ...P.people.map((p, r) => el("tr", {}, el("th", { text: p }), ...cols.map((c, ci) => {
-          const v = S.m[key(g, r, ci)] || "";
-          return el("td", {}, el("button", { class: "gm-cell2 " + v, "aria-label": p + " " + c, text: v === "o" ? "●" : v === "x" ? "✗" : "", onclick: () => tap(g, r, ci, cols) }));
+      wrap.replaceChildren(...grids.map((G) => el("table", { class: "gm-grid" },
+        el("tr", {}, el("th", {}), ...G.cols.map((c) => el("th", { text: c }))),
+        ...G.rows.map((r, ri) => el("tr", {}, el("th", { text: r }), ...G.cols.map((c, ci) => {
+          const v = S.m[key(G.id, ri, ci)] || "";
+          return el("td", {}, el("button", { class: "gm-cell2 " + v, "aria-label": r + " " + c, text: v === "o" ? "●" : v === "x" ? "✗" : "", onclick: () => tap(G, ri, ci) }));
         }))))));
+    }
+    // A hint is the solver's next step, with its reason (or, without a trace, one true cell).
+    function hint() {
+      if (over) return;
+      const g = (id) => grids.find((G) => G.id === id);
+      const step = (P.trace || []).find((t) => { const G = g(t.grid); return G && S.m[key(G.id, G.rows.indexOf(t.a), G.cols.indexOf(t.b))] !== "o"; });
+      S.hints += 1;
+      if (step) { const G = g(step.grid); msg.textContent = "Hint: " + step.a + " ↔ " + step.b + " (" + step.why + ")."; tap(G, G.rows.indexOf(step.a), G.cols.indexOf(step.b), true); return; }
+      let done = false;
+      each((G, r, ri, c, ci) => { if (!done && G.truth(r, c) && S.m[key(G.id, ri, ci)] !== "o") { done = true; msg.textContent = "Hint: " + r + " ↔ " + c + "."; tap(G, ri, ci, true); } });
     }
     function finish(ok) {
       if (over) return;
@@ -791,20 +799,12 @@
     }));
     const actions = el("div", { class: "sactions" },
       el("button", { class: "sbtn", text: "Check (−1)", onclick: () => { if (over) return; S.checks += 1; save(); const w = wrong(); msg.textContent = w ? w + " mark" + (w > 1 ? "s are" : " is") + " wrong." : "Everything marked so far is right."; } }),
-      el("button", { class: "sbtn", text: "Hint (−2)", onclick: () => {
-        if (over) return;
-        const p = P.people.find((pp, r) => grids.some(([g, cols]) => S.m[key(g, r, cols.indexOf(P.solution[pp][g]))] !== "o"));
-        if (!p) return;
-        const r = P.people.indexOf(p);
-        const [g, cols] = grids.find(([g2, cols2]) => S.m[key(g2, r, cols2.indexOf(P.solution[p][g2]))] !== "o");
-        S.hints += 1; tap(g, r, cols.indexOf(P.solution[p][g]), cols);
-        if (S.m[key(g, r, cols.indexOf(P.solution[p][g]))] !== "o") tap(g, r, cols.indexOf(P.solution[p][g]), cols);
-      } }),
+      el("button", { class: "sbtn", text: "Hint (−2)", onclick: hint }),
       giveUpBtn(() => finish(false)));
     draw();
     openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Case file · tier " + P.tier }), el("p", { class: "fine", text: P.story }),
-      el("p", { class: "asrc", text: "Tap a cell: blank → ✗ → ●. A ● crosses out the rest of its row and column. Tap a clue to strike it through." }),
-      clues, wrap, msg, actions, backBtn()], "Case file");
+      el("p", { class: "fine", text: "Tap a cell: blank → ✗ → ●. A ● crosses out the rest of its row and column. Tap a clue to strike it through." }),
+      el("div", { class: "gm-casepin" }, clues), wrap, msg, actions, backBtn()], "Case file");
   }
 
   // ---------------------------------------------------------------- Connections
@@ -853,7 +853,7 @@
       grid.replaceChildren();
       const herring = (P.decoys || [])[0];
       msg.replaceChildren(reveal({ ok, verdict: ok ? (S.mistakes ? "Solved with " + S.mistakes + " mistake" + (S.mistakes > 1 ? "s" : "") : "Perfect") : "Out of mistakes",
-        keep: herring ? "Your herring: " + herring + " — a real pattern, but not one of the four." : null, meta: "Groups come from complete public rosters and committee lists.", next: earlierNext() }));
+        keep: herring ? "Your herring: " + herring + " — a real pattern, but not one of the four." : null, meta: "Groups come from complete public lists.", next: earlierNext() }));
     }
     draw();
     openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Connections" }), el("p", { class: "fine", text: "Find four groups of four. Group names are facts." }),
@@ -993,12 +993,21 @@
       if (!Q) return finish();
       const last = i === P.questions.length - 1;
       const ask = (cert) => {
-        openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz · " + (i + 1) + " of " + P.questions.length + (last ? " · wager: " + cert : "") }),
-          el("p", { class: "gm-keep", text: Q.q }),
-          ...Q.options.map((o) => el("button", { class: "gm-slot", onclick: () => answer(o, cert) }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: o })))), backBtn()], "Friday quiz");
+        const head = [el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz · " + (i + 1) + " of " + P.questions.length + (last ? " · wager: " + cert : "") }),
+          el("p", { class: "gm-keep", text: Q.q })];
+        if (Q.type === "typed" || !(Q.options || []).length) {          // typed: recall, not recognition
+          const input = answerInput("Type your answer");
+          keepVisible(input);
+          const go = () => { if (input.value.trim()) answer(input.value.trim(), cert, true); };
+          input.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+          openGame([...head, input, el("button", { class: "sbtn primary wide", text: "Answer", onclick: go }), backBtn()], "Friday quiz");
+          setTimeout(() => input.focus(), 50);
+          return;
+        }
+        openGame([...head, ...Q.options.map((o) => el("button", { class: "gm-slot", onclick: () => answer(o, cert) }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: o })))), backBtn()], "Friday quiz");
       };
-      const answer = (o, cert) => {
-        const ok = o === Q.answer;
+      const answer = (o, cert, typed) => {
+        const ok = typed ? accepts(o, Q.answer, Q.accept) : o === Q.answer;
         if (ok) right += 1;
         if (last) wager = cbm(ok, cert);
         openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Friday quiz · " + (i + 1) + " of " + P.questions.length }),

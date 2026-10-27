@@ -975,3 +975,5 @@ select.tin { width: 100%; }
 .gm-wday.some { box-shadow: inset 0 0 0 2px var(--here); }
 .gm-wday.all { background: var(--here); color: var(--on-here); }
 .gm-wday.all .asrc { color: var(--on-here); }
+.gm-casepin { position: sticky; top: 0; z-index: 2; background: var(--surface); max-height: 34vh; overflow-y: auto; border-bottom: 1px solid var(--hair, rgba(127,127,127,0.25)); }
+.gm-grid { margin-bottom: 10px; }
