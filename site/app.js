@@ -3216,13 +3216,14 @@ async function quizEntry(g) {
     const fresh = g.quiz.items.filter((it) => !mine.answers[it.id]);
     if (fresh.length) box.append(el("button", { class: "sbtn primary wide", text: "Answer " + fresh.length + " new statement" + (fresh.length === 1 ? "" : "s"), onclick: () => openQuiz(g, fresh.map((it) => it.id)) }));
     if (stale.length) box.append(el("button", { class: "sbtn wide", text: stale.length + " statement" + (stale.length === 1 ? " was" : "s were") + " reworded: re-answer " + (stale.length === 1 ? "it" : "them"), onclick: () => openQuiz(g, stale.map((it) => it.id)) }));
+    box.append(el("button", { class: "sbtn wide", text: "Keep going: 5 questions that sharpen your matches", onclick: () => keepGoing(g) }));
     box.append(el("p", { class: "rjob", text: "Done " + fmtDate.format(new Date(Date.parse(mine.done_at))) + ". Your results compare your answers with the candidates' stated positions." }),
       el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openMatch(g) }),
         el("button", { class: "sbtn", text: "Retake", onclick: async () => { await saveQuiz({ kind: "clear", id: g.id }); openQuiz(g); } })));
   }
   return box;
 }
-function openQuiz(g, only) {
+function openQuiz(g, only, opts) {
   const Q = myQuiz || { elections: {} };
   const prior = ((Q.elections || {})[g.id] || {}).answers || {};
   const seed = Number(store.get("wire.quizSeed." + g.id)) || (Date.now() % 100000) + 1;
@@ -3239,6 +3240,7 @@ function openQuiz(g, only) {
         el("h2", { id: "sheet-title", class: "stitle", text: "Done" }),
         el("p", { class: "sdesc", text: "Your answers are saved privately. Look at the results whenever you like; they're not shown anywhere until you do." }),
         el("div", { class: "sactions" }, el("button", { class: "sbtn primary", text: "See my results", onclick: () => openMatch(g) }),
+          el("button", { class: "sbtn", text: "Keep going: 5 more ›", onclick: () => keepGoing(g, opts && opts.raceId) }),
           el("button", { class: "sbtn", text: "Back to the guide", onclick: () => openGuide() })),
       ], "Done"));
       return;
@@ -3278,6 +3280,48 @@ function matchFor(g, name, answers) {
   }
   return { pct: den ? Math.round(100 * num / den) : null, n, rows: rows.sort((a, b) => b.agree - a.agree) };
 }
+// Keep going (2026-10-27): the next questions that would sharpen your matches most. A race needs
+// more when its candidates share few answered statements with you or its top two are close; a
+// statement helps when that race's candidates are coded far apart on it. Unanswered (or skipped)
+// statements only; `raceId` limits it to one race.
+function raceNeed(g, r, a) {
+  const st = (g.quiz || {}).stances || {};
+  const ms = (r.candidates || []).filter((c) => st[c.name]).map((c) => matchFor(g, c.name, a));
+  const scored = ms.filter((m) => m.n >= 2).sort((x, y) => y.pct - x.pct);
+  const minN = ms.length ? Math.min(...ms.map((m) => m.n)) : 0;
+  const gap = scored.length >= 2 ? scored[0].pct - scored[1].pct : 0;
+  return { minN, gap, need: (minN < 4 ? 3 : minN < 8 ? 2 : 1) + (scored.length >= 2 && gap < 10 ? 1.5 : 0) };
+}
+function confidence(minN) { return minN >= 8 ? "solid" : minN >= 4 ? "fair" : "thin"; }
+function sharpenIds(g, a, raceId, k) {
+  const st = (g.quiz || {}).stances || {};
+  const open = g.quiz.items.filter((it) => !a[it.id] || a[it.id].skip);
+  const score = {};
+  for (const r of g.races || []) {
+    if (raceId && r.id !== raceId) continue;
+    const names = (r.candidates || []).map((c) => c.name).filter((n) => st[n]);
+    if (names.length < 2) continue;
+    const { need } = raceNeed(g, r, a);
+    for (const it of open) {
+      const vs = names.map((n) => (st[n][it.id] || {}).v).filter((v) => v != null);
+      if (vs.length < 2) continue;
+      const sep = Math.max(...vs) - Math.min(...vs);           // 0–4: how far apart the candidates are
+      score[it.id] = (score[it.id] || 0) + need * (1 + sep);
+    }
+  }
+  return Object.entries(score).sort((x, y) => y[1] - x[1]).slice(0, k || 5).map(([id]) => id);
+}
+function keepGoing(g, raceId) {
+  const own = (((myQuiz || {}).elections || {})[g.id] || {}).answers || {};
+  const ids = sharpenIds(g, withProposals("election", own), raceId, 5);
+  if (!ids.length) {
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "All caught up" }),
+      el("p", { class: "sdesc", text: (raceId ? "You've answered every statement that separates the candidates in this race." : "You've answered every statement that separates these candidates.") + " New ones arrive as more positions are sourced; they'll show up here." }),
+      el("div", { class: "sactions" }, el("button", { class: "sbtn", text: "See my results", onclick: () => openMatch(g) }))], "All caught up");
+    return;
+  }
+  openQuiz(g, ids, { more: true, raceId });
+}
 function matchLine(r) {
   const g = data.voter_guide;
   if (!g || !g.quiz || !prefs.showMatch || !myQuiz) return "";
@@ -3303,7 +3347,11 @@ async function openMatch(g) {
   for (const r of g.races || []) {
     const ms = (r.candidates || []).map((c) => ({ c, m: matchFor(g, c.name, a) })).filter((x) => x.m.n > 0);
     if (!ms.length) continue;
+    const rn = raceNeed(g, r, a);
+    const canSharpen = sharpenIds(g, a, r.id, 1).length > 0;
     nodes.push(el("section", { class: "ssec" }, el("h3", { class: "sh3", text: r.office + (r.district ? " · " + r.district : "") }),
+      el("p", { class: "fine", text: "Confidence: " + confidence(rn.minN) + " (" + rn.minN + " statement" + (rn.minN === 1 ? "" : "s") + " in common with the least-coded candidate)" + (ms.filter((x) => x.m.n >= 2).length >= 2 && rn.gap < 10 ? " · the top two are close" : "") }),
+      canSharpen ? el("button", { class: "linkbtn", text: "Sharpen this race ›", onclick: () => keepGoing(g, r.id) }) : null,
       ...ms.map(({ c, m }) => el("details", { class: "race" },
         el("summary", {}, el("span", { class: "rtitle" }, el("b", { text: c.name }), m.n >= 2 ? " · " + m.pct + "% agreement" + (ms.some((y) => y !== ms.find((z) => z.c === c) && y.m.n >= 2 && y.m.pct === m.pct) ? " · tied" : "") : " · too few stated positions"),
           el("span", { class: "rsub", text: ((c.lines || []).length ? "On the " + c.lines.join(", ") + " line" + (c.lines.length > 1 ? "s" : "") + " · " : "") + m.n + " statement" + (m.n === 1 ? "" : "s") + " in common" }), el("span", { class: "chev", text: "▾" })),
