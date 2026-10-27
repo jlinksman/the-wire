@@ -24,11 +24,11 @@ with sync_playwright() as p:
     pg.goto("http://127.0.0.1:8799/_smoke.html")
     for g, tiers in games.items():
         for t, params in enumerate(tiers, 1):
-            pg.evaluate(f"load('{g}.html#{params}#20261027')")
+            pg.evaluate(f"load('{g}.html?t={t}#{params}#20261027')")   # query forces a fresh page
             err, frame = [], None
             for _ in range(40):
                 pg.wait_for_timeout(250)
-                frame = next((f for f in pg.frames if f.url.split("#")[0].endswith(f"/{g}.html")), None)
+                frame = next((f for f in pg.frames if f.url.split("#")[0].split("?")[0].endswith(f"/{g}.html")), None)
                 try:
                     if frame and frame.evaluate("!!document.getElementById('puzzlecanvas') && typeof Module !== 'undefined' && !!Module.calledRun"): break
                 except Exception:
