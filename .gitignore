@@ -14,3 +14,4 @@ share/wrangler.toml
 site/vendor/puzzles/
 .games/
 site/vendor/maps/
+site/_state.json

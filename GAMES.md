@@ -262,6 +262,25 @@ Listen queue every day.
    minefield, Refute the move, Proof mode, Ledger logic, Escalation week, zero-hint gauntlet)
    only when Joe asks.
 
+## Build status (2026-10-27)
+Steps 1–7 are built, tested and deployed; step 8's tactics is built. What differs from the plan:
+- **Connections** runs in shadow mode and turns itself on after 10 of 14 days produce a clean board
+  (the log is in the Actions cache; Admin shows the record).
+- **Saturday meta v1** is assembled on Saturday from the week's items rather than seeded from Monday.
+- **Defectors** use House roll calls only: the Senate's site refuses automated requests (HTTP 403),
+  so the build backs off and never works around it.
+- **Pending docket predictions** are not built. Oyez lists argued cases, but its decision field is
+  often empty months after a ruling, so predictions can't be scored automatically. Options: a free
+  CourtListener API token (Joe creates the account), or reading each new opinion's syllabus from
+  supremecourt.gov at one request a day.
+- **Statute-change flags** on legal cards wait for Joe's NY Open Legislation API key.
+- **Library rosters**: five hand-checked team lists (rosters.yaml). The current NYCFC roster is held
+  as unverified until it's checked against the club's page.
+- **Tactics** (pipeline/tactics.py): 6×6, two units, three enemies; boards with one to three winning
+  outcomes where the greedy line loses; tiered by how many outcomes win. The page engine is
+  cross-checked against the generator in CI.
+- Not built (by plan): pass the phone and the UFCB pack (after a month of use), variants (on request).
+
 ## Open items for Joe
 - Register a free NY Open Legislation API key (walkthrough when we reach step 3).
 - Beacon ward shapes: build from Board of Elections district lists, or trace the city's ward
