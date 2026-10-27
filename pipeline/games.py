@@ -645,85 +645,451 @@ def meta(wsi, dv, dk, seed, drops, budget: QuoteBudget | None = None) -> dict | 
 
 
 # ------------------------------------------------------------------ Case file (Sunday logic grid)
-# Fictional applicants before a fictional board, their projects and hearing times. A random solution,
-# a pool of true clues, clues added until exactly one solution remains (checked by brute force), then
-# removed one by one while it stays unique, so the set is minimal. Graded by the clue types it needs.
+# Fictional applicants before a fictional board: who brought which project, and when was each heard.
+# A random solution; a pool of true clues of every kind (direct facts, either/or, "of these two…",
+# before/after with at most two ordering clues); clues added until exactly one solution remains
+# (brute force over all 576 grids), then removed while it stays unique, so the set is minimal.
+# Every case must tie people to projects and projects to times (not just two sorts), and a
+# human-style solver must finish it without guessing; its hardest technique is the tier:
+#   1 = direct clues, grid elimination (a row or column with one cell left) and cross-grid transfer
+#       (A brought the bakery, the bakery was at 7:00, so A was at 7:00)
+#   2 = reading either/or, "of these two" and before/after clues against what's still open
+#   3 = a short chain: suppose a cell, follow tiers 1–2 to a contradiction, cross it out
 # Nothing about spills or remediation (never resembles an Optima job).
 CASE_PEOPLE = ["Abernathy", "Brennan", "Castillo", "Dunleavy", "Esposito", "Fairbanks", "Galloway", "Hollis"]
 CASE_PROJECTS = ["bakery", "bike shop", "gallery", "recording studio", "bookshop", "climbing gym", "tea room", "print shop"]
 CASE_TIMES = ["6:00", "6:30", "7:00", "7:30"]
+CASE_N = 4
+MAX_ORDER_CLUES = 2
 
 
-def _solutions(n, clues):
+def _row(ref, P, T):
+    kind, v = ref
+    return v if kind == "p" else P.index(v) if kind == "j" else T.index(v)
+
+
+def _clue_true(c, P, T) -> bool:
+    k = c["kind"]
+    if k in ("pj", "pt", "jt"):
+        a, b = c["cell"]
+        hit = (P[a] == b) if k == "pj" else (T[a] == b) if k == "pt" else (T[P.index(a)] == b)
+        return hit == c["yes"]
+    r = [_row(x, P, T) for x in c["refs"]]
+    if k == "order":
+        return T[r[0]] < T[r[1]]
+    if k == "adjacent":
+        return T[r[0]] + 1 == T[r[1]]
+    if k == "either":                       # refs: Z, X1, X2 — Z is X1 or X2, and X1, X2 are different rows
+        return r[1] != r[2] and r[0] in (r[1], r[2])
+    if k == "pair":                         # refs: X, Y, F1, F2 — {X, Y} == {F1, F2}, X≠Y, F1≠F2
+        return r[0] != r[1] and r[2] != r[3] and {r[0], r[1]} == {r[2], r[3]}
+    raise ValueError(k)
+
+
+def _all_solutions(clues, limit=2):
     out = []
-    for proj in itertools.permutations(range(n)):
-        for tm in itertools.permutations(range(n)):
-            if all(c["test"](proj, tm) for c in clues):
-                out.append((proj, tm))
-                if len(out) > 1:
+    for P in itertools.permutations(range(CASE_N)):
+        for T in itertools.permutations(range(CASE_N)):
+            if all(_clue_true(c, P, T) for c in clues):
+                out.append((P, T))
+                if len(out) >= limit:
                     return out
     return out
 
 
-def casefile(seed, drops) -> dict | None:
-    rng = random.Random(seed + "case")
-    n = 4
-    people = rng.sample(CASE_PEOPLE, n)
-    projects = rng.sample(CASE_PROJECTS, n)
-    times = CASE_TIMES[:n]
-    proj = list(range(n)); rng.shuffle(proj)          # person i -> project proj[i]
-    tm = list(range(n)); rng.shuffle(tm)              # person i -> time tm[i]
-    who_proj = {proj[i]: i for i in range(n)}
+class _Contradiction(Exception):
+    pass
+
+
+class CaseSolver:
+    """Three grids, each cell None (open), True (●) or False (✗): PJ person×project, PT person×time,
+    JT project×time. Deductions carry the tier of the technique that made them."""
+
+    def __init__(self, clues):
+        n = CASE_N
+        self.g = {"PJ": [[None] * n for _ in range(n)], "PT": [[None] * n for _ in range(n)], "JT": [[None] * n for _ in range(n)]}
+        self.clues = clues
+        self.tier = 0
+        self.steps = []
+
+    def copy(self):
+        s = CaseSolver(self.clues)
+        s.g = {k: [r[:] for r in v] for k, v in self.g.items()}
+        return s
+
+    def set(self, grid, a, b, val, tier, why):
+        cur = self.g[grid][a][b]
+        if cur is val:
+            return False
+        if cur is not None:
+            raise _Contradiction(why)
+        self.g[grid][a][b] = val
+        self.tier = max(self.tier, tier)
+        self.steps.append((grid, a, b, val, tier, why))
+        return True
+
+    def solved(self):
+        return all(v is not None for G in self.g.values() for r in G for v in r)
+
+    # tier 1 -------------------------------------------------------------
+    def direct(self):
+        ch = False
+        for c in self.clues:
+            if c["kind"] in ("pj", "pt", "jt"):
+                ch |= self.set(c["kind"].upper(), *c["cell"], c["yes"], 1, c.get("t", c["kind"]))
+        return ch
+
+    def eliminate(self):
+        ch = False
+        n = CASE_N
+        for name, G in self.g.items():
+            for a in range(n):
+                for line, put in ((G[a], lambda b, v, a=a: self.set(name, a, b, v, 1, "only one left in the row")),
+                                  ([G[x][a] for x in range(n)], lambda b, v, a=a: self.set(name, b, a, v, 1, "only one left in the column"))):
+                    if line.count(True) > 1 or line.count(False) == n:
+                        raise _Contradiction("line")
+                    if True in line:
+                        for b in range(n):
+                            if line[b] is None:
+                                ch |= put(b, False)
+                    elif line.count(False) == n - 1:
+                        ch |= put(line.index(None), True)
+        return ch
+
+    # tier 2 -------------------------------------------------------------
+    def cross(self):
+        ch = False
+        PJ, PT, JT = self.g["PJ"], self.g["PT"], self.g["JT"]
+        n = CASE_N
+        for i in range(n):
+            for j in range(n):
+                for k in range(n):
+                    a, b, c = PJ[i][j], PT[i][k], JT[j][k]
+                    if a and b:
+                        ch |= self.set("JT", j, k, True, 1, "cross-grid")
+                    if a and c:
+                        ch |= self.set("PT", i, k, True, 1, "cross-grid")
+                    if b and c:
+                        ch |= self.set("PJ", i, j, True, 1, "cross-grid")
+                    if a and b is False:
+                        ch |= self.set("JT", j, k, False, 1, "cross-grid")
+                    if a and c is False:
+                        ch |= self.set("PT", i, k, False, 1, "cross-grid")
+                    if b and a is False:
+                        ch |= self.set("JT", j, k, False, 1, "cross-grid")
+                    if b and c is False:
+                        ch |= self.set("PJ", i, j, False, 1, "cross-grid")
+                    if c and a is False:
+                        ch |= self.set("PT", i, k, False, 1, "cross-grid")
+                    if c and b is False:
+                        ch |= self.set("PJ", i, j, False, 1, "cross-grid")
+        return ch
+
+    def relative(self):
+        """Read each either/or, pair and order clue against what's still open (arc consistency)."""
+        ch = False
+        PJ, PT, JT = self.g["PJ"], self.g["PT"], self.g["JT"]
+        n = CASE_N
+        for c in self.clues:
+            if c["kind"] in ("pj", "pt", "jt"):
+                continue
+            refs = c["refs"]
+            cand = []
+            for kind, v in refs:
+                cand.append([v] if kind == "p" else [i for i in range(n) if PJ[i][v] is not False] if kind == "j" else [i for i in range(n) if PT[i][v] is not False])
+            timed = c["kind"] in ("order", "adjacent")
+            sup_row = [set() for _ in refs]
+            sup_time = [set() for _ in refs]
+            for rows in itertools.product(*cand):
+                ok = True
+                fixed = {}
+                for (kind, v), r in zip(refs, rows):
+                    f = fixed.setdefault(r, {})
+                    if kind in ("j", "t"):
+                        if kind in f and f[kind] != v:
+                            ok = False
+                            break
+                        f[kind] = v
+                for r, f in fixed.items():
+                    if "j" in f and PJ[r][f["j"]] is False or "t" in f and PT[r][f["t"]] is False or ("j" in f and "t" in f and JT[f["j"]][f["t"]] is False):
+                        ok = False
+                if not ok:
+                    continue
+                if c["kind"] == "either" and not (rows[1] != rows[2] and rows[0] in (rows[1], rows[2])):
+                    continue
+                if c["kind"] == "pair" and not (rows[0] != rows[1] and rows[2] != rows[3] and {rows[0], rows[1]} == {rows[2], rows[3]}):
+                    continue
+                if not timed:
+                    for x, r in enumerate(rows):
+                        sup_row[x].add(r)
+                    continue
+                distinct = sorted(fixed)
+                tc = []
+                for r in distinct:
+                    f = fixed[r]
+                    ks = [f["t"]] if "t" in f else [k for k in range(n) if PT[r][k] is not False and ("j" not in f or JT[f["j"]][k] is not False)]
+                    tc.append(ks)
+                for ts in itertools.product(*tc):
+                    if len(set(ts)) != len(ts):
+                        continue
+                    tm = dict(zip(distinct, ts))
+                    t0, t1 = tm[rows[0]], tm[rows[1]]
+                    if (c["kind"] == "order" and t0 < t1) or (c["kind"] == "adjacent" and t0 + 1 == t1):
+                        for x, r in enumerate(rows):
+                            sup_row[x].add(r)
+                            sup_time[x].add(tm[r])
+            for x, (kind, v) in enumerate(refs):
+                if not sup_row[x]:
+                    raise _Contradiction(c["kind"])
+                if kind == "j":
+                    for i in cand[x]:
+                        if i not in sup_row[x]:
+                            ch |= self.set("PJ", i, v, False, 2, c.get("t", c["kind"]))
+                if kind == "t":
+                    for i in cand[x]:
+                        if i not in sup_row[x]:
+                            ch |= self.set("PT", i, v, False, 2, c.get("t", c["kind"]))
+                if timed and kind == "p":
+                    for k in range(n):
+                        if PT[v][k] is None and k not in sup_time[x]:
+                            ch |= self.set("PT", v, k, False, 2, c.get("t", c["kind"]))
+                if timed and kind == "j":
+                    for k in range(n):
+                        if JT[v][k] is None and k not in sup_time[x]:
+                            ch |= self.set("JT", v, k, False, 2, c.get("t", c["kind"]))
+        return ch
+
+    def propagate(self, max_tier):
+        while True:
+            if self.direct() or self.eliminate():
+                continue
+            if self.cross():
+                continue
+            if max_tier >= 2 and self.relative():
+                continue
+            return
+
+    # tier 3 -------------------------------------------------------------
+    def chain(self):
+        for name, G in self.g.items():
+            for a in range(CASE_N):
+                for b in range(CASE_N):
+                    if G[a][b] is None:
+                        trial = self.copy()
+                        try:
+                            trial.set(name, a, b, True, 0, "suppose")
+                            trial.propagate(2)
+                        except _Contradiction:
+                            self.set(name, a, b, False, 3, "supposing it leads to a contradiction")
+                            return True
+        return False
+
+    def solve(self):
+        try:
+            while True:
+                self.propagate(2)
+                if self.solved():
+                    return True
+                if not self.chain():
+                    return False
+        except _Contradiction:
+            return False
+
+
+def _case_pool(P, T, rng):
+    n = CASE_N
     pool = []
     for i in range(n):
         for j in range(n):
-            if proj[i] == j:
-                pool.append({"t": f"{people[i]} brought the {projects[j]}.", "kind": "pos", "test": (lambda i, j: lambda P, T: P[i] == j)(i, j)})
-            else:
-                pool.append({"t": f"{people[i]} didn't bring the {projects[j]}.", "kind": "neg", "test": (lambda i, j: lambda P, T: P[i] != j)(i, j)})
-            if tm[i] == j:
-                pool.append({"t": f"{people[i]} was heard at {times[j]}.", "kind": "pos", "test": (lambda i, j: lambda P, T: T[i] == j)(i, j)})
-            else:
-                pool.append({"t": f"{people[i]} wasn't heard at {times[j]}.", "kind": "neg", "test": (lambda i, j: lambda P, T: T[i] != j)(i, j)})
-    for a in range(n):
-        for b in range(n):
-            if a == b:
+            pool.append({"kind": "pj", "cell": (i, j), "yes": P[i] == j})
+            pool.append({"kind": "pt", "cell": (i, j), "yes": T[i] == j})
+            pool.append({"kind": "jt", "cell": (i, j), "yes": T[P.index(i)] == j})
+    ents = [("p", i) for i in range(n)] + [("j", j) for j in range(n)]
+    for X in ents:
+        for Y in ents:
+            rx, ry = _row(X, P, T), _row(Y, P, T)
+            if rx == ry or X[0] == Y[0] == "j" and False:
                 continue
-            if tm[a] < tm[b]:
-                pool.append({"t": f"{people[a]} was heard before {people[b]}.", "kind": "order", "test": (lambda a, b: lambda P, T: T[a] < T[b])(a, b)})
-            if tm[a] + 1 == tm[b]:
-                pool.append({"t": f"{people[a]} was heard exactly half an hour before {people[b]}.", "kind": "adjacent", "test": (lambda a, b: lambda P, T: T[a] + 1 == T[b])(a, b)})
-            pa, pb = projects[proj[a]], projects[proj[b]]
-            if tm[a] < tm[b]:
-                pool.append({"t": f"The {pa} was heard before the {pb}.", "kind": "order",
-                             "test": (lambda ja, jb: lambda P, T: T[P.index(ja)] < T[P.index(jb)])(proj[a], proj[b])})
-    for j in range(n):
-        i = who_proj[j]
-        other = rng.choice([x for x in range(n) if x != i])
-        pool.append({"t": f"The {projects[j]} was either {people[i]}'s or {people[other]}'s.", "kind": "either",
-                     "test": (lambda i, o, j: lambda P, T: P[i] == j or P[o] == j)(i, other, j)})
-    rng.shuffle(pool)
-    # Prefer the interesting clue types; positives last (they make it too easy).
-    pool.sort(key=lambda c: {"order": 0, "adjacent": 0, "either": 1, "neg": 2, "pos": 3}[c["kind"]])
-    clues = []
+            if T[rx] < T[ry]:
+                pool.append({"kind": "order", "refs": (X, Y)})
+            if T[rx] + 1 == T[ry]:
+                pool.append({"kind": "adjacent", "refs": (X, Y)})
+    allrefs = [("p", i) for i in range(n)] + [("j", j) for j in range(n)] + [("t", k) for k in range(n)]
+    for _ in range(40):
+        Z = rng.choice(allrefs)
+        rz = _row(Z, P, T)
+        others = [r for r in allrefs if r[0] != Z[0]]
+        X1 = rng.choice([r for r in others if _row(r, P, T) == rz])
+        X2 = rng.choice([r for r in others if _row(r, P, T) != rz and r[0] != X1[0] or (_row(r, P, T) != rz and Z[0] != "p")])
+        refs = (Z,) + tuple(rng.sample([X1, X2], 2))
+        c = {"kind": "either", "refs": refs}
+        if _clue_true(c, P, T) and not (Z[0] != "p" and X1[0] == X2[0] == "p" and False):
+            pool.append(c)
+    for _ in range(40):
+        r1, r2 = rng.sample(range(n), 2)
+        kx, ky = rng.choice(["p", "t", "j"]), rng.choice(["p", "t", "j"])
+        fk = rng.choice([k for k in ("p", "j", "t") if k not in (kx, ky)] or ["j"])
+        val = lambda kind, r: r if kind == "p" else P[r] if kind == "j" else T[r]
+        X, Y = (kx, val(kx, r1)), (ky, val(ky, r2))
+        F1, F2 = (fk, val(fk, r2)), (fk, val(fk, r1))
+        c = {"kind": "pair", "refs": (X, Y) + tuple(rng.sample([F1, F2], 2))}
+        if _clue_true(c, P, T):
+            pool.append(c)
+    uniq, seen = [], set()
     for c in pool:
+        sig = (c["kind"], c.get("cell"), c.get("yes"), c.get("refs"))
+        if sig not in seen:
+            seen.add(sig)
+            uniq.append(c)
+    return uniq
+
+
+def _case_text(c, people, projects, times):
+    def noun(r, cap=False):
+        k, v = r
+        s = people[v] if k == "p" else f"the {projects[v]} applicant" if k == "j" else f"the {times[v]} applicant"
+        return s[0].upper() + s[1:] if cap else s
+
+    def pred(r):
+        k, v = r
+        return f"is {people[v]}" if k == "p" else f"brought the {projects[v]}" if k == "j" else f"was heard at {times[v]}"
+
+    k = c["kind"]
+    if k == "pj":
+        i, j = c["cell"]
+        return f"{people[i]} brought the {projects[j]}." if c["yes"] else f"{people[i]} didn't bring the {projects[j]}."
+    if k == "pt":
+        i, j = c["cell"]
+        return f"{people[i]} was heard at {times[j]}." if c["yes"] else f"{people[i]} wasn't heard at {times[j]}."
+    if k == "jt":
+        i, j = c["cell"]
+        return f"The {projects[i]} was heard at {times[j]}." if c["yes"] else f"The {projects[i]} wasn't heard at {times[j]}."
+    if k == "order":
+        return f"{noun(c['refs'][0], True)} was heard before {noun(c['refs'][1])}."
+    if k == "adjacent":
+        return f"{noun(c['refs'][0], True)} was heard exactly half an hour before {noun(c['refs'][1])}."
+    if k == "either":
+        Z, X1, X2 = c["refs"]
+        if X1[0] == X2[0] == "p" and Z[0] == "j":
+            return f"The {projects[Z[1]]} was either {people[X1[1]]}'s or {people[X2[1]]}'s."
+        if Z[0] == "p":
+            return f"{people[Z[1]]} either {pred(X1)[0:]} or {pred(X2)}."
+        return f"{noun(Z, True)} was either {noun(X1)} or {noun(X2)}."
+    if k == "pair":
+        X, Y, F1, F2 = c["refs"]
+        return f"Of {noun(X)} and {noun(Y)}, one {pred(F1)} and the other {pred(F2)}."
+    raise ValueError(k)
+
+
+def _case_links(clues) -> tuple[bool, bool]:
+    """(ties people to projects, ties projects to times) somewhere in the clue set."""
+    pj = jt = False
+    for c in clues:
+        if c["kind"] == "pj":
+            pj = True
+        elif c["kind"] == "jt":
+            jt = True
+        elif c["kind"] in ("either", "pair"):
+            kinds = {r[0] for r in c["refs"]}
+            pj |= {"p", "j"} <= kinds
+            jt |= {"j", "t"} <= kinds
+        elif c["kind"] in ("order", "adjacent"):
+            jt |= any(r[0] == "j" for r in c["refs"])
+            pj |= {r[0] for r in c["refs"]} == {"p", "j"}
+    return pj, jt
+
+
+def case_grade(clues, P=None, T=None) -> tuple[int | None, list]:
+    """The solver's hardest technique, or None if it can't finish without guessing (or, given the
+    true answer, if it ever reached a wrong one: the solver must be sound)."""
+    s = CaseSolver(clues)
+    if not s.solve():
+        return None, s.steps
+    if P is not None:
+        n = CASE_N
+        if any(s.g["PJ"][i][P[i]] is not True or s.g["PT"][i][T[i]] is not True for i in range(n)):
+            return None, s.steps
+    return s.tier, s.steps
+
+
+def _case_once(rng, target):
+    n = CASE_N
+    P = list(range(n)); rng.shuffle(P)
+    T = list(range(n)); rng.shuffle(T)
+    pool = _case_pool(P, T, rng)
+    rng.shuffle(pool)
+    # Easy days lean on direct facts; hard days on either/or, pairs and negatives.
+    pri = {1: {"pj": 0, "pt": 0, "jt": 0, "either": 1, "pair": 2, "order": 1, "adjacent": 2},
+           2: {"either": 0, "order": 0.5, "jt": 0.5, "pj": 1, "pt": 1, "adjacent": 1, "pair": 1.5},
+           3: {"pair": 0, "either": 0.3, "adjacent": 0.8, "order": 0.8, "jt": 1.5, "pj": 1.5, "pt": 1.5}}[target]
+    pool.sort(key=lambda c: pri[c["kind"]] + (1.0 if c.get("yes") and target > 1 else 0) + 2.2 * rng.random())
+    clues, orders = [], 0
+    for c in pool:
+        if c["kind"] in ("order", "adjacent"):
+            if orders >= MAX_ORDER_CLUES:
+                continue
+            orders += 1
         clues.append(c)
-        if len(_solutions(n, clues)) == 1:
+        if len(clues) >= 4 and len(_all_solutions(clues)) == 1:
             break
-    if len(_solutions(n, clues)) != 1:
-        drops.append(("casefile", "clue pool didn't pin down one solution"))
+    if len(_all_solutions(clues)) != 1:
         return None
     for c in list(clues):                              # minimal: drop any clue that isn't needed
         trial = [x for x in clues if x is not c]
-        if len(_solutions(n, trial)) == 1:
+        if len(_all_solutions(trial)) == 1:
             clues = trial
-    kinds = {c["kind"] for c in clues}
-    tier = 3 if {"either", "adjacent"} & kinds else 2 if "order" in kinds else 1
-    rng.shuffle(clues)
-    return {"id": "cf" + pid(seed, *people), "people": people, "projects": projects, "times": times,
-            "clues": [c["t"] for c in clues], "tier": tier,
-            "solution": {people[i]: {"project": projects[proj[i]], "time": times[tm[i]]} for i in range(n)},
-            "story": "Four applicants came before a fictional town board one evening. Who brought which project, and when was each heard?"}
+    if not all(_case_links(clues)):
+        return None
+    tier, steps = case_grade(clues, P, T)
+    if tier is None:
+        return None                                    # needs more than a short chain: never ship a guess
+    return P, T, clues, tier, steps
+
+
+def case_target(day: str | None) -> int:
+    """Monthly ramp (GAMES.md rule 5): week 1 easiest, week 4 hardest."""
+    if not day:
+        return 2
+    w = (date.fromisoformat(day).day - 1) // 7
+    return [1, 2, 2, 3, 3][w]
+
+
+def casefile(seed, drops, target: int | None = None, tries: int = 60) -> dict | None:
+    rng = random.Random(seed + "case")
+    target = target or 2
+    best = None
+    for _ in range(tries):
+        got = _case_once(rng, target)
+        if not got:
+            continue
+        if best is None or abs(got[3] - target) < abs(best[3] - target):
+            best = got
+        if got[3] == target:
+            break
+    if not best:
+        drops.append(("casefile", "no clue set pinned down one solution a person could reach without guessing"))
+        return None
+    P, T, clues, tier, steps = best
+    n = CASE_N
+    people = rng.sample(CASE_PEOPLE, n)
+    projects = rng.sample(CASE_PROJECTS, n)
+    times = CASE_TIMES[:n]
+    for c in clues:
+        c["t"] = _case_text(c, people, projects, times)
+    tier, steps = case_grade(clues, P, T)                 # again, so the trace quotes the clues
+    texts = [c["t"] for c in clues]
+    rng.shuffle(texts)
+    sol = {people[i]: {"project": projects[P[i]], "time": times[T[i]]} for i in range(n)}
+    gname = {"PJ": ("person", "project"), "PT": ("person", "time"), "JT": ("project", "time")}
+    label = {"person": people, "project": projects, "time": times}
+    trace = [{"grid": g, "a": label[gname[g][0]][a], "b": label[gname[g][1]][b], "mark": "o" if v else "x", "tier": t, "why": w}
+             for g, a, b, v, t, w in steps if v]
+    return {"id": "cf" + pid("case", *sorted(texts), *sorted(f"{k}:{v['project']}:{v['time']}" for k, v in sol.items())),
+            "people": people, "projects": projects, "times": times, "clues": texts, "tier": tier, "target": target,
+            "solution": sol, "project_times": {projects[P[i]]: times[T[i]] for i in range(n)}, "trace": trace,
+            "kinds": sorted({c["kind"] for c in clues}),
+            "story": "Four applicants came before a fictional town board one evening. Who brought which project, and when was each heard? "
+                     "In \"either … or\" and \"of these two\" clues, the two named are different applicants."}
 
 
 # ------------------------------------------------------------------ Connections (shadow mode)
@@ -1677,7 +2043,7 @@ def main(argv=None) -> int:
     left = who_left(lib, a.snapshots, day)
     lg = legal(data, now, drops, a.scotus.parent / "openleg.json" if a.scotus else None)
     wk = weekend_ciphers(wsi, seed, drops, budget, keyed=fri, patristocrat=sun)
-    cf = casefile(seed, drops)
+    cf = casefile(seed, drops, case_target(day))
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import tactics
     tx = tactics.pool(seed)

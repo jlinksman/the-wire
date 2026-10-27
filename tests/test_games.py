@@ -127,12 +127,40 @@ def test_keyed_aristocrat():
 
 
 def test_casefile_unique_and_minimal():
-    for k in range(6):
-        cf = games.casefile(f"seed{k}", [])
-        assert cf and 3 <= len(cf["clues"]) <= 16
+    import collections
+    tiers = collections.Counter()
+    for k in range(12):
+        target = 1 + k % 3
+        rng = random.Random(f"fixture{k}")
+        got = games._case_once(rng, target)
+        if not got:
+            continue
+        P, T, clues, tier, _ = got
+        assert len(games._all_solutions(clues)) == 1                            # one answer
+        for c in clues:                                                         # minimal
+            assert len(games._all_solutions([x for x in clues if x is not c])) > 1
+        assert sum(c["kind"] in ("order", "adjacent") for c in clues) <= games.MAX_ORDER_CLUES
+        assert all(games._case_links(clues))                                    # people↔projects, projects↔times
+        tiers[tier] += 1
+    assert len(tiers) >= 2, tiers
+    for k in range(4):
+        cf = games.casefile(f"seed{k}", [], 1 + k % 3)
+        assert cf and 3 <= len(cf["clues"]) <= 16 and cf["tier"] in (1, 2, 3)
         sol = cf["solution"]
         assert sorted(v["project"] for v in sol.values()) == sorted(cf["projects"])
         assert sorted(v["time"] for v in sol.values()) == sorted(cf["times"])
+        assert all(cf["project_times"][v["project"]] == v["time"] for v in sol.values())
+
+
+def test_casefile_solver_rejects_guessing():
+    # Only "before" clues on four people: several orders fit, so no deduction finishes it.
+    clues = [{"kind": "order", "refs": (("p", 0), ("p", 1))}, {"kind": "order", "refs": (("p", 2), ("p", 3))}]
+    assert len(games._all_solutions(clues)) > 1
+    assert games.case_grade(clues)[0] is None
+    # Direct facts with cross-grid transfer only: tier 1.
+    P, T = (0, 1, 2, 3), (0, 1, 2, 3)
+    direct = [{"kind": "pj", "cell": (i, i), "yes": True} for i in range(3)] + [{"kind": "jt", "cell": (i, i), "yes": True} for i in range(3)]
+    assert games.case_grade(direct, P, T)[0] == 1
 
 
 def test_tactics_boards():
