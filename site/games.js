@@ -404,21 +404,22 @@
     G.asked = G.asked || new Set();
     G.asked.add(c.id);
     const t0 = Date.now();
-    const PH = { element: "The missing element", speaker: "Who said it?", author: "Justice's surname", place: "Name it", form: "Form of government", roster: "Name", fact: "Your answer" };
+    const PH = { element: "The missing element", speaker: "Who said it?", author: "Justice's surname", place: "Name it", form: "Form of government", roster: "Name", fact: "Your answer", figure: "Your best number" };
     const input = answerInput(PH[c.type] || "Your answer");
     keepVisible(input);
     const nextBtn = () => (i + 1 < list.length ? { text: "Next ›", fn: () => fromEarlier(list, i + 1) } : { text: "Done ›", fn: () => openPuzzles() });
     const go = (cert) => {
       const v = input.value.trim();
       if (!v) return input.focus();
-      const ok = c.type === "element" ? matchesKeys(v, c.accept) : accepts(v, c.a, c.accept);
+      const n = Number(String(v).toLowerCase().replace(/,/g, "").replace(/k$/, "e3").replace(/m$/, "e6").replace(/b$/, "e9").replace(/[^0-9.e]/g, ""));
+      const ok = c.type === "element" ? matchesKeys(v, c.accept) : c.type === "figure" ? (n > 0 && Math.abs(n - Number(c.a)) / Number(c.a) <= 0.25) : accepts(v, c.a, c.accept);
       send({ game: "callback", puzzle: c.id, ok, score: cbm(ok, cert), ms: Date.now() - t0, cert, items: [Object.assign({}, c, { ok, cert })] });
       openGame([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier" }),
         c.type === "speaker" ? el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }) : el("p", { class: "gm-keep", text: c.q }),
         reveal({ ok, verdict: ok ? "Still there" : "Not quite", keep: c.a, meta: c.hint || null, link: c.link, linkText: c.type === "element" ? "Primary source ↗" : "Source ↗", thread: c.thread, back: ok ? "Spacing it out further." : "Back tomorrow.", next: nextBtn() })], "From earlier");
     };
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
-    const ASK = { element: "One element is missing. Which?", author: "Which justice?", roster: "Who?", place: "Which one is highlighted?", form: "Which form of government?", fact: "" };
+    const ASK = { element: "One element is missing. Which?", author: "Which justice?", roster: "Who?", place: "Which one is highlighted?", form: "Which form of government?", fact: "", figure: "Within 25% counts." };
     const prompt = c.type === "speaker" || !c.type ? [el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }), el("p", { class: "fine", text: "Who said it?" })]
       : [el("p", { class: "gm-keep", text: c.q }), ASK[c.type] ? el("p", { class: "fine", text: ASK[c.type] }) : null];
     if (c.type === "place" && c.ref) {                    // show the map with the missed shape highlighted
@@ -577,7 +578,8 @@
       const got = nyRight + named.size;
       const ok = got / Math.max(1, total) >= 0.6;
       const res = { ok, score: got, ms: Date.now() - t0, hints: 0 };
-      send(Object.assign({ slot: s.slot, game: "defectors", puzzle: p.id, items: [] }, res));
+      const items = p.defectors.filter((b) => !named.has(b)).slice(0, 3).map((b) => ({ id: "df:" + p.id + ":" + fold(b.name).replace(/ /g, "_").slice(0, 16), type: "roster", q: "Broke with their party (" + b.party + "-" + b.state + ") on " + (p.bill || "House roll call " + p.num) + ": " + p.desc, a: b.name, accept: b.accept || [], hint: p.date, link: p.link, ok: false, cert: "guess" }));
+      send(Object.assign({ slot: s.slot, game: "defectors", puzzle: p.id, items }, res));
       markDone(s.slot, res);
       const congressLink = p.bill ? "https://www.congress.gov/search?q=" + encodeURIComponent(JSON.stringify({ search: p.bill })) : null;
       openGame([...head,
@@ -899,6 +901,7 @@
       const ok = caseOk && (!au || au.ok);
       const score = (caseOk ? 1 : 0) + (au ? cbm(au.ok, au.cert) : 0);
       const items = au ? [{ id: "au:" + p.id, type: "author", q: "Wrote the opinion in " + p.name + " (" + p.date + ")", a: p.author, accept: p.author_accept, hint: p.docket, link: p.pdf, ok: au.ok, cert: au.cert }] : [];
+      items.push({ id: "hd:" + p.id, type: "fact", q: "Which case held: " + p.holding, a: p.name, accept: [p.name.split(" v. ")[0], p.name.split(" v. ")[1]].filter(Boolean), hint: "Supreme Court, " + p.date, link: p.pdf, ok: caseOk, cert: caseOk ? "think" : "guess" });
       const res = { ok, score, ms: Date.now() - t0, hints: 0, cert: au && au.cert };
       send(Object.assign({ slot: s.slot, game: "docket", puzzle: p.id, items }, res));
       markDone(s.slot, res);
@@ -961,7 +964,9 @@
       store.removeItem(PKEY + p.id);
       const ok = !!(est && est.hit);
       const res = { ok, score: est ? est.score : 10, ms: Date.now() - t0, hints: 0, pairs: right };
-      send(Object.assign({ slot: s.slot, game: "ledger", puzzle: p.id, items: [] }, res));
+      // The figure itself comes back for review: answered right when within ±25%.
+      const fig = est ? [{ id: "fg:" + (f.id || p.id).toString().slice(0, 36), type: "figure", q: f.q + (f.unit ? " (" + f.unit + ")" : ""), a: String(f.a), accept: [], hint: f.source, link: f.link, ok: est.hit && est.b / est.a <= 2, cert: est.hit ? "think" : "guess" }] : [];
+      send(Object.assign({ slot: s.slot, game: "ledger", puzzle: p.id, items: fig }, res));
       markDone(s.slot, res);
       openGame([el("h2", { id: "sheet-title", class: "stitle", text: "The Ledger" }),
         reveal({ ok, verdict: "Range score " + res.score + (ok ? " (lower is better)" : " · a miss") + ((p.pairs || []).length ? " · pairs " + right + " of " + p.pairs.length : ""),
