@@ -729,6 +729,24 @@ def friday_quiz(wsi, dv, lg, data, seed, drops) -> dict | None:
 
 
 # ------------------------------------------------------------------ The Docket
+# Court cases that are about a private person's crime or sentence (habeas, capital cases) stay out.
+COURT_PRIVATE = re.compile(r"habeas|conviction|convicted|sentenc\w+|prisoner|inmate|death row|capital (case|murder)|prosecut\w+|"
+                           r"guilty|plea\b|jury verdict|criminal|Fourth Amendment|warrant\w*|Miranda|Confrontation Clause|Sixth Amendment|suppress\w*|"
+                           r"search(ed)? (the|his|her) (home|car|house)", re.I)
+
+
+def court_ok(r) -> str | None:
+    why = blocked(r["holding"], r["name"])
+    if why:
+        return why
+    if re.search(r"(^|v\. )([A-Z]\. ?){2,4}($| v\.)|\bIn re [A-Z]\. ?[A-Z]\.|\bDoe\b|\bRoe\b", r["name"]):
+        return "party named by initials (often a minor)"
+    if COURT_PRIVATE.search(r["holding"]):
+        return "criminal case (private defendant)"
+    if re.search(r"\b(United States|People|State|Commonwealth) v\.", r["name"]) and not re.search(r"\bv\. (United States|[A-Z][a-z]+ (County|City|Department|Board|Commission))", r["name"]):
+        return "criminal case (private defendant)"
+    return None
+
 # Decided Supreme Court cases (and emergency-docket orders) from the Court's own opinion list: which
 # case held this, and who wrote it. Correct by construction: the holding sentence, the case names
 # and the author column are the Court's. Criminal cases and anything on the exclusion list are left
@@ -738,15 +756,9 @@ def docket(scotus_rows, data, seed, now, drops) -> list[dict]:
     rows = [r for r in scotus_rows if r.get("holding") and r.get("name")]
     ok = []
     for r in rows:
-        why = blocked(r["holding"], r["name"])
+        why = court_ok(r)
         if why:
             drops.append(("docket", why))
-            continue
-        if re.search(r"(^|v\. )([A-Z]\. ?){2,4}($| v\.)|\bIn re [A-Z]\. ?[A-Z]\.|\bDoe\b|\bRoe\b", r["name"]):
-            drops.append(("docket", "party named by initials (often a minor)"))
-            continue
-        if re.search(r"\b(United States|People|State|Commonwealth) v\.", r["name"]) and not re.search(r"\bv\. (United States|[A-Z][a-z]+ (County|City|Department|Board|Commission))", r["name"]):
-            drops.append(("docket", "criminal case (private defendant)"))
             continue
         ok.append(r)
     week = fold(" ".join(it.get("title", "") for it in data.get("items", [])))
@@ -773,6 +785,83 @@ def docket(scotus_rows, data, seed, now, drops) -> list[dict]:
     out.sort(key=lambda x: x["date"], reverse=True)
     out.sort(key=lambda x: (not x["in_news"], x["author_code"] in ("PC", "D")))   # in the news, then signed opinions
     return out[:10]
+
+
+# ------------------------------------------------------------------ Timeline
+# Cards carry the date the thing happened, from the primary record (the roll call, the Court's
+# decision date), never the date it was reported. One card at a time; tap where it goes; three lives.
+def timeline(votes, scotus_rows, seed, now, drops) -> list[dict]:
+    import rollcalls
+    rng = random.Random(seed + "timeline")
+    ev = []
+    for v in votes:
+        meant = rollcalls.yea_meant(v["question"], v["desc"])
+        if not meant or blocked(v["desc"]):
+            continue
+        label = (v["desc"] or v["bill"])
+        if re.match(r"Providing for congressional disapproval", label, re.I):
+            label = f"Congressional Review Act resolution {v['bill']}".strip()
+        elif len(label) > 110:
+            label = label[:107].rsplit(" ", 1)[0] + "…"
+        ev.append({"text": f"House vote: {label} ({v['result'].lower()})", "date": v["date"], "link": v["link"], "kind": "vote"})
+    for r in scotus_rows:
+        if court_ok(r):
+            continue
+        ev.append({"text": f"Supreme Court {'order' if r['emergency'] else 'decision'}: {r['name']}", "date": r["date"], "link": r["pdf"], "kind": "court"})
+    ev = [e for e in ev if e["date"]]
+    out = []
+    for k in range(3):
+        rng.shuffle(ev)
+        pick, used = [], set()
+        for e in ev:
+            if e["date"] in used or any(abs((date.fromisoformat(e["date"]) - date.fromisoformat(x["date"])).days) < 3 for x in pick):
+                continue
+            pick.append(e)
+            used.add(e["date"])
+            if len(pick) == 7:
+                break
+        if len(pick) >= 5:
+            out.append({"id": "t" + pid(seed, k, *[e["text"] for e in pick]), "cards": pick})
+    if not out:
+        drops.append(("timeline", "fewer than 5 dated events"))
+    return out
+
+
+# ------------------------------------------------------------------ Beacon Agenda
+# Which board hears this item? From Beacon's posted agendas (Granicus). Only items brought by a
+# company, LLC or the City itself: never a private person's name or home.
+BODIES = {"council": "City Council", "planning": "Planning Board", "zoning": "Zoning Board of Appeals",
+          "historic": "Historic District & Landmark Commission", "conservation": "Conservation Advisory Committee"}
+
+
+def beacon_agenda(data, seed, drops) -> list[dict]:
+    rng = random.Random(seed + "agenda")
+    out = []
+    for it in data.get("items", []):
+        if not it.get("agenda"):
+            continue
+        body = next((k for k, rx in (("zoning", r"zoning"), ("planning", r"planning"), ("historic", r"historic|landmark"),
+                                      ("conservation", r"conservation"), ("council", r"council")) if re.search(rx, it.get("title", ""), re.I)), None)
+        if not body:
+            continue
+        for a in it["agenda"]:
+            text = a.get("text") or ""
+            m = re.search(r"submitted by ([^,]+(?:,\s*(?:LLC|Inc\.?|L\.P\.|Corp\.?))?)", text)
+            applicant = m.group(1) if m else ""
+            if m and not re.search(r"\b(LLC|Inc|Corp|Company|L\.?P\.?|Partners|Associates|City of Beacon|Holdings|Realty|Development|Properties)\b", applicant, re.I):
+                drops.append(("beacon_agenda", "item brought by a private person"))
+                continue
+            if blocked(text) or len(text) < 40 or not re.match(r"(Public hearing|Continue|Consider|Discussion|Resolution|Approval|Review|Workshop|Presentation|Request|Application)", text, re.I):
+                continue
+            others = [v for k, v in BODIES.items() if k != body]
+            opts = rng.sample(others, 3) + [BODIES[body]]
+            rng.shuffle(opts)
+            out.append({"id": "b" + pid(it["id"], a.get("n"), text[:60]), "text": text[:400], "answer": BODIES[body], "options": opts,
+                        "meeting": it.get("title"), "date": (it.get("t") or "")[:10], "link": it.get("link")})
+    rng.shuffle(out)
+    if not out:
+        drops.append(("beacon_agenda", "no eligible agenda items this week"))
+    return out[:12]
 
 
 # ------------------------------------------------------------------ run
@@ -838,13 +927,20 @@ def main(argv=None) -> int:
             if res.get("error"):
                 drops.append(("docket", f"supremecourt.gov: {res['error']}"))
         dk = fresh(docket(scotus.rows(a.scotus), data, seed, now, drops), "docket")
+    tl = []
+    if a.votes or a.scotus:
+        import rollcalls
+        vlist = rollcalls.parse(a.votes, legislator_index(a.rosters)) if a.votes else []
+        srows = scotus.rows(a.scotus) if a.scotus else []
+        tl = fresh(timeline(vlist, srows, seed, now, drops), "timeline")
+    ba = fresh(beacon_agenda(data, seed, drops), "beacon_agenda")
     lg = legal(data, now, drops)
     ldg = fresh(ledger(dv, a.rosters, seed, now, drops), "ledger")
     fq = friday_quiz(wsi, dv, lg, data, seed, drops) if date.fromisoformat(day).weekday() == 4 or os.environ.get("WIRE_FRIDAY") else None
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
-        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk,
-        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk),
+        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba,
+        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba),
     }
     if a.quiz:
         try:
@@ -858,7 +954,7 @@ def main(argv=None) -> int:
             print(f"[games] audio quiz skipped: {type(exc).__name__}")
     Path(a.out).write_text(json.dumps(pool, ensure_ascii=False, separators=(",", ":")))
     if a.hashes:                                   # offered today = used; never back within 90 days
-        for x in wsi + cq + dv + ldg + dk + ([grid] if grid else []):
+        for x in wsi + cq + dv + ldg + dk + tl + ([grid] if grid else []):
             used.setdefault(x["id"], day)
         a.hashes.write_text(json.dumps(used))
     print(f"[games] {day}: who said it {len(wsi)}, cryptoquote {len(cq)}, connections {'1 (shadow)' if grid else 'dropped'}; "
@@ -866,10 +962,10 @@ def main(argv=None) -> int:
     return 0
 
 
-def health(wsi, cq, grid, drops, dv=(), lg=None, ldg=None, fq=None, dk=None) -> list[dict]:
+def health(wsi, cq, grid, drops, dv=(), lg=None, ldg=None, fq=None, dk=None, tl=None, ba=None) -> list[dict]:
     lg = lg or {"cards": []}
     rows = []
-    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv)), ("legal", len(lg["cards"])), ("ledger", len(ldg or [])), ("friday_quiz", 1 if fq else 0), ("docket", len(dk or []))):
+    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv)), ("legal", len(lg["cards"])), ("ledger", len(ldg or [])), ("friday_quiz", 1 if fq else 0), ("docket", len(dk or [])), ("timeline", len(tl or [])), ("beacon_agenda", len(ba or []))):
         why = {}
         for g, r in drops:
             if g == game:

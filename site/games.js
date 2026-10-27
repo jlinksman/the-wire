@@ -115,7 +115,7 @@
   }
   function nyDay() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()); }
 
-  const NAMES = { docket: "The Docket", ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
+  const NAMES = { timeline: "Timeline", beacon_agenda: "Beacon Agenda", docket: "The Docket", ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
   const LOGIC_NAMES = { loopy: "Loopy", keen: "Keen", towers: "Towers", galaxies: "Galaxies", signpost: "Signpost", dominosa: "Dominosa", unequal: "Unequal", slant: "Slant", range: "Range", pattern: "Pattern" };
   function slotLine(s) {
     const p = s.puzzle || {};
@@ -123,6 +123,8 @@
     if (s.game === "chess") { const th = (p.themes || []).filter((t) => !/^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality)$/.test(t)).slice(0, 2); return "Puzzle rated " + p.rating + (th.length ? " · " + th.join(", ") : ""); }
     if (s.game === "cryptoquote") return ["", "Easy", "Medium", "Hard"][p.tier] + " · " + (p.cipher || "").replace(/[^A-Z]/g, "").length + " letters";
     if (s.game === "who_said_it") return p.outlet ? "From " + p.outlet : "This week's news";
+    if (s.game === "timeline") return (p.cards || []).length + " events · votes and decisions";
+    if (s.game === "beacon_agenda") return (p.items || []).length + " items · which board hears it?";
     if (s.game === "docket") return (p.emergency ? "Emergency docket" : "Decided case") + " · " + p.date + (p.in_news ? " · in the news" : "");
     if (s.game === "ledger") return "Estimate · " + ((p.estimate || {}).subject || "");
     if (s.game === "friday_quiz") return (p.questions || []).length + " questions from the week";
@@ -178,6 +180,8 @@
     if (s.game === "legal") return legalGame(s);
     if (s.game === "ledger") return ledgerGame(s);
     if (s.game === "docket") return docketGame(s);
+    if (s.game === "timeline") return timelineGame(s);
+    if (s.game === "beacon_agenda") return agendaGame(s);
     if (s.game === "friday_quiz") return fridayQuiz(s);
     openPuzzles();
   }
@@ -421,6 +425,84 @@
       ], "Defectors");
     }
     stage1();
+  }
+
+  // ---------------------------------------------------------------- Timeline
+  // One card at a time: tap the gap where it belongs. Dates are when it happened (the roll call,
+  // the decision), from the record. Three lives; every card links to its source.
+  function timelineGame(s) {
+    const P = s.puzzle;
+    const t0 = Date.now();
+    const deck = P.cards.slice();
+    const placed = [deck.shift()];
+    let lives = 3, right = 0;
+    const fmtD = (d) => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    function draw(msgText) {
+      const cur = deck[0];
+      if (!cur || !lives) return finish();
+      const line = [];
+      placed.forEach((c, i) => {
+        line.push(el("button", { class: "gm-gap", text: "＋ here", onclick: () => place(i) }));
+        line.push(el("div", { class: "gm-card" }, el("span", { class: "gm-date", text: fmtD(c.date) }), el("span", { text: c.text })));
+      });
+      line.push(el("button", { class: "gm-gap", text: "＋ here", onclick: () => place(placed.length) }));
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Timeline · " + "♥".repeat(lives) }),
+        el("div", { class: "gm-card gm-next" }, el("span", { class: "gm-date", text: "When?" }), el("span", { text: cur.text })),
+        msgText ? el("p", { class: "fine", text: msgText }) : null,
+        el("div", { class: "gm-line" }, ...line), backBtn()], "Timeline");
+    }
+    function place(i) {
+      const cur = deck.shift();
+      const before = placed[i - 1], after = placed[i];
+      const ok = (!before || before.date <= cur.date) && (!after || cur.date <= after.date);
+      let pos = placed.findIndex((c) => c.date > cur.date);
+      if (pos < 0) pos = placed.length;
+      placed.splice(pos, 0, cur);
+      if (ok) right += 1; else lives -= 1;
+      draw(ok ? "Right: " + fmtD(cur.date) + "." : "Not quite — it was " + fmtD(cur.date) + ". " + lives + " " + (lives === 1 ? "life" : "lives") + " left.");
+    }
+    function finish() {
+      const ok = !deck.length && lives > 0;
+      const res = { ok, score: right, ms: Date.now() - t0, hints: 0 };
+      send(Object.assign({ slot: s.slot, game: "timeline", puzzle: P.id, items: [] }, res));
+      markDone(s.slot, res);
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Timeline" }),
+        reveal({ ok, verdict: right + " placed right" + (deck.length ? " · out of lives" : ""), next: earlierNext() }),
+        el("div", { class: "gm-line" }, ...placed.concat(deck).sort((a, b) => a.date.localeCompare(b.date)).map((c) => el("a", { class: "gm-card", href: c.link, target: "_blank", rel: "noopener" },
+          el("span", { class: "gm-date", text: fmtD(c.date) }), el("span", { text: c.text + " ↗" }))))], "Timeline");
+    }
+    draw("Place each event on the line. Dates are from the official record.");
+  }
+
+  // ---------------------------------------------------------------- Beacon Agenda
+  // Which board hears this? Items from Beacon's posted agendas, brought by companies or the City.
+  function agendaGame(s) {
+    const P = s.puzzle;
+    const t0 = Date.now();
+    let right = 0;
+    function q(i) {
+      const it = P.items[i];
+      if (!it) return finish();
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda · " + (i + 1) + " of " + P.items.length }),
+        el("p", { class: "gm-keep", text: it.text }), el("p", { class: "fine", text: "Which board hears it?" }),
+        ...it.options.map((o) => el("button", { class: "gm-slot", onclick: () => answer(it, o, i) }, el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: o })))), backBtn()], "Beacon Agenda");
+    }
+    function answer(it, o, i) {
+      const ok = o === it.answer;
+      if (ok) right += 1;
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda · " + (i + 1) + " of " + P.items.length }),
+        el("p", { class: "gm-keep", text: it.text }),
+        reveal({ ok, verdict: ok ? "Right" : "It's the " + it.answer, keep: it.answer, meta: it.meeting, link: it.link, linkText: "The agenda ↗",
+          next: { text: i + 1 < P.items.length ? "Next ›" : "Finish ›", fn: () => q(i + 1) } })], "Beacon Agenda");
+    }
+    function finish() {
+      const ok = right / P.items.length >= 0.6;
+      const res = { ok, score: right, ms: Date.now() - t0, hints: 0 };
+      send(Object.assign({ slot: s.slot, game: "beacon_agenda", puzzle: P.id, items: [] }, res));
+      markDone(s.slot, res);
+      openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Beacon Agenda" }), reveal({ ok, verdict: right + " of " + P.items.length, next: earlierNext() })], "Beacon Agenda");
+    }
+    q(0);
   }
 
   // ---------------------------------------------------------------- The Docket

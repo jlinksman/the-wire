@@ -111,6 +111,11 @@ function assemble(st, pool, chess, today) {
   if (dow === 2) { const d = pickDefectors(st, pool, today); if (d) news = { game: "defectors", puzzle: d }; }
   if (dow === 3) { const k = ((pool && pool.docket) || []).find((x) => !st.served[x.id]); if (k) news = { game: "docket", puzzle: k }; }
   if (dow === 4) { const l = ((pool && pool.ledger) || []).find((x) => !st.served[x.id]); if (l) news = { game: "ledger", puzzle: l }; }
+  if (dow === 6) { const t = ((pool && pool.timeline) || []).find((x) => !st.served[x.id]); if (t) news = { game: "timeline", puzzle: t }; }
+  if (dow === 0) {
+    const items = ((pool && pool.beacon_agenda) || []).filter((x) => !st.served[x.id]).slice(0, 5);
+    if (items.length >= 2) news = { game: "beacon_agenda", puzzle: { id: "ba" + today, items } };
+  }
   if (dow === 5 && pool && pool.friday_quiz && !st.served[pool.friday_quiz.id]) news = { game: "friday_quiz", puzzle: pool.friday_quiz };
   let wsi = null;
   if (!news) { wsi = pickWho(st, pool, today); if (wsi) news = { game: "who_said_it", puzzle: wsi }; }
