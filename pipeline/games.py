@@ -572,75 +572,119 @@ def weekend_ciphers(wsi: list[dict], seed: str, drops, budget: QuoteBudget | Non
 
 
 # ------------------------------------------------------------------ Saturday meta
-# The answer is chosen first: a real Hudson Valley place name. Seven or eight feeders come from the
-# week's verified puzzles (Friday's keyword, people quoted, members who broke ranks, opinion
-# authors); each gives one letter at a stated position, in order. Before it ships, every way of
-# hiding a quarter of the feeders must still leave exactly one place in the list that fits.
-HV_PLACES = """BEACON GOSHEN CARMEL CROTON TIVOLI AMENIA PAWLING CHESTER WARWICK KINGSTON FISHKILL NEWBURGH GARRISON
+# The answer is chosen first: a real Hudson Valley place name of 7–9 letters. One feeder per letter
+# (so 7–9 feeders), each from the week's verified puzzles, drawn from several games (Friday's keyword,
+# people quoted, members who broke ranks, opinion authors, the Beacon board that heard an item,
+# officials in the news), never two feeders with the same answer; each gives one letter at a stated
+# position, in order. Before it ships, every way of hiding a quarter of the feeders must still leave
+# exactly one place in the whole place list that fits.
+HV_PLACES = sorted(set("""BEACON GOSHEN CARMEL CROTON TIVOLI AMENIA PAWLING CHESTER WARWICK KINGSTON FISHKILL NEWBURGH GARRISON
 CORNWALL HIGHLAND MARLBORO OSSINING BREWSTER HYDEPARK NEWPALTZ PATTERSON MAHOPAC MONTGOMERY WALDEN
 MAYBROOK SHAWANGUNK ELLENVILLE CATSKILL HUDSON ATHENS COXSACKIE STANFORD MILLERTON PINEPLAINS
 LAGRANGE UNIONVALE DOVER RHINEBECK REDHOOK CLINTON WASHINGTON KENT PUTNAM YORKTOWN PEEKSKILL
-CORTLANDT NYACK HAVERSTRAW PIERMONT SUFFERN NEWWINDSOR WOODBURY MONROE CHESTER FLORIDA""".split()
+CORTLANDT NYACK HAVERSTRAW PIERMONT SUFFERN NEWWINDSOR WOODBURY MONROE FLORIDA""".split()))
+META_CAP = {"keyed": 1, "who_said_it": 2, "defectors": 2, "docket": 2, "agenda": 2, "official": 2}
 
 
-def meta(wsi, dv, dk, seed, drops, budget: QuoteBudget | None = None) -> dict | None:
-    rng = random.Random(seed + "meta")
-    budget = budget or QuoteBudget()
-    feeders = []
-    kw = week_keyword()
-    feeders.append({"clue": "Friday's keyword (it's in the keyed cipher's worksheet)", "answer": kw, "src": "keyed"})
-    for q in [x for x in wsi if budget.ok(x["id"], "meta")][:8]:
-        feeders.append({"clue": f"Said this week: “{q['quote'][:120]}{'…' if len(q['quote']) > 120 else ''}” (surname)", "answer": fold(q["answer"]).split()[-1].upper(), "src": "who_said_it", "link": q.get("link"), "qid": q["id"]})
-    for d in dv[:4]:
+def all_places() -> list[str]:
+    """Every place name the uniqueness check must rule out: the meta list plus the four counties'
+    full municipality lists (spaces and hyphens dropped)."""
+    return sorted(set(HV_PLACES) | {re.sub(r"[^A-Z]", "", p.upper()) for p in HV_COUNTY_OF})
+
+
+def surname_key(name: str) -> str:
+    """ "Alexandria Ocasio-Cortez" → OCASIOCORTEZ; suffixes dropped; accents folded."""
+    last = strip_suffix(name).split()[-1] if strip_suffix(name).split() else ""
+    return fold(last).replace(" ", "").upper()
+
+
+def meta_feeders(wsi, dv, dk, budget, ba=(), lib=(), data=None) -> list[dict]:
+    feeders = [{"clue": "Friday's keyword (it's in the keyed cipher's worksheet)", "answer": week_keyword(), "src": "keyed"}]
+    for q in [x for x in wsi if budget.ok(x["id"], "meta")][:6]:
+        feeders.append({"clue": f"Said this week: “{q['quote'][:120]}{'…' if len(q['quote']) > 120 else ''}” (surname)",
+                        "answer": surname_key(q["answer"]), "src": "who_said_it", "link": q.get("link"), "qid": q["id"]})
+    for d in list(dv)[:4]:
         for b in d["defectors"][:2]:
             feeders.append({"clue": f"Broke with the {'Republicans' if b['party'] == 'R' else 'Democrats'} on {d['bill'] or 'a House vote'} ({d['date']}), from {b['state']} (surname)",
                             "answer": fold(b["last"] or b["name"]).replace(" ", "").upper(), "src": "defectors", "link": d.get("link")})
-    for k in dk[:4]:
+    for k in list(dk)[:4]:
         if k.get("author") and k.get("author_code") not in ("PC", "D"):
-            feeders.append({"clue": f"Wrote the Court's opinion in {k['name']} (surname)", "answer": fold(k["author"]).split()[-1].upper(), "src": "docket", "link": k.get("pdf")})
-    feeders = [f for f in feeders if f["answer"].isalpha() and len(f["answer"]) >= 4]
-    if len(feeders) < 7:
-        drops.append(("meta", f"only {len(feeders)} feeders this week"))
-        return None
-    places = [p for p in HV_PLACES if 6 <= len(p) <= 8]
-    rng.shuffle(places)
-    for ans in places:
-        need = len(ans)
-        chosen, used = [], set()
-        ok = True
-        # Friday's keyword always feeds first if it can.
-        for i, ch in enumerate(ans):
-            cands = [f for j, f in enumerate(feeders) if j not in used and ch in f["answer"]]
-            if i == 0:
-                kwc = [f for f in cands if f["src"] == "keyed"]
-                cands = kwc or cands
-            if not cands:
-                ok = False
-                break
-            f = rng.choice(cands)
-            used.add(feeders.index(f))
-            pos = [k for k, c in enumerate(f["answer"]) if c == ch]
-            chosen.append(dict(f, index=rng.choice(pos) + 1))
-        if not ok:
+            feeders.append({"clue": f"Wrote the Court's opinion in {k['name']} (surname)", "answer": surname_key(k["author"]), "src": "docket", "link": k.get("pdf")})
+    for b in list(ba)[:6]:
+        word = {"City Council": "COUNCIL", "Planning Board": "PLANNING", "Zoning Board of Appeals": "ZONING"}.get(b["answer"])
+        if word:
+            feeders.append({"clue": f"Which Beacon board had this on its agenda (COUNCIL, PLANNING or ZONING)? “{b['text'][:110]}”", "answer": word, "src": "agenda", "link": b.get("link")})
+    week = fold(" ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in (data or {}).get("items", [])))
+    for L in lib:
+        if L.get("group") not in ("Beacon", "Dutchess", "New York") or L.get("kind") == "forms":
             continue
-        # Uniqueness with a quarter of the feeders missing.
-        k_hide = max(1, need // 4)
-        unique = True
-        for hide in itertools.combinations(range(need), k_hide):
-            pat = "".join("." if i in hide else ans[i] for i in range(need))
-            fits = [p for p in HV_PLACES if len(p) == need and re.fullmatch(pat, p)]
-            if len(fits) != 1:
-                unique = False
+        for x in L["items"]:
+            if x.get("clue") and fold(x["answer"]) in week:
+                feeders.append({"clue": f"{L['title']}: {x['clue']} (surname)", "answer": surname_key(x["answer"]), "src": "official"})
+    out, seen = [], set()
+    for f in feeders:
+        if f["answer"].isalpha() and len(f["answer"]) >= 4 and f["answer"] not in seen:
+            seen.add(f["answer"])
+            out.append(f)
+    return out
+
+
+def meta_unique(ans: str, places: list[str]) -> int:
+    """How many feeders can be hidden (a quarter) with exactly one place still fitting, or 0."""
+    need = len(ans)
+    k_hide = max(1, need // 4)
+    for hide in itertools.combinations(range(need), k_hide):
+        pat = "".join("." if i in hide else ans[i] for i in range(need))
+        if len([p for p in places if len(p) == need and re.fullmatch(pat, p)]) != 1:
+            return 0
+    return k_hide
+
+
+def meta(wsi, dv, dk, seed, drops, budget: QuoteBudget | None = None, ba=(), lib=(), data=None) -> dict | None:
+    rng = random.Random(seed + "meta")
+    budget = budget or QuoteBudget()
+    feeders = meta_feeders(wsi, dv, dk, budget, ba, lib, data)
+    srcs = {f["src"] for f in feeders}
+    if len(feeders) < 7 or len(srcs) < 3:
+        drops.append(("meta", f"only {len(feeders)} distinct feeders from {len(srcs)} games this week (need 7 from 3)"))
+        return None
+    places = all_places()
+    answers = [p for p in HV_PLACES if 7 <= len(p) <= 9]
+    rng.shuffle(answers)
+    for ans in answers:
+        k_hide = meta_unique(ans, places)
+        if not k_hide:
+            continue
+        for _ in range(30):                               # several tries at the letter-to-feeder assignment
+            chosen, used, per = [], set(), {}
+            ok = True
+            for i, ch in enumerate(ans):
+                cands = [j for j, f in enumerate(feeders) if j not in used and ch in f["answer"] and per.get(f["src"], 0) < META_CAP.get(f["src"], 2)]
+                if i == 0 and any(feeders[j]["src"] == "keyed" for j in cands):
+                    cands = [j for j in cands if feeders[j]["src"] == "keyed"]   # Friday's keyword leads when it can
+                if not cands:
+                    ok = False
+                    break
+                least = min(per.get(feeders[j]["src"], 0) for j in cands)          # spread across games
+                j = rng.choice([j for j in cands if per.get(feeders[j]["src"], 0) == least])
+                used.add(j)
+                f = feeders[j]
+                per[f["src"]] = per.get(f["src"], 0) + 1
+                pos = [k for k, c in enumerate(f["answer"]) if c == ch]
+                chosen.append(dict(f, index=rng.choice(pos) + 1))
+            if ok and len(per) >= 3:
                 break
-        if not unique:
+        else:
+            continue
+        if not ok:
             continue
         for c in chosen:
             if c.get("qid"):
                 budget.take(c["qid"], "meta")
-        return {"id": "mt" + pid(seed, ans), "category": "a Hudson Valley place", "length": need, "answer": ans,
+        return {"id": "mt" + pid("meta", ans, *[c["answer"] for c in chosen]), "category": "a Hudson Valley place", "length": len(ans), "answer": ans,
                 "feeders": [{"clue": c["clue"], "answer": c["answer"], "index": c["index"], "link": c.get("link"), "src": c["src"]} for c in chosen],
                 "solvable_missing": k_hide}
-    drops.append(("meta", "no place name could be built with a unique answer"))
+    drops.append(("meta", "no place name could be built with a unique answer from this week's feeders"))
     return None
 
 
@@ -2361,7 +2405,7 @@ def main(argv=None) -> int:
         drops.append(("tactics", "no board passed the one-to-three-winning-lines test"))
     ldg = ledger(dv, a.rosters, seed, now, drops, data, lambda i: i in used and used[i] != day)
     fq = friday_quiz(wsi, dv, lg, data, seed, drops, budget, dk=dk, ldg=ldg, tl=tl, ba=ba, lib=lib) if fri else None
-    mt = meta(wsi, dv, dk, seed, drops, budget) if sat else None
+    mt = meta(wsi, dv, dk, seed, drops, budget, ba=ba, lib=lib, data=data) if sat else None
     if not WORDS:
         drops.append(("cryptoquote", "word list missing (/usr/share/dict/words): difficulty grading and wordplay are off"))
     cq = fresh(cryptoquotes(wsi, seed, drops, budget), "cryptoquote")

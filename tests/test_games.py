@@ -115,6 +115,33 @@ def test_connections_universe_mixed():
     assert games.same_ends("Albania") and not games.same_ends("Canada Dry")
 
 
+def test_meta_rules():
+    places = games.all_places()
+    assert len(places) == len(set(places)) and games.HV_PLACES.count("CHESTER") == 1
+    games.WEEK["day"] = "2026-10-24"
+    wsi = [{"id": f"w{i}", "quote": "A quote long enough to use here.", "answer": n, "link": None}
+           for i, n in enumerate(["Donald Trump", "Chris Drago", "Katie Zacharia", "Frank Morano", "Lee Kyriacou"])]
+    dv = [{"bill": "H R 1", "date": "2026-10-01", "link": None, "defectors": [{"party": "R", "last": n, "name": n, "state": "KY"} for n in ("Massie", "Davidson")]},
+          {"bill": "H R 2", "date": "2026-10-02", "link": None, "defectors": [{"party": "D", "last": n, "name": n, "state": "TX"} for n in ("Cuellar", "Golden")]}]
+    dk = [{"name": f"Case {i}", "author": a, "author_code": "X", "pdf": None} for i, a in enumerate(["Elena Kagan", "Neil Gorsuch", "Samuel Alito"])]
+    ba = [{"answer": "Planning Board", "text": "Review of an application", "link": None}, {"answer": "City Council", "text": "A bond", "link": None}]
+    found = 0
+    for k in range(8):
+        m = games.meta(wsi, dv, dk, f"seed{k}", [], None, ba=ba)
+        if not m:
+            continue
+        found += 1
+        f = m["feeders"]
+        assert 7 <= len(f) <= 9 and len(f) == len(m["answer"])
+        assert len({x["answer"] for x in f}) == len(f)                       # no duplicate feeder answers
+        srcs = [x["src"] for x in f]
+        assert len(set(srcs)) >= 3 and srcs.count("who_said_it") <= 2
+        assert "".join(x["answer"][x["index"] - 1] for x in f) == m["answer"]
+        assert games.meta_unique(m["answer"], places) == m["solvable_missing"] >= 1
+    assert found >= 4
+    assert games.surname_key("Alexandria Ocasio-Cortez") == "OCASIOCORTEZ" and games.surname_key("Donald S. Beyer, Jr.") == "BEYER"
+
+
 def test_crypt_difficulty_monotone():
     easy = games.crypt_features("It's a fine day and I'll be at the shop at ten, so it's all good to go.")
     hard = games.crypt_features("Quickly judging mixed zebras vexes bold nymphs.")
