@@ -1275,13 +1275,18 @@ def main(argv=None) -> int:
     WEEK["day"] = day
     wk = weekend_ciphers(wsi, seed, drops)
     cf = casefile(seed, drops)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import tactics
+    tx = tactics.pool(seed)
+    if not tx:
+        drops.append(("tactics", "no board passed the one-to-three-winning-lines test"))
     mt = meta(wsi, dv, dk, seed, drops) if date.fromisoformat(day).weekday() == 5 or os.environ.get("WIRE_SATURDAY") else None
     ldg = fresh(ledger(dv, a.rosters, seed, now, drops), "ledger")
     fq = friday_quiz(wsi, dv, lg, data, seed, drops) if date.fromisoformat(day).weekday() == 4 or os.environ.get("WIRE_FRIDAY") else None
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
-        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left, "weekend": wk, "meta": mt, "casefile": cf,
-        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba),
+        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left, "weekend": wk, "meta": mt, "casefile": cf, "tactics": tx,
+        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba, more=(("casefile", 1 if cf else 0), ("tactics", len(tx)))),
     }
     if a.quiz:
         try:
@@ -1314,10 +1319,10 @@ def main(argv=None) -> int:
     return 0
 
 
-def health(wsi, cq, grid, drops, dv=(), lg=None, ldg=None, fq=None, dk=None, tl=None, ba=None) -> list[dict]:
+def health(wsi, cq, grid, drops, dv=(), lg=None, ldg=None, fq=None, dk=None, tl=None, ba=None, more=()) -> list[dict]:
     lg = lg or {"cards": []}
     rows = []
-    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv)), ("legal", len(lg["cards"])), ("ledger", len(ldg or [])), ("friday_quiz", 1 if fq else 0), ("docket", len(dk or [])), ("timeline", len(tl or [])), ("beacon_agenda", len(ba or []))):
+    for game, made in (("who_said_it", len(wsi)), ("cryptoquote", len(cq)), ("connections", 1 if grid else 0), ("defectors", len(dv)), ("legal", len(lg["cards"])), ("ledger", len(ldg or [])), ("friday_quiz", 1 if fq else 0), ("docket", len(dk or [])), ("timeline", len(tl or [])), ("beacon_agenda", len(ba or [])), *more):
         why = {}
         for g, r in drops:
             if g == game:

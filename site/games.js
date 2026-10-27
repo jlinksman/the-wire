@@ -115,11 +115,12 @@
   }
   function nyDay() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()); }
 
-  const NAMES = { keyed: "Keyed cipher", patristocrat: "Patristocrat", meta: "Saturday meta", casefile: "Case file", timeline: "Timeline", beacon_agenda: "Beacon Agenda", docket: "The Docket", ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections" };
+  const NAMES = { keyed: "Keyed cipher", patristocrat: "Patristocrat", meta: "Saturday meta", casefile: "Case file", timeline: "Timeline", beacon_agenda: "Beacon Agenda", docket: "The Docket", ledger: "The Ledger", friday_quiz: "Friday quiz", legal: "Law refresher", defectors: "Defectors", who_said_it: "Who said it", cryptoquote: "Cryptoquote", chess: "Chess", logic: "Logic", connections: "Connections", tactics: "Tactics" };
   const LOGIC_NAMES = { loopy: "Loopy", keen: "Keen", towers: "Towers", galaxies: "Galaxies", signpost: "Signpost", dominosa: "Dominosa", unequal: "Unequal", slant: "Slant", range: "Range", pattern: "Pattern" };
   function slotLine(s) {
     const p = s.puzzle || {};
     if (s.game === "logic") return (LOGIC_NAMES[p.game] || p.game) + " · tier " + p.tier;
+    if (s.game === "tactics") return "Save every building in one turn · tier " + p.tier;
     if (s.game === "chess") { const th = (p.themes || []).filter((t) => !/^(short|long|veryLong|oneMove|middlegame|endgame|opening|master|masterVsMaster|crushing|advantage|equality)$/.test(t)).slice(0, 2); return "Puzzle rated " + p.rating + (th.length ? " · " + th.join(", ") : ""); }
     if (s.game === "keyed") return "Friday cipher · the keyword feeds the meta";
     if (s.game === "connections") return "Sixteen names from the week, four groups";
@@ -166,7 +167,7 @@
     nodes.push(el("button", { class: "sbtn wide", text: "Library: name them all, match ›", onclick: () => openLibrary() }));
     nodes.push(el("div", { class: "sactions" },
       el("span", { class: "fine", text: "Brain break:" }),
-      ...["logic", "chess"].map((b) => el("button", { class: "chip" + ((D.pick || "logic") === b ? " on" : ""), text: b === "logic" ? "Logic" : "Chess", onclick: async () => {
+      ...["logic", "chess", "tactics"].map((b) => el("button", { class: "chip" + ((D.pick || "logic") === b ? " on" : ""), text: b[0].toUpperCase() + b.slice(1), onclick: async () => {
         try { await fetch("games", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "pick", brain: b }) }); D.pick = b; } catch (e) { /* later */ }
         openPuzzles(); } }))));
     const bits = [st.played7 != null ? "played " + st.played7 + " of the last 7 days" : null, st.sure_right != null ? "when sure, right " + st.sure_right + "%" : null, st.chess ? "chess " + st.chess : null, st.ranges90 ? "90% ranges right " + st.ranges90.hit + " of " + st.ranges90.of : null].filter(Boolean);
@@ -192,6 +193,7 @@
     if (s.game === "connections") return connections(s);
     if (s.game === "beacon_agenda") return agendaGame(s);
     if (s.game === "friday_quiz") return fridayQuiz(s);
+    if (s.game === "tactics") return tacticsGame(s);
     openPuzzles();
   }
   const backBtn = () => el("button", { class: "sbtn wide", text: "‹ Puzzles", onclick: () => openPuzzles() });
@@ -1008,6 +1010,159 @@
     draw();
     openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Chess" }), boardEl, msg, backBtn()], "Chess");
   }
+
+  // ---------------------------------------------------------------- Tactics (one turn, Into the Breach-style)
+  // Same rules as pipeline/tactics.py (CI replays the generator's lines through this engine).
+  const TX_N = 6;
+  const TX_DIRS = { N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0] };
+  const txIn = (x, y) => x >= 0 && x < TX_N && y >= 0 && y < TX_N;
+  function txBoard(P) {
+    const t = {};
+    for (const [x, y, k] of P.terrain) t[x + "," + y] = k;
+    return { t, b: new Set(P.buildings.map(([x, y]) => x + "," + y)), e: P.enemies.map((e) => Object.assign({}, e)), u: P.units.map((u) => Object.assign({}, u)), hit: false };
+  }
+  const txCopy = (B) => ({ t: B.t, b: B.b, e: B.e.map((e) => Object.assign({}, e)), u: B.u.map((u) => Object.assign({}, u)), hit: B.hit });
+  const txEnemy = (B, x, y) => B.e.find((e) => e.x === x && e.y === y && e.hp > 0) || null;
+  const txOcc = (B, x, y) => B.t[x + "," + y] === "mountain" || B.b.has(x + "," + y) || !!txEnemy(B, x, y) || B.u.some((u) => u.x === x && u.y === y);
+  function txDamage(B, x, y) { if (B.b.has(x + "," + y)) B.hit = true; const e = txEnemy(B, x, y); if (e) e.hp -= 1; }
+  function txPush(B, x, y, d) {
+    const e = txEnemy(B, x, y);
+    if (!e) return;
+    const nx = x + TX_DIRS[d][0], ny = y + TX_DIRS[d][1];
+    if (!txIn(nx, ny)) return;
+    if (txOcc(B, nx, ny)) { e.hp -= 1; txDamage(B, nx, ny); return; }
+    e.x = nx; e.y = ny;
+    if (B.t[nx + "," + ny] === "water") e.hp = 0;
+  }
+  function txReach(B, u, steps) {
+    const seen = new Set([u.x + "," + u.y]);
+    let frontier = [[u.x, u.y]];
+    for (let i = 0; i < steps; i++) {
+      const nxt = [];
+      for (const [x, y] of frontier) for (const [dx, dy] of Object.values(TX_DIRS)) {
+        const px = x + dx, py = y + dy, k = px + "," + py;
+        if (txIn(px, py) && !seen.has(k) && !txOcc(B, px, py) && B.t[k] !== "water") { seen.add(k); nxt.push([px, py]); }
+      }
+      frontier = nxt;
+    }
+    return [...seen].map((k) => k.split(",").map(Number));
+  }
+  function txAct(B, i, to, a) {
+    const u = B.u[i];
+    u.x = to[0]; u.y = to[1];
+    const [dx, dy] = TX_DIRS[a[1]];
+    if (a[0] === "punch") {
+      const tx = u.x + dx, ty = u.y + dy;
+      if (txIn(tx, ty)) { txDamage(B, tx, ty); txPush(B, tx, ty, a[1]); }
+    } else if (a[0] === "shell") {
+      const tx = u.x + dx * a[2], ty = u.y + dy * a[2];
+      if (txIn(tx, ty)) {
+        txDamage(B, tx, ty);
+        for (const [dd, [ax, ay]] of Object.entries(TX_DIRS)) if (txIn(tx + ax, ty + ay)) txPush(B, tx + ax, ty + ay, dd);
+      }
+    }
+  }
+  function txAttack(B) {
+    for (const e of B.e) {
+      if (e.hp <= 0) continue;
+      const tx = e.x + TX_DIRS[e.dir][0], ty = e.y + TX_DIRS[e.dir][1];
+      if (txIn(tx, ty)) txDamage(B, tx, ty);
+    }
+  }
+  function txReplay(P, line) { const B = txBoard(P); for (const st of line) txAct(B, st.unit, st.to, st.attack); txAttack(B); return !B.hit; }
+  const txSq = (x, y) => "ABCDEF"[x] + (y + 1);
+  const txDescribe = (P, line) => line.map((st) => (P.units[st.unit].kind === "punch" ? "Puncher" : "Artillery") + " to " + txSq(...st.to) + ", " +
+    (st.attack[0] === "hold" ? "hold fire" : (st.attack[0] === "punch" ? "punch " : "shell " + st.attack[2] + " tiles ") + { N: "north", E: "east", S: "south", W: "west" }[st.attack[1]])).join("; then ");
+
+  function tacticsGame(s) {
+    const P = s.puzzle;
+    const t0 = Date.now();
+    let B = txBoard(P), line = [], sel = null, moved = null, over = false;
+    const ARROW = { N: "↑", E: "→", S: "↓", W: "←" };
+    const grid = el("div", { class: "gm-board gm-tx" });
+    const msg = el("p", { class: "fine" });
+    const tools = el("div", { class: "sactions" });
+    const threats = () => new Set(B.e.filter((e) => e.hp > 0).map((e) => [e.x + TX_DIRS[e.dir][0], e.y + TX_DIRS[e.dir][1]]).filter(([x, y]) => txIn(x, y)).map(([x, y]) => x + "," + y));
+    function targets(u) {
+      const out = [];
+      for (const [d, [dx, dy]] of Object.entries(TX_DIRS)) {
+        if (u.kind === "punch") { if (txIn(u.x + dx, u.y + dy)) out.push([u.x + dx, u.y + dy, ["punch", d]]); }
+        else for (const r of [2, 3, 4]) if (txIn(u.x + dx * r, u.y + dy * r)) out.push([u.x + dx * r, u.y + dy * r, ["shell", d, r]]);
+      }
+      return out;
+    }
+    function draw() {
+      const th = threats();
+      const reach = sel != null && !moved ? new Set(txReach(B, B.u[sel], B.u[sel].kind === "punch" ? 3 : 2).map(([x, y]) => x + "," + y)) : new Set();
+      const tg = sel != null && moved ? targets(B.u[sel]) : [];
+      const cells = [];
+      for (let y = 0; y < TX_N; y++) for (let x = 0; x < TX_N; x++) {
+        const k = x + "," + y, e = txEnemy(B, x, y), ui = B.u.findIndex((u) => u.x === x && u.y === y);
+        const terr = B.t[k];
+        let txt = "", cls = "gm-sq gm-txs" + (terr ? " " + terr : "") + (th.has(k) ? " threat" : "") + (reach.has(k) ? " reach" : "") + (tg.some((q) => q[0] === x && q[1] === y) ? " target" : "") + (ui === sel && sel != null ? " sel" : "");
+        if (B.b.has(k)) { txt = "▣"; cls += " bldg"; }
+        else if (e) { txt = ARROW[e.dir] + e.hp; cls += " foe"; }
+        else if (ui >= 0) { txt = B.u[ui].kind === "punch" ? "P" : "A"; cls += " mine" + (line.some((l) => l.unit === ui) ? " spent" : ""); }
+        else if (terr === "water") txt = "≈";
+        else if (terr === "mountain") txt = "▲";
+        cells.push(el("button", { class: cls, "aria-label": txSq(x, y) + " " + (txt || "ground"), onclick: () => tap(x, y) }, el("span", { text: txt }),
+          y === 0 || x === 0 ? el("i", { class: "gm-co", text: (y === 0 ? "ABCDEF"[x] : "") + (x === 0 ? String(y + 1) : "") }) : null));
+      }
+      grid.replaceChildren(...cells);
+      const left = B.u.map((u, i) => i).filter((i) => !line.some((l) => l.unit === i));
+      if (!over) msg.textContent = sel == null ? (left.length ? "Tap a unit (P punches and pushes; A shells 2–4 tiles away and pushes the four tiles around the hit). Red tiles get hit at the end of the turn." : "")
+        : !moved ? "Tap where " + (B.u[sel].kind === "punch" ? "the Puncher" : "the Artillery") + " moves (its own tile to stay)." : "Tap a target.";
+      tools.replaceChildren(...[
+        sel != null && moved ? el("button", { class: "sbtn", text: "Hold fire", onclick: () => fire(["hold", "N"]) }) : null,
+        !over && (line.length || sel != null) ? el("button", { class: "sbtn", text: "Reset turn", onclick: () => { B = txBoard(P); line = []; sel = null; moved = null; draw(); } }) : null].filter(Boolean));
+    }
+    let before = null;
+    function tap(x, y) {
+      if (over) return;
+      const ui = B.u.findIndex((u) => u.x === x && u.y === y);
+      if (sel == null || (!moved && ui >= 0)) {
+        if (ui >= 0 && !line.some((l) => l.unit === ui)) { sel = ui; moved = null; draw(); }
+        return;
+      }
+      if (!moved) {
+        if (!txReach(B, B.u[sel], B.u[sel].kind === "punch" ? 3 : 2).some(([a, b]) => a === x && b === y)) return;
+        before = txCopy(B);
+        B.u[sel].x = x; B.u[sel].y = y; moved = [x, y]; draw();
+        return;
+      }
+      const q = targets(B.u[sel]).find((t) => t[0] === x && t[1] === y);
+      if (q) fire(q[2]);
+    }
+    function fire(a) {
+      const to = moved;
+      B = before; before = null;
+      if (a[0] !== "hold") txAct(B, sel, to, a); else { B.u[sel].x = to[0]; B.u[sel].y = to[1]; }
+      line.push({ unit: sel, to, attack: a });
+      sel = null; moved = null;
+      if (line.length === B.u.length || B.hit) return end();
+      draw();
+    }
+    function end() {
+      over = true;
+      txAttack(B);
+      const ok = !B.hit;
+      draw();
+      const res = { ok, score: ok ? 1 : 0, ms: Date.now() - t0, hints: 0 };
+      send(Object.assign({ slot: s.slot, game: "tactics", puzzle: P.id, items: [] }, res));
+      markDone(s.slot, res);
+      const sols = (P.solutions || []).map((l, i) => (P.solutions.length > 1 ? (i + 1) + ". " : "") + txDescribe(P, l));
+      msg.replaceChildren(reveal({ ok, verdict: ok ? "Every building stands" : "A building was hit",
+        keep: ok ? "Your line: " + txDescribe(P, line) : null,
+        why: (sols.length > 1 ? "The " + sols.length + " winning outcomes: " : "The winning line: ") + sols.join(" · "),
+        meta: "Columns A–F, rows 1–6 from the top · generated board, tier " + P.tier,
+        next: { text: "Done ›", fn: () => openPuzzles() } }));
+    }
+    draw();
+    openSheet([el("h2", { id: "sheet-title", class: "stitle", text: "Tactics" }),
+      el("p", { class: "fine", text: "▣ building · ↑2 enemy (attacks the way it points; number is health) · ≈ water drowns · ▲ mountain blocks. Pushing an enemy into something hurts both." }),
+      grid, msg, tools, backBtn()], "Tactics");
+  }
+  window.wireTactics = { replay: txReplay };
 
   // ---------------------------------------------------------------- Logic (Simon Tatham's Puzzles)
   // The official web build, patched to report "solved" and themed dark (built at deploy time).

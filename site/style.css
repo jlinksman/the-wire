@@ -919,3 +919,19 @@ select.tin { width: 100%; }
 .gm-tile.sel { background: #4b6fa8; color: #fff; }
 .gm-group { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 6px; margin: 4px 0; color: #111; font-size: 0.8rem; }
 .gm-group.yellow { background: #e6c35c; } .gm-group.green { background: #8fbf6a; } .gm-group.blue { background: #8fb0dc; } .gm-group.purple { background: #b48ccc; }
+
+/* Tactics (6×6) */
+.gm-tx { grid-template-columns: repeat(6, 1fr); width: min(100%, 360px); }
+.gm-txs { position: relative; font: 600 15px/1 var(--mono, ui-monospace, monospace); color: var(--fg, #ddd); background: rgba(127,127,127,0.16); border: 1px solid rgba(127,127,127,0.25); }
+.gm-txs.water { background: rgba(60, 120, 200, 0.35); }
+.gm-txs.mountain { background: rgba(140, 110, 80, 0.45); }
+.gm-txs.bldg { color: #e8c45a; }
+.gm-txs.foe { color: #ff6b6b; }
+.gm-txs.mine { color: #2f8fd8; }
+.gm-txs.water { color: #3a78c8; }
+.gm-co { position: absolute; top: 2px; left: 3px; font: 9px/1 var(--mono, ui-monospace, monospace); font-style: normal; color: var(--fg, #ddd); opacity: 0.8; }
+.gm-txs.spent { opacity: 0.55; }
+.gm-txs.threat { box-shadow: inset 0 0 0 2px #ff6b6b; }
+.gm-txs.reach { background: rgba(102, 204, 255, 0.22); }
+.gm-txs.target { box-shadow: inset 0 0 0 3px #e8c45a; }
+.gm-txs.sel { box-shadow: inset 0 0 0 3px var(--accent, #6cf); }

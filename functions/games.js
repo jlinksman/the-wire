@@ -6,7 +6,7 @@
 // GET  /games                 -> today's slots, callbacks, stats, health
 // GET  /games?shadow=1        -> Connections shadow-mode board and generator health (Admin)
 // POST {action:"result", ...} -> record a finished puzzle (≤ 30 writes a day)
-// POST {action:"pick", brain} -> default brain break ("logic" | "chess")
+// POST {action:"pick", brain} -> default brain break ("logic" | "chess" | "tactics")
 const KEY = "games.json";
 const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 const WRITE_CAP = 30;
@@ -28,6 +28,8 @@ const LOGIC = {
   pattern: ["10x10", "15x15", "20x20"],
 };
 const LOGIC_ORDER = Object.keys(LOGIC);
+const BRAINS = ["logic", "chess", "tactics"];
+let POOL = null;                     // set by assemble() (synchronous), read by brainBreak()
 
 export async function onRequestGet({ request, env }) {
   if (!env.WIRE) return json({ error: "KV binding WIRE is not configured" }, 500);
@@ -62,7 +64,7 @@ export async function onRequestPost({ request, env }) {
   const w = (st.writes[today] || 0);
   if (w >= WRITE_CAP) return json({ ok: false, error: "Daily write cap reached; this result is kept on the page and sent tomorrow.", retry: true }, 429);
   if (b.action === "pick") {
-    if (!["logic", "chess"].includes(b.brain)) return json({ error: "Unknown brain break." }, 400);
+    if (!BRAINS.includes(b.brain)) return json({ error: "Unknown brain break." }, 400);
     st.pick = b.brain;
   } else if (b.action === "result") {
     record(st, b, today);
@@ -94,11 +96,12 @@ function trim(st, today) {
 
 // ------------------------------------------------------------------ assembly
 function assemble(st, pool, chess, today) {
+  POOL = pool;
   const rng = seeded("wire-day-" + today);
   const slots = [];
   const health = [];
   const brain = st.pick || "logic";
-  const other = brain === "logic" ? "chess" : "logic";
+  const other = brain === "logic" ? "chess" : "logic";       // tactics days put logic in the grid slot
   const tier = (g) => ((st.ladder[g] || {}).tier || (g === "cryptoquote" && weekday(today) === 1 ? 1 : 2));
 
   // Slot 1: the daily grid. Connections is in shadow mode, so the grid slot holds the other brain break.
@@ -210,6 +213,13 @@ function pickCipher(st, pool, today, tier, avoid) {
 }
 
 function brainBreak(kind, st, chess, today, rng, health, taken) {
+  if (kind === "tactics") {
+    const T = ((POOL && POOL.tactics) || []).filter((b) => !st.served[b.id] && !(taken || []).some((s) => s.id === b.id));
+    if (!T.length) { health.push({ game: "tactics", made: 0, dropped: 0, why: [["no tactics board today; a logic puzzle instead", 1]] }); return brainBreak("logic", st, chess, today, rng, health, taken); }
+    const t = ((st.ladder.tactics || {}).tier) || 2;
+    T.sort((a, b) => Math.abs(a.tier - t) - Math.abs(b.tier - t));
+    return { game: "tactics", puzzle: T[0] };
+  }
   if (kind === "chess") {
     const P = (chess && chess.puzzles) || [];
     if (!P.length) { health.push({ game: "chess", made: 0, dropped: 0, why: [["chess sample not loaded yet (monthly workflow)", 1]] }); return kind === "chess" ? brainBreak("logic", st, chess, today, rng, health, taken) : null; }

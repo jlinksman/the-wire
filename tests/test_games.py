@@ -115,6 +115,17 @@ def test_casefile_unique_and_minimal():
         assert sorted(v["time"] for v in sol.values()) == sorted(cf["times"])
 
 
+def test_tactics_boards():
+    import tactics
+    for P in tactics.pool("t-fixture", per_tier=1):
+        assert 1 <= len(P["solutions"]) <= 3 and P["tier"] in (1, 2, 3)
+        assert all(tactics.replay(P, l) for l in P["solutions"])
+        b = tactics.Board({(x, y): t for x, y, t in P["terrain"]}, [tuple(x) for x in P["buildings"]], P["enemies"], P["units"])
+        assert not tactics.greedy(b)                     # the obvious line loses
+        b.enemies_attack()
+        assert b.hit                                     # doing nothing loses
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):
