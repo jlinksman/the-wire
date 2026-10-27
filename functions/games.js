@@ -34,6 +34,7 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const pool = (await env.WIRE.get("games-today.json", "json")) || null;
   if (url.searchParams.get("shadow")) return json({ pool_day: pool && pool.day, connections: pool && pool.connections_shadow, health: pool && pool.health });
+  if (url.searchParams.get("quiz")) return json({ day: pool && pool.day, quiz: (pool && pool.wirequiz) || null });
   const st = await load(env);
   const today = nyDay();
   let day = st.days[today];

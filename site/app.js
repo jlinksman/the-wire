@@ -782,7 +782,28 @@ function newscastItem() {
 }
 // The newscast goes right after the edition (it's stale within the hour); podcasts follow, and the
 // queue tops itself up with more episodes when it runs low, so it doesn't just stop.
-function buildQueue() { return [editionItem(), newscastItem(), ...podcastPicks(4).map(podItem)].filter(Boolean); }
+function buildQueue() { return [editionItem(), newscastItem(), quizItem(), ...podcastPicks(4).map(podItem)].filter(Boolean); }
+// The Wire Quiz (2026-10-27, GAMES.md): a listen-only audio quiz, made once a day with the puzzles.
+let wireQuiz = null;
+function loadWireQuiz() {
+  return fetch("games?quiz=1", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
+    if (j && j.quiz && j.quiz.v) {
+      const fresh = !wireQuiz || wireQuiz.v !== j.quiz.v;
+      wireQuiz = j.quiz;
+      if (fresh && lq.items.length && !lq.items.some((x) => x.kind === "quiz")) {   // slot it in after the newscast
+        const k = lq.items.findIndex((x) => x.kind === "newscast");
+        lq.items.splice(k >= 0 ? k + 1 : Math.min(1, lq.items.length), 0, quizItem());
+        if (k >= 0 && k + 1 <= lq.i) lq.i += 1;
+        lqSave(); drawAplayer();
+      }
+    }
+  }).catch(() => null);
+}
+function quizItem() {
+  if (!wireQuiz || !wireQuiz.v) return null;
+  return { id: "qz:" + wireQuiz.v, kind: "quiz", title: "The Wire Quiz", sub: Math.round((wireQuiz.seconds || 0) / 60) + " min · listen-only", src: "wirequiz.mp3?v=" + wireQuiz.v, chapters: wireQuiz.chapters || [], show: "wirequiz" };
+}
+setTimeout(() => { try { loadWireQuiz(); } catch (e) { /* later */ } }, 6000);
 function extendQueue() {
   const more = podcastPicks(4, new Set(lq.items.map((x) => x.id))).map(podItem);
   lq.items.push(...more);
@@ -914,6 +935,7 @@ function listenCard() {
 setTimeout(() => { try { loadListenLog(); } catch (e) { /* later */ } }, 5000);
 function startListen(at) {
   lq.items = buildQueue();
+  if (!wireQuiz) loadWireQuiz();
   lq.i = 0;
   if (at != null && lq.items[0] && lq.items[0].kind === "edition") lq.pos[lq.items[0].id] = at;
   playAt(0, true);
@@ -987,7 +1009,7 @@ if ("mediaSession" in navigator) {
   // Car and lock-screen buttons (2026-10-26): in a podcast or the newscast, back and forward jump
   // 15 seconds (quick past an ad read); in the audio edition they move between stories.
   const jump = (d) => { aud.currentTime = Math.max(0, Math.min((aud.duration || 1e9) - 1, aud.currentTime + d)); };
-  const inEdition = () => { const cur = lq.items[lq.i]; return cur && cur.kind === "edition"; };
+  const inEdition = () => { const cur = lq.items[lq.i]; return cur && (cur.kind === "edition" || cur.kind === "quiz"); };
   set("seekbackward", (e) => jump(-((e && e.seekOffset) || 15)));
   set("seekforward", (e) => jump((e && e.seekOffset) || 15));
   set("previoustrack", () => (inEdition() ? skipChapter(-1) : jump(-15)));

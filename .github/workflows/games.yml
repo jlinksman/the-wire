@@ -65,12 +65,16 @@ jobs:
         run: |
           mkdir -p dist
           python pipeline/games.py data.json dist/games-today.json --rosters .games/rosters --hashes .games/hashes.json \
-            --votes .games/votes --fetch-votes
+            --votes .games/votes --fetch-votes --quiz dist
           rm -f data.json
 
       - name: Publish to Workers KV
         if: env.CLOUDFLARE_API_TOKEN != '' && env.WIRE_KV_ID != ''
-        run: npx --yes wrangler@4.152.0 kv key put games-today.json --path dist/games-today.json --namespace-id "$WIRE_KV_ID" --remote
+        run: |
+          if [ -s dist/wirequiz.mp3 ]; then
+            npx --yes wrangler@4.152.0 kv key put wirequiz.mp3 --path dist/wirequiz.mp3 --namespace-id "$WIRE_KV_ID" --remote
+          fi
+          npx --yes wrangler@4.152.0 kv key put games-today.json --path dist/games-today.json --namespace-id "$WIRE_KV_ID" --remote
 
       - name: Save games state
         if: always()

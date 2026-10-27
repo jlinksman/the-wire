@@ -578,6 +578,7 @@ def main(argv=None) -> int:
     ap.add_argument("--hashes", type=Path, help="puzzle-hash log (Actions cache): hashes only, never results")
     ap.add_argument("--votes", type=Path, help="roll-call cache directory (Actions cache)")
     ap.add_argument("--fetch-votes", action="store_true", help="fetch new roll calls before generating")
+    ap.add_argument("--quiz", type=Path, help="write the audio Wire Quiz MP3 into this directory (needs Cloudflare credentials)")
     a = ap.parse_args(argv)
     load_words()
     now = datetime.now(timezone.utc)
@@ -624,6 +625,16 @@ def main(argv=None) -> int:
         "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg,
         "health": health(wsi, cq, grid, drops, dv, lg),
     }
+    if a.quiz:
+        try:
+            import requests
+            import wirequiz
+            label = datetime.fromisoformat(day + "T12:00:00").strftime("%A, %B %-d")
+            pool["wirequiz"] = wirequiz.build(pool, requests.Session(), a.quiz, label)
+        except Exception as exc:                     # the quiz is optional; the puzzles still ship
+            pool["wirequiz"] = None
+            pool["health"].append({"game": "wirequiz", "made": 0, "dropped": 1, "why": [[f"{type(exc).__name__}", 1]]})
+            print(f"[games] audio quiz skipped: {type(exc).__name__}")
     Path(a.out).write_text(json.dumps(pool, ensure_ascii=False, separators=(",", ":")))
     if a.hashes:                                   # offered today = used; never back within 90 days
         for x in wsi + cq + dv + ([grid] if grid else []):
