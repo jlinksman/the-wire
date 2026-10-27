@@ -34,10 +34,13 @@ with sync_playwright() as p:
                 except Exception:
                     pass
             pg.wait_for_timeout(600)
+            visible = frame.evaluate("(()=>{const c=document.getElementById('puzzlecanvas');if(!c)return false;const r=c.getBoundingClientRect();return r.width>100&&r.height>100&&getComputedStyle(c).display!=='none'})()") if frame else False
+            if not visible:
+                err.append("puzzle canvas not visible")
             if t == 2:
                 Path("shots").mkdir(exist_ok=True)
                 pg.screenshot(path=f"shots/{g}.png")
-            err = [m for m in pg.evaluate("msgs") if isinstance(m, dict) and m.get("wireTatham") == "error"]
+            err += [m for m in pg.evaluate("msgs") if isinstance(m, dict) and m.get("wireTatham") == "error"]
             try:
                 frame.evaluate("document.getElementById('solve').click()")
             except Exception as e:
