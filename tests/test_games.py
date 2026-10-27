@@ -126,6 +126,16 @@ def test_tactics_boards():
         assert b.hit                                     # doing nothing loses
 
 
+def test_docket_dispositions():
+    import pending
+    d = pending.disposition
+    assert d("Pp. 4-19. 101 F. 4th 22, reversed and remanded. KAGAN, J., delivered the opinion of the Court")[0] == "petitioner"
+    assert d("The Court of Appeals reversed. Pp. 3-9. 98 F.4th 1, affirmed. THOMAS, J., delivered the opinion of the Court")[0] == "respondent"
+    assert d("55 F.4th 9, affirmed in part, reversed in part, and remanded. ROBERTS, C. J., delivered the opinion of the Court")[0] == "mixed"
+    assert d("3 F.4th 2, vacated and remanded. BARRETT, J., delivered the opinion of the Court")[0] == "petitioner"
+    assert d("no judgment line") is None
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):

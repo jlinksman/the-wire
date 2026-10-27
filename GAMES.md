@@ -269,10 +269,9 @@ Steps 1–7 are built, tested and deployed; step 8's tactics is built. What diff
 - **Saturday meta v1** is assembled on Saturday from the week's items rather than seeded from Monday.
 - **Defectors** use House roll calls only: the Senate's site refuses automated requests (HTTP 403),
   so the build backs off and never works around it.
-- **Pending docket predictions** are not built. Oyez lists argued cases, but its decision field is
-  often empty months after a ruling, so predictions can't be scored automatically. Options: a free
-  CourtListener API token (Joe creates the account), or reading each new opinion's syllabus from
-  supremecourt.gov at one request a day.
+- **Pending docket** (2026-10-27): argued cases come from Oyez (one request a day); judgments come
+  from each decided case's syllabus on supremecourt.gov, read by an hourly workflow at one PDF per
+  run (Oyez's decision field is often empty). Calls lock when made; split judgments don't count.
 - **Statute-change flags** on legal cards wait for Joe's NY Open Legislation API key.
 - **Library rosters**: five hand-checked team lists (rosters.yaml). The current NYCFC roster is held
   as unverified until it's checked against the club's page.

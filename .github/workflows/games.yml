@@ -48,6 +48,14 @@ jobs:
           key: wire-games-${{ github.run_id }}
           restore-keys: wire-games-
 
+      # Supreme Court judgments for pending-docket cases, written by the hourly docket-check workflow.
+      - name: Restore docket dispositions
+        uses: actions/cache/restore@v4
+        with:
+          path: .disp
+          key: wire-disp-${{ github.run_id }}
+          restore-keys: wire-disp-
+
       - name: Public rosters (congress-legislators, CC0)
         run: |
           mkdir -p .games/rosters
@@ -65,7 +73,7 @@ jobs:
         run: |
           mkdir -p dist
           python pipeline/games.py data.json dist/games-today.json --rosters .games/rosters --hashes .games/hashes.json \
-            --votes .games/votes --fetch-votes --scotus .games/scotus --fetch-scotus --snapshots .games/lists.json --quiz dist
+            --votes .games/votes --fetch-votes --scotus .games/scotus --fetch-scotus --fetch-oyez --dispositions .disp/dispositions.json --snapshots .games/lists.json --quiz dist
           rm -f data.json
 
       - name: Publish to Workers KV

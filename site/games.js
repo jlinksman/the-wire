@@ -165,6 +165,8 @@
     }
     if ((D.callbacks || []).length) nodes.push(el("p", { class: "fine", text: "Woven in today: " + D.callbacks.length + " from earlier (they follow the news puzzle)." }));
     nodes.push(el("button", { class: "sbtn wide", text: "Library: name them all, match ›", onclick: () => openLibrary() }));
+    const dv = D.docket;
+    if (dv && ((dv.open || []).length || (dv.recent || []).length)) nodes.push(pendingDocket(dv));
     nodes.push(el("div", { class: "sactions" },
       el("span", { class: "fine", text: "Brain break:" }),
       ...["logic", "chess", "tactics"].map((b) => el("button", { class: "chip" + ((D.pick || "logic") === b ? " on" : ""), text: b[0].toUpperCase() + b.slice(1), onclick: async () => {
@@ -176,6 +178,39 @@
     if (bad.length) nodes.push(el("details", { class: "gm-health" }, el("summary", { text: "Puzzle health · " + bad.length + " generator" + (bad.length > 1 ? "s" : "") + " made nothing today" }),
       el("ul", { class: "admin" }, ...(D.health || []).map((h) => el("li", { text: (NAMES[h.game] || h.game) + ": made " + h.made + ", dropped " + h.dropped + ((h.why || []).length ? " (" + h.why.map((w) => w[0] + " ×" + w[1]).join("; ") + ")" : "") })))));
     openSheet(nodes, "Puzzles");
+  }
+
+  // Pending docket: one optional call per argued Supreme Court case; scored when the Court rules.
+  function pendingDocket(dv) {
+    const sec = el("section", { class: "ssec" }, el("h3", { class: "sh3", text: "Pending docket" }));
+    const sideName = (x, side) => side === "petitioner" ? x.petitioner : side === "respondent" ? x.respondent : "split";
+    for (const r of dv.recent || []) sec.appendChild(el("p", { class: "fine", text: (r.right === null ? "· " : r.right ? "✓ " : "✗ ") + r.name + ": you said " + sideName(r, r.side) + "; the Court: " + (r.line || r.court) + (r.right === null ? " (split; doesn't count)" : "") }));
+    for (const c of dv.open || []) {
+      const row = el("div", { class: "gm-pd" },
+        el("p", { class: "gm-keep" }, el("b", { text: c.name }), el("span", { class: "asrc", text: "  argued " + c.argued })),
+        el("p", { class: "fine", text: c.question }),
+        el("p", { class: "fine", text: "Question presented via Oyez (CC BY-NC) · who wins?" }));
+      const act = el("div", { class: "sactions" });
+      const go = async (side) => {
+        act.replaceChildren(el("span", { class: "fine", text: "Saving…" }));
+        try {
+          const r = await fetch("games", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "predict", docket: c.docket, side }) });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
+          if (G.day && j.docket) G.day.docket = j.docket;
+          act.replaceChildren(el("span", { class: "fine", text: side === "skip" ? "Skipped." : "Locked in: " + (side === "petitioner" ? c.petitioner : c.respondent) + ". Scored when the Court rules." }));
+        } catch (e) { act.replaceChildren(el("span", { class: "fine", text: "Couldn't save (" + e.message + ")." })); }
+      };
+      act.append(el("button", { class: "sbtn", text: c.petitioner + " (petitioner)", onclick: () => go("petitioner") }),
+        el("button", { class: "sbtn", text: c.respondent + " (respondent)", onclick: () => go("respondent") }),
+        el("button", { class: "chip", text: "Skip", onclick: () => go("skip") }));
+      row.appendChild(act);
+      if (c.link) row.appendChild(el("a", { class: "asrc", href: c.link, target: "_blank", rel: "noopener", text: "Case page ↗" }));
+      sec.appendChild(row);
+    }
+    if (dv.of) sec.appendChild(el("p", { class: "fine", text: "Calls right: " + dv.right + " of " + dv.of + (dv.baseline != null ? " · always picking the side that won most would be " + dv.baseline + "%" : "") }));
+    if ((dv.locked || []).length) sec.appendChild(el("p", { class: "asrc", text: "Waiting on the Court: " + dv.locked.length + " call" + (dv.locked.length > 1 ? "s" : "") }));
+    return sec;
   }
 
   function play(s) {

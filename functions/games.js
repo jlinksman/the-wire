@@ -6,6 +6,7 @@
 // GET  /games                 -> today's slots, callbacks, stats, health
 // GET  /games?shadow=1        -> Connections shadow-mode board and generator health (Admin)
 // POST {action:"result", ...} -> record a finished puzzle (≤ 30 writes a day)
+// POST {action:"predict", docket, side} -> pending-docket prediction ("petitioner" | "respondent" | "skip")
 // POST {action:"pick", brain} -> default brain break ("logic" | "chess" | "tactics")
 const KEY = "games.json";
 const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
@@ -45,6 +46,7 @@ export async function onRequestGet({ request, env }) {
     const chess = (await env.WIRE.get("chess.json", "json")) || null;
     day = assemble(st, pool, chess, today);
     st.days[today] = day;
+    resolvePredictions(st, pool, today);
     trim(st, today);
     await save(env, st, today);
   }
@@ -52,6 +54,7 @@ export async function onRequestGet({ request, env }) {
     day: today, slots: day.slots, done: day.done || {}, callbacks: callbacks(st, today, day),
     pick: st.pick || "logic", stats: stats(st, today), as_of: pool ? pool.made : null,
     health: [...((pool && pool.health) || []), ...(day.health || [])], connections_live: CONNECTIONS_LIVE,
+    docket: docketView(st, pool, today),
   });
 }
 
@@ -66,11 +69,42 @@ export async function onRequestPost({ request, env }) {
   if (b.action === "pick") {
     if (!BRAINS.includes(b.brain)) return json({ error: "Unknown brain break." }, 400);
     st.pick = b.brain;
+  } else if (b.action === "predict") {
+    const c = ((pool0(await env.WIRE.get("games-today.json", "json"))).pending_docket || []).find((x) => x.docket === b.docket);
+    if (!c) return json({ error: "That case isn't pending (it may have been decided)." }, 400);
+    if (!["petitioner", "respondent", "skip"].includes(b.side)) return json({ error: "Pick a side." }, 400);
+    st.predict = st.predict || {};
+    if (st.predict[c.docket] && st.predict[c.docket].side !== "skip") return json({ error: "Already locked in." }, 400);
+    st.predict[c.docket] = { side: b.side, day: today, name: c.name, petitioner: c.petitioner, respondent: c.respondent };
   } else if (b.action === "result") {
     record(st, b, today);
   } else return json({ error: "Unknown action." }, 400);
   await save(env, st, today);
-  return json({ ok: true, stats: stats(st, today), callbacks: callbacks(st, today, st.days[today] || {}) });
+  return json({ ok: true, stats: stats(st, today), callbacks: callbacks(st, today, st.days[today] || {}), docket: b.action === "predict" ? docketView(st, pool0(await env.WIRE.get("games-today.json", "json")), today) : undefined });
+}
+
+// ------------------------------------------------------------------ pending docket
+// One optional prediction per argued case, locked once made, scored from the Court's judgment line
+// (pipeline/pending.py). Split judgments and dismissals don't count either way.
+const pool0 = (p) => p || {};
+function resolvePredictions(st, pool, today) {
+  const D = (pool && pool.dispositions) || {};
+  for (const [dk, p] of Object.entries(st.predict || {})) {
+    if (p.result || p.side === "skip" || !D[dk]) continue;
+    const d = D[dk];
+    p.result = { court: d.side, line: d.line || "", date: d.date, right: d.side === "mixed" || d.side === "unknown" ? null : d.side === p.side, seen: today };
+  }
+}
+function docketView(st, pool, today) {
+  const P = st.predict || {};
+  const open = ((pool && pool.pending_docket) || []).filter((c) => !P[c.docket]).slice(0, 3);
+  const locked = ((pool && pool.pending_docket) || []).filter((c) => P[c.docket] && P[c.docket].side !== "skip").map((c) => ({ docket: c.docket, name: c.name, side: P[c.docket].side }));
+  const scored = Object.entries(P).filter(([, p]) => p.result).map(([dk, p]) => ({ docket: dk, name: p.name, side: p.side, petitioner: p.petitioner, respondent: p.respondent, court: p.result.court, line: p.result.line, date: p.result.date, right: p.result.right }));
+  scored.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const counted = scored.filter((x) => x.right !== null);
+  const petWins = counted.filter((x) => x.court === "petitioner").length;
+  return { open, locked, recent: scored.filter((x) => x.date >= addDays(today, -14)), right: counted.filter((x) => x.right).length, of: counted.length,
+    baseline: counted.length ? Math.round((100 * Math.max(petWins, counted.length - petWins)) / counted.length) : null };
 }
 
 // ------------------------------------------------------------------ state

@@ -1,0 +1,67 @@
+name: Docket check
+
+# Pending docket (GAMES.md): when a case on the pending list is decided, read that one opinion's
+# syllabus from supremecourt.gov for the judgment line, so predictions score automatically. One PDF
+# per run at most, and never within 20 minutes of the last (the Court's robots.txt crawl delay).
+# It reads the games cache (slip-opinion rows, the pending list) without saving it, and keeps its
+# results in its own cache. It never sees Joe's predictions (CLAUDE.md rule 10).
+on:
+  schedule:
+    - cron: "41 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: docket-check
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      UA: "TheWire/1.0 (personal news reader; ${{ github.server_url }}/${{ github.repository }})"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install requests pypdf
+      - name: Restore games state (read only)
+        uses: actions/cache/restore@v4
+        with:
+          path: .games
+          key: wire-games-none
+          restore-keys: wire-games-
+      - name: Restore dispositions
+        uses: actions/cache/restore@v4
+        with:
+          path: .disp
+          key: wire-disp-${{ github.run_id }}
+          restore-keys: wire-disp-
+      - name: Read at most one syllabus
+        id: check
+        run: |
+          mkdir -p .disp .games/scotus
+          python - <<'PY'
+          import os, sys
+          from datetime import datetime, timezone
+          from pathlib import Path
+          sys.path.insert(0, "pipeline")
+          import requests, scotus, pending
+          before = Path(".disp/dispositions.json").read_bytes() if Path(".disp/dispositions.json").exists() else b""
+          msg = pending.check_one(Path(".disp/dispositions.json"), scotus.rows(Path(".games/scotus")), Path(".games/scotus/pending_seen.json"),
+                                  requests.Session(), os.environ["UA"], datetime.now(timezone.utc))
+          print("[docket-check]", msg)
+          changed = Path(".disp/dispositions.json").exists() and Path(".disp/dispositions.json").read_bytes() != before
+          open(os.environ["GITHUB_OUTPUT"], "a").write(f"changed={'true' if changed else 'false'}\n")
+          PY
+      - name: Save dispositions
+        if: steps.check.outputs.changed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .disp
+          key: wire-disp-${{ github.run_id }}

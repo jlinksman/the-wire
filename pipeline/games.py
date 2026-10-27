@@ -1249,6 +1249,8 @@ def main(argv=None) -> int:
     ap.add_argument("--scotus", type=Path, help="Supreme Court opinion-list cache directory (Actions cache)")
     ap.add_argument("--fetch-scotus", action="store_true", help="make today's one request to supremecourt.gov")
     ap.add_argument("--snapshots", type=Path, help="weekly list snapshot for Who left the list (Actions cache)")
+    ap.add_argument("--fetch-oyez", action="store_true", help="make today's one request to the Oyez case list (pending docket)")
+    ap.add_argument("--dispositions", type=Path, help="dispositions.json from the hourly docket-check workflow (its own cache)")
     ap.add_argument("--quiz", type=Path, help="write the audio Wire Quiz MP3 into this directory (needs Cloudflare credentials)")
     a = ap.parse_args(argv)
     load_words()
@@ -1290,7 +1292,7 @@ def main(argv=None) -> int:
         dv = fresh(defectors(data, rollcalls.parse(a.votes, legislator_index(a.rosters)), legislator_index(a.rosters), now, drops), "defectors")
         for ch, err in vote_errors.items():
             drops.append(("defectors", f"{ch} votes unavailable: {err}"))
-    dk = []
+    dk, pend = [], []
     if a.scotus:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         import scotus
@@ -1300,6 +1302,16 @@ def main(argv=None) -> int:
             if res.get("error"):
                 drops.append(("docket", f"supremecourt.gov: {res['error']}"))
         dk = fresh(docket(scotus.rows(a.scotus), data, seed, now, drops), "docket")
+        import pending as pendmod
+        if a.fetch_oyez:
+            import requests
+            res = pendmod.fetch_oyez(a.scotus, requests.Session(), "TheWire/1.0 (personal news reader; " + os.environ.get("WIRE_CONTACT", "github") + ")", now)
+            if res.get("error"):
+                drops.append(("pending_docket", f"oyez: {res['error']}"))
+        pend = pendmod.pending(a.scotus, scotus.rows(a.scotus), court_ok, now)
+        seen_p = a.scotus / "pending_seen.json"
+        seen = set(json.loads(seen_p.read_text())) if seen_p.exists() else set()
+        seen_p.write_text(json.dumps(sorted(seen | {x["docket"] for x in pend})))
     tl = []
     if a.votes or a.scotus:
         import rollcalls
@@ -1324,7 +1336,8 @@ def main(argv=None) -> int:
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
         "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left, "weekend": wk, "meta": mt, "casefile": cf, "tactics": tx,
-        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba, more=(("casefile", 1 if cf else 0), ("tactics", len(tx)))),
+        "pending_docket": pend[:40], "dispositions": _disp(a.dispositions),
+        "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba, more=(("casefile", 1 if cf else 0), ("tactics", len(tx)), ("pending_docket", len(pend)))),
     }
     if a.quiz:
         try:
@@ -1355,6 +1368,14 @@ def main(argv=None) -> int:
     print(f"[games] {day}: who said it {len(wsi)}, cryptoquote {len(cq)}, connections {'1 (shadow)' if grid else 'dropped'}; "
           f"{len(drops)} candidates dropped")
     return 0
+
+
+def _disp(p: Path | None) -> dict:
+    """Supreme Court judgments for cases that were on the pending list: docket -> side and line."""
+    if not p or not p.exists():
+        return {}
+    d = json.loads(p.read_text())
+    return {k: v for k, v in d.items() if not k.startswith("_")}
 
 
 def health(wsi, cq, grid, drops, dv=(), lg=None, ldg=None, fq=None, dk=None, tl=None, ba=None, more=()) -> list[dict]:
