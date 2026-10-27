@@ -99,6 +99,22 @@ def test_connections_accepts_unique_with_decoy():
     assert len(parts) == 1
 
 
+def test_connections_universe_mixed():
+    from datetime import datetime, timezone
+    now = datetime(2026, 10, 19, 20, tzinfo=timezone.utc)
+    items = [{"id": "a", "t": "2026-10-18T12:00:00Z", "scope": "national", "title": "EPA and FBI brief Canada, France and Japan", "summary": "Justice Kavanaugh wrote."},
+             {"id": "b", "t": "2026-10-18T12:00:00Z", "scope": "local", "title": "Newburgh and Beacon split costs", "summary": "Rochester visitors"}]
+    reg = {"bob barker": {"name": "Bob Barker", "role": "U.S. Senator", "party": "R", "aliases": [], "kind": "legislator", "state": "NY", "chamber": "senate"}}
+    items[0]["summary"] += " Bob Barker said."
+    uni, preds = games.connections_universe({"items": items, "threads": [], "stories": []}, reg, None, now)
+    assert not any(p.startswith("cmte:") for p in preds)                          # no committee trivia
+    assert {"EPA", "FBI", "Canada", "France", "Japan", "Brett Kavanaugh", "Newburgh", "Beacon", "Bob Barker"} <= set(uni), set(uni)
+    assert "Rochester" not in uni                                                  # usually means elsewhere
+    assert "bloc:G7" in uni["Canada"] and "county:Orange" in uni["Newburgh"] and "court:scotus" in uni["Brett Kavanaugh"]
+    assert games.alliterative("Bob Barker, Jr.") and games.alliterative("Bob Barker") and not games.alliterative("Bob Jones")
+    assert games.same_ends("Albania") and not games.same_ends("Canada Dry")
+
+
 def test_crypt_difficulty_monotone():
     easy = games.crypt_features("It's a fine day and I'll be at the shop at ten, so it's all good to go.")
     hard = games.crypt_features("Quickly judging mixed zebras vexes bold nymphs.")

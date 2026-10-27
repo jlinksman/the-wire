@@ -1093,66 +1093,179 @@ def casefile(seed, drops, target: int | None = None, tries: int = 60) -> dict | 
 
 
 # ------------------------------------------------------------------ Connections (shadow mode)
-# Groups come only from complete sources (full rosters, full committee lists) plus one purple
-# wordplay test run against every item. Uniqueness: every predicate that 4+ of the 16 satisfy is
-# a candidate group; the board ships only if exactly one way exists to split the 16 into four of
-# them, and only with a decoy (a non-answer predicate covering 3+ of the 16).
+# Sixteen items from the week's news, of mixed types: members of Congress, Beacon and Dutchess
+# officials, Supreme Court justices, world leaders, countries, Hudson Valley places and government
+# agencies. Groups come only from complete sources (the congress roster, local_politics.yaml, the
+# Court's bench, world.yaml, the county municipality lists below, the agency list below) plus one
+# purple wordplay test run against every item (names with a suffix like "Jr." are tested without
+# it). No committee-roster trivia. Uniqueness: every predicate that 4+ of the 16 satisfy is a
+# candidate group; the board ships only if exactly one way exists to split the 16 into four of
+# them, and only with a near-miss decoy: a real category that 3+ board items fit, drawn from at
+# least two of the answer groups.
+SCOTUS_APPOINTED = {"John Roberts": "George W. Bush", "Clarence Thomas": "George H. W. Bush", "Samuel Alito": "George W. Bush",
+                    "Sonia Sotomayor": "Barack Obama", "Elena Kagan": "Barack Obama", "Neil Gorsuch": "Donald Trump",
+                    "Brett Kavanaugh": "Donald Trump", "Amy Coney Barrett": "Donald Trump", "Ketanji Brown Jackson": "Joe Biden"}
+# Cities, towns and villages by county (complete for these four counties; New York State's list of
+# municipalities). A name that is both a town and a village (Fishkill) is one item.
+HV_COUNTIES = {
+    "Dutchess": """Beacon Poughkeepsie Amenia Beekman Clinton Dover East_Fishkill Fishkill Hyde_Park LaGrange Milan North_East Pawling
+                   Pine_Plains Pleasant_Valley Red_Hook Rhinebeck Stanford Union_Vale Wappinger Washington Millbrook Millerton Tivoli
+                   Wappingers_Falls""",
+    "Putnam": "Carmel Kent Patterson Philipstown Putnam_Valley Southeast Brewster Cold_Spring Nelsonville",
+    "Orange": """Middletown Newburgh Port_Jervis Blooming_Grove Chester Cornwall Crawford Deerpark Goshen Greenville Hamptonburgh
+                 Highlands Minisink Monroe Montgomery Mount_Hope New_Windsor Palm_Tree Tuxedo Wallkill Warwick Wawayanda Woodbury
+                 Cornwall-on-Hudson Florida Greenwood_Lake Harriman Highland_Falls Kiryas_Joel Maybrook Tuxedo_Park Unionville Walden
+                 Washingtonville""",
+    "Ulster": """Kingston Denning Esopus Gardiner Hardenburgh Hurley Lloyd Marbletown Marlborough New_Paltz Olive Plattekill Rochester
+                 Rosendale Saugerties Shandaken Shawangunk Ulster Wawarsing Woodstock Ellenville""",
+}
+HV_COUNTY_OF = {p.replace("_", " "): c for c, ps in HV_COUNTIES.items() for p in ps.split()}
+# Names that usually mean somewhere else (or something else) in the news: never board items.
+HV_AMBIGUOUS = set("""Rochester Washington Florida Clinton Dover Milan Monroe Montgomery Greenville Highlands Lloyd Olive Kent Southeast
+Ulster Crawford Stanford Chester Hurley Unionville Woodbury Denning Deerpark""".split())
+AGENCIES = {"federal": "EPA FBI CIA CDC FDA FEMA IRS NASA ICE FAA SEC FTC FCC NIH NSA ATF DEA TSA NOAA NTSB OSHA USPS".split(),
+            "state": "DEC MTA DMV SUNY OCFS DOCCS NYSERDA PSC".split()}
+AGENCY_PARENT = {"FBI": "Justice", "ATF": "Justice", "DEA": "Justice", "CDC": "Health and Human Services", "FDA": "Health and Human Services",
+                 "NIH": "Health and Human Services", "FEMA": "Homeland Security", "ICE": "Homeland Security", "TSA": "Homeland Security",
+                 "IRS": "the Treasury", "FAA": "Transportation", "NSA": "Defense", "NOAA": "Commerce", "OSHA": "Labor"}
+# Membership lists (stable, complete): a second fact about each country, so near misses exist.
+BLOCS = {"G7": "Canada France Germany Italy Japan United_Kingdom",
+         "NATO": """Albania Belgium Bulgaria Canada Croatia Czechia Denmark Estonia Finland France Germany Greece Hungary Iceland Italy Latvia
+                    Lithuania Luxembourg Montenegro Netherlands North_Macedonia Norway Poland Portugal Romania Slovakia Slovenia Spain Sweden
+                    Turkey United_Kingdom""",
+         "EU": """Austria Belgium Bulgaria Croatia Cyprus Czechia Denmark Estonia Finland France Germany Greece Hungary Ireland Italy Latvia
+                  Lithuania Luxembourg Malta Netherlands Poland Portugal Romania Slovakia Slovenia Spain Sweden"""}
+BLOC_NAME = {"G7": "G7 members", "NATO": "NATO members", "EU": "European Union members"}
+FORM_PLURAL = {"Presidential republic": "Presidential republics", "Semi-presidential republic": "Semi-presidential republics",
+               "Parliamentary republic": "Parliamentary republics", "Parliamentary constitutional monarchy": "Constitutional monarchies with a parliament",
+               "Absolute monarchy": "Absolute monarchies", "One-party state": "One-party states", "Theocratic republic": "Theocratic republics",
+               "Directorial republic": "Directorial republics", "Military-led government": "Military-led governments"}
+
+
+def _letters(label: str) -> list[str]:
+    return [w for w in re.findall(r"[A-Za-z]+", strip_suffix(label)) if len(w) > 1]
+
+
 def alliterative(label: str) -> bool:
-    p = [w for w in re.findall(r"[A-Za-z]+", label) if len(w) > 1]
+    p = _letters(label)
     return len(p) >= 2 and p[0][0].lower() == p[-1][0].lower()
 
 
 def surname_is_word(label: str) -> bool:
-    last = re.findall(r"[A-Za-z]+", label)[-1].lower() if label else ""
+    p = _letters(label)
+    last = p[-1].lower() if len(p) >= 2 else ""
     return bool(WORDS) and len(last) >= 4 and last in WORDS
+
+
+def same_ends(label: str) -> bool:
+    w = "".join(_letters(label)).lower()
+    return len(w) >= 5 and w[0] == w[-1]
 
 
 WORDPLAY = {
     "alliterative": ("First and last names start with the same letter", alliterative),
     "surname_word": ("Surname is also an ordinary English word", surname_is_word),
+    "same_ends": ("Begins and ends with the same letter", same_ends),
 }
 
 
 def connections_universe(data, reg, rosters: Path | None, now) -> tuple[dict, dict]:
-    """label -> set of predicate ids, and predicate id -> (category name, kind). Only items in the news."""
-    items, threads, story_of = index(data)
+    """label -> set of predicate ids, and predicate id -> (category name, kind). Only items in the news.
+    kind: fact (can be an answer group), wordplay (purple), decoy (near-miss only, never an answer)."""
     cut = now - timedelta(days=CFG["connections"]["window_days"])
-    text = " \n ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in data.get("items", [])
-                       if (parse_t(it.get("t")) or now) >= cut and not blocked(it.get("title"), it.get("summary")))
-    ftext = fold(text)
+    news = [it for it in data.get("items", []) if (parse_t(it.get("t")) or now) >= cut and not blocked(it.get("title"), it.get("summary"))]
+    raw = " \n ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in news)
+    rawlocal = " \n ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in news if it.get("scope") == "local")
+    ftext = f" {fold(raw)} "
+    inn = lambda name: f" {fold(name)} " in ftext
     preds: dict[str, tuple[str, str]] = {}
     uni: dict[str, set] = {}
-    committees = {}
-    if rosters and (rosters / "committee-membership-current.json").exists():
-        names = {}
-        if (rosters / "committees-current.json").exists():
-            for c in json.loads((rosters / "committees-current.json").read_text()):
-                n = re.sub(r"^(House|Senate|Joint) (Special |Select |Permanent Select )?Committee on (the )?", "", c.get("name") or "")
-                names[c["thomas_id"]] = f"{c.get('type', '').title()} {n} Committee".strip()
-        for cid, members in json.loads((rosters / "committee-membership-current.json").read_text()).items():
-            if cid in names:                      # full committees only, not subcommittees
-                for m in members:
-                    committees.setdefault(m.get("bioguide"), set()).add(cid)
-        preds.update({f"cmte:{k}": (f"Sit on the {v}", "fact") for k, v in names.items()})
+    kind_of: dict[str, str] = {}
+
+    def put(label, ps, kind):
+        label = strip_suffix(label)
+        uni.setdefault(label, set()).update(ps)
+        kind_of.setdefault(label, kind)
+
+    # Members of Congress in the news: chamber and state (the roster).
+    by_alias = {}
     for v in reg.values():
-        if v.get("kind") != "legislator" or fold(v["name"]) not in ftext:
+        if v.get("kind") != "legislator":
             continue
-        label = v["name"]
-        p = {f"chamber:{v['chamber']}", f"state:{v['state']}"}
-        p |= {f"cmte:{c}" for c in committees.get(v.get("bioguide"), ())}
-        p |= {f"party:{v.get('party')}"}            # decoy only, never an answer category
-        p |= {f"wp:{k}" for k, (_, fn) in WORDPLAY.items() if fn(label)}
-        uni[label] = p
-    for v in reg.values():
-        if v.get("kind") == "legislator":
-            preds[f"state:{v['state']}"] = (f"Represent {v['state']} in Congress", "fact")
-    preds["chamber:senate"] = ("Sitting U.S. senators", "decoy")      # too broad to be an answer
-    preds["chamber:house"] = ("Sitting U.S. representatives", "decoy")
+        for a in [fold(v["name"]), *v.get("aliases", [])]:
+            by_alias[a] = v
+        if inn(v["name"]) or any(len(a.split()) >= 2 and inn(a) for a in v.get("aliases", [])):
+            put(v["name"], {f"chamber:{v['chamber']}", f"state:{v['state']}"}, "person")
+            preds[f"state:{v['state']}"] = (f"Represent {US_STATES.get(v['state'], v['state'])} in Congress", "fact")
+    preds["chamber:senate"] = ("Sitting U.S. senators", "fact")
+    preds["chamber:house"] = ("Sitting U.S. representatives", "fact")
+    # Beacon and Dutchess officials (local_politics.yaml).
+    lp = (yaml.safe_load((ROOT / "local_politics.yaml").read_text()) or {}).get("officials", {})
+    cb, dc = lp.get("city_of_beacon", {}), lp.get("dutchess_county", {})
+    lists = {
+        "local:beacon_council": ("Beacon's mayor and City Council", [cb.get("mayor", {})] + list(cb.get("council", []) or [])),
+        "local:reps_beacon": ("Represent Beacon in Congress or Albany", lp.get("state_and_federal_for_beacon", []) or []),
+        "local:dutchess_leg": ("Dutchess County legislators", list(dc.get("legislators_for_beacon", []) or []) + list(dc.get("legislature_leaders", []) or [])),
+        "local:dutchess_wide": ("Elected countywide in Dutchess", dc.get("countywide", []) or []),
+    }
+    for pidk, (name, people) in lists.items():
+        preds[pidk] = (name, "fact")
+        for p in people:
+            nm = (p or {}).get("name")
+            if not nm or not inn(nm):
+                continue
+            leg = by_alias.get(fold(strip_suffix(nm)))
+            put(leg["name"] if leg else nm, {pidk}, "person")
+    # The Supreme Court (its bench), with who appointed each as a near-miss decoy.
+    preds["court:scotus"] = ("Supreme Court justices", "fact")
+    for j, by in SCOTUS_APPOINTED.items():
+        last = j.split()[-1]
+        if inn(j) or re.search(rf"\bJustice {re.escape(last)}\b", raw):
+            put(j, {"court:scotus", f"appointed:{by}"}, "person")
+            preds[f"appointed:{by}"] = (f"Appointed to the Court by {by}", "decoy")
+    # World leaders and countries (world.yaml): head of government vs head of state, forms of government.
+    wp = ROOT / "world.yaml"
+    for c in ((yaml.safe_load(wp.read_text()) or {}).get("countries", []) if wp.exists() else []):
+        if c.get("status") == "unverified":
+            continue
+        g, h = c.get("head_of_government") or {}, c.get("head_of_state") or {}
+        for who, role in ((g.get("name"), "hog"), (h.get("name"), "hos")):
+            if who and len(who.split()) >= 2 and inn(who) and not by_alias.get(fold(who)):
+                put(who, {f"leader:{role}"}, "person")
+        if c.get("form") in FORM_PLURAL and c["country"] != "United States" and re.search(rf"\b{re.escape(c['country'])}\b", raw):
+            blocs = {f"bloc:{b}" for b, ms in BLOCS.items() if c["country"].replace(" ", "_") in ms.split()}
+            put(c["country"], {f"form:{c['form']}"} | blocs, "country")
+            preds[f"form:{c['form']}"] = (FORM_PLURAL[c["form"]], "fact")
+            for b in blocs:
+                preds[b] = (BLOC_NAME[b.split(":")[1]], "fact")
+    preds["leader:hog"] = ("Lead their country's government", "fact")
+    preds["leader:hos"] = ("Heads of state", "fact")
+    # Hudson Valley places in local and state stories, by county.
+    for place, county in HV_COUNTY_OF.items():
+        if place in HV_AMBIGUOUS:
+            continue
+        if re.search(rf"\b{re.escape(place)}\b(?!\s+(County|Avenue|Street|Road|St\.|Ave\.))", rawlocal):
+            put(place, {f"county:{county}"}, "place")
+            preds[f"county:{county}"] = (f"Cities, towns and villages in {county} County", "fact")
+    # Agencies by acronym (federal vs New York State).
+    for lvl, names in AGENCIES.items():
+        for a in names:
+            if re.search(rf"\b{a}\b", raw):
+                put(a, {f"agency:{lvl}"} | ({f"dept:{AGENCY_PARENT[a]}"} if a in AGENCY_PARENT else set()), "agency")
+                if a in AGENCY_PARENT:
+                    preds[f"dept:{AGENCY_PARENT[a]}"] = (f"Part of the Department of {AGENCY_PARENT[a]}", "fact")
+                preds[f"agency:{lvl}"] = ("Federal agencies" if lvl == "federal" else "New York State agencies", "fact")
+    # Purple: one clean trick, run against every item.
+    for label in uni:
+        uni[label] |= {f"wp:{k}" for k, (_, fn) in WORDPLAY.items() if fn(label)}
     for k, (name, _) in WORDPLAY.items():
         preds[f"wp:{k}"] = (name, "wordplay")
-    for p in {"party:Democrat", "party:Republican", "party:Independent"}:
-        preds[p] = (p.split(":")[1], "decoy")
+    uni = {k: v for k, v in uni.items() if any(not p.startswith("wp:") for p in v)}
+    connections_universe.kinds = kind_of
     return uni, preds
+
+
+connections_universe.kinds = {}
 
 
 def partitions(board: list[str], uni: dict, preds: dict) -> list[tuple]:
@@ -1184,10 +1297,22 @@ def partitions(board: list[str], uni: dict, preds: dict) -> list[tuple]:
     return out
 
 
-def connections(data, reg, rosters, seed, now, drops) -> dict | None:
+def grid_item_keys(label: str) -> list[str]:
+    """Two hash-log slots per item per week: no item in more than two grids a week."""
+    h = pid("grid-item", fold(label))
+    return [f"cx1{h}", f"cx2{h}"]
+
+
+def connections(data, reg, rosters, seed, now, drops, week_used=lambda label: 0) -> dict | None:
     uni, preds = connections_universe(data, reg, rosters, now)
+    kinds = connections_universe.kinds
+    full = [x for x in uni if week_used(x) >= CFG["connections"]["max_per_week"]]
+    for x in full:
+        del uni[x]
+    if full:
+        drops.append(("connections", f"{len(full)} items already in two grids this week"))
     if len(uni) < 16:
-        drops.append(("connections", f"only {len(uni)} people in the news with complete roster facts (need 16)"))
+        drops.append(("connections", f"only {len(uni)} items in the news with complete facts (need 16)"))
         return None
     rng = random.Random(seed + "conn")
     answerable = [p for p, (_, k) in preds.items() if k != "decoy" and sum(p in s for s in uni.values()) >= 4]
@@ -1195,6 +1320,10 @@ def connections(data, reg, rosters, seed, now, drops) -> dict | None:
         drops.append(("connections", "fewer than 4 categories with 4+ members in the news"))
         return None
     reasons = {}
+
+    def why(r):
+        reasons[r] = reasons.get(r, 0) + 1
+
     for _ in range(CFG["connections"]["attempts"]):
         cats = rng.sample(answerable, 4)
         if sum(preds[c][1] == "wordplay" for c in cats) > 1:
@@ -1211,27 +1340,36 @@ def connections(data, reg, rosters, seed, now, drops) -> dict | None:
             used.update(pick)
             board += pick
         if not ok:
-            reasons["not enough members"] = reasons.get("not enough members", 0) + 1
+            why("not enough members")
+            continue
+        if len({kinds.get(x) for x in board}) < 2:
+            why("one type of item only")
+            continue
+        names = " ".join(fold(preds[c][0]) for c in cats)
+        if any(re.search(rf"\b{re.escape(w)}\b", names) for x in board for w in fold(x).split() if len(w) > 3):
+            why("a board word inside a category name")
             continue
         parts = partitions(board, uni, preds)
         if len(parts) != 1:
-            reasons[f"{len(parts)} solutions"] = reasons.get(f"{len(parts)} solutions", 0) + 1
+            why(f"{len(parts)} solutions")
             continue
         groups = parts[0]
         answer = {p for _, p in groups}
-        decoys = [p for p in preds if p not in answer and sum(p in uni[x] for x in board) >= 3]
+        group_of = {x: p for g, p in groups for x in g}
+        # A genuine near miss: a real category, 3+ board items, drawn from at least two answer groups.
+        decoys = [p for p in preds if p not in answer
+                  and sum(p in uni[x] for x in board) >= 3 and len({group_of[x] for x in board if p in uni[x]}) >= 2]
         if not decoys:
-            reasons["no decoy"] = reasons.get("no decoy", 0) + 1
+            why("no near-miss decoy")
             continue
-        # Difficulty: biggest predicate first (yellow) … wordplay last (purple).
         def size(p):
             return 99 if preds[p][1] == "wordplay" else -sum(p in s for s in uni.values())
         ordered = sorted(groups, key=lambda gp: size(gp[1]))
         colors = ["yellow", "green", "blue", "purple"]
         rng.shuffle(board)
-        return {"id": "g" + pid(seed, *sorted(board)), "board": board, "shadow": True,
+        return {"id": "g" + pid("grid", *sorted(board)), "board": board, "shadow": True,
                 "groups": [{"color": colors[i], "name": preds[p][0], "members": sorted(g)} for i, (g, p) in enumerate(ordered)],
-                "decoys": [preds[d][0] for d in decoys][:3]}
+                "decoys": [preds[d][0] for d in decoys][:3], "types": sorted({kinds.get(x) for x in board})}
     top = sorted(reasons.items(), key=lambda kv: -kv[1])[:3]
     drops.append(("connections", "no unique board: " + ", ".join(f"{k} ×{v}" for k, v in top)))
     return None
@@ -2170,7 +2308,8 @@ def main(argv=None) -> int:
     wsi = fresh(who_said_it(data, reg, now, drops, week_speakers), "who_said_it")
     for q in wsi:
         budget.take(q["id"], "who_said_it")
-    grid = connections(data, reg, a.rosters, seed, now, drops)
+    grid = connections(data, reg, a.rosters, seed, now, drops,
+                       lambda label: sum(1 for k in grid_item_keys(label) if week_start <= used.get(k, "") < day))
     dv, vote_errors = [], {}
     if a.votes:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -2259,6 +2398,11 @@ def main(argv=None) -> int:
             used.setdefault(x["id"], day)
         for q in wsi:                              # one quote per speaker per ISO week
             used.setdefault(q["speaker_key"], day)
+        for label in (grid or {}).get("board", []):  # no item in more than two grids a week
+            for k in grid_item_keys(label):
+                if used.get(k, "") < week_start or used.get(k) == day:
+                    used[k] = day
+                    break
         a.hashes.write_text(json.dumps(used))
     print(f"[games] {day}: who said it {len(wsi)}, cryptoquote {len(cq)}, connections {'1 (shadow)' if grid else 'dropped'}; "
           f"{len(drops)} candidates dropped")
