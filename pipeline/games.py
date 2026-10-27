@@ -768,19 +768,33 @@ def defectors(data, votes, legis, now, drops) -> list[dict]:
 # ------------------------------------------------------------------ Legal refreshers
 # Cards come from legal.yaml (our wording, cited, second-checked). Only status: verified ships.
 # A card whose `news` pattern matches a story from the last week is featured ("From today: …").
-def legal(data, now, drops) -> dict:
+def legal(data, now, drops, openleg_cache: Path | None = None) -> dict:
     cfg = yaml.safe_load((ROOT / "legal.yaml").read_text()) or {}
+    held = {}
+    if openleg_cache:
+        import openleg
+        ny = [c for c in cfg.get("cards", []) if c.get("jurisdiction") == "NY"]
+        key = os.environ.get("OPENLEG_KEY")
+        if key:
+            import requests
+            res = openleg.refresh(ny, openleg_cache, requests.Session(), key, "TheWire/1.0 (personal news reader; " + os.environ.get("WIRE_CONTACT", "github") + ")", now)
+            for e in res["errors"]:
+                drops.append(("legal", "Open Legislation: " + e))
+        held = openleg.holds(ny, openleg_cache)
     cards = []
     for c in cfg.get("cards", []):
         if c.get("status") != "verified" or not c.get("verified"):
             drops.append(("legal", "card not yet second-checked"))
+            continue
+        if c["id"] in held:
+            drops.append(("legal", f"{c['id']} held: {held[c['id']]}"))
             continue
         cards.append({k: c.get(k) for k in ("id", "area", "title", "jurisdiction", "cite", "source", "verified", "elements", "cloze", "note")})
     cut = now - timedelta(days=7)
     featured = []
     items, threads, story_of = index(data)
     for c in cfg.get("cards", []):
-        if c.get("status") != "verified" or not c.get("news"):
+        if c.get("status") != "verified" or not c.get("news") or c["id"] in held:
             continue
         rx = re.compile(c["news"], re.I)
         for it in data.get("items", []):
@@ -1326,7 +1340,7 @@ def main(argv=None) -> int:
     ba = fresh(beacon_agenda(data, seed, drops), "beacon_agenda")
     lib = library(a.rosters, [], data, now)
     left = who_left(lib, a.snapshots, day)
-    lg = legal(data, now, drops)
+    lg = legal(data, now, drops, a.scotus.parent / "openleg.json" if a.scotus else None)
     WEEK["day"] = day
     wk = weekend_ciphers(wsi, seed, drops)
     cf = casefile(seed, drops)

@@ -15,7 +15,9 @@
 # 2026-05-29; confirm the amending chapter's effective date and scope first).
 #
 # Card fields: id, area, title, jurisdiction, cite, source (URL), verified, status, news,
-# note (variants to remember), elements [{text, keys}], optional cloze {text, answer, accept, source}.
+# note (variants to remember), elements [{text, keys}], optional cloze {text, answer, accept, source},
+# openleg (NY sections to watch; otherwise the source URL's section). A watched section that changes
+# after `verified`, or a cloze that no longer matches the statute, holds the card (pipeline/openleg.py).
 
 cards:
   # ------------------------------------------------------------ NY spill and environmental
@@ -25,6 +27,7 @@ cards:
     jurisdiction: NY
     cite: "N.Y. Navigation Law §§ 172(8), 181(1), (5); State of New York v. Green, 96 N.Y.2d 403, 405, 407 (2001)"
     source: https://www.nysenate.gov/legislation/laws/NAV/181
+    openleg: [NAV/181, NAV/172]   # sections watched for amendments (Open Legislation)
     status: verified
     verified: "2026-10-27"
     news: '\b(oil|petroleum|gasoline|fuel|heating oil|diesel) (spill|leak|discharge)|\bspill\b|navigation law'

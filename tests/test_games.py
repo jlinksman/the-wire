@@ -136,6 +136,22 @@ def test_docket_dispositions():
     assert d("no judgment line") is None
 
 
+def test_openleg_holds():
+    import json
+    import tempfile
+    import openleg
+    card = {"id": "x", "jurisdiction": "NY", "verified": "2026-10-27", "source": "https://www.nysenate.gov/legislation/laws/NAV/181",
+            "openleg": ["NAV/181", "NAV/172"], "cloze": {"text": "strictly liable, ___, for all", "answer": "without regard to fault", "source": "https://www.nysenate.gov/legislation/laws/NAV/181"}}
+    assert openleg.watched(card) == ["NAV/181", "NAV/172"]
+    p = Path(tempfile.mkdtemp()) / "ol.json"
+    p.write_text(json.dumps({"NAV/181": {"active": "2014-09-22", "hash": "a", "base": "a", "phrases": {"x": True}}}))
+    assert openleg.holds([card], p) == {}
+    p.write_text(json.dumps({"NAV/172": {"active": "2027-01-01", "hash": "a", "base": "a"}}))
+    assert "changed 2027-01-01" in openleg.holds([card], p)["x"]
+    p.write_text(json.dumps({"NAV/181": {"active": "2014-09-22", "hash": "a", "base": "a", "phrases": {"x": False}}}))
+    assert "no longer matches" in openleg.holds([card], p)["x"]
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):

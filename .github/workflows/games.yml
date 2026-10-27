@@ -24,6 +24,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       WIRE_KV_ID: ${{ secrets.WIRE_KV_ID }}
+      OPENLEG_KEY: ${{ secrets.OPENLEG_KEY }}       # NY Senate Open Legislation (statute-change flags); optional
       WIRE_CONTACT: ${{ github.server_url }}/${{ github.repository }}
       UA: "TheWire/1.0 (personal news reader; ${{ github.server_url }}/${{ github.repository }})"
     steps:
