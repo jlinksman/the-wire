@@ -1,4 +1,4 @@
-# Explainers for questionnaire statements (2026-10-23; election statements q19-q44 added 2026-10-24),
+# Explainers for questionnaire statements (2026-10-23; election statements q19-q44 added 2026-10-24, q45-q57 2026-10-27),
 # shown by "What's this about?" before answering. Written in Claude sessions from the sources listed
 # under each (all opened and checked); neutral by rule: the case for agreeing and for disagreeing get
 # equal space, and nothing says how an answer is counted. The build adds the newest matching coverage
@@ -1069,6 +1069,199 @@ q44:
   sources:
   - https://www.nysenate.gov/newsroom/press-releases/2025/rob-rolison/senator-rolison-urges-governor-hochul-include-raise-age
   - https://cccnewyork.org/press-and-media/statement-on-the-hochul-administration-declining-to-include-regressive-changes-to-raise-the-age-in-new-yorks-fy2027-budget-unveiling/
+q45:
+  now: New York's 2019 bail law, in effect since 2020, ended cash bail for most misdemeanors and nonviolent felonies, and judges may set bail or order detention only to make sure a defendant comes back to court. Changes in 2020, 2022 and 2023 widened the charges eligible for bail and gave judges more discretion, but none let judges weigh a defendant's danger to the community, which makes New York the only state without such a standard. Sen. Pamela Helming's PROTECT Act, which would allow pretrial detention of suspected repeat offenders, did not reach a vote.
+  case_for: Republican nominees Bruce Blakeman and Saritha Komatireddy, Sen. Helming and many law enforcement officials argue judges should be able to hold people who pose a clear threat, as judges in every other state can. They point to cases such as the 2025 killing of Abagail Perez in Rochester by a man released shortly after his arrest for choking her.
+  case_against: Gov. Hochul says judges already have the tools they need, and the NYCLU, the Legal Aid Society and CUNY researchers argue that predicting future danger is unreliable and would jail more legally innocent people, with the heaviest effect on Black and Latino defendants. State data also show homicides at a 15-year low in 2025, even as reported crime overall rose.
+  terms:
+  - bail reform
+  - dangerousness standard
+  - pretrial detention
+  - PROTECT Act
+  - judicial discretion
+  sources:
+  - https://www.wxxinews.org/local-news/2026-08-17/blakeman-touts-dangerousness-standard-in-setting-bail-claiming-crime-is-up
+  - https://islg.cuny.edu/blog/dangerousness-in-pretrial-decisionmaking
+  - https://www.nyclu.org/commentary/we-shouldnt-let-dangerous-standard-endanger-bail-reform
+  - https://fox11online.com/news/nation-world/is-letitia-james-weaponizing-her-office-opponent-focuses-more-on-crime-less-on-politics-saritha-komatireddy
+q46:
+  now: A state law Gov. Hochul signed on May 26, 2026 makes it a class B misdemeanor, punishable by up to three months in jail, to block access to a house of worship or, within 50 feet of one, to put people entering or leaving in reasonable fear for their safety. The AP reported that it expressly lets police set 50-foot security perimeters where protests are not allowed, while the NYCLU says it does not create uniform protest-free zones. Separately, a federal judge in June 2026 paused Nassau County's law barring protest within 35 feet of houses of worship, calling its reach unprecedented.
+  case_for: UJA-Federation of New York, Gov. Hochul and the bill's sponsors, Sen. Sam Sutton and Assemblymember Micah Lasher, say people going to services have faced intimidation at protests outside synagogues and should be able to enter and leave without fear. They note the law covers every house of worship statewide, including mosques.
+  case_against: The NYCLU and other civil liberties groups argue buffer rules chill lawful protest on public sidewalks and could be used against peaceful marches, anti-war rallies and picketing at community centers. They point to the 2014 Supreme Court ruling that struck down a 35-foot protest-free zone outside Massachusetts abortion clinics.
+  terms:
+  - buffer zone
+  - house of worship
+  - synagogue protest
+  - First Amendment
+  - NYCLU
+  - Religious Safety Act
+  sources:
+  - https://ny1.com/nyc/all-boroughs/news/2026/05/28/new-york-makes-it-a-crime-to-block-entry-to-a-house-of-worship
+  - https://nyclu.substack.com/p/nys-buffer-zone-law-doesnt-create
+  - https://jewishinsider.com/2026/05/new-york-buffer-bill-misdemeanor-hochul-50-feet/
+  - https://www.amny.com/politics/federal-court-blocks-nassau-buffer-zone-bill/
+q47:
+  now: Attorney General Letitia James has sued the federal government many times since 2025 over grant money that was cut or frozen, usually alongside other states. After FEMA cut New York's homeland security grants by 79%, more than $100 million, a federal court in Rhode Island ordered the money restored, and the administration dropped its appeal on May 7, 2026. In January 2026 she sued over a freeze of child care and family assistance funds that the administration tied to fraud concerns. In August 2025 the Supreme Court ruled 5-4 that challenges to cancelled grants belong in the Court of Federal Claims, which experts say makes quick relief harder to win.
+  case_for: James and the attorneys general who join her argue that once Congress appropriates money and an agency awards it, the executive cannot pull it back without legal cause. They say cuts to counterterrorism, school and child care funds harm New Yorkers directly, and point to the court order that restored New York's homeland security grants.
+  case_against: The Trump administration argues agencies may end or pause grants over policy priorities or concerns such as fraud, and that disputes over grant money do not belong in suits brought by states in federal district courts. A 5-4 Supreme Court majority agreed in 2025 that such claims go to the Court of Federal Claims, letting $783 million in NIH grant cuts proceed.
+  terms:
+  - federal funding freeze
+  - grant termination
+  - Letitia James lawsuit
+  - Court of Federal Claims
+  - homeland security grants
+  sources:
+  - https://ag.ny.gov/press-release/2026/attorney-general-james-successfully-protects-critical-counterterrorism-funding
+  - https://www.wbng.com/2026/01/09/new-york-attorney-general-letitia-james-sues-trump-administration-over-childcare-funding-freeze/
+  - https://www.washington.edu/federalrelations/2025/08/22/supreme-court-rules-on-nih-grant-cancellation/
+q48:
+  now: A March 2025 executive order sought to add a documentary proof-of-citizenship requirement to the federal voter registration form and to stop states from counting mail ballots that arrive after Election Day. Federal courts have blocked much of it; Judge Colleen Kollar-Kotelly permanently barred several of its citizenship provisions, writing that the Constitution does not let the President impose changes to federal election procedures. A second order, signed March 31, 2026, directs DHS to send states citizenship lists, the Postal Service to set new mail-ballot envelope rules, and the Justice Department to prioritize prosecutions over ballots issued to ineligible voters. In August 2026 the Supreme Court, 6-3, lifted an injunction against it, saying states had sued too early, without ruling on whether it is lawful.
+  case_for: The White House says the orders protect election security by making sure only citizens vote and that mail ballots can be tracked, and that directing federal agencies and setting prosecution priorities are within the President's power. Congressional Republicans who back proof-of-citizenship requirements say limiting voting to citizens is a basic safeguard.
+  case_against: Democratic attorneys general who sued over both orders, New York's among them in 2025, argue the Constitution gives the power to set election rules to the states and Congress, not the President. They say federal citizenship lists could leave out eligible voters such as naturalized citizens, and that threats to withhold funds or prosecute officials pressure states to comply.
+  terms:
+  - election executive order
+  - proof of citizenship
+  - mail-in ballots
+  - SAVE Act
+  - Elections Clause
+  sources:
+  - https://ag.ny.gov/press-release/2025/attorney-general-james-sues-president-trump-unconstitutional-attempt-seize
+  - https://www.opb.org/article/2026/01/30/judge-blocks-additional-citizenship-provisions
+  - https://www.naco.org/news/white-house-issues-executive-order-mail-ballot-procedures-and-citizenship-verification
+  - https://whyy.org/articles/election-2026-trump-supreme-court-mail-ballot-ruling/
+q49:
+  now: The state budget signed in May 2025 widened New York's involuntary commitment standard to cover people at substantial risk of physical harm because mental illness leaves them unable or unwilling to meet basic needs such as food, shelter or medical care. Before, the law centered on danger to oneself or others. The same budget made it easier to renew Kendra's Law outpatient orders and paid for 100 new forensic psychiatric beds in New York City. The state said the change brought it in line with 43 other states; the open question is whether to go further.
+  case_for: Gov. Hochul, state mental health commissioner Ann Marie Sullivan and former Mayor Eric Adams argue some people with severe illness cannot recognize their need for care, and that waiting until they become dangerous leaves them suffering on the street. Sullivan says the standard reaches a small group at very substantial risk and that the state has the beds to treat them.
+  case_against: Disability and civil rights advocates, including New York Lawyers for the Public Interest and the Alliance for Rights and Recovery, say forced treatment is not real treatment and that money belongs in voluntary community care. Sen. Samra Brouk warned the standard could treat homelessness as grounds for commitment, and Assemblymember Jo Anne Simon questioned whether hospitals have room.
+  terms:
+  - involuntary commitment
+  - severe mental illness
+  - Kendra's Law
+  - psychiatric beds
+  - basic needs standard
+  sources:
+  - https://www.governor.ny.gov/news/governor-hochul-signs-legislation-improve-mental-health-care-and-strengthen-treatment-serious
+  - https://healthbeat.org/newyork/2025/02/06/hochul-involuntary-commitment-hospitalization-mental-health-services
+q50:
+  now: The State Comptroller reviews and approves most executive branch contracts over $50,000 before they take effect, but emergency purchases and contracts the Legislature exempts skip that review. In December 2024 Gov. Hochul vetoed, for the second year in a row, a bill that passed both houses unanimously and would have required agencies to publicly list emergency and exempt contracts. The budget passed in 2026 exempted nearly $1.5 billion from Comptroller approval, by Reinvent Albany's count, and many of those exemptions also allowed skipping competitive bidding.
+  case_for: Comptroller DiNapoli and good-government groups such as Reinvent Albany argue an independent check before money is committed guards against waste and favoritism. They cite the Buffalo Billion bid-rigging case and a $637 million COVID test contract awarded despite cheaper offers, and say reviews average about eight days.
+  case_against: Gov. Hochul argues emergencies require fast action and that added review and disclosure rules would hamper response and could expose vendors' trade secrets. Her budget office says exemptions are a lawful practice that predates her administration, and SUNY has argued that extra review causes costly delays.
+  terms:
+  - comptroller contract review
+  - emergency contracts
+  - pre-audit
+  - Reinvent Albany
+  - procurement
+  - DiNapoli
+  sources:
+  - https://www.post-journal.com/news/top-stories/2024/12/hochul-vetoes-comptroller-review-of-emergency-purchases/
+  - https://nysfocus.com/2026/07/02/ny-state-budget-hochul-contract-review
+  - https://gothamgazette.com/state/11708-hochul-bill-restoring-contract-review-powers-comptroller-dinapoli/
+q51:
+  now: New York has no law barring companies that seek state contracts from donating to the officials who award them; their executives can give up to $18,000 to a candidate for governor. Sen. Zellnor Myrie's bill S8246, part of Comptroller DiNapoli's legislative program, would bar vendors seeking contracts over $50,000, along with key employees, lobbyists and family members, from giving to statewide officials while a procurement is under way. The Senate passed it 56-2 in June 2025 and 59-1 on June 4, 2026, and it sits in the Assembly Election Law Committee.
+  case_for: Reinvent Albany, other watchdog groups and DiNapoli argue donations from vendors during a contract competition create a risk that contracts are steered to donors and erode public trust. They note New York City already has similar doing-business limits and that a federal appeals court upheld Connecticut's contractor donation ban in 2010.
+  case_against: Opponents, including lobbyists and others who challenged Connecticut's law, argue such bans unconstitutionally limit the political participation of contractors, their families and lobbyists. The same 2010 ruling struck down Connecticut's ban on lobbyist donations, and Myrie's bill drew two no votes in the Senate in 2025 and one in 2026.
+  terms:
+  - pay-to-play
+  - campaign contributions
+  - state contractors
+  - S8246
+  - doing business restrictions
+  sources:
+  - https://www.nysenate.gov/legislation/bills/2025/s8246
+  - https://reinventalbany.org/wp-content/uploads/2025/06/Memo-of-Support-for-SS8246-Myrie-Establishes-doing-business-restrictions-in-NYS-elections-June-2025.pdf
+  - https://www.brennancenter.org/our-work/court-cases/green-party-connecticut-v-jeffrey-garfield
+  - https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+q52:
+  now: The New York State Common Retirement Fund, overseen by the Comptroller, was valued at about $309.7 billion in mid-2026 and serves more than one million public workers, retirees and beneficiaries. It has a goal of net-zero greenhouse gas emissions across its portfolio by 2040 and uses shareholder proposals, proxy votes and direct talks to press companies on climate; in 2024 it reached agreements with companies including Southwest Airlines and McDonald's. Nationally, no climate or other ESG shareholder proposal had passed in the 2026 season as of May, and the SEC stopped weighing in on most company requests to exclude proposals.
+  case_for: Comptroller DiNapoli argues climate change is a growing financial risk for every long-term investor, so pressing companies to set emissions targets and disclose transition plans protects retirees' money. His 2026 Democratic primary challengers, Raj Goyle and Drew Warshaw, wanted the fund to go further and divest from fossil fuel companies.
+  case_against: Republican nominee Joseph Hernandez calls the fund's green-energy and diversity work a political agenda. Anti-ESG shareholder groups frame climate policies as questions of shareholder value alone, and SEC Chairman Paul Atkins favors relieving companies of climate disclosures that are not financially material. The SEC proposed rescinding its climate disclosure rules in May 2026.
+  terms:
+  - Common Retirement Fund
+  - shareholder proposals
+  - proxy voting
+  - net zero 2040
+  - ESG
+  - DiNapoli
+  sources:
+  - https://www.osc.ny.gov/press/releases/2024/08/dinapoli-ny-pension-fund-reaches-climate-agreements-five-portfolio-companies
+  - https://www.osc.ny.gov/common-retirement-fund/corporate-governance
+  - https://corpgov.law.harvard.edu/2026/06/14/esg-and-anti-esg-shareholder-proposals-in-2026/
+  - https://ny1.com/nyc/all-boroughs/politics/2026/10/02/state-comptroller-dinapoli-fends-off-repeated-attacks-in-ny1-debate-joseph-hernandez
+q53:
+  now: The Common Retirement Fund files shareholder proposals asking companies to report workforce diversity data and how they handle discrimination complaints, and its voting guidelines let it oppose directors at companies whose boards lack diversity; in 2023 it voted against 1,028 directors at 290 companies on that basis. DiNapoli reaffirmed the policy in March 2024. In December 2024 a federal appeals court ruled 9-8 that the SEC exceeded its authority in approving Nasdaq's board diversity disclosure rule, striking it down.
+  case_for: DiNapoli argues diverse boards and workforces support innovation and long-term shareholder value, and that weak diversity practices bring reputational risk and talent loss that can hurt returns. Supporters point to shareholder backing for some of these requests, such as a 52% vote for a Wells Fargo proposal on harassment and discrimination disclosure.
+  case_against: Republican nominee Joseph Hernandez calls the fund's diversity and green-energy efforts a political agenda. Anti-ESG shareholder groups argue such policies should be judged only on shareholder value, and the Fifth Circuit found the SEC had no authority under securities law to require Nasdaq companies to disclose directors' race and gender.
+  terms:
+  - board diversity
+  - DEI
+  - shareholder proposals
+  - Common Retirement Fund
+  - Nasdaq diversity rule
+  sources:
+  - https://www.osc.ny.gov/press/releases/2024/03/dinapoli-reaffirms-commitment-dei-initiatives
+  - https://velaw.com/insights/fifth-circuit-strikes-down-nasdaq-board-diversity-rules
+  - https://ny1.com/nyc/all-boroughs/politics/2026/10/02/state-comptroller-dinapoli-fends-off-repeated-attacks-in-ny1-debate-joseph-hernandez
+  - https://corpgov.law.harvard.edu/2026/06/14/esg-and-anti-esg-shareholder-proposals-in-2026/
+q54:
+  now: 'The Common Retirement Fund, about 97% funded, holds alternatives such as private equity and infrastructure. A few other public pensions have bought bitcoin funds: Wisconsin''s state investment board held about $321 million in a bitcoin exchange-traded fund in early 2025, and Michigan''s retirement system has disclosed smaller holdings. An April 2025 survey of state policy found several states debating crypto for pension plans while a handful bar it.'
+  case_for: Supporters, including crypto industry groups that have lobbied state legislatures, argue a small allocation through regulated exchange-traded funds lets pensions share in a growing asset class, as Wisconsin and Michigan have done. Pension analysts note that a well-funded plan, as New York's is, has more room to take on investment risk than an underfunded one.
+  case_against: Comptroller DiNapoli calls crypto too risky for retirees' money, and both comptroller candidates said at their Oct. 1 debate they would not invest the fund in it. Anthony Randazzo of the Equable Institute says fiduciaries must justify why a volatile asset is the most prudent use of pension money.
+  terms:
+  - pension fund crypto
+  - bitcoin ETF
+  - Common Retirement Fund
+  - public pensions
+  - fiduciary duty
+  sources:
+  - https://www.bondbuyer.com/news/states-loosen-restrictions-on-pension-funds-and-crypto
+  - https://spectrumlocalnews.com/nys/capital-region/news/2026/09/24/comptroller-tom-dinapoli-discusses-his-tenure
+  - https://www.cityandstateny.com/politics/2026/10/dinapoli-defends-record-medicaid-fraud-comptroller-debate/416380/
+q55:
+  now: In June 2026 the federal General Services Administration awarded a 15-year, $35.57 million lease for a warehouse at 800 Corporate Blvd. in the Town of Newburgh, near Stewart Airport, to Texas-based Leverage Enterprises. Lease documents call for secure space for government vehicles, including detainee buses and vans, with 24/7 access; ICE has not publicly described its plans. The Newburgh Town Board and the Orange County Legislature passed unanimous resolutions opposing an ICE site there, though county leaders say they cannot legally block the lease and the town holds zoning authority.
+  case_for: The Department of Homeland Security says policies of not cooperating with ICE put New Yorkers in danger, and border czar Tom Homan has promised more immigration enforcement in New York. Some residents who backed ICE at an Orange County Legislature meeting noted the county jail already holds ICE detainees and called the opposition inconsistent.
+  case_against: Rep. Pat Ryan, Sen. Rob Rolison and local boards object that the plan was made without public input and that a detention or processing site does not suit the location. The town's resolution says the area is already an overburdened community and raises concerns about water and sewer capacity.
+  terms:
+  - ICE Newburgh
+  - immigration detention
+  - 800 Corporate Boulevard
+  - Stewart Airport
+  - Orange County ICE
+  sources:
+  - https://www.wamc.org/2026-08-07/orange-county-legislature-passes-resolution-asking-ice-not-to-build-in-newburgh
+  - https://www.wamc.org/2026-07-14/town-of-newburgh-votes-unanimously-to-oppose-ice-warehouse
+  - https://patryan.house.gov/media/press-releases/congressman-pat-ryan-raises-alarm-reports-potential-ice-facility-newburgh
+  - https://www.nysenate.gov/newsroom/press-releases/2026/rob-rolison/senator-rob-rolison-statement-regard-immigration-and
+q56:
+  now: The House passed H.R. 7008, the Stop Insider Trading Act, 232-198 on July 22, 2026. It would bar members of Congress, their spouses and dependent children from buying new individual stocks, let them keep existing holdings with 7 to 14 days' public notice before selling, and also adds photo ID requirements for federal elections. On Sept. 30, 2026 the Senate fell seven votes short of the 60 needed to advance it, 53-47. Under the 2012 STOCK Act, members may trade but must report trades over $1,000, with a $200 fine for late reports.
+  case_for: Supporters in both parties, including Reps. Seth Magaziner and Tim Burchett, argue members have access to nonpublic information, so letting them trade individual stocks invites corruption. They cite 2024 data showing 46 members who traded beat the S&P 500 and say the STOCK Act's disclosure rules are too weak to deter abuse.
+  case_against: Opponents of a ban, including Sens. Ron Johnson and Rick Scott, say insider trading is already illegal, disclosure rules are enough, and a ban would discourage successful people from running for office. Others, such as Rep. Gil Cisneros, would limit trading only in industries a member oversees.
+  terms:
+  - congressional stock trading ban
+  - Stop Insider Trading Act
+  - H.R. 7008
+  - STOCK Act
+  - insider trading
+  sources:
+  - https://247wallst.com/investing/2026/10/01/the-senate-just-voted-down-a-ban-on-congressional-stock-trading/
+  - https://www.fox5vegas.com/2026/07/25/house-passes-limits-stock-trading-senate-path-remains-uncertain/
+  - https://www.wamc.org/2025-11-21/house-considers-banning-stock-trading-by-members-of-congress
+  - https://electionlawblog.org/2025/why-lawmakers-dont-want-to-ban-their-own-stock-trading/
+q57:
+  now: Federal tax credits worth 30% of the cost of home solar and up to $2,000 a year for heat pumps ended Dec. 31, 2025, under the One Big Beautiful Bill Act. In New York, the main help now comes from about $1 billion a year in efficiency and electrification programs for 2026 through 2030, approved by the PSC in May 2025 and paid for by a surcharge on utility bills. The state also announced up to $150 million in April 2026 for heat pumps in homes and small buildings.
+  case_for: Democratic state Senate candidate Lisa Kaul and other backers of state incentives argue heat pumps and solar cost less to run over time but are expensive to install, so help with the upfront cost is what lets ordinary households switch. Heat pumps can be about three times as efficient as gas heat, and buildings produce about a third of the state's emissions.
+  case_against: Utilities have said these costs cannot all go on utility bills, where every customer pays for subsidies that early adopters, often higher-income households, are most likely to use. Some subsidized heat pump owners in Con Edison's territory have also faced higher winter bills than they expected, adding to concerns about affordability.
+  terms:
+  - heat pump rebates
+  - NYS Clean Heat
+  - home electrification
+  - solar incentives
+  - 25C tax credit
+  sources:
+  - https://www.governor.ny.gov/news/governor-hochul-announces-150-million-expand-heat-pump-installations-homeowners-and-small
+  - https://dps.ny.gov/news/psc-announces-approval-energy-efficiency-and-building-electrification-programs-reduce-energy
+  - https://www.eenews.net/articles/how-ny-heat-pump-users-got-stuck-with-higher-bills/
+  - https://www.chronogram.com/river-newsroom/new-yorks-heat-pump-program-is-drying-up-18194313
 il01:
   now: Israel's government opposes Palestinian statehood; when the UK, Canada and Australia recognized Palestine on September 21, 2025, Netanyahu replied that 'there will be no Palestinian state west of the Jordan.' More than 140 of 193 UN members now recognize Palestine. A July 2026 Tel Aviv University Peace Index found only 29% of Jewish Israelis support any negotiations with the Palestinian Authority.
   case_for: Ra'am backs a negotiated two-state solution, the Joint List supports Palestinian statehood, and the Democrats' Gilad Kariv calls for dividing the land with a demilitarized Palestinian state inside a regional agreement. Supporters point out that Saudi Arabia makes a path to statehood its condition for normalization.
