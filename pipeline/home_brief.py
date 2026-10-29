@@ -90,7 +90,7 @@ def say_for(title: str, summary: str) -> str:
     return _cap(said)
 
 
-def section(x: dict, local) -> str:
+def section(x: dict, local=None) -> str:
     sec = x.get("section")
     if sec == "Alert":
         return "Alert"
@@ -99,7 +99,9 @@ def section(x: dict, local) -> str:
     if sec == "Law":
         return "Courts"
     if sec == "Government":
-        return "Albany" if x.get("scope") == "state" else "Congress" if re.search(r"\b(Congress|House|Senate|Speaker|lawmakers)\b", x["title"]) else "Washington"
+        if x.get("scope") == "state":
+            return "Albany" if re.search(r"\b(Albany|Hochul|Legislature|Assembly|state Senate|state budget|Comptroller|Attorney General)\b", x["title"] + " " + x.get("summary", "")) else "New York"
+        return "Congress" if re.search(r"\b(Congress|House|Senate|Speaker|lawmakers)\b", x["title"]) else "Washington"
     return sec or "News"
 
 
