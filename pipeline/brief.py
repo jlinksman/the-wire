@@ -157,3 +157,9 @@ def build(data: dict, cfg: dict, dist, log, texts: dict | None = None) -> None:
                  + [{"id": "following", "label": "Following"}],
     }, separators=(",", ":")))
     log(f"[brief] {len(picked)} signal items, {len(extras)} category extras, {count}, {len(sports)} sports lines, {len(ahead)} ahead")
+    # The kitchen speaker's morning brief (Home Assistant): 3 to 5 of these, news only.
+    try:
+        import home_brief
+        home_brief.build(picked, extras, data, dist, log)
+    except Exception as exc:
+        log(f"[home_brief] failed: {type(exc).__name__}")

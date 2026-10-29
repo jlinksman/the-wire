@@ -1307,7 +1307,7 @@ def mark_changed(state: dict) -> None:
     key is republished at least every two hours regardless."""
     pub = state.setdefault("published", {})
     lines = []
-    for name in ("brief.json", "alerts.json", "evidence.json"):
+    for name in ("brief.json", "alerts.json", "evidence.json", "home-brief.json"):
         f = DIST / name
         if not f.exists():
             continue
