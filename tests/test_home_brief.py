@@ -10,6 +10,9 @@ cases = [
      lambda s: "Governor" not in s and "New York Senate passed it 40 to 22" in s and "http" not in s and "Senator Smith" in s and "🎉" not in s),
     ("Beacon City Council approves Main St. rezoning", "", lambda s: s == "Beacon City Council approves Main Street rezoning."),
     ("Board meets", "File photo of the board. Kevin Smith of the Times has this report.", lambda s: s == "Board meets."),
+    ("Sun River Health Hunger Relief Program", "Screenshot Screenshot Screenshot", lambda s: s == "Sun River Health Hunger Relief Program."),
+    ("Planning Board - Nov 10", "The board meets at 7:00 p.m. to discuss agenda items and/or topics.", lambda s: "7 PM" in s and "and and" not in s and "or topics" in s),
+    ("Election Day is here", "A poll site in Summit, NJ. Nov.", lambda s: s == "Election Day is here."),
     ("A" + " word" * 60, "", lambda s: len(s.split()) <= 40 and s.endswith(".")),
 ]
 fail = 0

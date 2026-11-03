@@ -45,6 +45,8 @@ def spoken(text: str) -> str:
     t = re.sub(r"\$\s?(\d[\d,.]*)\s?(k|m|mn|million|b|bn|billion)?\b", _money, t, flags=re.I)
     t = re.sub(r"(\d)\s?%", r"\1 percent", t)
     t = re.sub(r"\b(\d{1,3})\s?-\s?(\d{1,3})\b(?!-)", r"\1 to \2", t)          # votes and scores: 40-22
+    t = re.sub(r"\band\s*/\s*or\b", "or", t, flags=re.I)
+    t = re.sub(r"\b(\d{1,2})(?::00)?(?::(\d\d))?\s?([ap])\.?m\.?(?=\W|$)", lambda m: m.group(1) + (":" + m.group(2) if m.group(2) else "") + (" AM" if m.group(3).lower() == "a" else " PM"), t, flags=re.I)
     t = t.replace("&", " and ").replace("—", ", ").replace("–", " to ").replace("…", ".").replace("/", " and ")
     t = re.sub(r"[\"“”]", "", t).replace("‘", "'").replace("’", "'")
     for pat, rep in SAY:
@@ -57,7 +59,7 @@ def _sentences(t: str) -> list[str]:
     return [s.strip() for s in re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", t) if s.strip()]
 
 
-FILLER = re.compile(r"\b(file photo|photo by|courtesy of|has (this|the|a) (report|story|details)|reports?:$|read more|continue reading|click here|subscribe|appeared first on|is available)\b", re.I)
+FILLER = re.compile(r"\b(screenshots?|file photo|photo by|courtesy of|a (poll|polling) site in|pictured|has (this|the|a) (report|story|details)|reports?:$|read more|continue reading|click here|subscribe|appeared first on|is available)\b", re.I)
 
 
 def _cap(text: str) -> str:
@@ -75,8 +77,8 @@ def say_for(title: str, summary: str) -> str:
     head = spoken(re.split(r";\s", title)[0]).rstrip(".!?:") + "."
     out, n = [], 0
     for s in _sentences(spoken(summary)):
-        if FILLER.search(s):
-            continue
+        if FILLER.search(s) or len(s.split()) < 4 or len({w.lower().strip(".,") for w in s.split()}) == 1:
+            continue                     # captions, datelines ("Nov."), repeated alt text
         w = len(s.split())
         if n + w > MAX_WORDS or len(out) == 2:
             break
@@ -95,7 +97,8 @@ def section(x: dict, local=None) -> str:
     if sec == "Alert":
         return "Alert"
     if sec == "Beacon":
-        return "Beacon" if re.search(r"\bBeacon\b", x["title"] + " " + x.get("summary", "")) else "Hudson Valley"
+        local_src = re.search(r"\b(Beacon|City of Beacon)\b", x.get("source", ""))
+        return "Beacon" if local_src or re.search(r"\bBeacon\b", x["title"] + " " + x.get("summary", "")) else "Hudson Valley"
     if sec == "Law":
         return "Courts"
     if sec == "Government":
