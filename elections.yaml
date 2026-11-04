@@ -244,6 +244,7 @@ elections:
       - id: supreme_court
         level: judicial
         office: "State Supreme Court Justice"
+        seats: 3              # vote for up to 3 (Dutchess sample ballots); Call it asks for 3 winners
         district: "9th Judicial District"
         desk: LAW
         job: "New York's trial court of general jurisdiction: commercial cases, Article 78 proceedings, matrimonial and major civil and criminal cases. Fourteen-year terms."

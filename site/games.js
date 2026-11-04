@@ -221,6 +221,11 @@
         openPuzzles(); } })),
       el("span", { class: "fine", text: bb4 && done["4"] ? "today's is played; this sets tomorrow's" : "switches slot 4 now and stays your default" })));
     if ((D.callbacks || []).length) nodes.push(el("p", { class: "fine", text: "Woven in today: " + D.callbacks.length + " from earlier (they follow the news puzzle)." }));
+    const CL = D.calls;
+    if (CL && ((CL.open || []).length || (CL.locked || []).length)) {
+      const todo = (CL.open || []).filter((r) => !r.mine).length;
+      nodes.push(el("button", { class: "sbtn wide", text: "Call it: " + (CL.open || []).length + " race" + ((CL.open || []).length === 1 ? "" : "s") + " open" + (todo ? " · " + todo + " to call" : "") + ((CL.locked || []).some((r) => r.result && r.mine && r.mine.scored) ? " · results in" : "") + " ›", onclick: () => openCalls() }));
+    }
     if (D.law) nodes.push(el("button", { class: "sbtn wide", text: "Law: today's session" + (D.law.issue && !D.law.done.issue ? " + issue spotter" : "") + (D.law.done.law || (D.law.slot && done[String(D.law.slot)]) ? " ✓" : "") + " ›", onclick: () => openLaw() }));
     nodes.push(el("button", { class: "sbtn wide", text: "Library: name them all, match ›", onclick: () => openLibrary() }));
     const dv = D.docket;
@@ -587,6 +592,82 @@
   }
   // An element's short form: drop parentheticals (nested too) for prompts and options.
   function shortEl(t) { let x = String(t || ""), y; do { y = x; x = x.replace(/\s*\([^()]*\)/g, ""); } while (x !== y); return x.trim(); }
+
+  // ---------------------------------------------------------------- Call it (2026-11-04)
+  // Election calls: winner, margin bucket, confidence; change until voting starts. Scored against
+  // the recorded result, with a calibration line ("when 75% sure, right 3 of 4") and a Brier score.
+  const MARGIN_NAME = { lt5: "Under 5", "5to15": "5–15", gt15: "15+" };
+  async function openCalls() {
+    G.hub = "calls";
+    let D;
+    try { D = await load(); } catch (e) { return openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Call it" }), el("p", { class: "fine", text: "Couldn't load (" + e.message + ")." }), backBtn()], "Call it"); }
+    const C = D.calls || { open: [], locked: [], coming: [] };
+    const nodes = [el("h2", { id: "sheet-title", class: "stitle", text: "Call it" }),
+      el("p", { class: "asrc", text: "Winner, margin, how sure · change until voting starts · as of " + (D.as_of ? when(D.as_of) : "—") })];
+    const R = C.record;
+    if (R) {
+      nodes.push(el("p", { class: "gm-keep", text: "Winners right " + R.right + " of " + R.of + (R.margin_of ? " · margins " + R.margin_right + " of " + R.margin_of : "") + " · Brier " + R.brier.toFixed(2) + " (coin flip 0.25; lower is better)" }));
+      if ((R.calibration || []).length) nodes.push(el("p", { class: "fine", text: R.calibration.map((x) => "when " + x.conf + "% sure, right " + x.hit + " of " + x.of).join(" · ") }));
+    }
+    const groups = {};
+    for (const r of C.open || []) (groups[r.election + " · " + r.date] = groups[r.election + " · " + r.date] || []).push(r);
+    for (const [g, list] of Object.entries(groups)) {
+      nodes.push(el("h3", { class: "sh3", text: g }));
+      for (const r of list) nodes.push(callRow(r));
+    }
+    if (!(C.open || []).length) nodes.push(el("p", { class: "fine", text: "Nothing open to call right now." }));
+    if ((C.locked || []).length) {
+      nodes.push(el("h3", { class: "sh3", text: "Your locked calls" }));
+      for (const r of C.locked) {
+        const m = r.mine, sc = m.scored;
+        const said = m.pick.join(", ") + (m.margin ? " by " + MARGIN_NAME[m.margin] : "") + " · " + m.conf + "%";
+        nodes.push(el("div", { class: "gm-pd" }, el("p", { class: "gm-keep" }, el("b", { text: r.title }), el("span", { class: "asrc", text: "  " + r.date })),
+          el("p", { class: "fine", text: (sc ? (sc.right ? "✓ " : "✗ ") : "· ") + "You: " + said + (sc ? " · Result: " + sc.winner.join(", ") + (sc.margin != null ? " by " + sc.margin.toFixed(1) + " pts" + (sc.margin_right === true ? " ✓" : sc.margin_right === false ? " ✗" : "") : "") + " (" + sc.called + ")" : " · waiting for a call") }),
+          sc && sc.source ? el("a", { class: "asrc", href: sc.source, target: "_blank", rel: "noopener", text: "Result source ↗" }) : null));
+      }
+    }
+    if ((C.coming || []).length) nodes.push(el("h3", { class: "sh3", text: "Coming up" }), el("ul", { class: "gm-hints" }, ...C.coming.map((h) => el("li", { text: h.date + " · " + h.title + (h.note ? " (" + h.note + ")" : "") }))));
+    nodes.push(el("p", { class: "fine", text: "Your calls stay private on The Wire. Results come from official counts or established outlets once a race is called, with the source linked." }), backBtn());
+    openGame(nodes, "Call it");
+  }
+  function callRow(r) {
+    const mine = r.mine || {};
+    const pick = new Set(mine.pick || []);
+    let margin = mine.margin || null, conf = mine.conf || null;
+    const box = el("div", { class: "gm-pd" });
+    const status = el("p", { class: "fine", text: r.mine ? "Your call is in. Change it until voting starts." : "" });
+    const draw = () => {
+      const cands = el("div", { class: "gm-opts" }, ...r.candidates.map((c) => el("button", { class: "sbtn wide" + (pick.has(c.name) ? " primary" : ""), text: c.name + ((c.lines || []).length ? " · " + c.lines.join(", ") : ""), onclick: () => {
+        if (pick.has(c.name)) pick.delete(c.name); else { if (r.seats === 1) pick.clear(); if (pick.size < r.seats) pick.add(c.name); }
+        draw(); } })));
+      const chips = (vals, cur, name, set) => el("div", { class: "chips" }, el("span", { class: "fine", text: name }), ...vals.map(([v, t]) => el("button", { class: "chip" + (cur === v ? " on" : ""), text: t, onclick: () => { set(v); draw(); } })));
+      const lockAt = new Date(r.closes).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+      box.replaceChildren(
+        el("p", { class: "gm-keep" }, el("b", { text: r.title }), el("span", { class: "asrc", text: "  " + (r.where || "") + " · locks " + lockAt })),
+        r.why ? el("p", { class: "fine", text: r.why }) : null,
+        r.seats > 1 ? el("p", { class: "fine", text: "Pick the " + r.seats + " winners." }) : null,
+        cands,
+        r.margin ? chips([["lt5", "Under 5"], ["5to15", "5–15"], ["gt15", "15+"]], margin, "Margin (pts):", (v) => { margin = v; }) : null,
+        chips([[55, "55%"], [65, "65%"], [75, "75%"], [85, "85%"], [95, "95%"]], conf, "How sure:", (v) => { conf = v; }),
+        el("button", { class: "sbtn", text: r.mine ? "Update call" : "Lock in", onclick: save }), status);
+    };
+    async function save() {
+      if (pick.size !== r.seats) { status.textContent = r.seats > 1 ? "Pick " + r.seats + " winners." : "Pick a winner."; return; }
+      if (r.margin && !margin) { status.textContent = "Pick a margin."; return; }
+      if (!conf) { status.textContent = "Pick how sure you are."; return; }
+      status.textContent = "Saving…";
+      try {
+        const res = await fetch("games", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "call", race: r.id, pick: [...pick], margin, conf }) });
+        const j = await res.json();
+        if (!res.ok) throw new Error(j.error || "HTTP " + res.status);
+        if (G.day && j.calls) G.day.calls = j.calls;
+        r.mine = { pick: [...pick], margin, conf };
+        status.textContent = "Locked in. Change it until voting starts.";
+      } catch (e) { status.textContent = "Couldn't save (" + e.message + ")."; }
+    }
+    draw();
+    return box;
+  }
 
   // ---------------------------------------------------------------- The Law tab (2026-11-04)
   // Its own daily session (on Tue/Thu that's slot 3), a weekend issue spotter, and recall by area.

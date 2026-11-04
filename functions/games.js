@@ -8,9 +8,10 @@
 // POST {action:"result", ...} -> record a finished puzzle (≤ 30 writes a day)
 // POST {action:"predict", docket, side} -> pending-docket prediction ("petitioner" | "respondent" | "skip")
 // POST {action:"pick", brain} -> default brain break ("logic" | "chess" | "tactics")
+// POST {action:"call", race, pick:[names], margin, conf} -> Call it: an election call, changeable until voting starts
 const KEY = "games.json";
 const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
-const WRITE_CAP = 30;
+const WRITE_CAP = 50;              // a ballot of calls can take ~15 writes; KV free plan is 1,000 a day across the site
 const CALLBACK_CAP = 3;
 const CONNECTIONS_LIVE = false;      // force on; otherwise the pool turns it on after 10 of 14 days without a drop (GAMES.md)
 
@@ -59,9 +60,10 @@ export async function onRequestGet({ request, env }) {
     await save(env, st, today);
   }
   const law = lawTab(st, pool, today, day);
-  if (day.lawNew) { delete day.lawNew; await save(env, st, today); }
+  const calls = callsView(st, pool);
+  if (day.lawNew || st.callsDirty) { delete day.lawNew; delete st.callsDirty; await save(env, st, today); }
   return json({
-    law,
+    law, calls,
     day: today, slots: day.slots, done: day.done || {}, callbacks: callbacks(st, today, day),
     pick: st.pick || "logic", stats: stats(st, today), as_of: pool ? pool.made : null,
     health: [...((pool && pool.health) || []), ...(day.health || [])], connections_live: CONNECTIONS_LIVE,
@@ -96,11 +98,17 @@ export async function onRequestPost({ request, env }) {
     st.predict = st.predict || {};
     if (st.predict[c.docket] && st.predict[c.docket].side !== "skip") return json({ error: "Already locked in." }, 400);
     st.predict[c.docket] = { side: b.side, day: today, name: c.name, petitioner: c.petitioner, respondent: c.respondent };
+  } else if (b.action === "call") {
+    const err = makeCall(st, pool0(await env.WIRE.get("games-today.json", "json")), b, today);
+    if (err) return json({ error: err }, 400);
   } else if (b.action === "result") {
     record(st, b, today);
   } else return json({ error: "Unknown action." }, 400);
+  const callsOut = b.action === "call" ? callsView(st, pool0(await env.WIRE.get("games-today.json", "json"))) : undefined;
+  delete st.callsDirty;
   await save(env, st, today);
-  return json({ ok: true, stats: stats(st, today), callbacks: callbacks(st, today, st.days[today] || {}), docket: b.action === "predict" ? docketView(st, pool0(await env.WIRE.get("games-today.json", "json")), today) : undefined });
+  return json({ ok: true, stats: stats(st, today), callbacks: callbacks(st, today, st.days[today] || {}), docket: b.action === "predict" ? docketView(st, pool0(await env.WIRE.get("games-today.json", "json")), today) : undefined,
+    calls: callsOut });
 }
 
 // ------------------------------------------------------------------ pending docket
@@ -391,6 +399,52 @@ function brainBreak(kind, st, chess, today, rng, health, taken) {
   const t = ((st.ladder["logic:" + g] || st.ladder.logic || {}).tier) || 2;     // each puzzle type climbs on its own
   const seed = today.replace(/-/g, "") + (taken ? "x" + taken.length : "");
   return { game: "logic", puzzle: { id: "lg" + g + seed, game: g, params: LOGIC[g][t - 1], seed, tier: t } };
+}
+
+// ------------------------------------------------------------------ Call it (2026-11-04)
+// Election calls: the winner (or the N winners of a multi-seat race), a margin bucket for one-seat
+// races, and a confidence. Changeable until the race's `closes` (when voting starts), then locked;
+// scored from the result recorded in elections.yaml once a race is called. Private (rule 10): KV only.
+const CONF = [55, 65, 75, 85, 95];
+const MARGINS = ["lt5", "5to15", "gt15"];
+function bucket(m) { return m == null ? null : m < 5 ? "lt5" : m < 15 ? "5to15" : "gt15"; }
+function makeCall(st, pool, b, now0) {
+  const R = (((pool || {}).calls || {}).races || []).find((x) => x.id === b.race);
+  if (!R) return "That race isn't open for calls.";
+  if (Date.now() >= Date.parse(R.closes)) return "Voting has started; this race is locked.";
+  const names = new Set(R.candidates.map((c) => c.name));
+  const pick = (Array.isArray(b.pick) ? b.pick : [b.pick]).filter((n) => names.has(n));
+  if (pick.length !== R.seats || new Set(pick).size !== pick.length) return R.seats > 1 ? "Pick " + R.seats + " winners." : "Pick a winner.";
+  if (R.margin && !MARGINS.includes(b.margin)) return "Pick a margin.";
+  if (!CONF.includes(Number(b.conf))) return "Pick how sure you are.";
+  st.calls = st.calls || {};
+  st.calls[R.id] = { pick, margin: R.margin ? b.margin : null, conf: Number(b.conf), at: new Date().toISOString(),
+    title: R.title, election: R.election, date: R.date, closes: R.closes, seats: R.seats };
+  return null;
+}
+function callsView(st, pool) {
+  const races = (((pool || {}).calls || {}).races || []);
+  const C = st.calls || (st.calls = {});
+  const now = Date.now();
+  // Score any call whose race now has a result; the score stays even after the race leaves the pool.
+  for (const R of races) {
+    const c = C[R.id];
+    if (c && R.result && !c.scored) {
+      const win = new Set(R.result.winner);
+      st.callsDirty = true;
+      c.scored = { right: c.pick.length === win.size && c.pick.every((n) => win.has(n)), winner: R.result.winner,
+        margin: R.result.margin, margin_right: c.margin ? c.margin === bucket(R.result.margin) : null, called: R.result.called, source: R.result.source };
+    }
+  }
+  const open = races.filter((R) => now < Date.parse(R.closes)).map((R) => Object.assign({}, R, { mine: C[R.id] ? { pick: C[R.id].pick, margin: C[R.id].margin, conf: C[R.id].conf } : null }));
+  const locked = races.filter((R) => now >= Date.parse(R.closes) && C[R.id]).map((R) => Object.assign({ id: R.id, title: R.title, election: R.election, date: R.date, candidates: R.candidates, result: R.result || null }, { mine: C[R.id] }));
+  const scored = Object.values(C).filter((c) => c.scored);
+  const brier = scored.length ? scored.reduce((a, c) => a + Math.pow(c.conf / 100 - (c.scored.right ? 1 : 0), 2), 0) / scored.length : null;
+  const cal = CONF.map((k) => { const x = scored.filter((c) => c.conf === k); return { conf: k, of: x.length, hit: x.filter((c) => c.scored.right).length }; }).filter((x) => x.of);
+  const mg = scored.filter((c) => c.scored.margin_right !== null);
+  return { open, locked, coming: ((pool || {}).calls || {}).coming || [],
+    record: scored.length ? { of: scored.length, right: scored.filter((c) => c.scored.right).length, margin_of: mg.length, margin_right: mg.filter((c) => c.scored.margin_right).length,
+      brier: Math.round(brier * 1000) / 1000, calibration: cal } : null };
 }
 
 // ------------------------------------------------------------------ results, ladders, review items

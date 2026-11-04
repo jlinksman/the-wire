@@ -2491,8 +2491,15 @@ def main(argv=None) -> int:
         drops.append(("meta", "built on Saturdays only"))
     more = [("keyed", 1 if wk.get("keyed") else 0), ("patristocrat", 1 if wk.get("patristocrat") else 0), ("meta", 1 if mt else 0),
             ("casefile", 1 if cf else 0), ("tactics", len(tx)), ("pending_docket", len(pend))]
+    import calls as callsmod                     # Call it: election predictions (2026-11-04)
+    try:
+        cl = {"races": callsmod.races(now, drops=drops), "coming": callsmod.upcoming_hot(now)}
+    except Exception as exc:
+        drops.append(("calls", f"elections.yaml: {type(exc).__name__}: {exc}"))
+        cl = {"races": [], "coming": []}
+    more.append(("calls", len(cl["races"])))
     pool = {
-        "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"),
+        "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"), "calls": cl,
         "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left, "weekend": wk, "meta": mt, "casefile": cf, "tactics": tx,
         "pending_docket": pend[:40], "dispositions": _disp(a.dispositions),
         "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba, more=more),

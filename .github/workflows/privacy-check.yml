@@ -27,4 +27,6 @@ jobs:
       - run: node tests/games_answers.test.js
       - run: node tests/tactics_cross.test.js
       - run: node tests/law_tab.test.mjs
+      - run: node tests/calls.test.mjs
+      - run: python tests/test_calls.py
       - run: python tests/test_home_brief.py
