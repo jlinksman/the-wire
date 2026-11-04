@@ -290,23 +290,1038 @@ cards:
   - id: cplr1411
     area: torts
     family: rule
-    title: "Comparative fault — CPLR 1411"
+    title: Comparative fault — CPLR 1411
     jurisdiction: NY
-    cite: "N.Y. CPLR 1411(a), (b) (as amended, revision of 2026-05-29)"
+    cite: N.Y. CPLR 1411(a), (b) (as amended by L. 2026, ch. 58, pt. EE, § 3)
     source: https://www.nysenate.gov/legislation/laws/CVP/1411
-    status: draft          # amended 2026; confirm the chapter's effective date and scope first
-    verified: null
-    news: '\bcomparative (fault|negligence)\b'
+    openleg:
+    - CVP/1411
+    status: verified
+    verified: '2026-11-04'
+    news: \bcomparative (fault|negligence)\b
+    news_ny: true
+    note: Pure comparative fault remains the rule for personal injury, property damage and wrongful death generally. The 2026 change in § 1411(b) reaches only personal injury actions subject to Insurance
+      Law art. 51 (motor vehicle), where a claimant more at fault than the defendant or the defendants combined recovers nothing. Added by L. 2026, ch. 58, pt. EE (signed May 26, 2026); applies to actions
+      commenced on or after May 26, 2026.
+    elements:
+    - text: The claimant's own culpable conduct, including contributory negligence or assumption of risk, does not bar recovery (§ 1411(a))
+      keys:
+      - not bar
+      - does not bar
+      - no bar
+    - text: Damages are diminished in proportion to the claimant's share of the culpable conduct
+      keys:
+      - proportion
+      - diminished
+      - reduced
+    - text: 'Exception, § 1411(b): in Insurance Law art. 51 (motor vehicle) personal injury actions, a claimant more at fault than the defendant or defendants combined is barred'
+      keys:
+      - motor vehicle
+      - article 51
+      - no-fault
+      - greater
+      - modified
+    cloze:
+      text: The amount of damages otherwise recoverable shall be ___ in the proportion which the culpable conduct attributable to the claimant or decedent bears to the culpable conduct which caused the damages.
+      answer: diminished
+      accept:
+      - diminished
+      - reduced
+      source: https://www.nysenate.gov/legislation/laws/CVP/1411
+
+  # ------------------------------------------------------------ NY limitations and practice (2026-11-04)
+  # Statute text checked against newyork.public.law (NY Open Legislation republished; nysenate.gov blocked
+  # scripted reads); the openleg check confirms each cloze against Open Legislation once OPENLEG_KEY is set.
+  # Second check 2026-11-04 (independent reviewer): fixes applied.
+
+  - id: cplr213
+    area: practice
+    family: list
+    title: CPLR 213 — actions that take six years
+    jurisdiction: NY
+    cite: N.Y. CPLR 213(1)–(9)
+    source: https://www.nysenate.gov/legislation/laws/CVP/213
+    openleg:
+    - CVP/213
+    status: verified
+    verified: '2026-11-04'
+    news: \b(statute of limitations|time[- ]barred|limitations period)\b.*\b(contract|fraud|mortgage)\b|\bCPLR 213\b
+    news_ny: true
+    note: '213(1) is the residual period: six years for any action with no period specifically prescribed. 213(2) contract claims yield to UCC art. 2 (four years for sales of goods), CPLR 213-a (rent overcharge),
+      214-i (consumer credit) and GBL art. 36-B.'
+    elements:
+    - text: 'Residual: an action for which no limitation is specifically prescribed by law'
+      keys:
+      - residual
+      - no limitation
+      - not otherwise provided
+      - catch-all
+      - catchall
+    - text: An action on a contractual obligation or liability, express or implied (with the UCC 2 and other carve-outs)
+      keys:
+      - contract
+      - contractual
+      - express or implied
+    - text: An action on a sealed instrument
+      keys:
+      - sealed instrument
+      - seal
+    - text: An action on a bond or note secured by a mortgage on real property, or on the mortgage
+      keys:
+      - mortgage
+      - bond
+      - note
+    - text: An action by the State for spoliation or misappropriation of public property (runs from the State's discovery)
+      keys:
+      - state
+      - public property
+      - misappropriation
+      - spoliation
+    - text: An action based on mistake
+      keys:
+      - mistake
+    - text: A corporation's action against a present or former director, officer or stockholder (accounting, fraud, liability, waste, injury to property)
+      keys:
+      - corporation
+      - director
+      - officer
+      - stockholder
+      - derivative
+    - text: An action based on fraud (greater of six years or two from discovery)
+      keys:
+      - fraud
+    - text: An Attorney General action under GBL art. 23-A (Martin Act) or Executive Law § 63(12)
+      keys:
+      - attorney general
+      - martin act
+      - 63(12)
+      - 23-a
+    cloze:
+      text: an action upon a contractual obligation or liability, ___, except as provided in section two hundred thirteen-a or two hundred fourteen-i of this article or article 2 of the uniform commercial
+        code or article 36-B of the general business law;
+      answer: express or implied
+      accept:
+      - express or implied
+      - express or implied,
+      source: https://www.nysenate.gov/legislation/laws/CVP/213
+    numbers:
+    - q: Limitations period for an action on a contractual obligation (CPLR 213(2))
+      answer: 6
+      unit: years
+      cite: CPLR 213(2)
+    - q: Residual limitations period where no other period is prescribed (CPLR 213(1))
+      answer: 6
+      unit: years
+      cite: CPLR 213(1)
+
+  - id: cplr213_8
+    area: practice
+    family: rule
+    title: 'CPLR 213(8) — fraud: six years or two from discovery, whichever is greater'
+    jurisdiction: NY
+    cite: N.Y. CPLR 213(8)
+    source: https://www.nysenate.gov/legislation/laws/CVP/213
+    openleg:
+    - CVP/213
+    status: verified
+    verified: '2026-11-04'
+    news: \bfraud\b.*\b(statute of limitations|time[- ]barred)\b|\b(statute of limitations|time[- ]barred)\b.*\bfraud\b
+    news_ny: true
+    note: 'Discovery is actual or constructive: when the plaintiff (or the person through whom the plaintiff claims) discovered the fraud or could have with reasonable diligence.'
+    elements:
+    - text: The period is the greater of two measures
+      keys:
+      - greater
+      - longer
+      - whichever
+    - text: Six years from accrual
+      keys:
+      - six years
+      - 6 years
+      - accrual
+      - accrued
+    - text: Two years from actual discovery, or when the fraud could have been discovered with reasonable diligence
+      keys:
+      - two years
+      - 2 years
+      - discovery
+      - discovered
+      - reasonable diligence
+    cloze:
+      text: an action based upon fraud; the time within which the action must be commenced shall be the ___ of six years from the date the cause of action accrued or two years from the time the plaintiff
+        or the person under whom the plaintiff claims discovered the fraud, or could with reasonable diligence have discovered it.
+      answer: greater
+      accept:
+      - greater
+      - longer
+      source: https://www.nysenate.gov/legislation/laws/CVP/213
+    numbers:
+    - q: 'Fraud: years from accrual (CPLR 213(8))'
+      answer: 6
+      unit: years
+      cite: CPLR 213(8)
+    - q: 'Fraud: years from actual or constructive discovery (CPLR 213(8))'
+      answer: 2
+      unit: years
+      cite: CPLR 213(8)
+
+  - id: cplr214
+    area: practice
+    family: list
+    title: CPLR 214 — actions that take three years
+    jurisdiction: NY
+    cite: N.Y. CPLR 214(1)–(7); Chase Scientific Research, Inc. v. NIA Group, Inc., 96 N.Y.2d 20, 29–30 (2001)
+    source: https://www.nysenate.gov/legislation/laws/CVP/214
+    openleg:
+    - CVP/214
+    status: verified
+    verified: '2026-11-04'
+    news: \b(statute of limitations|time[- ]barred)\b.*\b(injury|malpractice|property damage)\b|\bCPLR 214\b
+    news_ny: true
+    note: 'The ones to know: 214(4) injury to property and 214(5) personal injury (both except as 214-c provides), and 214(6) non-medical malpractice, three years whether pleaded in contract or tort. Medical,
+      dental and podiatric malpractice is 214-a (two and a half years).'
+    elements:
+    - text: Against a sheriff, constable or other officer for not paying over money collected on an execution
+      keys:
+      - sheriff
+      - constable
+      - execution
+    - text: On a liability, penalty or forfeiture created or imposed by statute (except as in 213 and 215)
+      keys:
+      - statute
+      - statutory
+      - penalty
+      - forfeiture
+      - liability created
+    - text: To recover a chattel, or damages for taking or detaining one
+      keys:
+      - chattel
+      - replevin
+      - conversion
+      - detaining
+    - text: Damages for injury to property (except as in 214-c)
+      keys:
+      - injury to property
+      - property damage
+      - property
+    - text: Damages for personal injury (except as in 214-b, 214-c, 214-i and 215)
+      keys:
+      - personal injury
+      - bodily injury
+    - text: Malpractice other than medical, dental or podiatric, whether the theory is contract or tort
+      keys:
+      - malpractice
+      - professional
+      - contract or tort
+    - text: To annul a marriage for fraud (runs from discovery of the fraud)
+      keys:
+      - annul
+      - annulment
+      - marriage
+    cloze:
+      text: an action to recover damages for malpractice, other than medical, dental or podiatric malpractice, ___; and
+      answer: regardless of whether the underlying theory is based in contract or tort
+      accept:
+      - regardless of whether the underlying theory is based in contract or tort
+      - whether based in contract or tort
+      - regardless of contract or tort
+      source: https://www.nysenate.gov/legislation/laws/CVP/214
+    numbers:
+    - q: Limitations period for injury to property (CPLR 214(4))
+      answer: 3
+      unit: years
+      cite: CPLR 214(4)
+    - q: Limitations period for personal injury (CPLR 214(5))
+      answer: 3
+      unit: years
+      cite: CPLR 214(5)
+    - q: Limitations period for non-medical malpractice (CPLR 214(6))
+      answer: 3
+      unit: years
+      cite: CPLR 214(6)
+    cases:
+    - name: Chase Scientific Research, Inc. v. NIA Group, Inc.
+      cite: 96 N.Y.2d 20, 29–30 (2001)
+      url: https://static.case.law/ny-2d/96/html/0020-01.html
+      holding: A "professional" under 214(6) has extensive formal training, licensure, a code of conduct above marketplace norms and a disciplinary system, so insurance agents and brokers are outside it and
+        claims against them keep their contract or tort periods.
+      element: 5
+
+  - id: cplr214c
+    area: practice
+    family: elements
+    title: CPLR 214-c(2) — discovery rule for latent exposure injuries
+    jurisdiction: NY
+    cite: N.Y. CPLR 214-c(1), (2), (5), (6); MRI Broadway Rental, Inc. v. United States Mineral Prods. Co., 92 N.Y.2d 421, 424, 429 (1998)
+    source: https://www.nysenate.gov/legislation/laws/CVP/214-C
+    openleg:
+    - CVP/214-C
+    status: verified
+    verified: '2026-11-04'
+    news: \b(contaminat\w+|toxic exposure|asbestos|PFAS|PFOA|PCE|TCE|perchloroethylene|trichloroethylene|vapor intrusion|groundwater plume|benzene|lead paint)\b.*\b(lawsuits?|suits?|sues?|sued|damages|statute
+      of limitations|time[- ]barred)\b|\b(lawsuits?|sues?|sued)\b.*\b(contaminat\w+|toxic exposure|asbestos|PFAS|PFOA|vapor intrusion|benzene)\b|\bCPLR 214-c\b
+    news_not: \b(medical malpractice|covid|measles)\b
+    news_ny: true
+    note: Without 214-c a toxic-exposure claim accrues on exposure (MRI Broadway). Discovery means discovering the injury (the primary condition), not its cause; the cause-discovery extension is 214-c(4).
+      Not for medical or dental malpractice (214-c(5)); 214-c(3) moves notice-of-claim accrual the same way.
+    elements:
+    - text: Personal injury or injury to property
+      keys:
+      - personal injury
+      - injury to property
+      - property
+      - injury
+    - text: Caused by the latent effects of exposure to a substance (absorption, contact, ingestion, inhalation, implantation or injection), in or on the body or property
+      keys:
+      - latent
+      - exposure
+      - substance
+    - text: Three years from the earlier of actual discovery of the injury or when reasonable diligence would have discovered it
+      keys:
+      - three years
+      - 3 years
+      - discovery
+      - discovered
+      - reasonable diligence
+      - earlier
+    - text: Not a medical or dental malpractice action
+      keys:
+      - medical malpractice
+      - dental
+      - not malpractice
+    cloze:
+      text: shall be computed from the date of discovery of the injury by the plaintiff or from the date when through the exercise of reasonable diligence such injury should have been discovered by the plaintiff,
+        ___.
+      answer: whichever is earlier
+      accept:
+      - whichever is earlier
+      - whichever is sooner
+      - the earlier
+      source: https://www.nysenate.gov/legislation/laws/CVP/214-C
+    numbers:
+    - q: 'Latent exposure claim: years from discovery of the injury (CPLR 214-c(2))'
+      answer: 3
+      unit: years
+      cite: CPLR 214-c(2)
+    missing:
+    - facts: Hollowmere Feed & Grain hires a Saugerties pest service that sprays a solvent in its barn office. Two months later a sprayer hose bursts in plain view and soaks the office rug. Hollowmere sues
+        two years later.
+      missing: 1
+      why: The damage was immediate and visible, not a latent effect of exposure, so 214-c does not apply; ordinary 214(4) governs from the day it happened.
+    - facts: Ada Pruitt's well in Clinton Corners tests positive for a dry-cleaning solvent in March 2022 and her property value drops. She sues the neighboring cleaner in June 2026, saying she only learned
+        in 2026 that the cleaner was its source.
+      missing: 2
+      why: The three years ran from discovery of the injury (March 2022), not from learning its cause; she needs 214-c(4) instead.
+    cases:
+    - name: MRI Broadway Rental, Inc. v. United States Mineral Prods. Co.
+      cite: 92 N.Y.2d 421, 429 (1998)
+      url: https://static.case.law/ny-2d/92/html/0421-01.html
+      holding: Under 214-c discovery means the plaintiff's objective awareness of the primary condition the claim rests on (here, asbestos in the building), and an owner on notice of that condition before
+        July 1, 1986 could not use the statute.
+      element: 2
+
+  - id: cplr214c4
+    area: practice
+    family: elements
+    title: CPLR 214-c(4) — one year after discovering the cause
+    jurisdiction: NY
+    cite: N.Y. CPLR 214-c(4)
+    source: https://www.nysenate.gov/legislation/laws/CVP/214-C
+    openleg:
+    - CVP/214-C
+    status: verified
+    verified: '2026-11-04'
+    news: \b(contaminat\w+|toxic exposure|asbestos|PFAS|PFOA|PCE|TCE|vapor intrusion|groundwater plume|benzene)\b.*\b(lawsuits?|suits?|sues?|sued|damages|statute of limitations|time[- ]barred)\b|\b(lawsuits?|sues?|sued)\b.*\b(contaminat\w+|toxic
+      exposure|asbestos|PFAS|PFOA|vapor intrusion|benzene)\b|\bCPLR 214-c\b
+    news_not: \b(medical malpractice|covid|measles)\b
+    news_ny: true
+    note: The last two elements apply only when the suit is filed after the ordinary 214-c(2) or (3) period would have run; inside that period the one-year window simply adds time.
+    elements:
+    - text: The cause of the injury was discovered less than five years after the injury was (or should have been) discovered
+      keys:
+      - five years
+      - 5 years
+      - cause
+      - less than five
+    - text: The action is commenced (or claim filed) within one year of discovering the cause
+      keys:
+      - one year
+      - 1 year
+      - within a year
+    - text: 'If filed after the ordinary period: the plaintiff also shows it otherwise satisfied 214-c(2) and (3)'
+      keys:
+      - otherwise
+      - subdivision two
+      - requirements
+    - text: 'If filed after the ordinary period: the plaintiff pleads and proves that the technical, scientific or medical knowledge to ascertain the cause had not been discovered, identified or determined
+        before that period expired'
+      keys:
+      - technical
+      - scientific
+      - medical knowledge
+      - not discovered
+      - identified
+      - determined
+    cloze:
+      text: the plaintiff or claimant shall be required to allege and prove that ___ sufficient to ascertain the cause of his injury had not been discovered, identified or determined prior to the expiration
+        of the period within which the action or claim would have been authorized
+      answer: technical, scientific or medical knowledge and information
+      accept:
+      - technical, scientific or medical knowledge and information
+      - technical, scientific or medical knowledge
+      - scientific or medical knowledge and information
+      source: https://www.nysenate.gov/legislation/laws/CVP/214-C
+    numbers:
+    - q: '214-c(4): the cause must be discovered within how many years of discovering the injury?'
+      answer: 5
+      unit: years
+      cite: CPLR 214-c(4)
+    - q: '214-c(4): time to sue after discovering the cause'
+      answer: 1
+      unit: years
+      cite: CPLR 214-c(4)
+    missing:
+    - facts: Ruth Ostrander learns in 2016 that her Red Hook orchard soil is poisoned; in 2024 a university study first links it to a fertilizer additive. She sues the maker eight months later.
+      missing: 0
+      why: The cause came to light eight years after she discovered the injury, past the five-year window.
+    - facts: In 2021 Dov Kessler's Hyde Park pond fish die off and his land is damaged. A 2024 state study, the first of its kind, ties the die-off to a coating plant's runoff; Kessler sues the plant in 2026.
+      missing: 1
+      why: He sued about two years after discovering the cause, outside the one-year window.
+
+  - id: cplr3211a
+    area: practice
+    family: list
+    title: CPLR 3211(a) — grounds to dismiss a cause of action
+    jurisdiction: NY
+    cite: N.Y. CPLR 3211(a)(1)–(11), (e)
+    source: https://www.nysenate.gov/legislation/laws/CVP/3211
+    openleg:
+    - CVP/3211
+    status: verified
+    verified: '2026-11-04'
+    news: \bmotion to dismiss\b|\bCPLR 3211\b
+    news_ny: true
+    note: 'Waiver (3211(e)): grounds (1), (3), (4), (5), (6) are waived unless raised by the motion or in the answer; (2), (7), (10) can be raised later; (8) and (9) are waived if a 3211(a) motion omits them
+      or, with no motion, the answer omits them. One 3211(a) motion only.'
+    elements:
+    - text: (1) A defense founded on documentary evidence
+      keys:
+      - documentary evidence
+      - documentary
+      - documents
+    - text: (2) No subject matter jurisdiction
+      keys:
+      - subject matter
+    - text: (3) The claimant lacks legal capacity to sue
+      keys:
+      - capacity
+    - text: (4) Another action pending between the same parties for the same cause
+      keys:
+      - another action
+      - prior action pending
+      - pending
+    - text: '(5) A listed bar: arbitration and award, collateral estoppel, bankruptcy discharge, infancy or disability, payment, release, res judicata, statute of limitations, statute of frauds'
+      keys:
+      - res judicata
+      - collateral estoppel
+      - release
+      - payment
+      - statute of limitations
+      - statute of frauds
+      - arbitration
+      - discharge
+    - text: (6) A counterclaim that cannot properly be interposed
+      keys:
+      - counterclaim
+    - text: (7) The pleading fails to state a cause of action
+      keys:
+      - fails to state
+      - failure to state
+      - cause of action
+    - text: (8) No personal jurisdiction over the defendant
+      keys:
+      - personal jurisdiction
+      - jurisdiction of the person
+    - text: (9) No jurisdiction where service was made under CPLR 314 or 315
+      keys:
+      - '314'
+      - '315'
+      - in rem
+      - quasi in rem
+    - text: (10) The court should not proceed without a necessary party
+      keys:
+      - necessary party
+      - absence
+      - joinder
+    - text: (11) Not-for-profit volunteer immunity under N-PCL § 720-a
+      keys:
+      - 720-a
+      - not-for-profit
+      - volunteer
+      - immune
+      - immunity
+    cloze:
+      text: the cause of action may not be maintained because of arbitration and award, collateral estoppel, discharge in bankruptcy, infancy or other disability of the moving party, payment, release, res
+        judicata, ___, or statute of frauds; or
+      answer: statute of limitations
+      accept:
+      - statute of limitations
+      - limitations
+      source: https://www.nysenate.gov/legislation/laws/CVP/3211
+    numbers:
+    - q: After pleading improper service as a defense, days to move on it before it is waived (CPLR 3211(e))
+      answer: 60
+      unit: days
+      cite: CPLR 3211(e)
+    - q: A 3211 motion extends the time to answer until how many days after service of notice of entry of the order? (CPLR 3211(f))
+      answer: 10
+      unit: days
+      cite: CPLR 3211(f)
+
+  - id: cplr3211a7
+    area: practice
+    family: rule
+    title: CPLR 3211(a)(7) — the failure-to-state standard
+    jurisdiction: NY
+    cite: N.Y. CPLR 3211(a)(7); Leon v. Martinez, 84 N.Y.2d 83, 87–88 (1994)
+    source: https://static.case.law/ny-2d/84/html/0083-01.html
+    openleg:
+    - CVP/3211
+    status: verified
+    verified: '2026-11-04'
+    news: \b(failure to state a (claim|cause of action)|motion to dismiss)\b
+    news_ny: true
+    note: The pleading is construed liberally (CPLR 3026). The federal analogue (Twombly/Iqbal plausibility) is stricter; don't mix them up.
+    elements:
+    - text: Accept the facts alleged in the complaint as true
+      keys:
+      - 'true'
+      - accept
+      - facts as alleged
+    - text: Give the plaintiff every possible favorable inference
+      keys:
+      - favorable inference
+      - inference
+      - benefit
+    - text: Ask only whether the facts fit within any cognizable legal theory
+      keys:
+      - cognizable
+      - legal theory
+      - any theory
+    cloze:
+      text: the pleading fails to state a ___; or
+      answer: cause of action
+      accept:
+      - cause of action
+      - a cause of action
+      source: https://www.nysenate.gov/legislation/laws/CVP/3211
+    cases:
+    - name: Leon v. Martinez
+      cite: 84 N.Y.2d 83, 87–88 (1994)
+      url: https://static.case.law/ny-2d/84/html/0083-01.html
+      holding: On a 3211 motion the court takes the complaint's facts as true, draws every favorable inference for the plaintiff, and asks only whether those facts fit any cognizable legal theory.
+      element: 2
+
+  - id: cplr3211a1
+    area: practice
+    family: rule
+    title: CPLR 3211(a)(1) — dismissal on documentary evidence
+    jurisdiction: NY
+    cite: Goshen v. Mutual Life Ins. Co. of N.Y., 98 N.Y.2d 314, 326 (2002); Leon v. Martinez, 84 N.Y.2d 83, 88 (1994)
+    source: https://static.case.law/ny-2d/98/html/0314-01.html
+    openleg:
+    - CVP/3211
+    status: verified
+    verified: '2026-11-04'
+    news: \bdocumentary evidence\b
     news_ny: true
     elements:
-      - text: "The claimant's own culpable conduct does not bar recovery (§ 1411(a))"
-        keys: [not bar, does not bar, no bar]
-      - text: "Damages are diminished in proportion to the claimant's share of the culpable conduct"
-        keys: [proportion, diminished, reduced]
-      - text: "Exception, § 1411(b): in Insurance Law art. 51 (motor vehicle) personal injury actions, a claimant more at fault than the defendant or defendants combined is barred"
-        keys: [motor vehicle, article 51, no-fault, greater, modified]
+    - text: The documentary evidence utterly refutes the plaintiff's factual allegations
+      keys:
+      - utterly refutes
+      - refutes
+      - refute
+    - text: Conclusively establishing a defense as a matter of law
+      keys:
+      - conclusively
+      - matter of law
+      - establishes a defense
     cloze:
-      text: "The amount of damages otherwise recoverable shall be ___ in the proportion which the culpable conduct attributable to the claimant or decedent bears to the culpable conduct which caused the damages."
-      answer: "diminished"
-      accept: ["diminished", "reduced"]
-      source: https://www.nysenate.gov/legislation/laws/CVP/1411
+      text: a defense is founded upon ___; or
+      answer: documentary evidence
+      accept:
+      - documentary evidence
+      source: https://www.nysenate.gov/legislation/laws/CVP/3211
+    cases:
+    - name: Goshen v. Mutual Life Ins. Co. of N.Y.
+      cite: 98 N.Y.2d 314, 326 (2002)
+      url: https://static.case.law/ny-2d/98/html/0314-01.html
+      holding: A 3211(a)(1) dismissal is proper only where the documents flatly contradict the plaintiff's factual allegations and conclusively establish a defense as a matter of law.
+      element: 0
+    - name: Leon v. Martinez
+      cite: 84 N.Y.2d 83, 88 (1994)
+      url: https://static.case.law/ny-2d/84/html/0083-01.html
+      holding: Documentary evidence supports dismissal only when it conclusively establishes a defense to the claims as a matter of law.
+      element: 1
+
+  - id: cplr3212
+    area: practice
+    family: elements
+    title: CPLR 3212 — summary judgment burdens
+    jurisdiction: NY
+    cite: N.Y. CPLR 3212(b); Alvarez v. Prospect Hosp., 68 N.Y.2d 320, 324 (1986); Zuckerman v. City of New York, 49 N.Y.2d 557, 562 (1980)
+    source: https://www.nysenate.gov/legislation/laws/CVP/3212
+    openleg:
+    - CVP/3212
+    status: verified
+    verified: '2026-11-04'
+    news: \bsummary judgment\b
+    news_ny: true
+    note: If the movant misses its prima facie showing, the motion fails however weak the opposition (Alvarez). The court may search the record and grant judgment to a non-moving party without a cross-motion
+      (3212(b)).
+    elements:
+    - text: The movant makes a prima facie showing of entitlement to judgment as a matter of law, with evidence showing no material issue of fact
+      keys:
+      - prima facie
+      - entitlement
+      - matter of law
+      - no material issue
+    - text: The burden then shifts to the opponent to produce evidentiary proof in admissible form showing a material issue of fact that needs a trial
+      keys:
+      - burden shifts
+      - shift
+      - admissible form
+      - triable issue
+      - issue of fact
+    - text: Conclusions, hopes or unsubstantiated allegations do not raise an issue (absent an acceptable excuse for the lack of admissible proof)
+      keys:
+      - conclusory
+      - mere conclusions
+      - unsubstantiated
+      - expressions of hope
+    cloze:
+      text: Except as provided in subdivision (c) of this rule the motion shall be denied if any party shall show facts sufficient to require ___.
+      answer: a trial of any issue of fact
+      accept:
+      - a trial of any issue of fact
+      - a trial
+      - trial of any issue of fact
+      source: https://www.nysenate.gov/legislation/laws/CVP/3212
+    missing:
+    - facts: Fernwhistle Marine moves for summary judgment in a dock-collapse suit, supported only by its lawyer's affirmation that the dock was sound; no inspector, deposition or photos. Plaintiff files
+        a thin, conclusory response.
+      missing: 0
+      why: A lawyer's affirmation without personal knowledge has no evidentiary value (Zuckerman), so the movant never made a prima facie showing; the burden never shifts and the motion fails regardless of
+        the weak opposition (Alvarez).
+    - facts: Bluegill Kayak Rentals moves with inspection reports and deposition excerpts showing the rental boat had no defect. The renter opposes with his own unsworn letter saying the hull "must have"
+        been cracked.
+      missing: 1
+      why: The movant's proof shifted the burden, and an unsworn letter of speculation is not evidentiary proof in admissible form, so the opponent did not meet it.
+    cases:
+    - name: Alvarez v. Prospect Hosp.
+      cite: 68 N.Y.2d 320, 324 (1986)
+      url: https://static.case.law/ny-2d/68/html/0320-01.html
+      holding: The movant must first show prima facie entitlement to judgment with evidence eliminating material fact issues; only then does the burden move to the opponent to show a triable issue with admissible
+        proof.
+      element: 0
+    - name: Zuckerman v. City of New York
+      cite: 49 N.Y.2d 557, 562 (1980)
+      url: https://static.case.law/ny-2d/49/html/0557-01.html
+      holding: An opponent must come forward with admissible evidence of a material fact issue or an acceptable excuse for not doing so; conclusions and unsupported assertions are not enough.
+      element: 1
+
+  - id: cplr3212a
+    area: practice
+    family: rule
+    title: CPLR 3212(a) — timing of a summary judgment motion
+    jurisdiction: NY
+    cite: N.Y. CPLR 3212(a); Brill v. City of New York, 2 N.Y.3d 648, 652 (2004)
+    source: https://www.nysenate.gov/legislation/laws/CVP/3212
+    openleg:
+    - CVP/3212
+    status: verified
+    verified: '2026-11-04'
+    news: \bsummary judgment\b.*\b(untimely|late|deadline|note of issue)\b
+    news_ny: true
+    note: A deadline the court sets displaces the 120 days but can be no earlier than 30 days after the note of issue.
+    elements:
+    - text: Any party may move after issue has been joined
+      keys:
+      - issue joined
+      - joinder of issue
+      - after issue
+    - text: No later than 120 days after the note of issue is filed, unless the court sets another date (no earlier than 30 days after it)
+      keys:
+      - '120'
+      - one hundred twenty
+      - note of issue
+    - text: 'A late motion needs leave on good cause shown: a satisfactory explanation for the delay, not merit or lack of prejudice'
+      keys:
+      - good cause
+      - explanation
+      - excuse
+      - delay
+    cloze:
+      text: If no such date is set by the court, such motion shall be made no later than one hundred twenty days after the filing of the note of issue, except with leave of court on ___.
+      answer: good cause shown
+      accept:
+      - good cause shown
+      - good cause
+      source: https://www.nysenate.gov/legislation/laws/CVP/3212
+    numbers:
+    - q: Default deadline to move for summary judgment after the note of issue (CPLR 3212(a))
+      answer: 120
+      unit: days
+      cite: CPLR 3212(a)
+    - q: Earliest court-set summary judgment deadline after the note of issue (CPLR 3212(a))
+      answer: 30
+      unit: days
+      cite: CPLR 3212(a)
+    cases:
+    - name: Brill v. City of New York
+      cite: 2 N.Y.3d 648, 652 (2004)
+      url: https://static.case.law/ny3d/2/html/0648-01.html
+      holding: Good cause under 3212(a) means a satisfactory reason for the lateness itself; a meritorious, non-prejudicial but tardy motion with no excuse or a perfunctory one must be denied.
+      element: 2
+
+  - id: gol5701
+    area: practice
+    family: list
+    title: GOL § 5-701(a) — agreements that must be in writing
+    jurisdiction: NY
+    cite: N.Y. Gen. Oblig. Law § 5-701(a)(1)–(3), (5), (9), (10)
+    source: https://www.nysenate.gov/legislation/laws/GOB/5-701
+    openleg:
+    - GOB/5-701
+    status: verified
+    verified: '2026-11-04'
+    news: \bstatute of frauds\b|\boral (agreement|contract|promise)\b
+    news_ny: true
+    note: The writing must be subscribed by the party to be charged or its agent. Paragraphs 4, 7 and 8 are no longer in the section, and paragraph 6 is an auction-memorandum rule rather than a category.
+      Real property interests are GOL § 5-703; sales of goods, UCC 2-201. 5-701(b) relaxes the writing rule for qualified financial contracts between non-natural persons.
+    elements:
+    - text: By its terms not to be performed within one year, or not to be completed before the end of a lifetime
+      keys:
+      - one year
+      - within a year
+      - lifetime
+    - text: A special promise to answer for another's debt, default or miscarriage
+      keys:
+      - guaranty
+      - guarantee
+      - debt of another
+      - suretyship
+      - answer for
+    - text: Made in consideration of marriage (mutual promises to marry excepted)
+      keys:
+      - marriage
+    - text: A new promise to pay a debt discharged in bankruptcy
+      keys:
+      - bankruptcy
+      - discharged
+    - text: An assignment of, or contract to assign, a life, health or accident policy, or a promise to name a beneficiary
+      keys:
+      - insurance policy
+      - beneficiary
+      - assign
+    - text: A contract to pay a finder's or broker's compensation for negotiating a loan, a real estate deal or a business sale (licensed brokers, attorneys and auctioneers excepted)
+      keys:
+      - finder
+      - broker
+      - compensation
+      - commission
+      - negotiating
+    cloze:
+      text: 'Every agreement, promise or undertaking is void, unless it or some note or memorandum thereof be in writing, and ___ by the party to be charged therewith, or by his lawful agent, if such agreement,
+        promise or undertaking:'
+      answer: subscribed
+      accept:
+      - subscribed
+      - signed
+      source: https://www.nysenate.gov/legislation/laws/GOB/5-701
+    numbers:
+    - q: An agreement not to be performed within how many years must be in writing? (GOL § 5-701(a)(1))
+      answer: 1
+      unit: years
+      cite: GOL § 5-701(a)(1)
+
+  - id: gol5701_1yr
+    area: practice
+    family: rule
+    title: GOL § 5-701(a)(1) — the one-year provision, read narrowly
+    jurisdiction: NY
+    cite: D & N Boening, Inc. v. Kirsch Beverages, Inc., 63 N.Y.2d 449, 454, 456 (1984)
+    source: https://static.case.law/ny-2d/63/html/0449-01.html
+    openleg:
+    - GOB/5-701
+    status: verified
+    verified: '2026-11-04'
+    news: \bstatute of frauds\b
+    news_ny: true
+    note: A contract either side may end on notice within the year is outside the statute (Boening at 455, citing Blake v. Voigt); one ending within a year only by breach is within it.
+    elements:
+    - text: Reaches only an agreement whose own terms make full performance within a year impossible, in fact and in law
+      keys:
+      - no possibility
+      - impossible
+      - by its terms
+      - full performance
+      - absolutely
+    - text: A contract terminable within a year only by a breach is still within the statute, since breach is not performance
+      keys:
+      - breach
+      - termination
+      - not performance
+    cloze:
+      text: By its terms is not to be performed ___ from the making thereof or the performance of which is not to be completed before the end of a lifetime;
+      answer: within one year
+      accept:
+      - within one year
+      - within a year
+      source: https://www.nysenate.gov/legislation/laws/GOB/5-701
+    cases:
+    - name: D & N Boening, Inc. v. Kirsch Beverages, Inc.
+      cite: 63 N.Y.2d 449, 454, 456 (1984)
+      url: https://static.case.law/ny-2d/63/html/0449-01.html
+      holding: The one-year clause reaches only agreements that cannot possibly be fully performed within a year, and an oral exclusive distributorship that could end within the year only through a breach
+        was within the statute and void.
+      element: 1
+
+  - id: gol5_1401
+    area: practice
+    family: elements
+    title: GOL § 5-1401 — choosing New York law without a NY connection
+    jurisdiction: NY
+    cite: N.Y. Gen. Oblig. Law § 5-1401(1), (2)
+    source: https://www.nysenate.gov/legislation/laws/GOB/5-1401
+    openleg:
+    - GOB/5-1401
+    status: verified
+    verified: '2026-11-04'
+    news: \b(choice[- ]of[- ]law|governing law)\b.*\bnew york\b
+    note: 'The point of the section: the parties'' choice of NY law holds whether or not the contract bears a reasonable relation to New York. Smaller contracts are left to ordinary choice-of-law rules (§
+      5-1401(2)).'
+    elements:
+    - text: A contract, agreement or undertaking arising out of a transaction covering, in the aggregate, at least $250,000
+      keys:
+      - 250,000
+      - '250000'
+      - two hundred fifty thousand
+      - aggregate
+    - text: The parties agreed that New York law governs, in whole or in part
+      keys:
+      - agree
+      - choice of law
+      - new york law
+      - governing law
+    - text: Not a contract for labor or personal services
+      keys:
+      - labor
+      - personal services
+    - text: Not a transaction for personal, family or household services (and not contrary to UCC § 1-301(c))
+      keys:
+      - personal
+      - family
+      - household
+      - consumer
+      - 1-301
+    cloze:
+      text: may agree that the law of this state shall govern their rights and duties in whole or in part, whether or not such contract, agreement or undertaking ___ to this state.
+      answer: bears a reasonable relation
+      accept:
+      - bears a reasonable relation
+      - bears a reasonable relationship
+      - has a reasonable relation
+      source: https://www.nysenate.gov/legislation/laws/GOB/5-1401
+    numbers:
+    - q: Minimum aggregate transaction size for GOL § 5-1401 choice of NY law
+      answer: 250000
+      unit: dollars
+      cite: GOL § 5-1401(1)
+    missing:
+    - facts: A Danbury, Connecticut bakery signs a $90,000 oven lease with a New Jersey lessor, choosing New York law. Neither party has any connection to New York.
+      missing: 0
+      why: The transaction is under $250,000, so § 5-1401 does not save the clause; ordinary choice-of-law rules apply.
+    - facts: A Connecticut studio hires a Vermont cinematographer for $400,000 of shooting days, choosing New York law. Neither party has any New York contact.
+      missing: 2
+      why: A contract for personal services is excluded from § 5-1401.
+
+  - id: gol5_1402
+    area: practice
+    family: elements
+    title: GOL § 5-1402 — choosing a New York forum
+    jurisdiction: NY
+    cite: N.Y. Gen. Oblig. Law § 5-1402(1), (2)
+    source: https://www.nysenate.gov/legislation/laws/GOB/5-1402
+    openleg:
+    - GOB/5-1402
+    status: verified
+    verified: '2026-11-04'
+    news: \b(forum selection|choice[- ]of[- ]forum)\b
+    news_ny: true
+    note: It overrides statutes that would otherwise limit suits against foreign corporations in NY courts (e.g., BCL § 1314(b), Banking Law § 200-b(2)).
+    elements:
+    - text: The contract chose New York law under § 5-1401
+      keys:
+      - 5-1401
+      - new york law
+      - choice of law
+    - text: The transaction covers, in the aggregate, at least $1 million
+      keys:
+      - 1 million
+      - one million
+      - 1,000,000
+      - million
+    - text: The foreign corporation or non-resident agreed to submit to the jurisdiction of New York courts
+      keys:
+      - submit
+      - jurisdiction
+      - consent
+      - forum
+    - text: The suit is against a foreign corporation, non-resident or foreign state and arises out of or relates to that contract
+      keys:
+      - foreign corporation
+      - non-resident
+      - foreign state
+      - arises out of
+      - relates to
+    cloze:
+      text: is a contract, agreement or undertaking, contingent or otherwise, in consideration of, or relating to any obligation arising out of a transaction covering in the aggregate, not less than ___,
+        and
+      answer: one million dollars
+      accept:
+      - one million dollars
+      - $1 million
+      - 1 million
+      - $1,000,000
+      source: https://www.nysenate.gov/legislation/laws/GOB/5-1402
+    numbers:
+    - q: Minimum aggregate transaction size for GOL § 5-1402 (NY forum)
+      answer: 1000000
+      unit: dollars
+      cite: GOL § 5-1402(1)
+    missing:
+    - facts: A Newburgh boatyard and a Quebec engine maker sign a $2.4 million supply contract choosing New York law. The contract is silent on forum, and the Quebec firm never agreed to submit to New York
+        courts. The boatyard sues it in Orange County.
+      missing: 2
+      why: Without the foreign party's agreement to submit to NY jurisdiction, § 5-1402 does not apply.
+
+# Weekend issue spotters (2026-11-04): fictional facts; claims and decoys are card ids, all must be live.
+issues:
+  - id: issue_oil_well
+    facts: In October 2019 a driver for Emberline Fuel, a Wappingers Falls heating-oil dealer, overfilled the basement tank at a rental house on Myers Corners Road, and the vent pipe sprayed oil onto the
+      side yard. Nobody reported it. In August 2024 the next-door owner, Lena Vasquez, noticed a fuel smell in her well water; a lab confirmed petroleum and a consultant traced it to the 2019 overfill. Her
+      well needs a treatment system and her house is hard to sell. She sues Emberline in May 2026 for her cleanup costs and lost value, and Emberline answers that her claim is time-barred because the spill
+      happened more than three years before she sued.
+    claims:
+    - card: nav181
+      why: A petroleum discharge by the company that caused it, with cleanup costs and damages to a neighbor.
+    - card: cplr214c
+      why: Injury to property from the latent effects of exposure to a substance; the three years run from her 2024 discovery, not the 2019 spill, so the 2026 suit is timely.
+    - card: negligence
+      why: The driver's overfill breached a duty of care to neighbors and caused the contamination.
+    decoys:
+    - card: cercla107
+      why_not: Petroleum is excluded from CERCLA's hazardous substances, so § 107 does not reach a heating-oil spill.
+    - card: cwa301
+      why_not: Oil sprayed onto a yard and seeping into a private well is not a point-source discharge to navigable waters.
+    status: verified
+    verified: '2026-11-04'
+
+  - id: issue_cider_handshake
+    facts: 'In 2023 Bramblecrest Cider of Cold Spring and Larkfield Distributing of Newburgh shook hands on a deal: Larkfield would be Bramblecrest''s exclusive distributor in Orange and Dutchess for as long
+      as it hit its sales targets, and Bramblecrest could end it only if Larkfield fell short. Nothing was signed. In 2025 Bramblecrest''s owner, Tom Aldana, switched distributors and told three Beacon bar
+      owners that Larkfield "has been skimming cash from your accounts," which was untrue. Larkfield sued for breach and for slander. Before answering, Bramblecrest moved to dismiss the contract claim as
+      barred by the statute of frauds.'
+    claims:
+    - card: gol5701_1yr
+      why: An oral exclusive deal that could end within a year only through Larkfield's breach is within the one-year provision and void unless written.
+    - card: cplr3211a
+      why: Bramblecrest moves before answering under 3211(a)(5), which lists the statute of frauds.
+    - card: slander_per_se
+      why: A spoken, false accusation that Larkfield steals from its customers charges a serious crime and injures it in its business, so damages are presumed.
+    decoys:
+    - card: gol5_1401
+      why_not: There is no written contract, let alone a choice of New York law, and the deal is between two New York businesses.
+    - card: cplr213_8
+      why_not: Larkfield sues for breach and slander, not fraud.
+    status: verified
+    verified: '2026-11-04'
+
+  - id: issue_inn_septic
+    facts: The Wildacre Inn in Rhinebeck hired Kessel & Lowe, a firm of licensed professional engineers, under a written contract to design a new septic field. The system was finished in June 2021 and failed
+      in 2022, flooding the lawn behind the inn. The inn sued in September 2025, pleading only breach of contract and arguing it had six years. After the note of issue was filed in January 2026, Kessel &
+      Lowe moved for summary judgment on limitations in July 2026, 170 days later, with no explanation for the timing. The court had not set its own deadline.
+    claims:
+    - card: cplr214
+      why: A claim for engineering malpractice takes three years under 214(6) even when it is pleaded only as breach of contract.
+    - card: cplr3212a
+      why: The motion came after 120 days with no court-set date and no excuse, so under Brill it should be denied as untimely despite its merit.
+    decoys:
+    - card: cplr213
+      why_not: The six-year contract period gives way to 214(6) for non-medical professional malpractice.
+    - card: cplr214c
+      why_not: The harm is a failed design, not the latent effect of exposure to a substance.
+    status: verified
+    verified: '2026-11-04'
+
+  - id: issue_solar_forum
+    facts: Cobblefield Solar, a Delaware LLC based in Kingston, signed a $3.2 million contract with Ohio-based Tallgrass Racking for panel mounts for an Ulster County array. The contract says New York law
+      governs and that Tallgrass "submits to the jurisdiction of the courts of the State of New York." Tallgrass shipped late, and Cobblefield sued in Supreme Court, Ulster County. Tallgrass moved to dismiss
+      before answering, arguing that New York courts have no personal jurisdiction over it and that Ohio law should apply because the contract has no real New York connection.
+    claims:
+    - card: gol5_1401
+      why: The transaction is over $250,000 and chooses New York law, so the choice holds whether or not the contract bears a reasonable relation to New York, which answers Tallgrass's Ohio-law argument.
+    - card: gol5_1402
+      why: Over $1 million, NY law chosen, and the Ohio company agreed to submit to NY courts, so Cobblefield may sue it here.
+    - card: cplr3211a
+      why: Tallgrass's pre-answer motion rests on lack of personal jurisdiction under 3211(a)(8).
+    decoys:
+    - card: gol5701
+      why_not: The contract is written and signed, so the statute of frauds is no obstacle.
+    - card: cplr1411
+      why_not: This is a contract claim, not an action for personal injury, property damage or wrongful death.
+    status: verified
+    verified: '2026-11-04'
+
+  - id: issue_daycare_vapor
+    facts: From 1988 to 2012 Starchwell Cleaners ran a dry-cleaning shop in a Poughkeepsie strip mall and dumped spent perchloroethylene (PCE) down a floor drain. In 2025 state testing found PCE vapor in
+      the basement of Wrenwood Daycare next door, which closed for a month and installed a venting system. The state spent $400,000 on an investigation and sub-slab system and seeks to recover it from Gus
+      Halloran, who owned Starchwell and ran the shop and its floor drain himself. Wrenwood, which first learned of the vapor from the 2025 tests, sues Halloran in 2026 for the lost month and the system's
+      cost.
+    claims:
+    - card: cercla_prp
+      why: Halloran personally ran the shop when the PCE was disposed of, so he is an operator at the time of disposal, a responsible-party class.
+    - card: cercla107
+      why: A release of a hazardous substance (PCE) from a facility caused the state to incur response costs.
+    - card: cplr214c
+      why: Wrenwood's property injury came from latent exposure to a substance and it sued within three years of discovering it in 2025.
+    - card: private_nuisance
+      why: The vapor substantially and unreasonably interfered with the daycare's use of its premises.
+    decoys:
+    - card: nav181
+      why_not: PCE is a chlorinated solvent, not petroleum.
+    - card: cwa301
+      why_not: Vapor in a basement and a floor drain to soil are not a point-source discharge to navigable waters.
+    status: verified
+    verified: '2026-11-04'
+
+  - id: issue_trench_fall
+    facts: A crew from Thistledown Landscaping left a two-foot trench open and unmarked across a Main Street sidewalk in Beacon overnight. Pedestrian Marisol Chen, reading her phone, stepped into it and broke
+      her ankle. Thistledown had a city permit for the work but put out no cones, tape or plates, though its foreman admitted the crew usually did. She sued Thistledown for negligence. After discovery, Thistledown
+      moved for summary judgment, supported only by its lawyer's affirmation that the trench was "plainly visible." At trial the jury found Thistledown 70% at fault and Chen 30% at fault for not watching
+      where she walked, and assessed her damages at $180,000.
+    claims:
+    - card: negligence
+      why: Thistledown owed pedestrians a duty to guard the trench, breached it, and caused her injury.
+    - card: cplr3212
+      why: A lawyer's affirmation without personal knowledge is no prima facie showing (Zuckerman), so the motion fails whatever the opposition says (Alvarez).
+    - card: cplr1411
+      why: Her 30% share reduces her damages but does not bar recovery in a non-motor-vehicle injury case.
+    decoys:
+    - card: abnormally_dangerous
+      why_not: Digging a landscaping trench is a common activity whose risk reasonable care (a barrier) removes.
+    - card: cplr214c
+      why_not: A fall is an immediate traumatic injury, not the latent effect of exposure to a substance.
+    status: verified
+    verified: '2026-11-04'
