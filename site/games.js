@@ -448,6 +448,7 @@
   // each element is matched on its key words and becomes its own review item. Cited, with the
   // primary source and "verified" date on every reveal.
   function legalGame(s) {
+    const back = () => (s.slot === "law" ? el("button", { class: "sbtn wide", text: "‹ Law", onclick: () => openLaw() }) : backBtn());
     const P = s.puzzle;
     const t0 = Date.now();
     // Each finished step is saved on this device, so leaving mid-session keeps what you've done.
@@ -482,7 +483,7 @@
       };
       openGame([...header(c, k), el("p", { class: "fine", text: "Fictional facts. Every element is met but one. Which one is missing?" }),
         el("blockquote", { class: "gm-quote", text: m.facts }),
-        el("div", { class: "gm-opts" }, ...c.elements.map((x, j) => el("button", { class: "sbtn wide", text: shortEl(x.text), onclick: () => pick(j) }))), backBtn()], "Law");
+        el("div", { class: "gm-opts" }, ...c.elements.map((x, j) => el("button", { class: "sbtn wide", text: shortEl(x.text), onclick: () => pick(j) }))), back()], "Law");
     }
     // Rule <-> case: the holding in our words; which case? Tapped here, typed when it comes back.
     function caseStep(c, k) {
@@ -500,7 +501,7 @@
             link: x.url || c.source, linkText: "The opinion ↗", next: nextCard(k) })], "Law");
       };
       openGame([...header(c, k), el("p", { class: "fine", text: "Which case stands for this?" }), el("blockquote", { class: "gm-quote", text: x.holding }),
-        el("div", { class: "gm-opts" }, ...opts.map((n) => el("button", { class: "sbtn wide", text: n, onclick: () => pick(n) }))), backBtn()], "Law");
+        el("div", { class: "gm-opts" }, ...opts.map((n) => el("button", { class: "sbtn wide", text: n, onclick: () => pick(n) }))), back()], "Law");
     }
     // Number drills: limitations periods, deadlines, thresholds. Exact.
     function numberStep(c, k) {
@@ -520,7 +521,7 @@
             link: c.source, linkText: "Official text ↗", next: nextCard(k) })], "Law");
       };
       input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
-      openGame([...header(c, k), el("p", { class: "fine", text: "Number drill. Exact answer." }), el("p", { class: "gm-keep", text: x.q }), input, certButtons(go, "Answer — how sure?"), backBtn()], "Law");
+      openGame([...header(c, k), el("p", { class: "fine", text: "Number drill. Exact answer." }), el("p", { class: "gm-keep", text: x.q }), input, certButtons(go, "Answer — how sure?"), back()], "Law");
       setTimeout(() => input.focus(), 50);
     }
     const header = (c, k) => [
@@ -542,7 +543,7 @@
           reveal({ ok, verdict: ok ? "Right" : "It's “" + c.cloze.answer + "”", keep: c.cite, meta: "Verified against the official text " + c.verified, link: c.cloze.source || c.source, linkText: "Official text ↗", next: { text: "Now the elements ›", fn: () => elements(c, k) } })], "Law");
       };
       input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
-      openGame([...header(c, k), el("p", { class: "fine", text: "Fill in the blank from the statute's own words." }), el("blockquote", { class: "gm-quote", text: c.cloze.text }), input, certButtons(go, "Answer — how sure?"), backBtn()], "Law");
+      openGame([...header(c, k), el("p", { class: "fine", text: "Fill in the blank from the statute's own words." }), el("blockquote", { class: "gm-quote", text: c.cloze.text }), input, certButtons(go, "Answer — how sure?"), back()], "Law");
       setTimeout(() => input.focus(), 50);
     }
     function elements(c, k) {
@@ -575,7 +576,7 @@
       }
       draw();
       openGame([...header(c, k), el("p", { class: "fine", text: c.elements.length + " elements. Type one and press return; key words are enough." }), list, input, fb,
-        certButtons(done, "Done — how sure were you?"), backBtn()], "Law");
+        certButtons(done, "Done — how sure were you?"), back()], "Law");
       setTimeout(() => input.focus(), 50);
     }
     function finishAll() {
