@@ -61,6 +61,9 @@ elections:
       Vote Affordable: {pos: [0.45, 0.2], what: "An independent line Blakeman's campaign created by petition this year, built around the cost of living. It isn't a party; if it drew 130,000 votes (or 2%, whichever is greater) in the governor's race, it would qualify as one.", source: "https://hoodline.com/2026/05/blakeman-rolls-out-vote-affordable-line-in-bid-to-oust-hochul/"}
     races:
       - id: governor
+        holds: "Governor"
+        term_start: "2027-01-01"
+        result: {"winner": ["Kathy Hochul"], "margin": 19.8, "called": "AP, Nov 3 (~9:15 PM ET)", "source": "https://www.amny.com/politics/nyc-midterm-election-results-governor-house-11032026/", "note": "Unofficial election-night count as of 1 AM Nov 4 (12,133 of 13,187 EDs (92.0%) reporting, Westchester not yet in); update at certification."}
         level: state
         office: "Governor and Lieutenant Governor"
         desk: GOV
@@ -100,6 +103,9 @@ elections:
           - {who: "Siena", dates: "Sep 11–17, likely voters", result: "Hochul 50, Blakeman 41", source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/22/siena-poll--hochul-s-lead-over-blakeman-sees-little-change-among-likely-voters"}
 
       - id: attorney_general
+        holds: "Attorney General"
+        term_start: "2027-01-01"
+        result: {"winner": ["Letitia James"], "margin": 20.5, "called": "AP, Nov 3–4 (by 12:33 AM ET Nov 4); Spectrum News also projected", "source": "https://www.fox5ny.com/news/ny-attorney-general-letitia-james-election-midterms-politics-win-new-york", "note": "Unofficial election-night count as of 1 AM Nov 4 (12,133 of 13,162 EDs (92.2%) reporting, Westchester not yet in); update at certification."}
         level: state
         office: "Attorney General"
         desk: GOV
@@ -131,6 +137,9 @@ elections:
           - {who: "Siena", dates: "Sep 11–17, likely voters", result: "James 52, Komatireddy 39", source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/22/siena-poll--hochul-s-lead-over-blakeman-sees-little-change-among-likely-voters"}
 
       - id: comptroller
+        holds: "State Comptroller"
+        term_start: "2027-01-01"
+        result: {"winner": ["Thomas DiNapoli"], "margin": 29.3, "called": "AP, Nov 3 (10:30 PM ET)", "source": "https://www.yahoo.com/news/politics/articles/dinapoli-wins-fifth-term-state-033446277.html", "note": "Unofficial election-night count as of 1 AM Nov 4 (12,133 of 13,187 EDs (92.0%) reporting, Westchester not yet in); update at certification."}
         level: state
         office: "State Comptroller"
         desk: GOV
@@ -159,6 +168,10 @@ elections:
           - {who: "Siena", dates: "Sep 11–17, likely voters", result: "DiNapoli 56, Hernandez 33", source: "https://ny1.com/nyc/all-boroughs/politics/2026/09/22/siena-poll--hochul-s-lead-over-blakeman-sees-little-change-among-likely-voters"}
 
       - id: ny18
+        holds: "U.S. House NY-18"
+        term_start: "2027-01-03"
+        map: "ny-districts|NY-18"
+        result: {"winner": ["Pat Ryan"], "margin": 25.8, "called": "AP, Nov 3 (37 minutes after polls closed, ~9:37 PM ET)", "source": "https://highlandscurrent.org/2026/11/04/dutchess-ryan-wins-easily/", "note": "Unofficial election-night count as of 1 AM Nov 4 (578 of 581 EDs (99.5%) reporting); update at certification."}
         level: federal
         office: "US House"
         district: "NY-18"
@@ -195,6 +208,9 @@ elections:
           - {who: "Cook Political Report", rating: "Likely Democratic", source: "https://www.cookpolitical.com/house/race/483661"}
 
       - id: sd39
+        holds: "State Senate District 39"
+        term_start: "2027-01-01"
+        # result pending: not called as of 1 AM Nov 4 (https://nysfocus.com/interactives/2026-election-results/state-senate/district-39/)
         level: state
         office: "State Senate"
         district: "39th District"
@@ -223,6 +239,9 @@ elections:
               - {topic: Transit and energy, text: "Wants more state transit funding, solar and electrification incentives, and simpler solar permitting.", source: "https://www.cityandstateny.com/personality/2026/09/lisa-kaul-looks-oust-rolinson-state-senate/416092/"}
 
       - id: ad104
+        holds: "State Assembly District 104"
+        term_start: "2027-01-01"
+        result: {"winner": ["Jonathan G. Jacobson"], "called": "uncontested (unopposed)", "source": "https://highlandscurrent.org/2026/11/04/dutchess-ryan-wins-easily/", "note": "Unofficial election-night count as of 1 AM Nov 4 (unofficial election-night, 86 of 89 EDs (96.6%) reporting; remainder write-ins); update at certification."}
         level: state
         office: "State Assembly"
         district: "104th District"
@@ -242,6 +261,9 @@ elections:
               - {topic: Jobs, text: "Sponsored the 'ghost jobs' bill requiring employers to say whether and when they plan to fill posted jobs; it passed the Legislature in June.", source: "https://assembly.ny.gov/mem/Jonathan-G-Jacobson/press"}
 
       - id: supreme_court
+        holds: "State Supreme Court Justice, 9th District"
+        term_start: "2027-01-01"
+        # result pending: not called as of 1 AM Nov 4 (https://nysfocus.com/interactives/2026-election-results/supreme-court/)
         level: judicial
         office: "State Supreme Court Justice"
         seats: 3              # vote for up to 3 (Dutchess sample ballots); Call it asks for 3 winners
@@ -258,6 +280,9 @@ elections:
           - {name: "John Ciampoli", lines: [Republican]}
 
       - id: sheriff
+        holds: "Dutchess Sheriff"
+        term_start: "2027-01-01"
+        result: {"winner": ["Kirk A. Imperati"], "called": "uncontested (unopposed)", "source": "https://highlandscurrent.org/2026/11/04/dutchess-ryan-wins-easily/", "note": "Unofficial election-night count as of 1 AM Nov 4 (share is from a partial early election-night Dutchess snapshot (24,759 votes, 576 write-ins)); update at certification."}
         level: county
         office: "Dutchess County Sheriff"
         desk: BEACON
