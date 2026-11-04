@@ -1948,13 +1948,18 @@
     let M;
     try { M = await loadMap(id); } catch (e) { openGame([el("h2", { id: "sheet-title", class: "stitle", text: MAPS[id].title }), el("p", { class: "fine", text: e.message }), el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Maps"); return; }
     const t0 = Date.now();
-    if (id === "beacon-wards") {                  // who holds each ward seat, from the Library's council list
-      try {
-        const lib = G.lib || (G.lib = await (await fetch("games?library=1", { credentials: "same-origin" })).json());
-        const council = ((lib.lists || []).find((x) => x.id === "beacon_council") || {}).items || [];
-        for (const sh of M.shapes) { const c = council.find((x) => x.clue === sh.name); if (c) sh.who = c.answer; }
-      } catch (e) { /* names are optional */ }
-    }
+    let since = null;
+    try {                                         // who holds each seat: the Library's lists, then each election's results
+      const lib = G.lib || (G.lib = await (await fetch("games?library=1", { credentials: "same-origin" })).json());
+      const holders = { "beacon-wards": "beacon_council", "ny-districts": "ny_house" }[id];
+      const list = holders ? ((lib.lists || []).find((x) => x.id === holders) || {}).items || [] : [];
+      for (const sh of M.shapes) { const c = list.find((x) => x.clue === sh.name); if (c) sh.who = c.answer; }
+      const seats = (lib.seats || []).filter((x) => x.map === id);
+      for (const x of seats) { const sh = M.shapes.find((y) => y.id === x.shape); if (sh && x.live) sh.who = x.who; }
+      const ch = seats.filter((x) => x.changed);
+      if (ch.length) since = el("p", { class: "fine", text: "Changed hands in the " + new Date(ch[0].election + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) + " election: " +
+        ch.map((x) => (M.shapes.find((y) => y.id === x.shape) || {}).name + " → " + x.who + (x.live ? "" : " (takes office " + new Date(x.from + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) + ")")).join(" · ") });
+    } catch (e) { /* names are optional */ }
     const shapes = M.shapes.filter((s) => s.d && (id !== "world" || s.area > 0.00005));
     const deck = shuffle(shapes, Date.now()).slice(0, 10);
     let k = 0, right = 0, pending = null;
@@ -2021,7 +2026,7 @@
         next: { text: "Again ›", fn: () => mapGame(id, mode) } }));
     }
     openGame([el("h2", { id: "sheet-title", class: "stitle", text: MAPS[id].title }), prompt, m.svg, m.controls,
-      mode === "find" ? confirm : input, msg, el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Maps");
+      mode === "find" ? confirm : input, msg, since, el("button", { class: "sbtn wide", text: "‹ Library", onclick: openLibrary })], "Maps");
     next();
   }
 

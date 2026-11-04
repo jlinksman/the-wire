@@ -52,7 +52,7 @@ def _race(eid, e_title, e_date, closes, r, where, scope, drops) -> dict | None:
     cands = [{"name": "Yes"}, {"name": "No"}] if kind == "proposal" else \
         [{"name": c["name"], "lines": c.get("lines") or ([c["party"]] if c.get("party") else [])} for c in r.get("candidates") or [] if c.get("name")]
     seats = int(r.get("seats") or 1)
-    if len(cands) <= seats:
+    if len(cands) <= seats or r.get("contested") is False:
         return None                                      # uncontested: nothing to call
     res, bad = _result(r, {c["name"] for c in cands})
     if bad:

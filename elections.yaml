@@ -270,6 +270,7 @@ elections:
       - id: county_legislature
         level: county
         office: "Dutchess County Legislator"
+        contested: false      # two districts, each unopposed: nothing to call
         district: "District 16 or 18"
         desk: BEACON
         job: "Sets the county budget and county law; one of 25 legislators. On the ballot again in 2026 because of the state's move of county elections to even years."

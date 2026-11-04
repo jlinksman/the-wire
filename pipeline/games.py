@@ -2230,7 +2230,7 @@ TEAM_NEWS = {"NYCFC": r"\bnycfc\b|new york city fc", "Mets": r"\bmets\b", "USMNT
              "Israel": r"israel.{0,40}\b(soccer|football|nations league|national team)\b"}
 
 
-def library(rosters, scotus_rows, data, now) -> list[dict]:
+def library(rosters, scotus_rows, data, now, extra: dict | None = None) -> list[dict]:
     lp = yaml.safe_load((ROOT / "local_politics.yaml").read_text()) or {}
     off = lp.get("officials", {})
     lists = []
@@ -2282,13 +2282,23 @@ def library(rosters, scotus_rows, data, now) -> list[dict]:
                       "source": "; ".join(R.get("sources", [])[:3]), "team": R["title"].split(" — ")[0],
                       "items": [{"answer": x["answer"], "accept": _acc(x["answer"], x.get("aliases", [])), "clue": x.get("clue", "")} for x in R["items"]]})
     lists += world_lists()
+    # Each election's winners: a "Who won" list, then the seat switches on the term's first day (succession.py).
+    try:
+        import succession
+        ech = succession.changes(yaml.safe_load((ROOT / "elections.yaml").read_text()) or {})
+        got = succession.apply(lists, ech, now.astimezone(NY).date() if now.tzinfo else now.date(), _acc)
+        if extra is not None:
+            extra["seats"] = got["seats"]
+    except Exception as exc:                      # never take the Library down over one bad result
+        if extra is not None:
+            extra["error"] = f"{type(exc).__name__}: {exc}"
     week = fold(" ".join(f"{it.get('title', '')} {it.get('summary', '')}" for it in data.get("items", [])))
     newest = {}                                     # a team in the news features its most recent list
     for L in lists:
         if L.get("team"):
             newest[L["team"]] = max(newest.get(L["team"], ""), str(L.get("as_of", "")))
     for L in lists:
-        L["mentions"] = sum(1 for x in L["items"] if fold(x["answer"]) in week)
+        L["mentions"] = sum(1 for x in L["items"] if fold(x["answer"]) in week) + (5 if L["id"].startswith("won_") else 0)
         tn = TEAM_NEWS.get(L.get("team", ""))
         if tn and str(L.get("as_of", "")) == newest.get(L["team"]) and re.search(tn, week):
             L["mentions"] += 3                      # the team itself is in the news
@@ -2467,7 +2477,10 @@ def main(argv=None) -> int:
         srows = scotus.rows(a.scotus) if a.scotus else []
         tl = fresh(timeline(vlist, srows, seed, now, drops), "timeline", 3)
     ba = fresh(beacon_agenda(data, seed, drops, now), "beacon_agenda")[:12]
-    lib = library(a.rosters, [], data, now)
+    lib_extra = {}
+    lib = library(a.rosters, [], data, now, lib_extra)
+    if lib_extra.get("error"):
+        drops.append(("library", "election results: " + lib_extra["error"]))
     left = who_left(lib, a.snapshots, day)
     lg = legal(data, now, drops, a.scotus.parent / "openleg.json" if a.scotus else None)
     wk = weekend_ciphers(wsi, seed, drops, budget, keyed=fri, patristocrat=sun)
@@ -2500,7 +2513,7 @@ def main(argv=None) -> int:
     more.append(("calls", len(cl["races"])))
     pool = {
         "v": FORMAT, "day": day, "made": iso(now), "data_as_of": data.get("generated_at"), "calls": cl,
-        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "who_left": left, "weekend": wk, "meta": mt, "casefile": cf, "tactics": tx,
+        "who_said_it": wsi, "cryptoquote": cq, "connections_shadow": grid, "defectors": dv, "legal": lg, "ledger": ldg, "friday_quiz": fq, "docket": dk, "timeline": tl, "beacon_agenda": ba, "library": lib, "seats": lib_extra.get("seats", []), "who_left": left, "weekend": wk, "meta": mt, "casefile": cf, "tactics": tx,
         "pending_docket": pend[:40], "dispositions": _disp(a.dispositions),
         "health": health(wsi, cq, grid, drops, dv, lg, ldg, fq, dk, tl, ba, more=more),
     }
