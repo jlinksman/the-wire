@@ -50,6 +50,22 @@ cards:
       answer: "without regard to fault"
       accept: ["without regard to fault", "regardless of fault"]
       source: https://www.nysenate.gov/legislation/laws/NAV/181
+    missing:
+    - facts: A Brightwater Fuel driver overfilled a home heating-oil tank, spilling a cup of oil on the owner's driveway. Brightwater wiped it up the same hour; the neighbor, Rhea Dunn, then sued Brightwater
+        under § 181 though she spent nothing and suffered no harm.
+      missing: 2
+      why: Dunn has no cleanup or removal costs and no direct or indirect damages.
+    - facts: Corliss Holdings bought a vacant lot already contaminated by petroleum from a long-gone prior owner; it never stored petroleum there and had no reason to expect anyone would. The State cleaned
+        the lot and sued Corliss.
+      missing: 1
+      why: Mere ownership of contaminated land, without control over petroleum activity it had reason to expect, does not make Corliss a discharger (State v. Green).
+    cases:
+    - name: State of New York v. Green
+      cite: 96 N.Y.2d 403, 405 (2001)
+      url: https://static.case.law/ny-2d/96/html/0403-01.html
+      holding: A faultless landowner is a discharger when it can control activities on its property and has reason to believe petroleum will be stored there, though ownership of contaminated land alone is not
+        enough.
+      element: 1
 
   - id: cercla107
     area: environmental
@@ -74,6 +90,39 @@ cards:
         keys: [response costs, costs, incur]
       - text: "The costs are consistent with the National Contingency Plan"
         keys: [national contingency plan, ncp, contingency]
+    numbers:
+    - q: Deadline for an initial CERCLA cost-recovery action for a removal action, measured from completion of the removal (absent a § 104(c)(1)(C) waiver), § 113(g)(2)(A)
+      answer: 3
+      unit: years
+      cite: 42 U.S.C. § 9613(g)(2)(A)
+    - q: Deadline for an initial CERCLA cost-recovery action for a remedial action, measured from initiation of physical on-site construction, § 113(g)(2)(B)
+      answer: 6
+      unit: years
+      cite: 42 U.S.C. § 9613(g)(2)(B)
+    - q: Deadline for a CERCLA contribution action after the judgment or qualifying settlement, § 113(g)(3)
+      answer: 3
+      unit: years
+      cite: 42 U.S.C. § 9613(g)(3)
+    missing:
+    - facts: Halvard Tool, a private company, dug out drums of solvent that a former operator had buried at its plant and sued that operator to recover the cost. Halvard did the job with no sampling plan, no
+        public comment and no regard to the National Contingency Plan.
+      missing: 4
+      why: A private plaintiff must show its response costs were consistent with the NCP.
+    - facts: A neighbor found trichloroethylene seeping from the Ostend Plating site, a facility owned by Ostend since the 1990s. The neighbor sued Ostend under § 107(a) before spending anything on investigation
+        or cleanup.
+      missing: 3
+      why: No response costs have been incurred yet.
+    cases:
+    - name: State of New York v. Shore Realty Corp.
+      cite: 759 F.2d 1032, 1044 (2d Cir. 1985)
+      url: https://static.case.law/f2d/759/html/1032-01.html
+      holding: The current owner of a facility with a release or threatened release is strictly liable under § 107(a)(1) without any showing that it caused the release.
+      element: 0
+    - name: B.F. Goodrich Co. v. Murtha
+      cite: 958 F.2d 1192, 1198 (2d Cir. 1992)
+      url: https://static.case.law/f2d/958/html/1192-01.html
+      holding: CERCLA liability is strict, so a plaintiff that proves the statutory elements need not show fault.
+      element: null
 
   - id: cercla_prp
     area: environmental
@@ -95,6 +144,17 @@ cards:
         keys: [arrange, arranger, generator]
       - text: "Transporters: those who accepted hazardous substances for transport to disposal or treatment sites they selected"
         keys: [transport, transporter, selected]
+    cases:
+    - name: United States v. Bestfoods
+      cite: 524 U.S. 51, 66–67 (1998)
+      url: https://static.case.law/us/524/html/0051-01.html
+      holding: An operator is one who manages, directs or conducts operations specifically related to pollution, such as the leakage or disposal of hazardous waste or decisions about environmental compliance.
+      element: 1
+    - name: Burlington Northern & Santa Fe Ry. Co. v. United States
+      cite: 556 U.S. 599, 611–13 (2009)
+      url: https://static.case.law/us/556/html/0599-01.html
+      holding: A seller of a useful product is an arranger only if it sold intending that at least part of the product be disposed of; knowing some would spill was not enough.
+      element: 2
 
   - id: cercla107b
     area: environmental
@@ -116,6 +176,13 @@ cards:
         keys: [third party, unrelated]
       - text: "Any combination of the above"
         keys: [combination]
+    cases:
+    - name: State of New York v. Lashins Arcade Co.
+      cite: 91 F.3d 353, 359–62 (2d Cir. 1996)
+      url: https://static.case.law/f3d/91/html/0353-01.html
+      holding: A shopping-center owner that bought after unrelated dry-cleaner tenants caused the contamination, and took reasonable steps once it owned the site, met the third-party defense's due-care and
+        precaution requirements; due care did not require a pre-purchase investigation or paying for the State's study.
+      element: 2
 
   - id: rcra7002
     area: environmental
@@ -136,6 +203,26 @@ cards:
         keys: [contributed, contributing, handling, disposal, waste]
       - text: "Which may present an imminent and substantial endangerment to health or the environment"
         keys: [imminent, substantial, endangerment]
+    numbers:
+    - q: Notice required before filing an imminent-and-substantial-endangerment suit under § 7002(a)(1)(B), § 7002(b)(2)(A)
+      answer: 90
+      unit: days
+      cite: 42 U.S.C. § 6972(b)(2)(A)
+    - q: Notice required before filing a permit- or standard-violation suit under § 7002(a)(1)(A) (contrast with (a)(1)(B)), § 7002(b)(1)(A)
+      answer: 60
+      unit: days
+      cite: 42 U.S.C. § 6972(b)(1)(A)
+    missing:
+    - facts: Marrow Auto bought a former gas station, dug out all the contaminated soil under DEC oversight, and the site now tests clean. Marrow then sued the prior owner under RCRA § 7002(a)(1)(B) to recover
+        the excavation costs.
+      missing: 2
+      why: Once cleaned up, the site presents no present imminent and substantial endangerment (and RCRA does not reimburse past cleanup; Meghrig).
+    cases:
+    - name: Meghrig v. KFC Western, Inc.
+      cite: 516 U.S. 479, 485–88 (1996)
+      url: https://static.case.law/us/516/html/0479-01.html
+      holding: A private party cannot use the RCRA citizen suit to recover past cleanup costs, and may sue only when the waste presents an imminent and substantial endangerment when the suit is filed.
+      element: 2
 
   - id: cwa301
     area: environmental
@@ -160,6 +247,32 @@ cards:
         keys: [point source]
       - text: "Without a permit (NPDES under § 1342, or § 404 dredge-and-fill under § 1344)"
         keys: [permit, npdes]
+    numbers:
+    - q: Maximum term of an NPDES permit under an approved state program, CWA § 402(b)(1)(B)
+      answer: 5
+      unit: years
+      cite: 33 U.S.C. § 1342(b)(1)(B)
+    - q: Notice required before a CWA citizen suit for violation of an effluent standard or limitation, § 505(b)(1)(A)
+      answer: 60
+      unit: days
+      cite: 33 U.S.C. § 1365(b)(1)(A)
+    missing:
+    - facts: Pellam Dyeworks pipes rinse water containing dye into the Fishkill Creek through a single outfall. It holds a current SPDES permit and every discharge has stayed within its limits.
+      missing: 4
+      why: The discharge is permitted and in compliance, so § 301(a) is not violated.
+    cases:
+    - name: County of Maui v. Hawaii Wildlife Fund
+      cite: 590 U.S. 165 (2020)
+      url: https://www.supremecourt.gov/opinions/preliminaryprint/590US1PP_web.pdf#page=181
+      holding: A permit is needed for a direct discharge from a point source into navigable waters or for the functional equivalent of one, such as pollutants that travel through groundwater and arrive in a
+        comparable way.
+      element: 3
+    - name: Sackett v. EPA
+      cite: 598 U.S. 651 (2023)
+      url: https://www.supremecourt.gov/opinions/22pdf/598us2r28_hgcj.pdf
+      holding: Waters of the United States are relatively permanent bodies like streams, rivers and lakes, and wetlands count only where a continuous surface connection makes them indistinguishable from such
+        a water.
+      element: 2
 
   # ------------------------------------------------------------ torts (NY)
   - id: negligence
@@ -179,6 +292,30 @@ cards:
         keys: [breach]
       - text: "Injury proximately resulting from the breach"
         keys: [proximate, cause, causation, injury, damages, harm]
+    numbers:
+    - q: Limitations period for a personal-injury action in NY, CPLR 214(5)
+      answer: 3
+      unit: years
+      cite: N.Y. CPLR 214(5)
+    missing:
+    - facts: A Fernwood Market clerk left a mop bucket in a dark aisle. Shopper Ada Lunt saw it, stepped around it, and finished her shopping unhurt, then sued over the hazard.
+      missing: 2
+      why: No injury resulted, so there is nothing for the breach to have proximately caused.
+    - facts: Ines Paley drove her friend home at the speed limit, sober and watching the road. A deer leapt from the brush too close to avoid, and the friend was hurt in the crash.
+      missing: 1
+      why: Paley owed her passenger a duty of care but did nothing unreasonable, so there was no breach.
+    cases:
+    - name: Palsgraf v. Long Island R.R. Co.
+      cite: 248 N.Y. 339, 343–44 (1928)
+      url: https://static.case.law/ny/248/html/0339-01.html
+      holding: Duty runs only to those within the range of reasonably foreseeable risk, so a passenger far down the platform could not recover for guards' conduct that endangered only the man they were helping.
+      element: 0
+    - name: Derdiarian v. Felix Contracting Corp.
+      cite: 51 N.Y.2d 308, 315 (1980)
+      url: https://static.case.law/ny-2d/51/html/0308-01.html
+      holding: A third party's intervening act does not break the causal chain if it is a normal or foreseeable consequence of the situation the defendant's negligence created; only an extraordinary or remote
+        act does.
+      element: 2
 
   - id: private_nuisance
     area: torts
@@ -201,6 +338,26 @@ cards:
         keys: [use and enjoy, enjoyment, property, land]
       - text: "Caused by another's conduct in acting or failing to act"
         keys: [conduct, caused, failure to act]
+    numbers:
+    - q: Limitations period for an action for injury to property in NY, CPLR 214(4)
+      answer: 3
+      unit: years
+      cite: N.Y. CPLR 214(4)
+    - q: Limitations period for injury to property from the latent effects of exposure to a substance, running from discovery or from when it should have been discovered, whichever is earlier, CPLR 214-c(2)
+      answer: 3
+      unit: years
+      cite: N.Y. CPLR 214-c(2)
+    missing:
+    - facts: Corbel Ironworks' forge across the road is ordinarily inaudible inside the Haddens' rented house. One afternoon Corbel ran a twenty-minute test of a new power hammer, knowing it would be loud and
+        without warning anyone; it never ran the test again. The Haddens sued over that afternoon.
+      missing: 0
+      why: A single, brief burst of noise that never recurs is not a substantial interference.
+    cases:
+    - name: Boomer v. Atlantic Cement Co.
+      cite: 26 N.Y.2d 219, 228 (1970)
+      url: https://static.case.law/ny-2d/26/html/0219-01.html
+      holding: Where a cement plant was a nuisance but an injunction would shut a major plant, the court granted an injunction that would be vacated once the plant paid the neighbors permanent damages.
+      element: null
 
   - id: trespass
     area: torts
@@ -244,6 +401,12 @@ cards:
         keys: [place, location, inappropriate]
       - text: "The extent to which its value to the community is outweighed by its dangerous attributes"
         keys: [value, community, outweigh]
+    cases:
+    - name: Spano v. Perini Corp.
+      cite: 25 N.Y.2d 11, 15, 17–18 (1969)
+      url: https://static.case.law/ny-2d/25/html/0011-01.html
+      holding: Overruling Booth, the Court held that one who blasts is liable without fault for damage to neighboring property, with or without a physical invasion.
+      element: null
 
   - id: defamation
     area: torts
@@ -265,6 +428,31 @@ cards:
         keys: [fault, negligence, malice]
       - text: "Special harm, or defamation per se"
         keys: [special harm, special damages, per se]
+    numbers:
+    - q: Limitations period for libel or slander in NY, CPLR 215(3)
+      answer: 1
+      unit: years
+      cite: N.Y. CPLR 215(3)
+    missing:
+    - facts: Gale Hornby, a private shop owner, read a draft blog post falsely calling her a thief. The blogger deleted it unposted and never showed it to anyone; Hornby sued anyway.
+      missing: 1
+      why: The statement was never published to a third party.
+    - facts: The Brant County Ledger reported that Silas Orme was charged in a burglary ring. Both the police blotter and a deputy confirmed it, and an editor checked the copy before it ran; the blotter turned
+        out to be wrong.
+      missing: 2
+      why: On a matter of public concern a private plaintiff must show gross irresponsibility, and careful two-source reporting is not that (Chapadeau).
+    cases:
+    - name: Chapadeau v. Utica Observer-Dispatch, Inc.
+      cite: 38 N.Y.2d 196, 199 (1975)
+      url: https://static.case.law/ny-2d/38/html/0196-01.html
+      holding: A private plaintiff suing over reporting on a matter of legitimate public concern must prove the publisher acted in a grossly irresponsible manner, judged against responsible news-gathering standards.
+      element: 2
+    - name: New York Times Co. v. Sullivan
+      cite: 376 U.S. 254, 279–80 (1964)
+      url: https://static.case.law/us/376/html/0254-01.html
+      holding: The First Amendment bars a public official from recovering for a defamatory falsehood about official conduct unless he proves actual malice, meaning knowledge of falsity or reckless disregard
+        for the truth.
+      element: 2
 
   - id: slander_per_se
     area: torts
@@ -286,6 +474,17 @@ cards:
         keys: [disease]
       - text: "Imputes unchastity to a woman"
         keys: [unchastity, chastity]
+    numbers:
+    - q: Limitations period for slander in NY, CPLR 215(3)
+      answer: 1
+      unit: years
+      cite: N.Y. CPLR 215(3)
+    cases:
+    - name: Liberman v. Gelstein
+      cite: 80 N.Y.2d 429, 435–36 (1992)
+      url: https://static.case.law/ny-2d/80/html/0429-01.html
+      holding: Slander is actionable without special damages only in four categories, and the crime category reaches only serious offenses, not every accusation of unlawful conduct.
+      element: 0
 
   - id: cplr1411
     area: torts
@@ -1205,6 +1404,559 @@ cards:
         courts. The boatyard sues it in Orange County.
       missing: 2
       why: Without the foreign party's agreement to submit to NY jurisdiction, § 5-1402 does not apply.
+
+  # ------------------------------------------------------------ Contracts and UCC Article 2 (2026-11-04)
+  # Statute text from nysenate.gov (current revisions; UCC 2-201 revised 2026-06-05). Second check 2026-11-04.
+
+  - id: breach_contract
+    area: contracts
+    family: elements
+    title: Breach of contract (NY)
+    jurisdiction: NY
+    cite: Harris v. Seward Park Housing Corp., 79 A.D.3d 425, 426 (1st Dep't 2010)
+    source: https://static.case.law/ad3d/79/html/0425-01.html
+    status: verified
+    verified: '2026-11-04'
+    news: \bbreach(es|ed)? (of )?(the |a |its |their )?contract\b
+    news_ny: true
+    note: 'Six years under CPLR 213(2), but a sale of goods runs under UCC 2-725 (four years). No enforceable agreement, no claim: in Harris an application to buy an apartment was never a contract.'
+    elements:
+    - text: A contract exists between the parties
+      keys:
+      - contract
+      - agreement
+      - existence
+      - formed
+    - text: The plaintiff performed its own obligations
+      keys:
+      - performance
+      - performed
+      - plaintiff performed
+    - text: The defendant breached
+      keys:
+      - breach
+      - failed to perform
+      - nonperformance
+    - text: Damages resulted from the breach
+      keys:
+      - damages
+      - resulting
+      - harm
+      - loss
+    numbers:
+    - q: Limitations period for an action on a contractual obligation (outside UCC Article 2), CPLR 213(2)
+      answer: 6
+      unit: years
+      cite: N.Y. CPLR 213(2)
+    missing:
+    - facts: Lantern Bakery signed a one-year supply deal with Orchard Mills, which promised weekly flour deliveries. Lantern stopped paying after March; in May, Orchard stopped delivering, Lantern had to
+        buy flour elsewhere at a higher price, and it sued Orchard.
+      missing: 1
+      why: Lantern quit paying first, so it cannot show its own performance.
+    - facts: Kestrel Print agreed in writing to print Dunmore Hall's programs by June 1 for $800, payable on delivery. Kestrel delivered on June 3 and Dunmore paid in full; Dunmore used the programs at its
+        June 10 event, lost nothing from the delay, and sued Kestrel.
+      missing: 3
+      why: Late delivery is a breach, but no damages flowed from it.
+    cases:
+    - name: Harris v. Seward Park Housing Corp.
+      cite: 79 A.D.3d 425, 426 (1st Dep't 2010)
+      url: https://static.case.law/ad3d/79/html/0425-01.html
+      holding: In the alternative, the court held that a buyer's application to purchase a co-op apartment, subject to board approval, never ripened into an enforceable agreement, so the breach-of-contract
+        claim failed at the first element.
+      element: 0
+
+  - id: formation
+    area: contracts
+    family: elements
+    title: Contract formation (NY)
+    jurisdiction: NY
+    cite: Matter of Express Indus. & Term. Corp. v. N.Y. State Dep't of Transp., 93 N.Y.2d 584, 589–90 (1999); Joseph Martin, Jr., Delicatessen, Inc. v. Schumacher, 52 N.Y.2d 105, 109 (1981); Holt v. Feigenbaum,
+      52 N.Y.2d 291, 298–99 (1981)
+    source: https://static.case.law/ny-2d/93/html/0584-01.html
+    status: verified
+    verified: '2026-11-04'
+    news: \b(meeting of the minds|mutual assent|agreement to agree|unenforceable (contract|agreement))\b
+    news_ny: true
+    note: 'Mutual assent is found in the offer and acceptance: courts look first for a sufficiently definite offer whose unequivocal acceptance would bind (Express Indus.). An agreement to agree on a material
+      term is unenforceable (Martin Delicatessen). Consideration is a benefit to the promisor or a detriment to the promisee (Holt).'
+    elements:
+    - text: An offer definite enough on all material terms that its unequivocal acceptance would show mutual assent (an objective meeting of the minds)
+      keys:
+      - offer
+      - definite
+      - mutual assent
+      - meeting of the minds
+      - material terms
+    - text: An unequivocal acceptance of that offer
+      keys:
+      - acceptance
+      - accept
+      - unequivocal
+    - text: 'Consideration: a benefit to the promisor or a detriment to the promisee'
+      keys:
+      - consideration
+      - benefit
+      - detriment
+      - bargain
+    missing:
+    - facts: Willow Garage leased its lot to Pell Hardware for five years at $2,000 a month, with an option to renew at a rent "to be agreed." Pell signed and paid every month. At the end of the term the
+        parties could not agree on the renewal rent, and Pell sued to enforce the renewal.
+      missing: 0
+      why: The renewal rent was left to future agreement, so the renewal term was never offered definitely enough to bind; an agreement to agree is unenforceable (Martin Delicatessen).
+    - facts: 'Rowan Painting emailed Ferro Cafe a firm quote to repaint its storefront for $900, finished by May 1. Ferro replied the same day: "Agreed, provided you finish by April 24." Rowan never answered.'
+      missing: 1
+      why: A reply that conditions assent on a changed term is a counteroffer, not an unequivocal acceptance (a sale of goods would go to UCC 2-207 instead).
+    cases:
+    - name: Matter of Express Indus. & Term. Corp. v. N.Y. State Dep't of Transp.
+      cite: 93 N.Y.2d 584, 589–90 (1999)
+      url: https://static.case.law/ny-2d/93/html/0584-01.html
+      holding: A DOT permit that left material terms open (the security-deposit date and the timing and rent effect of a redemption option) was not an offer definite enough for the tenant's signature to accept,
+        so no contract formed.
+      element: 0
+    - name: Holt v. Feigenbaum
+      cite: 52 N.Y.2d 291, 298–99 (1981)
+      url: https://static.case.law/ny-2d/52/html/0291-01.html
+      holding: Consideration is satisfied by either a benefit to the promisor or a detriment to the promisee; both are not required.
+      element: 2
+
+  - id: ucc2201
+    area: contracts
+    family: rule
+    title: UCC 2-201 — statute of frauds for the sale of goods (NY)
+    jurisdiction: NY
+    cite: N.Y. U.C.C. § 2-201 (current revision dated 2026-06-05 on nysenate.gov); Bazak Int'l Corp. v. Mast Indus., 73 N.Y.2d 113, 116 (1989)
+    source: https://www.nysenate.gov/legislation/laws/UCC/2-201
+    openleg:
+    - UCC/2-201
+    status: verified
+    verified: '2026-11-04'
+    news: \bstatute of frauds\b
+    news_ny: true
+    note: The current text (revision of 2026-06-05) says "record" where the older text, and Bazak, said "writing". The record may omit or misstate a term, but enforcement stops at the quantity it shows. Subsection
+      (4) carves out qualified financial contracts (GOL 5-701(b)(2)).
+    elements:
+    - text: 'Rule: a contract for the sale of goods at $500 or more needs a record, signed by the party to be charged, showing a contract for sale (enforceable only up to the quantity shown)'
+      keys:
+      - '500'
+      - record
+      - writing
+      - signed
+      - quantity
+    - text: 'Merchant confirmation: between merchants, a confirming record sufficient against the sender, received within a reasonable time, binds a recipient who has reason to know its contents unless it
+        objects in a record within ten days of receipt'
+      keys:
+      - merchant
+      - confirmation
+      - confirming
+      - ten days
+      - objection
+    - text: Specially manufactured goods not suitable for others, where the seller substantially began making them or committed to procure them before notice of repudiation
+      keys:
+      - specially manufactured
+      - special manufacture
+      - substantial beginning
+    - text: Admission in pleading, testimony or otherwise in court (up to the quantity admitted)
+      keys:
+      - admission
+      - admits
+      - pleading
+      - testimony
+      - court
+    - text: 'Part performance: goods paid for and payment accepted, or goods received and accepted'
+      keys:
+      - part performance
+      - payment
+      - accepted
+      - received
+    cloze:
+      text: Except as otherwise provided in this section a contract for the sale of goods for the price of $500 or more is not enforceable by way of action or defense unless there is a record sufficient to
+        indicate that a contract for sale has been made between the parties and signed by ___ or by the party's authorized agent or broker.
+      answer: the party against whom enforcement is sought
+      accept:
+      - the party against whom enforcement is sought
+      - party against whom enforcement is sought
+      - the party to be charged
+      source: https://www.nysenate.gov/legislation/laws/UCC/2-201
+    numbers:
+    - q: Price threshold at or above which UCC 2-201(1) requires a signed record
+      answer: 500
+      unit: dollars
+      cite: N.Y. U.C.C. § 2-201(1)
+    - q: Days a merchant has to object in a record to a confirming record, UCC 2-201(2)
+      answer: 10
+      unit: days
+      cite: N.Y. U.C.C. § 2-201(2)
+    cases:
+    - name: Bazak Int'l Corp. v. Mast Indus.
+      cite: 73 N.Y.2d 113, 116 (1989)
+      url: https://static.case.law/ny-2d/73/html/0113-01.html
+      holding: Purchase-order forms signed by the buyer, sent to the seller and kept without objection were confirmations within the merchant exception, even without the seller's signature (decided under
+        the older "writing" text).
+      element: 1
+
+  - id: ucc2207
+    area: contracts
+    family: list
+    title: UCC 2-207(2) — when additional terms between merchants drop out (NY)
+    jurisdiction: NY
+    cite: N.Y. U.C.C. § 2-207(2); Matter of Marlene Indus. Corp. v. Carnac Textiles, 45 N.Y.2d 327, 333 (1978)
+    source: https://www.nysenate.gov/legislation/laws/UCC/2-207
+    openleg:
+    - UCC/2-207
+    status: verified
+    verified: '2026-11-04'
+    news: \bbattle of the forms\b|\bucc 2-207\b
+    news_ny: true
+    note: A definite, seasonable acceptance works even with added or different terms, unless it is expressly conditional on assent to them (2-207(1)). Between non-merchants, added terms are only proposals.
+      Between merchants they join the contract unless one of these applies. Conduct recognizing a contract can form one even where the writings don't (2-207(3)).
+    elements:
+    - text: The offer expressly limits acceptance to its own terms
+      keys:
+      - limits acceptance
+      - expressly limits
+      - offer limits
+    - text: The added terms materially alter the contract
+      keys:
+      - materially alter
+      - material alteration
+      - material
+    - text: The offeror has objected already, or objects within a reasonable time after notice of them
+      keys:
+      - objection
+      - objects
+      - notification of objection
+    cloze:
+      text: 'Between merchants such terms become part of the contract unless: (a) the offer expressly limits acceptance to the terms of the offer; (b) they ___; or (c) notification of objection to them has
+        already been given or is given within a reasonable time after notice of them is received.'
+      answer: materially alter it
+      accept:
+      - materially alter it
+      - materially alter
+      - materially alter the contract
+      source: https://www.nysenate.gov/legislation/laws/UCC/2-207
+    cases:
+    - name: Matter of Marlene Indus. Corp. v. Carnac Textiles
+      cite: 45 N.Y.2d 327, 333 (1978)
+      url: https://static.case.law/ny-2d/45/html/0327-01.html
+      holding: An arbitration clause added in a merchant's acceptance or confirmation form is a material alteration, so it binds only if both sides expressly agree to it.
+      element: 1
+
+  - id: ucc2313
+    area: contracts
+    family: list
+    title: UCC 2-313 — the three ways to make an express warranty (NY)
+    jurisdiction: NY
+    cite: N.Y. U.C.C. § 2-313
+    source: https://www.nysenate.gov/legislation/laws/UCC/2-313
+    openleg:
+    - UCC/2-313
+    status: verified
+    verified: '2026-11-04'
+    news: \bexpress warrant(y|ies)\b
+    news_ny: true
+    note: No magic words ("warrant", "guarantee") or intent to warrant needed, but a statement only of the goods' value, or the seller's opinion or commendation, is puffery and creates no warranty (2-313(2)).
+    elements:
+    - text: An affirmation of fact or promise by the seller about the goods that becomes part of the basis of the bargain
+      keys:
+      - affirmation
+      - promise
+      - fact
+    - text: A description of the goods made part of the basis of the bargain
+      keys:
+      - description
+      - describe
+    - text: A sample or model made part of the basis of the bargain (the whole lot must match it)
+      keys:
+      - sample
+      - model
+    cloze:
+      text: Any affirmation of fact or promise made by the seller to the buyer which relates to the goods and becomes part of the ___ creates an express warranty that the goods shall conform to the affirmation
+        or promise.
+      answer: basis of the bargain
+      accept:
+      - basis of the bargain
+      - basis of bargain
+      source: https://www.nysenate.gov/legislation/laws/UCC/2-313
+
+  - id: ucc2314
+    area: contracts
+    family: elements
+    title: UCC 2-314 — implied warranty of merchantability (NY)
+    jurisdiction: NY
+    cite: N.Y. U.C.C. § 2-314(1)–(2); Denny v. Ford Motor Co., 87 N.Y.2d 248, 258–59 (1995)
+    source: https://www.nysenate.gov/legislation/laws/UCC/2-314
+    openleg:
+    - UCC/2-314
+    status: verified
+    verified: '2026-11-04'
+    news: \b(implied warranty|merchantab\w+)\b
+    news_ny: true
+    note: Serving food or drink for value counts as a sale (2-314(1)). Disclaimers run through 2-316. The (2) checklist is its own card (ucc2314_list).
+    elements:
+    - text: A contract for the sale of goods
+      keys:
+      - sale
+      - contract
+      - goods
+    - text: The seller is a merchant with respect to goods of that kind
+      keys:
+      - merchant
+      - goods of that kind
+    - text: The goods were not merchantable (for example, not fit for their ordinary purposes)
+      keys:
+      - not merchantable
+      - unmerchantable
+      - ordinary purposes
+      - defective
+    - text: The warranty was not excluded or modified (UCC 2-316)
+      keys:
+      - excluded
+      - modified
+      - disclaimer
+      - 2-316
+    cloze:
+      text: Goods to be merchantable must be at least such as (a) pass without objection in the trade under the contract description; and (b) in the case of fungible goods, are of fair average quality within
+        the description; and (c) are fit for the ___ for which such goods are used;
+      answer: ordinary purposes
+      accept:
+      - ordinary purposes
+      - ordinary purpose
+      source: https://www.nysenate.gov/legislation/laws/UCC/2-314
+    missing:
+    - facts: Corwin Ruiz, a dentist, sold his used home lawn mower to a neighbor. On its first use the blade housing cracked, and the neighbor sued for breach of the warranty of merchantability.
+      missing: 1
+      why: A dentist selling his own mower is not a merchant in mowers.
+    - facts: Delmont Plumbing, which also sells boilers, was hired only to clean and adjust Nora Vance's existing boiler; it supplied no parts. The boiler failed a week later and Vance sued for breach of
+        the warranty of merchantability.
+      missing: 0
+      why: A labor-only repair job is a contract for services, not a sale of goods.
+    cases:
+    - name: Denny v. Ford Motor Co.
+      cite: 87 N.Y.2d 248, 258–59 (1995)
+      url: https://static.case.law/ny-2d/87/html/0248-01.html
+      holding: Merchantability asks only whether the product met the expectations for its ordinary, foreseeable use, so a jury could find a breach of implied warranty while rejecting a strict-liability design
+        defect claim.
+      element: 2
+
+  - id: ucc2314_list
+    area: contracts
+    family: list
+    title: UCC 2-314(2) — the minimums for merchantable goods (NY)
+    jurisdiction: NY
+    cite: N.Y. U.C.C. § 2-314(2)(a)–(f)
+    source: https://www.nysenate.gov/legislation/laws/UCC/2-314
+    openleg:
+    - UCC/2-314
+    status: verified
+    verified: '2026-11-04'
+    news: \bmerchantab\w+\b
+    news_ny: true
+    note: 'A floor, not a ceiling: goods must be "at least such as" these six.'
+    elements:
+    - text: Pass without objection in the trade under the contract description
+      keys:
+      - without objection
+      - trade
+      - pass
+    - text: 'Fungible goods: of fair average quality within the description'
+      keys:
+      - fair average quality
+      - fungible
+      - average
+    - text: Fit for the ordinary purposes for which such goods are used
+      keys:
+      - ordinary purposes
+      - fit
+    - text: Of even kind, quality and quantity within each unit and among all units, within the variations the agreement allows
+      keys:
+      - even kind
+      - uniform
+      - consistent
+      - quantity
+    - text: Adequately contained, packaged and labeled as the agreement may require
+      keys:
+      - packaged
+      - labeled
+      - contained
+      - packaging
+    - text: Conform to any promises or affirmations of fact on the container or label
+      keys:
+      - label
+      - container
+      - conform
+
+  - id: ucc2315
+    area: contracts
+    family: elements
+    title: UCC 2-315 — implied warranty of fitness for a particular purpose (NY)
+    jurisdiction: NY
+    cite: N.Y. U.C.C. § 2-315
+    source: https://www.nysenate.gov/legislation/laws/UCC/2-315
+    openleg:
+    - UCC/2-315
+    status: verified
+    verified: '2026-11-04'
+    news: \bfitness for (a )?particular purpose\b
+    news_ny: true
+    note: Unlike 2-314, the text says "the seller", not a merchant. The knowledge test is fixed at the time of contracting.
+    elements:
+    - text: At contracting, the seller has reason to know the particular purpose the goods are needed for
+      keys:
+      - particular purpose
+      - reason to know
+      - purpose
+    - text: The seller has reason to know the buyer is relying on the seller's skill or judgment to select or furnish suitable goods
+      keys:
+      - reliance
+      - relying
+      - skill
+      - judgment
+    - text: The goods are not fit for that purpose
+      keys:
+      - not fit
+      - unfit
+    - text: The warranty was not excluded or modified (UCC 2-316)
+      keys:
+      - excluded
+      - modified
+      - disclaimer
+      - 2-316
+    cloze:
+      text: Where the seller at the time of contracting has reason to know any particular purpose for which the goods are required and that the buyer is relying on the seller's ___ to select or furnish suitable
+        goods, there is unless excluded or modified under the next section an implied warranty that the goods shall be fit for such purpose.
+      answer: skill or judgment
+      accept:
+      - skill or judgment
+      - skill and judgment
+      source: https://www.nysenate.gov/legislation/laws/UCC/2-315
+    missing:
+    - facts: Brisa Farms told Hollin Supply it needed hose that would carry 180-degree wash water. Brisa's own engineer then specified a catalog part number, and Hollin shipped exactly that hose, which split
+        at 150 degrees.
+      missing: 1
+      why: Brisa picked the hose itself, so it did not rely on Hollin's skill or judgment.
+
+  - id: ucc2725
+    area: contracts
+    family: rule
+    title: UCC 2-725 — limitations for sale-of-goods claims (NY)
+    jurisdiction: NY
+    cite: N.Y. U.C.C. § 2-725; Heller v. U.S. Suzuki Motor Corp., 64 N.Y.2d 407, 410–12 (1985)
+    source: https://www.nysenate.gov/legislation/laws/UCC/2-725
+    openleg:
+    - UCC/2-725
+    status: verified
+    verified: '2026-11-04'
+    news: \b(statute of limitations|time-barred)\b.*\b(warranty|sale of goods)\b
+    news_ny: true
+    note: 'Not CPLR 213''s six years: CPLR 213(2) itself excepts UCC Article 2. Accrual runs from tender of delivery whatever the buyer knew. A dismissed timely action can be refiled within six months unless
+      it ended by voluntary discontinuance or for neglect to prosecute (2-725(3)).'
+    elements:
+    - text: Four years from accrual
+      keys:
+      - four years
+      - 4 years
+      - four
+    - text: The claim accrues at breach, whether or not the buyer knows of it
+      keys:
+      - breach
+      - lack of knowledge
+      - regardless
+    - text: A warranty is breached on tender of delivery
+      keys:
+      - tender of delivery
+      - tender
+      - delivery
+    - text: 'Exception: a warranty that explicitly extends to future performance accrues when the breach is or should have been discovered'
+      keys:
+      - future performance
+      - discovery
+      - discovered
+    - text: The original agreement may shorten the period to not less than one year, but never lengthen it
+      keys:
+      - one year
+      - shorten
+      - reduce
+      - not extend
+    cloze:
+      text: A breach of warranty occurs when ___ is made, except that where a warranty explicitly extends to future performance of the goods and discovery of the breach must await the time of such performance
+        the cause of action accrues when the breach is or should have been discovered.
+      answer: tender of delivery
+      accept:
+      - tender of delivery
+      - tender
+      source: https://www.nysenate.gov/legislation/laws/UCC/2-725
+    numbers:
+    - q: Limitations period for breach of a contract for sale of goods, UCC 2-725(1)
+      answer: 4
+      unit: years
+      cite: N.Y. U.C.C. § 2-725(1)
+    - q: Shortest period the parties may agree to in the original agreement, UCC 2-725(1)
+      answer: 1
+      unit: years
+      cite: N.Y. U.C.C. § 2-725(1)
+    - q: Window to refile after a timely action ends leaving a remedy by another action, UCC 2-725(3)
+      answer: 6
+      unit: months
+      cite: N.Y. U.C.C. § 2-725(3)
+    cases:
+    - name: Heller v. U.S. Suzuki Motor Corp.
+      cite: 64 N.Y.2d 407, 410–12 (1985)
+      url: https://static.case.law/ny-2d/64/html/0407-01.html
+      holding: A warranty claim against a remote distributor accrued when the distributor tendered the motorcycle to its own immediate buyer, not when the plaintiff later bought it from a retailer, so the
+        suit was time-barred.
+      element: 2
+
+  - id: consequential_damages
+    area: contracts
+    family: elements
+    title: Lost profits and consequential damages for breach (NY)
+    jurisdiction: NY
+    cite: Kenford Co. v. County of Erie, 67 N.Y.2d 257, 261–62 (1986) (Kenford I); Kenford Co. v. County of Erie, 73 N.Y.2d 312, 319–20 (1989) (Kenford II)
+    source: https://static.case.law/ny-2d/67/html/0257-01.html
+    status: verified
+    verified: '2026-11-04'
+    news: \b(lost profits|consequential damages)\b
+    news_ny: true
+    note: General damages are the natural and probable consequence of the breach. Anything beyond them must have been within the parties' contemplation as the probable result of a breach at or before contracting
+      (Kenford II, the NY form of Hadley v. Baxendale). A new business faces a stricter standard of proof (Kenford I).
+    elements:
+    - text: The breach caused the loss, shown with certainty
+      keys:
+      - caused
+      - causation
+      - certainty
+      - traceable
+    - text: The amount is provable with reasonable certainty, not speculative
+      keys:
+      - reasonable certainty
+      - speculative
+      - provable
+    - text: The parties contemplated liability for this kind of loss at or before contracting
+      keys:
+      - contemplation
+      - contemplated
+      - foreseeable
+      - at contracting
+    missing:
+    - facts: Ardent Events contracted with the Town of Velmar to run a new waterfront stadium for twenty years; the contract expressly made Velmar answerable for Ardent's lost operating profits if the stadium
+        was not built. Velmar never built it. Ardent sought twenty years of projected profits from a venue that had never operated, with no comparable track record.
+      missing: 1
+      why: Profits of a business that never ran are too speculative to prove with reasonable certainty.
+    - facts: Quill Freight missed a delivery of a mill part to Haber Mill, which stayed shut for a week and lost provable sales. Haber never told Quill the mill had no spare or would idle without the part.
+      missing: 2
+      why: Nothing put the shutdown losses in Quill's contemplation at contracting.
+    cases:
+    - name: Kenford Co. v. County of Erie (Kenford II)
+      cite: 73 N.Y.2d 312, 319–20 (1989)
+      url: https://static.case.law/ny-2d/73/html/0312-01.html
+      holding: The developer could not recover the lost appreciation of land around a domed stadium the county never built, because nothing showed the parties contemplated the county assuming that liability
+        when they contracted.
+      element: 2
+    - name: Kenford Co. v. County of Erie (Kenford I)
+      cite: 67 N.Y.2d 257, 261–62 (1986)
+      url: https://static.case.law/ny-2d/67/html/0257-01.html
+      holding: The stadium operator's twenty-year projected profits from an untested venture were too speculative and outside the parties' contemplation, so they were not recoverable.
+      element: 1
 
 # Weekend issue spotters (2026-11-04): fictional facts; claims and decoys are card ids, all must be live.
 issues:
