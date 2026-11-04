@@ -183,6 +183,32 @@ Listen queue every day.
 - News tie-in: cards tagged with The Wire's law areas; a matching story features its card ("From
   today: …"); an opinion features the test it applied.
 
+**Law tab (Joe, 2026-11-04).** Law has its own section on the Puzzle Page: a daily session of three
+cards (on Tue/Thu that is slot 3's session) and a weekend issue spotter, with recall by area over 30
+days. Joe lifted the "wait a month" rule and chose the planned syllabus order. Each card gets one
+format a day: whatever is due, else one it hasn't had, else the one seen longest ago. Formats: statute
+fill-in, type the elements, spot the missing element (fictional facts, one tap), rule ↔ case (holding
+in our words, tap the case; typed when it comes back), number drills (exact). Issue spotters:
+fictional facts in `legal.yaml` `issues:`, tap every claim raised; claims and decoys must be live cards.
+Review ids: el/cz/mi/cs/nu:<card>:<n>, is:<issue>:<card>. Results use slots "law" and "issue", which
+never count toward the four.
+
+### 4b. Call it: election predictions (Joe, 2026-11-04)
+Every contested race on a Beacon ballot (elections.yaml) and ~10 curated national and international
+hot races a cycle (`hot_races`, each with a sourced reason). Joe picks the winner (or the N winners of
+a multi-seat race), a margin bucket (under 5, 5–15, 15+; one-seat races) and a confidence (55–95%);
+changeable until voting starts (`closes`, default 6 AM Eastern on election day), then locked. Scored
+from `result:` lines recorded per race (winner, margin, who called it, source); unrecorded races are
+never scored. Record, margins, calibration per confidence and a Brier score against a coin flip.
+Calls are political engagement under rule 10: Workers KV only, nothing in logs.
+
+### 4c. Officials refresh with each election (Joe, 2026-11-04)
+A race with a recorded result, `holds` (the seat's Library label) and `term_start` (pipeline/succession.py):
+a "Who won on <date>" Library list from the election to 60 days after the term starts; on the term's
+first day the holder switches in every list with that seat (or joins Who represents Beacon), and Who
+left the list picks up the departures from its snapshots; `map:` puts the new holder on that map's
+shape, and the map lists seats that changed hands.
+
 ### 5. Brain breaks (Joe's daily pick)
 - **Tatham logic** (MIT, official web build, one puzzle loaded per day, ~250–680 KB): Loopy, Keen,
   Towers, Galaxies, Signpost, Dominosa, Unequal, Slant, Range, Pattern, each at its top tier that
