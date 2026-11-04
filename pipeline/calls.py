@@ -50,7 +50,7 @@ def _result(r: dict, names: set[str]) -> tuple[dict | None, str | None]:
 def _race(eid, e_title, e_date, closes, r, where, scope, drops) -> dict | None:
     kind = r.get("kind") or "candidate"
     cands = [{"name": "Yes"}, {"name": "No"}] if kind == "proposal" else \
-        [{"name": c["name"], "lines": c.get("lines") or ([c["party"]] if c.get("party") else [])} for c in r.get("candidates") or [] if c.get("name")]
+        [{"name": c["name"], "lines": c.get("lines") or ([c["party"]] if c.get("party") and c["party"] not in c["name"] else [])} for c in r.get("candidates") or [] if c.get("name")]
     seats = int(r.get("seats") or 1)
     if len(cands) <= seats or r.get("contested") is False:
         return None                                      # uncontested: nothing to call
@@ -62,7 +62,7 @@ def _race(eid, e_title, e_date, closes, r, where, scope, drops) -> dict | None:
         title += " · " + str(r["district"])
     return {"id": f"{eid}:{r['id']}", "election": e_title, "title": title, "where": where, "scope": scope,
             "level": r.get("level") or scope, "date": e_date.isoformat(), "closes": closes.isoformat(), "seats": seats,
-            "kind": kind, "candidates": cands, "margin": seats == 1, "system": r.get("system"),
+            "kind": kind, "candidates": cands, "margin": seats == 1 and not str(r.get("system") or "").startswith("proportional"), "system": r.get("system"),
             **({"why": r["why_hot"]} if r.get("why_hot") else {}), **({"result": res} if res else {})}
 
 
