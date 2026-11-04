@@ -4,6 +4,13 @@ GET /home-brief.json (functions/home-brief.json.js) serves dist/home-brief.json 
 3 to 5 of the briefing's signal items in Joe's order (Beacon first, then by the briefing score),
 each with the headline, a section, and one or two plain sentences written to be heard.
 
+Editions (2026-11-03): before 3 PM Eastern it's the Morning brief (the last day, what's ahead today);
+from 3 PM it's the Evening brief (what happened since morning first, what's still developing, and
+meetings and hearings tonight and tomorrow morning). "ahead" carries those as spoken lines.
+"listen_for" gives Home Assistant words to match podcast episodes against: the topics, threads
+and searches Joe follows (reading taste, which the build may see) and today's lead story words.
+It is never logged.
+
 News only. Items come from the briefing's signal list, which is built from the news feeds; nothing
 from the private parts of The Wire (views, questionnaires, the voter's guide scoring, debate notes,
 campaign material) is read here, and opinion pieces, podcasts and anything from a campaign or
@@ -13,6 +20,10 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+
+NY = ZoneInfo("America/New_York")
 
 MAX_WORDS = 40
 CAMPAIGN = re.compile(r"\b(campaign|for (senate|congress|governor|assembly|mayor)|committee to elect|friends of|democrats?|republicans?|gop|working families party|conservative party)\b", re.I)
@@ -59,7 +70,7 @@ def _sentences(t: str) -> list[str]:
     return [s.strip() for s in re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", t) if s.strip()]
 
 
-FILLER = re.compile(r"\b(screenshots?|file photo|photo by|courtesy of|a (poll|polling) site in|pictured|has (this|the|a) (report|story|details)|reports?:$|read more|continue reading|click here|subscribe|appeared first on|is available)\b", re.I)
+FILLER = re.compile(r"\b(screenshots?|file photo|photo by|courtesy of|a (poll|polling) site in|pictured|has (this|the|a) (report|story|details)|has more|reports?:$|read more|continue reading|click here|subscribe|appeared first on|is available)\b", re.I)
 
 
 def _cap(text: str) -> str:
@@ -108,7 +119,67 @@ def section(x: dict, local=None) -> str:
     return sec or "News"
 
 
-def build(picked: list[dict], extras: list[dict], data: dict, dist, log) -> None:
+STOP = set("""the a an and or of to in on for at by with from about into over after before new news
+this that these those is are was were be been will would could should has have had its it's their
+his her they them you your our we not but as than more most says said say week today year years
+day days what who why how when where which while just also amid against first last make makes can may now out all one two off get set per its man men big top""".split())
+
+
+def edition_of(now: datetime) -> str:
+    return "Morning" if now.astimezone(NY).hour < 15 else "Evening"
+
+
+def _words(text: str) -> list[str]:
+    return [w for w in re.findall(r"[a-z][a-z'-]{2,}", (text or "").lower()) if w not in STOP][:4]
+
+
+def listen_for(data: dict, out: list[dict]) -> list[dict]:
+    """[{"w": [words], "n": weight}]: one entry per followed topic, thread or search (weight 3),
+    then one per story in this brief (weight 1). HA scores an episode +n once per entry that any
+    of its words matches."""
+    f = data.get("follows") or {}
+    seen, terms = set(), []
+    for kind in ("topics", "threads", "searches"):
+        for x in f.get(kind) or []:
+            title = str(x.get("title") or x.get("query") or "")
+            w = _words(title)
+            if w and title.lower() not in seen:
+                seen.add(title.lower())
+                terms.append({"w": w, "n": 3})
+    for x in out:
+        w = _words(x["headline"])
+        if w:
+            terms.append({"w": w, "n": 1})
+    return terms[:40]
+
+
+def _ahead(data: dict, now: datetime, edition: str) -> list[str]:
+    """Meetings, hearings and sessions with a start time: the rest of today in the morning;
+    tonight and tomorrow until 1 PM in the evening. Spoken as "At 7 PM, City Council workshop."""
+    local = now.astimezone(NY)
+    end = (local + timedelta(days=1)).replace(hour=13, minute=0) if edition == "Evening" else local.replace(hour=23, minute=59)
+    rows, seen = [], set()
+    for it in data.get("items", []):
+        if not it.get("event_at") or it.get("desk") == "SPORTS":
+            continue
+        try:
+            ev = datetime.fromisoformat(it["event_at"].replace("Z", "+00:00")).astimezone(NY)
+        except ValueError:
+            continue
+        what = spoken(re.split(r"\s[-–—|]\s", it["title"])[0]).rstrip(".")
+        if not (local - timedelta(minutes=30) < ev <= end) or what.lower() in seen:
+            continue
+        seen.add(what.lower())
+        day = "" if ev.date() == local.date() else "Tomorrow "
+        when = ev.strftime("%-I PM" if ev.minute == 0 else "%-I:%M PM") if ev.hour >= 12 else ev.strftime("%-I AM" if ev.minute == 0 else "%-I:%M AM")
+        rows.append((ev, it.get("desk") != "BEACON", f"{day}{'at' if day else 'At'} {when}, {what}."))
+    rows.sort(key=lambda r: (r[1], r[0]))
+    return [r[2] for r in sorted(rows[:3])]
+
+
+def build(picked: list[dict], extras: list[dict], data: dict, dist, log, now: datetime | None = None) -> None:
+    now = now or datetime.now(timezone.utc)
+    edition = edition_of(now)
     items = {it["id"]: it for it in data.get("items", [])}
     stories = {s["lead"]: s for s in data.get("stories", [])}
 
@@ -118,6 +189,13 @@ def build(picked: list[dict], extras: list[dict], data: dict, dist, log) -> None
                     or CAMPAIGN.search(x.get("source", "")) or x.get("section") == "Sports")
 
     pool = sorted([x for x in picked if ok(x)], key=lambda x: x.get("score", 0), reverse=True)
+    if edition == "Evening":             # since this morning first, then still developing, then the rest
+        def fresh(x):
+            try:
+                return now - datetime.fromisoformat(x["t"].replace("Z", "+00:00")) < timedelta(hours=12)
+            except (KeyError, ValueError):
+                return False
+        pool = [x for x in pool if fresh(x)] + [x for x in pool if not fresh(x) and x.get("developing")] + [x for x in pool if not fresh(x) and not x.get("developing")]
     if len(pool) < 3:                    # a thin morning: the best extras, local and state first
         more = sorted([x for x in extras if ok(x) and x not in pool], key=lambda x: (x.get("scope") not in ("local", "state"), -x.get("score", 0)))
         pool += more[: 5 - len(pool)]
@@ -137,6 +215,7 @@ def build(picked: list[dict], extras: list[dict], data: dict, dist, log) -> None
         out.append({"headline": spoken(re.split(r";\s", x["title"])[0]), "spoken": say_for(x["title"], summary), "section": section(x, None)})
         if len(out) == 5:
             break
-    body = {"updated": data.get("generated_at"), "items": out}
+    body = {"updated": data.get("generated_at"), "edition": edition, "items": out,
+            "ahead": _ahead(data, now, edition), "listen_for": listen_for(data, out)}
     (dist / "home-brief.json").write_text(json.dumps(body, ensure_ascii=False, separators=(",", ":")))
-    log(f"[home_brief] {len(out)} items")
+    log(f"[home_brief] {edition.lower()}: {len(out)} items")
