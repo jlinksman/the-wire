@@ -610,7 +610,7 @@
       if ((R.calibration || []).length) nodes.push(el("p", { class: "fine", text: R.calibration.map((x) => "when " + x.conf + "% sure, right " + x.hit + " of " + x.of).join(" · ") }));
     }
     const groups = {};
-    for (const r of C.open || []) (groups[r.election + " · " + r.date] = groups[r.election + " · " + r.date] || []).push(r);
+    for (const r of C.open || []) { const g = r.scope === "local" ? r.election + " · " + r.date : "Hot races"; (groups[g] = groups[g] || []).push(r); }
     for (const [g, list] of Object.entries(groups)) {
       nodes.push(el("h3", { class: "sh3", text: g }));
       for (const r of list) nodes.push(callRow(r));
@@ -642,14 +642,14 @@
         draw(); } })));
       const chips = (vals, cur, name, set) => el("div", { class: "chips" }, el("span", { class: "fine", text: name }), ...vals.map(([v, t]) => el("button", { class: "chip" + (cur === v ? " on" : ""), text: t, onclick: () => { set(v); draw(); } })));
       const lockAt = new Date(r.closes).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-      box.replaceChildren(
+      box.replaceChildren(...[
         el("p", { class: "gm-keep" }, el("b", { text: r.title }), el("span", { class: "asrc", text: "  " + (r.where || "") + " · locks " + lockAt })),
         r.why ? el("p", { class: "fine", text: r.why }) : null,
         r.seats > 1 ? el("p", { class: "fine", text: "Pick the " + r.seats + " winners." }) : null,
         cands,
         r.margin ? chips([["lt5", "Under 5"], ["5to15", "5–15"], ["gt15", "15+"]], margin, "Margin (pts):", (v) => { margin = v; }) : null,
         chips([[55, "55%"], [65, "65%"], [75, "75%"], [85, "85%"], [95, "95%"]], conf, "How sure:", (v) => { conf = v; }),
-        el("button", { class: "sbtn", text: r.mine ? "Update call" : "Lock in", onclick: save }), status);
+        el("button", { class: "sbtn", text: r.mine ? "Update call" : "Lock in", onclick: save }), status].filter(Boolean));
     };
     async function save() {
       if (pick.size !== r.seats) { status.textContent = r.seats > 1 ? "Pick " + r.seats + " winners." : "Pick a winner."; return; }
