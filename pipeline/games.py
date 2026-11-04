@@ -1523,6 +1523,46 @@ def card_scalars(c: dict) -> str | None:
     for k in [cz.get("text"), cz.get("answer"), *(cz.get("accept") or [])] if cz else []:
         if not isinstance(k, str):
             return f"cloze value {k!r} is not text (quote it in legal.yaml)"
+    n_el = len(c.get("elements") or [])
+    for m in c.get("missing") or []:                    # spot the missing element (2026-11-04)
+        if not isinstance(m.get("facts"), str) or not isinstance(m.get("why"), str):
+            return "a missing-element fact pattern needs text facts and why"
+        if not isinstance(m.get("missing"), int) or not 0 <= m["missing"] < n_el:
+            return f"missing-element index {m.get('missing')!r} is not one of the card's elements"
+    for x in c.get("cases") or []:                      # rule <-> case
+        if not all(isinstance(x.get(k), str) and x.get(k) for k in ("name", "cite", "holding")):
+            return "a case needs name, cite and holding as text"
+        if x.get("element") is not None and not (isinstance(x["element"], int) and 0 <= x["element"] < max(n_el, 1)):
+            return f"case element index {x.get('element')!r} is out of range"
+    for x in c.get("numbers") or []:                    # number drills
+        if not isinstance(x.get("q"), str) or not isinstance(x.get("answer"), int) or isinstance(x.get("answer"), bool):
+            return "a number drill needs a text question and a whole-number answer"
+        if x.get("unit") not in ("days", "months", "years", "dollars", "percent"):
+            return f"number drill unit {x.get('unit')!r} is not days, months, years, dollars or percent"
+    return None
+
+
+AREA_ORDER = ["environmental", "torts", "practice", "contracts", "civil_procedure", "evidence", "constitutional", "corporations", "bankruptcy"]
+AREA_NAME = {"environmental": "Environmental", "torts": "Torts", "practice": "NY limitations and practice", "contracts": "Contracts and UCC 2",
+             "civil_procedure": "Civil procedure", "evidence": "Evidence", "constitutional": "Constitutional tests",
+             "corporations": "Corporations", "bankruptcy": "Bankruptcy"}
+
+
+def issue_ok(x: dict, cards: dict) -> str | None:
+    """A weekend issue spotter: fictional facts, the claims they raise (cards that shipped) and
+    one or two decoys they don't. Every referenced card must be live, or the spotter waits."""
+    if not isinstance(x.get("facts"), str) or len(x["facts"].split()) < 40:
+        return "facts missing or too short"
+    claims, decoys = x.get("claims") or [], x.get("decoys") or []
+    if not claims:
+        return "no claims"
+    for r in claims + decoys:
+        if r.get("card") not in cards:
+            return f"refers to {r.get('card')!r}, which isn't a live card"
+        if not isinstance(r.get("why") or r.get("why_not"), str):
+            return "each claim needs why, each decoy why_not"
+    if {r["card"] for r in claims} & {r["card"] for r in decoys}:
+        return "a card is both a claim and a decoy"
     return None
 
 
@@ -1551,7 +1591,7 @@ def legal(data, now, drops, openleg_cache: Path | None = None) -> dict:
         if bad:
             drops.append(("legal", f"{c['id']}: {bad}"))
             continue
-        cards.append({k: c.get(k) for k in ("id", "area", "family", "title", "jurisdiction", "cite", "source", "verified", "elements", "cloze", "note")})
+        cards.append({k: c.get(k) for k in ("id", "area", "family", "title", "jurisdiction", "cite", "source", "verified", "elements", "cloze", "note", "missing", "cases", "numbers") if c.get(k) is not None})
     cut = now - timedelta(days=7)
     featured = []
     items, threads, story_of = index(data)
@@ -1570,7 +1610,20 @@ def legal(data, now, drops, openleg_cache: Path | None = None) -> dict:
                 featured.append({"card": c["id"], "title": it.get("title"), "link": it.get("link"), "outlet": it.get("source"),
                                  **context_for(it, story_of, threads)})
                 break
-    return {"cards": cards, "featured": featured[:5], "order": ["environmental", "torts"]}
+    live = {c["id"]: c for c in cards}
+    issues = []
+    for x in cfg.get("issues", []) or []:
+        if x.get("status") != "verified" or not x.get("verified"):
+            drops.append(("legal", "issue spotter not yet second-checked"))
+            continue
+        bad = issue_ok(x, live)
+        if bad:
+            drops.append(("legal", f"issue {x.get('id')}: {bad}"))
+            continue
+        issues.append({k: x.get(k) for k in ("id", "title", "facts", "claims", "decoys", "verified")})
+    areas = [a for a in AREA_ORDER if any(c["area"] == a for c in cards)]
+    return {"cards": cards, "featured": featured[:5], "order": areas, "issues": issues,
+            "areas": [{"id": a, "name": AREA_NAME.get(a, a.title()), "n": sum(c["area"] == a for c in cards)} for a in areas]}
 
 
 # ------------------------------------------------------------------ The Ledger

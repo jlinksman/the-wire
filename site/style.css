@@ -977,3 +977,7 @@ select.tin { width: 100%; }
 .gm-wday.all .asrc { color: var(--on-here); }
 .gm-casepin { position: sticky; top: 0; z-index: 2; background: var(--surface); max-height: 34vh; overflow-y: auto; border-bottom: 1px solid var(--hair, rgba(127,127,127,0.25)); }
 .gm-grid { margin-bottom: 10px; }
+/* Law tab (2026-11-04): stacked one-tap options, wrapped claim chips */
+.gm-opts { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.gm-opts .sbtn { margin-top: 0; text-align: left; white-space: normal; line-height: 1.35; }
+.gm-issue { flex-wrap: wrap; gap: 6px; }

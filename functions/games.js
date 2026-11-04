@@ -45,9 +45,9 @@ export async function onRequestGet({ request, env }) {
   // Opened before the morning build published today's pool: serve yesterday's pool for now, but
   // re-assemble once today's arrives (unless something was already played from it).
   const fresh = pool && pool.day === today;
-  if (day && day.stale && fresh && !Object.keys(day.done || {}).length) day = null;
-  const carried = day && !(day.slots || []).length ? day.done : null;   // a Library result came in before the page opened
-  if (carried) day = null;
+  let carried = null;
+  if (day && day.stale && fresh && !Object.keys(day.done || {}).some((k) => /^\d+$/.test(k))) { carried = day.done; day = null; }
+  if (day && !(day.slots || []).length) { carried = day.done; day = null; }   // a Library or Law result came in before the page opened
   if (!day) {
     const chess = (await env.WIRE.get("chess.json", "json")) || null;
     day = assemble(st, pool, chess, today);
@@ -58,7 +58,10 @@ export async function onRequestGet({ request, env }) {
     trim(st, today);
     await save(env, st, today);
   }
+  const law = lawTab(st, pool, today, day);
+  if (day.lawNew) { delete day.lawNew; await save(env, st, today); }
   return json({
+    law,
     day: today, slots: day.slots, done: day.done || {}, callbacks: callbacks(st, today, day),
     pick: st.pick || "logic", stats: stats(st, today), as_of: pool ? pool.made : null,
     health: [...((pool && pool.health) || []), ...(day.health || [])], connections_live: CONNECTIONS_LIVE,
@@ -234,30 +237,122 @@ function pickDefectors(st, pool, today) {
   return d;
 }
 
-// Legal refreshers: three cards a session. Cards with due elements first, then a card featured by
-// today's news, then the next card in syllabus order not started yet. A cloze card leads, so the
-// session never opens on a type-in.
-function pickLegal(st, pool, today) {
+// Legal refreshers: three cards a session. Cards with anything due first, then a card featured by
+// today's news, then the next card in syllabus order not started yet. Each card gets one format
+// (2026-11-04): whatever is due, else a format it hasn't had, else the one seen longest ago. The
+// session never opens on a type-in: a statute fill-in, a missing element or a case leads.
+const LAW_ITEM = /^(el|cz|mi|cs|nu):/;
+const TAP_FIRST = ["cloze", "missing", "case"];
+function lawFormats(c) {
+  return [c.cloze ? "cloze" : null, (c.elements || []).length ? "elements" : null, (c.missing || []).length ? "missing" : null,
+    (c.cases || []).length ? "case" : null, (c.numbers || []).length ? "number" : null].filter(Boolean);
+}
+const FMT_PREFIX = { cloze: "cz", elements: "el", missing: "mi", case: "cs", number: "nu" };
+function chooseFormat(st, c, today) {
+  const items = (f) => Object.values(st.items).filter((x) => x.id.split(":")[0] === FMT_PREFIX[f] && x.id.split(":")[1] === c.id && !x.retired);
+  const F = lawFormats(c);
+  const due = F.filter((f) => items(f).some((x) => x.due && x.due <= today));
+  if (due.length) return due[0];
+  const unseen = F.filter((f) => !items(f).length);
+  if (unseen.length) return unseen[0];
+  const last = (f) => items(f).map((x) => ((x.hist || []).slice(-1)[0] || [""])[0]).sort().slice(-1)[0] || "";
+  return F.slice().sort((a, b) => last(a).localeCompare(last(b)))[0];
+}
+function pickLegal(st, pool, today, avoid) {
   const L = pool && pool.legal;
   if (!L || !(L.cards || []).length) return null;
   const byId = Object.fromEntries(L.cards.map((c) => [c.id, c]));
-  const started = new Set(Object.keys(st.items).filter((k) => k.startsWith("el:")).map((k) => k.split(":")[1]));
-  const due = [...new Set(Object.values(st.items).filter((x) => x.type === "element" && !x.retired && x.due && x.due <= today).sort((a, b) => a.due.localeCompare(b.due)).map((x) => x.id.split(":")[1]))];
+  const skip = new Set(avoid || []);
+  const started = new Set(Object.keys(st.items).filter((k) => LAW_ITEM.test(k)).map((k) => k.split(":")[1]));
+  const due = [...new Set(Object.values(st.items).filter((x) => LAW_ITEM.test(x.id) && !x.retired && x.due && x.due <= today).sort((a, b) => a.due.localeCompare(b.due)).map((x) => x.id.split(":")[1]))];
   const featured = (L.featured || []).map((f) => f.card).filter((id) => byId[id] && !started.has(id));
   const order = (L.order || []).flatMap((area) => L.cards.filter((c) => c.area === area).map((c) => c.id));
   const fresh = order.filter((id) => !started.has(id));
+  const seen = order.filter((id) => started.has(id));
   const pick = [];
-  for (const id of [...due, ...featured, ...fresh]) if (byId[id] && !pick.includes(id) && pick.length < 3) pick.push(id);
+  for (const id of [...due, ...featured, ...fresh, ...seen]) if (byId[id] && !skip.has(id) && !pick.includes(id) && pick.length < 3) pick.push(id);
   if (!pick.length) return null;
-  // The session always opens on a statute fill-in (never cold on a type-in): if no picked card has
-  // one, the last pick gives way to the cloze card least recently seen.
-  if (!pick.some((id) => byId[id].cloze)) {
-    const cz = L.cards.filter((c) => c.cloze).sort((a, b) => ((st.items["cz:" + a.id] || {}).due || "").localeCompare((st.items["cz:" + b.id] || {}).due || ""))[0];
-    if (cz) { if (pick.length >= 3) pick.pop(); pick.unshift(cz.id); }
+  const cards = pick.map((id) => Object.assign({}, byId[id], { fmt: chooseFormat(st, byId[id], today) }));
+  const rng = seeded("law" + today + (avoid || []).join(""));
+  const allCases = L.cards.flatMap((c) => (c.cases || []).map((x) => ({ card: c.id, area: c.area, name: x.name })));
+  if (!cards.some((c) => TAP_FIRST.includes(c.fmt))) {
+    const k = cards.findIndex((c) => lawFormats(c).some((f) => TAP_FIRST.includes(f)));
+    if (k >= 0) cards[k].fmt = lawFormats(cards[k]).find((f) => TAP_FIRST.includes(f));
+    else {                                   // no picked card can lead: the least recently seen cloze card does
+      const cz = L.cards.filter((c) => c.cloze && !pick.includes(c.id)).sort((a, b) => ((st.items["cz:" + a.id] || {}).due || "").localeCompare((st.items["cz:" + b.id] || {}).due || ""))[0];
+      if (cz) { if (cards.length >= 3) cards.pop(); cards.unshift(Object.assign({}, cz, { fmt: "cloze" })); }
+    }
   }
-  const cards = pick.map((id) => byId[id]);
-  cards.sort((a, b) => (b.cloze ? 1 : 0) - (a.cloze ? 1 : 0));
-  return { id: "law" + today, cards, featured: (L.featured || []).filter((f) => pick.includes(f.card)) };
+  for (const c of cards) attachFormat(st, c, today, rng, allCases);        // a format changed above
+  cards.sort((a, b) => (TAP_FIRST.includes(b.fmt) ? 1 : 0) - (TAP_FIRST.includes(a.fmt) ? 1 : 0));
+  return { id: "law" + today, cards, featured: (L.featured || []).filter((f) => cards.some((c) => c.id === f.card)) };
+}
+
+// Which fact pattern, case or number a card shows today, and the case options (the right case and
+// two from other cards, same area first). Review items keep their own index, so each is scheduled alone.
+function attachFormat(st, c, today, rng, allCases) {
+  const pickIndex = (pre, len) => {                    // due first, then never seen, then seen longest ago
+    const it = (i) => st.items[pre + ":" + c.id + ":" + i];
+    const idx = [...Array(len).keys()];
+    const due = idx.find((i) => it(i) && !it(i).retired && it(i).due && it(i).due <= today);
+    if (due != null) return due;
+    const unseen = idx.find((i) => !it(i));
+    if (unseen != null) return unseen;
+    const last = (i) => ((it(i).hist || []).slice(-1)[0] || [""])[0];
+    return idx.sort((a, b) => last(a).localeCompare(last(b)))[0];
+  };
+  if (c.fmt === "missing") c.mi = pickIndex("mi", c.missing.length);
+  if (c.fmt === "number") c.nu = pickIndex("nu", c.numbers.length);
+  if (c.fmt === "case") {
+    c.cs = pickIndex("cs", c.cases.length);
+    const right = c.cases[c.cs].name;
+    const others = allCases.filter((x) => x.card !== c.id && x.name !== right);
+    const same = others.filter((x) => x.area === c.area), rest = others.filter((x) => x.area !== c.area);
+    const shuffle = (a) => a.map((x) => [rng(), x]).sort((p, q) => p[0] - q[0]).map((p) => p[1]);
+    const opts = [...new Set([...shuffle(same), ...shuffle(rest)].map((x) => x.name))].slice(0, 2);
+    c.case_opts = shuffle([right, ...opts]);
+  }
+}
+
+// The Law tab (2026-11-04): its own daily session of three cards (on Tue/Thu that is slot 3's session),
+// a weekend issue spotter, and Joe's recall by area. Results here use slots "law" and "issue".
+function lawTab(st, pool, today, day) {
+  const L = pool && pool.legal;
+  if (!L || !(L.cards || []).length) return null;
+  if (!day.law) {
+    const s3 = (day.slots || []).find((x) => x.game === "legal");
+    const sess = s3 ? null : pickLegal(st, pool, today);
+    if (sess) sess.id = "lawtab" + today;
+    const dow = weekday(today);
+    const iss = (dow === 6 || dow === 0) ? (L.issues || []).find((x) => !st.served["is" + x.id]) : null;
+    let issue = null;
+    if (iss) {                                 // the claims, the decoys and two other live cards, shuffled
+      const rng = seeded("issue" + today);
+      const title = (id) => { const c = L.cards.find((x) => x.id === id); return c ? c.title.split(" — ")[0] : id; };
+      const used = new Set([...iss.claims, ...(iss.decoys || [])].map((r) => r.card));
+      const extra = L.cards.filter((c) => !used.has(c.id)).map((c) => [rng(), c.id]).sort((a, b) => a[0] - b[0]).slice(0, 2).map((x) => x[1]);
+      const options = [...used, ...extra].map((id) => [rng(), id]).sort((a, b) => a[0] - b[0]).map((x) => ({ card: x[1], title: title(x[1]) }));
+      issue = Object.assign({}, iss, { pid: "is" + iss.id, options,
+        claims: iss.claims.map((r) => Object.assign({ title: title(r.card) }, r)), decoys: (iss.decoys || []).map((r) => Object.assign({ title: title(r.card) }, r)) });
+    }
+    day.law = { slot: s3 ? s3.slot : null, session: sess, issue };
+    if (iss) st.served["is" + iss.id] = today;
+    day.lawNew = true;
+  }
+  const recall = {};
+  const cardArea = Object.fromEntries(L.cards.map((c) => [c.id, c.area]));
+  for (const x of Object.values(st.items)) {
+    if (!LAW_ITEM.test(x.id)) continue;
+    const a = cardArea[x.id.split(":")[1]];
+    if (!a) continue;
+    const r = recall[a] || (recall[a] = { cards: new Set(), right: 0, of: 0 });
+    r.cards.add(x.id.split(":")[1]);
+    for (const h of (x.hist || [])) if (h[0] >= addDays(today, -30)) { r.of += 1; r.right += h[1]; }
+  }
+  const areas = (L.areas || []).map((a) => ({ id: a.id, name: a.name, n: a.n, started: recall[a.id] ? recall[a.id].cards.size : 0,
+    pct: recall[a.id] && recall[a.id].of >= 5 ? Math.round(100 * recall[a.id].right / recall[a.id].of) : null }));
+  const due = Object.values(st.items).filter((x) => LAW_ITEM.test(x.id) && !x.retired && x.due && x.due <= today).length;
+  return Object.assign({}, day.law, { done: { law: (day.done || {}).law || null, issue: (day.done || {}).issue || null }, areas, due, issues_total: (L.issues || []).length });
 }
 
 function pickCipher(st, pool, today, tier, avoid) {
@@ -361,8 +456,9 @@ function schedule(st, it, today) {
 function callbacks(st, today, day) {
   const served = new Set(Object.keys((day && day.done) || {}));
   // A law day already drills its own cards' elements, so those don't come back as callbacks too.
-  const lawCards = new Set(((day && day.slots) || []).filter((x) => x.game === "legal").flatMap((x) => ((x.puzzle || {}).cards || []).map((c) => c.id)));
-  const onLawCard = (x) => /^(el|cz):/.test(x.id) && lawCards.has(x.id.split(":")[1]);
+  const lawCards = new Set([...((day && day.slots) || []).filter((x) => x.game === "legal").flatMap((x) => ((x.puzzle || {}).cards || []).map((c) => c.id)),
+    ...((((day && day.law) || {}).session || {}).cards || []).map((c) => c.id)]);
+  const onLawCard = (x) => LAW_ITEM.test(x.id) && lawCards.has(x.id.split(":")[1]);
   const due = Object.values(st.items).filter((x) => !x.retired && !x.void && x.due && x.due <= today && !onLawCard(x))
     .sort((a, b) => a.due.localeCompare(b.due));
   return due.slice(0, CALLBACK_CAP).map((x) => ({ id: x.id, type: x.type, q: x.q, a: x.a, accept: x.accept, hint: x.hint, link: x.link, thread: x.thread, ref: x.ref, served: served.size }));
@@ -390,8 +486,9 @@ function week(st, today) {
   for (let i = 6; i >= 0; i--) {
     const d = addDays(today, -i);
     const D = st.days[d];
-    const n = D ? (D.slots || []).length : 0, done = D ? Object.keys(D.done || {}).length : 0;
-    days.push({ day: d, n, done, ok: D ? Object.values(D.done || {}).filter((x) => x.ok).length : 0 });
+    const slotDone = D ? Object.entries(D.done || {}).filter(([k]) => /^\d+$/.test(k)) : [];
+    const n = D ? (D.slots || []).length : 0, done = slotDone.length;
+    days.push({ day: d, n, done, ok: slotDone.filter(([, x]) => x.ok).length });
   }
   const med = (a) => { const b = a.slice().sort((x, y) => x - y); return b.length ? b[Math.floor(b.length / 2)] : null; };
   const games = {};

@@ -110,8 +110,9 @@
     if (!G.day) return;
     G.day.done = G.day.done || {};
     G.day.done[String(slot)] = res;
-    put("wire.games.today", { day: G.day.day, done: Object.keys(G.day.done).length, n: G.day.slots.length });
+    put("wire.games.today", { day: G.day.day, done: slotsDone(G.day.done), n: G.day.slots.length });
   }
+  const slotsDone = (done) => Object.keys(done || {}).filter((k) => /^\d+$/.test(k)).length;
 
   // ---------------------------------------------------------------- shared: reveal card
   // What it was, the fact to keep, outlet + time, the source, Open the thread, back in N days.
@@ -149,7 +150,7 @@
     const r = await fetch("games", { credentials: "same-origin" });
     if (!r.ok) throw new Error("HTTP " + r.status);
     G.day = await r.json();
-    put("wire.games.today", { day: G.day.day, done: Object.keys(G.day.done || {}).length, n: (G.day.slots || []).length });
+    put("wire.games.today", { day: G.day.day, done: slotsDone(G.day.done), n: (G.day.slots || []).length });
     return G.day;
   }
   function nyDay() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()); }
@@ -197,7 +198,7 @@
     }
     flush();
     const done = D.done || {};
-    const n = D.slots.length, k = Object.keys(done).length;
+    const n = D.slots.length, k = slotsDone(done);
     const st = D.stats || {};
     const nodes = [
       el("h2", { id: "sheet-title", class: "stitle", text: "Puzzles" }),
@@ -220,6 +221,7 @@
         openPuzzles(); } })),
       el("span", { class: "fine", text: bb4 && done["4"] ? "today's is played; this sets tomorrow's" : "switches slot 4 now and stays your default" })));
     if ((D.callbacks || []).length) nodes.push(el("p", { class: "fine", text: "Woven in today: " + D.callbacks.length + " from earlier (they follow the news puzzle)." }));
+    if (D.law) nodes.push(el("button", { class: "sbtn wide", text: "Law: today's session" + (D.law.issue && !D.law.done.issue ? " + issue spotter" : "") + (D.law.done.law || (D.law.slot && done[String(D.law.slot)]) ? " ✓" : "") + " ›", onclick: () => openLaw() }));
     nodes.push(el("button", { class: "sbtn wide", text: "Library: name them all, match ›", onclick: () => openLibrary() }));
     const dv = D.docket;
     if (dv && ((dv.open || []).length || (dv.recent || []).length)) nodes.push(pendingDocket(dv));
@@ -404,7 +406,7 @@
     G.asked = G.asked || new Set();
     G.asked.add(c.id);
     const t0 = Date.now();
-    const PH = { element: "The missing element", speaker: "Who said it?", author: "Justice's surname", place: "Name it", form: "Form of government", roster: "Name", fact: "Your answer", figure: "Your best number" };
+    const PH = { element: "The missing element", speaker: "Who said it?", author: "Justice's surname", place: "Name it", form: "Form of government", roster: "Name", fact: "Your answer", figure: "Your best number", number: "Exact number" };
     const input = answerInput(PH[c.type] || "Your answer");
     keepVisible(input);
     const nextBtn = () => (i + 1 < list.length ? { text: "Next ›", fn: () => fromEarlier(list, i + 1) } : { text: "Done ›", fn: () => openPuzzles() });
@@ -412,14 +414,14 @@
       const v = input.value.trim();
       if (!v) return input.focus();
       const n = Number(String(v).toLowerCase().replace(/,/g, "").replace(/k$/, "e3").replace(/m$/, "e6").replace(/b$/, "e9").replace(/[^0-9.e]/g, ""));
-      const ok = c.type === "element" ? matchesKeys(v, c.accept) : c.type === "figure" ? (n > 0 && Math.abs(n - Number(c.a)) / Number(c.a) <= 0.25) : accepts(v, c.a, c.accept);
+      const ok = c.type === "element" ? matchesKeys(v, c.accept) : c.type === "number" ? Number(v.replace(/[^0-9.]/g, "")) === Number(c.a) : c.type === "figure" ? (n > 0 && Math.abs(n - Number(c.a)) / Number(c.a) <= 0.25) : accepts(v, c.a, c.accept);
       send({ game: "callback", puzzle: c.id, ok, score: cbm(ok, cert), ms: Date.now() - t0, cert, items: [Object.assign({}, c, { ok, cert })] });
       openGame([el("h2", { id: "sheet-title", class: "stitle", text: "From earlier" }),
         c.type === "speaker" ? el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }) : el("p", { class: "gm-keep", text: c.q }),
         reveal({ ok, verdict: ok ? "Still there" : "Not quite", keep: c.a, meta: c.hint || null, link: c.link, linkText: c.type === "element" ? "Primary source ↗" : "Source ↗", thread: c.thread, back: ok ? "Spacing it out further." : "Back tomorrow.", next: nextBtn() })], "From earlier");
     };
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
-    const ASK = { element: "One element is missing. Which?", author: "Which justice?", roster: "Who?", place: "Which one is highlighted?", form: "Which form of government?", fact: "", figure: "Within 25% counts." };
+    const ASK = { element: "One element is missing. Which?", author: "Which justice?", roster: "Who?", place: "Which one is highlighted?", form: "Which form of government?", fact: "", figure: "Within 25% counts.", number: "Exact." };
     const prompt = c.type === "speaker" || !c.type ? [el("blockquote", { class: "gm-quote", text: "“" + c.q + "”" }), el("p", { class: "fine", text: "Who said it?" })]
       : [el("p", { class: "gm-keep", text: c.q }), ASK[c.type] ? el("p", { class: "fine", text: ASK[c.type] }) : null];
     if (c.type === "place" && c.ref) {                    // show the map with the missed shape highlighted
@@ -452,8 +454,69 @@
       S.k = k; save();
       const c = P.cards[k];
       if (!c) return finishAll();
-      if (c.cloze && !S.didCloze[c.id]) return cloze(c, k);
+      const f = c.fmt || (c.cloze && !S.didCloze[c.id] ? "cloze" : "elements");
+      if (f === "missing" && (c.missing || [])[c.mi || 0]) return missingStep(c, k);
+      if (f === "case" && (c.cases || [])[c.cs || 0]) return caseStep(c, k);
+      if (f === "number" && (c.numbers || [])[c.nu || 0]) return numberStep(c, k);
+      if (c.cloze && !S.didCloze[c.id] && f !== "elements") return cloze(c, k);
       return elements(c, k);
+    }
+    const nextCard = (k) => (k + 1 < P.cards.length ? { text: "Next card ›", fn: () => card(k + 1) } : { text: "Finish ›", fn: () => finishAll() });
+    // Spot the missing element: short fictional facts that meet every element but one. One tap.
+    function missingStep(c, k) {
+      const m = c.missing[c.mi || 0];
+      const pick = (j) => {
+        const ok = j === m.missing, e = c.elements[m.missing];
+        out.total += 1; if (ok) out.right += 1;
+        out.items.push({ id: "mi:" + c.id + ":" + (c.mi || 0), type: "element", q: m.facts, a: e.text, accept: e.keys, hint: c.cite, link: c.source, ok, cert: ok ? "think" : "guess" });
+        S.k = k + 1; save();
+        openGame([...header(c, k), el("p", { class: "fine", text: m.facts }),
+          el("ol", { class: "gm-hints" }, ...c.elements.map((x, n) => el("li", { text: (n === m.missing ? "✗ missing: " : "✓ ") + x.text }))),
+          reveal({ ok, verdict: ok ? "Right, that's the gap" : "The gap is “" + shortEl(e.text) + "”", keep: m.why, meta: c.cite + " · facts are fictional · verified " + c.verified,
+            link: c.source, linkText: "Primary source ↗", next: nextCard(k) })], "Law");
+      };
+      openGame([...header(c, k), el("p", { class: "fine", text: "Fictional facts. Every element is met but one. Which one is missing?" }),
+        el("blockquote", { class: "gm-quote", text: m.facts }),
+        el("div", { class: "gm-opts" }, ...c.elements.map((x, j) => el("button", { class: "sbtn wide", text: shortEl(x.text), onclick: () => pick(j) }))), backBtn()], "Law");
+    }
+    // Rule <-> case: the holding in our words; which case? Tapped here, typed when it comes back.
+    function caseStep(c, k) {
+      const x = c.cases[c.cs || 0];
+      const opts = c.case_opts && c.case_opts.length ? c.case_opts : [x.name];
+      const pick = (name) => {
+        const ok = name === x.name;
+        out.total += 1; if (ok) out.right += 1;
+        const party = x.name.split(/ v\.? /i)[0].replace(/^(People|State|Matter) of /i, "").trim();
+        out.items.push({ id: "cs:" + c.id + ":" + (c.cs || 0), type: "fact", q: "Which case held: " + x.holding, a: x.name, accept: [party, x.name.replace(/,.*$/, "")], hint: x.cite, link: x.url || c.source, ok, cert: ok ? "think" : "guess" });
+        S.k = k + 1; save();
+        const el_i = x.element != null && c.elements && c.elements[x.element] ? "On: " + shortEl(c.elements[x.element].text) + ". " : "";
+        openGame([...header(c, k), el("blockquote", { class: "gm-quote", text: x.holding }),
+          reveal({ ok, verdict: ok ? "Right" : "It's " + x.name, keep: x.name + ", " + x.cite, why: el_i + "Holding in our words.", meta: "Verified " + c.verified,
+            link: x.url || c.source, linkText: "The opinion ↗", next: nextCard(k) })], "Law");
+      };
+      openGame([...header(c, k), el("p", { class: "fine", text: "Which case stands for this?" }), el("blockquote", { class: "gm-quote", text: x.holding }),
+        el("div", { class: "gm-opts" }, ...opts.map((n) => el("button", { class: "sbtn wide", text: n, onclick: () => pick(n) }))), backBtn()], "Law");
+    }
+    // Number drills: limitations periods, deadlines, thresholds. Exact.
+    function numberStep(c, k) {
+      const x = c.numbers[c.nu || 0];
+      const input = el("input", { class: "tin gm-in", type: "text", inputmode: "numeric", placeholder: "How many " + x.unit + "?", autocomplete: "off", enterkeyhint: "go" });
+      keepVisible(input);
+      const go = (cert) => {
+        const v = Number(input.value.replace(/[^0-9.]/g, ""));
+        if (!input.value.trim()) return input.focus();
+        const ok = v === x.answer;
+        out.total += 1; if (ok) out.right += 1;
+        out.items.push({ id: "nu:" + c.id + ":" + (c.nu || 0), type: "number", q: x.q + " (" + x.unit + ")", a: String(x.answer), hint: x.cite || c.cite, link: c.source, ok, cert });
+        S.k = k + 1; save();
+        const say = x.unit === "dollars" ? "$" + x.answer.toLocaleString() : x.answer.toLocaleString() + " " + x.unit;
+        openGame([...header(c, k), el("p", { class: "gm-keep", text: x.q }),
+          reveal({ ok, verdict: ok ? "Right: " + say : "It's " + say + " (you said " + input.value.trim() + ")", keep: x.cite || c.cite, meta: "From the statute text · verified " + c.verified,
+            link: c.source, linkText: "Official text ↗", next: nextCard(k) })], "Law");
+      };
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") go("think"); });
+      openGame([...header(c, k), el("p", { class: "fine", text: "Number drill. Exact answer." }), el("p", { class: "gm-keep", text: x.q }), input, certButtons(go, "Answer — how sure?"), backBtn()], "Law");
+      setTimeout(() => input.focus(), 50);
     }
     const header = (c, k) => [
       el("h2", { id: "sheet-title", class: "stitle", text: "Law · " + (k + 1) + " of " + P.cards.length }),
@@ -517,13 +580,76 @@
       send(Object.assign({ slot: s.slot, game: "legal", puzzle: P.id, items: out.items }, res));
       markDone(s.slot, res);
       openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Law" }),
-        reveal({ ok, verdict: out.right + " of " + out.total + " recalled · score " + out.right, keep: "Missed elements come back tomorrow; the ones you knew, spaced further out.",
-          meta: "Refreshers, not advice. Elements in our words from statutes and controlling cases, second-checked.", next: earlierNext() })], "Law");
+        reveal({ ok, verdict: out.right + " of " + out.total + " recalled · score " + out.right, keep: "Misses come back tomorrow; the ones you knew, spaced further out.",
+          meta: "Refreshers, not advice. Elements and holdings in our words from statutes and controlling cases, second-checked.", next: s.slot === "law" ? { text: "‹ Law", fn: () => openLaw() } : earlierNext() })], "Law");
     }
     card(S.k || 0);
   }
   // An element's short form: drop parentheticals (nested too) for prompts and options.
   function shortEl(t) { let x = String(t || ""), y; do { y = x; x = x.replace(/\s*\([^()]*\)/g, ""); } while (x !== y); return x.trim(); }
+
+  // ---------------------------------------------------------------- The Law tab (2026-11-04)
+  // Its own daily session (on Tue/Thu that's slot 3), a weekend issue spotter, and recall by area.
+  const FMT_NAME = { cloze: "statute fill-in", elements: "elements", missing: "spot the missing element", case: "rule ↔ case", number: "number drill" };
+  async function openLaw() {
+    G.hub = "law";
+    let D;
+    try { D = await load(); } catch (e) { return openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Law" }), el("p", { class: "fine", text: "Couldn't load (" + e.message + ")." }), backBtn()], "Law"); }
+    const L = D.law;
+    const nodes = [el("h2", { id: "sheet-title", class: "stitle", text: "Law" }),
+      el("p", { class: "asrc", text: "Three cards a day · issue spotter on weekends · as of " + (D.as_of ? when(D.as_of) : "—") })];
+    if (!L) { nodes.push(el("p", { class: "fine", text: "No cards are live yet." }), backBtn()); return openGame(nodes, "Law"); }
+    const done = D.done || {};
+    if (L.slot) {
+      const s = D.slots.find((x) => x.slot === L.slot);
+      nodes.push(el("button", { class: "gm-slot" + (done[String(L.slot)] ? " done" : ""), onclick: () => play(s) },
+        el("span", { class: "gm-n", text: "§" }), el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: "Today's session (Puzzles slot " + L.slot + ")" }),
+          el("span", { class: "gm-s", text: slotLine(s) })), el("span", { class: "gm-mark", text: done[String(L.slot)] ? "✓" : "›" })));
+    } else if (L.session) {
+      const s = { slot: "law", game: "legal", puzzle: L.session };
+      const d = L.done.law || done.law;
+      nodes.push(el("button", { class: "gm-slot" + (d ? " done" : ""), onclick: () => (d ? doneCard(s, d) : legalGame(s)) },
+        el("span", { class: "gm-n", text: "§" }), el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: "Today's session · 5 min" }),
+          el("span", { class: "gm-s", text: L.session.cards.map((c) => c.title.split(" — ")[0] + " (" + (FMT_NAME[c.fmt] || "elements") + ")").join(" · ") })),
+        el("span", { class: "gm-mark", text: d ? "✓" : "›" })));
+    }
+    if (L.issue) {
+      const d = L.done.issue || done.issue;
+      nodes.push(el("button", { class: "gm-slot" + (d ? " done" : ""), onclick: () => (d ? null : issueGame(L.issue)) },
+        el("span", { class: "gm-n", text: "?" }), el("span", { class: "gm-txt" }, el("span", { class: "gm-t", text: "Issue spotter · 5 min" }),
+          el("span", { class: "gm-s", text: (L.issue.title || "Fictional facts") + " · find the claims" })), el("span", { class: "gm-mark", text: d ? (d.ok ? "✓" : "·") : "›" })));
+    }
+    if (L.due) nodes.push(el("p", { class: "fine", text: L.due + " law item" + (L.due > 1 ? "s" : "") + " due for review; they lead the next sessions." }));
+    nodes.push(el("h3", { class: "sh3", text: "Syllabus" }),
+      el("ul", { class: "gm-hints" }, ...(L.areas || []).map((a) => el("li", { text: a.name + " · " + a.n + " card" + (a.n > 1 ? "s" : "") + " · started " + a.started + (a.pct != null ? " · recall " + a.pct + "% (30 days)" : "") }))),
+      el("p", { class: "fine", text: "Refreshers, not advice. Elements and holdings in our words from statutes and controlling cases, each second-checked and dated; statute text is quoted only in fill-ins." }),
+      backBtn());
+    openGame(nodes, "Law");
+  }
+
+  // Weekend issue spotter: fictional facts; tap every claim they raise. Each missed claim comes back.
+  function issueGame(I) {
+    const t0 = Date.now();
+    const on = new Set();
+    const chips = I.options.map((o) => { const b = el("button", { class: "chip", text: o.title, onclick: () => { on.has(o.card) ? on.delete(o.card) : on.add(o.card); b.classList.toggle("on", on.has(o.card)); } }); return b; });
+    const finish = () => {
+      const claims = new Set(I.claims.map((r) => r.card));
+      const found = [...on].filter((c) => claims.has(c)).length, wrong = [...on].filter((c) => !claims.has(c)).length;
+      const ok = found === claims.size && !wrong;
+      const items = I.claims.filter((r) => !on.has(r.card)).map((r) => ({ id: "is:" + I.id + ":" + r.card, type: "fact", q: "Issue spotter (" + (I.title || "fictional facts") + "): " + I.facts.slice(0, 220) + "… One claim you missed?", a: r.title, accept: r.title.split(/[^A-Za-z§0-9-]+/).filter((w) => w.length >= 5), hint: r.why, ok: false, cert: "guess" }));
+      const res = { ok, score: Math.max(0, found - wrong), ms: Date.now() - t0, hints: 0 };
+      send(Object.assign({ slot: "issue", game: "issue", puzzle: I.pid, items }, res));
+      markDone("issue", res);
+      openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Issue spotter" }),
+        el("ul", { class: "gm-hints" }, ...I.claims.map((r) => el("li", { text: (on.has(r.card) ? "✓ " : "✗ missed: ") + r.title + ". " + r.why })),
+          ...(I.decoys || []).map((r) => el("li", { text: (on.has(r.card) ? "✗ not raised: " : "· ") + r.title + ". " + r.why_not }))),
+        reveal({ ok, verdict: found + " of " + claims.size + " claims" + (wrong ? " · " + wrong + " not raised" : ""), keep: ok ? "Clean spot." : "Missed claims come back tomorrow.",
+          meta: "Fictional facts · verified " + I.verified, next: { text: "‹ Law", fn: () => openLaw() } })], "Issue spotter");
+    };
+    openGame([el("h2", { id: "sheet-title", class: "stitle", text: "Issue spotter" }), el("p", { class: "fine", text: "Fictional facts. Tap every claim or rule they raise, then Done." }),
+      el("blockquote", { class: "gm-quote", text: I.facts }), el("div", { class: "sactions gm-issue" }, ...chips),
+      el("button", { class: "sbtn wide primary", text: "Done", onclick: finish }), el("button", { class: "sbtn wide", text: "‹ Law", onclick: () => openLaw() })], "Issue spotter");
+  }
 
   // ---------------------------------------------------------------- Defectors
   // A crossover roll call: the result and the party split are shown; first call NY members' votes
