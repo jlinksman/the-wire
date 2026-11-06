@@ -210,7 +210,7 @@ elections:
       - id: sd39
         holds: "State Senate District 39"
         term_start: "2027-01-01"
-        # result pending: not called as of 1 AM Nov 4 (https://nysfocus.com/interactives/2026-election-results/state-senate/district-39/)
+        result: {"winner": ["Lisa Kaul"], "margin": 10.3, "called": "Rolison conceded, Nov 3", "source": "https://newburghtimes.com/newburgh-election-results-2026-hochul-ryan-kaul-arteta-town/", "note": "Unofficial: 54.9% to 44.6% with 192 of 195 districts in; update at certification."}
         level: state
         office: "State Senate"
         district: "39th District"
