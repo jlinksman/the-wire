@@ -263,7 +263,7 @@ elections:
       - id: supreme_court
         holds: "State Supreme Court Justice, 9th District"
         term_start: "2027-01-01"
-        # result pending: not called as of 1 AM Nov 4 (https://nysfocus.com/interactives/2026-election-results/supreme-court/)
+        result: {"winner": ["George E. Fufidio", "Maria G. Rosa", "Alden H. Wolfe"], "margin": 7.2, "called": "Unofficial districtwide totals, Nov 7 (no formal call); third place leads fourth by 142,142 votes", "source": "https://blackwestchester.com/bw-news-brief-2026-westchester-midterm-election-results-democrats-score-major-victories-following-countywide-voting-machine-failure/", "note": "Fufidio 621,934, Rosa 435,667, Wolfe 409,351, Fava 267,209, Ciampoli 242,879 as of Nov 7; unofficial until the boards finish canvassing (Westchester is reconciling after its voting-machine failure)."}
         level: judicial
         office: "State Supreme Court Justice"
         seats: 3              # vote for up to 3 (Dutchess sample ballots); Call it asks for 3 winners
